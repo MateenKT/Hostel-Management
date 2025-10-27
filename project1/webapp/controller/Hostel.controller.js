@@ -13,6 +13,14 @@ sap.ui.define([
                 if (oAvatar) {
                     oAvatar.setVisible(false);
                 }
+                    var model = new JSONModel({
+                CustomerName: "",
+                MobileNo: "",
+                Gender: "",
+                DateOfBirth: ""
+
+            });
+            this.getView().setModel(model, "HostelModel");
             // this._loadFilteredData("KLB01");
         },
 
@@ -255,7 +263,152 @@ onEditProfilePic: function() {
 },
 onProfileDialogClose:function(){
      this._oProfileDialog.close()
+},
+  onSingleRoomPress: function () {
+
+            if (!this.FCIA_Dialog) {
+                var oView = this.getView();
+                this.FCIA_Dialog = sap.ui.xmlfragment("sap.ui.com.project1.fragment.Book_Room", this);
+                oView.addDependent(this.FCIA_Dialog);
+
+                this.FCIA_Dialog.open();
+
+            } else {
+                this.FCIA_Dialog.open();
+
+            }
+
+        },
+        onCancelDialog: function () {
+            this.FCIA_Dialog.close();
+        },
+        onAdminPress: function () {
+            var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+            oRouter.navTo("RouteStudentDetails");
+        },
+        onWizardNext: function () {
+            const oDialog = this.FCIA_Dialog;
+            const oWizard = sap.ui.getCore().byId("idHostelWizard");
+            const oNextButton = sap.ui.getCore().byId("idWizardNextBtn");
+            const oBackButton = sap.ui.getCore().byId("idWizardBackBtn");
+            const oSubmitButton = sap.ui.getCore().byId("idWizardSubmitBtn");
+
+            oWizard.nextStep();
+
+            const aSteps = oWizard.getSteps();
+            const oCurrentStep = oWizard.getProgressStep();
+
+            // If current step is last, adjust button visibility
+            const bIsLast = aSteps[aSteps.length - 1].getId() === oCurrentStep.getId();
+
+            if (bIsLast) {
+                oNextButton.setVisible(false);
+                oSubmitButton.setVisible(true);
+            } else {
+                oNextButton.setVisible(true);
+                oSubmitButton.setVisible(false);
+            }
+
+            oBackButton.setEnabled(true);
+        },
+
+        onWizardBack: function () {
+         
+            const oWizard = sap.ui.getCore().byId("idHostelWizard");
+            const oNextButton =  sap.ui.getCore().byId("idWizardNextBtn");
+            const oBackButton =  sap.ui.getCore().byId("idWizardBackBtn");
+            const oSubmitButton =  sap.ui.getCore().byId("idWizardSubmitBtn");
+
+         
+            oWizard.previousStep();
+
+            const aSteps = oWizard.getSteps();
+            const oCurrentStep = oWizard.getCurrentStep();
+            const bIsFirst = aSteps[0].getId() === oCurrentStep;
+
+            oBackButton.setEnabled(!bIsFirst);
+            oNextButton.setVisible(true);
+            oSubmitButton.setVisible(false);
+        },
+
+        onWizardComplete: function () {
+            MessageToast.show("Wizard completed successfully!");
+        },
+
+        onSaveDialog: function () {
+            // Final form submission logic
+            MessageBox.success("Form submitted successfully!");
+        },
+
+        onCancelDialog: function () {
+            this.FCIA_Dialog.close();
+            sap.ui.getCore().byId("idHostelWizardDialog").close();
+        },
+    //     onSaveDialog:function(){
+    //             var payload=this.getView().getModel("HostelModel").getData();
+    //              payload.DateOfBirth=payload.DateOfBirth.split("/").reverse().join("-");
+
+              
+    //         $.ajax({
+    //     url: "https://rest.kalpavrikshatechnologies.com/HM_Customer",
+    //     method: "POST",
+    //     contentType: "application/json",
+    //      headers: {
+    //       name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+    //       password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+    //      },
+    //     data: JSON.stringify({data:payload}),
+    //     success: function(response) {
+    //     }
+    //     })
+    // },
+    onSaveDialog: function () {
+    var payload = this.getView().getModel("HostelModel").getData();
+
+    payload.DateOfBirth = payload.DateOfBirth.split("/").reverse().join("-");
+
+    var oFileUploader = sap.ui.getCore().byId("idFileUploader");
+    var aFiles = oFileUploader.oFileUpload.files;
+
+    if (!aFiles.length) {
+        sap.m.MessageBox.error("Please select a file to upload.");
+        return;
+    }
+
+    var oFile = aFiles[0];
+    var reader = new FileReader();
+
+    reader.onload = function (e) {
+        var sBase64 = e.target.result.split(",")[1]; 
+        payload.FileName = oFile.name;
+        payload.FileContent = sBase64;
+
+        $.ajax({
+            url: "https://rest.kalpavrikshatechnologies.com/HM_Customer",
+            method: "POST",
+            contentType: "application/json",
+            headers: {
+                name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+            },
+            data: JSON.stringify({ data: payload }),
+            success: function (response) {
+                sap.m.MessageToast.show("Data and file uploaded successfully!");
+            },
+            error: function (err) {
+                sap.m.MessageBox.error("Error uploading data or file.");
+            }
+        });
+    };
+
+    reader.readAsDataURL(oFile);
 }
+,
+    onDoubleRoomPress:function(){
+        var oRouter = this.getOwnerComponent().getRouter();
+        oRouter.navTo("RouteAdmin");
+    },
+ 
 
 
 

@@ -1,0 +1,224 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+    xmlns:u="sap.ui.unified"
+>
+    <Dialog
+        id="idHostelWizardDialog"
+        title="Hostel Registration Form"
+        type="Message"
+        stretchOnPhone="true"
+        class="sapUiContentPadding"
+    >
+        <content>
+            <Wizard
+                id="idHostelWizard"
+                complete=".onWizardComplete"
+            >
+                <!-- 🧍 Step 1: Personal Information -->
+                <WizardStep
+                    id="idStepPersonal"
+                    title="Personal Information"
+                    validated="false"
+                >
+                    <f:SimpleForm
+                        editable="true"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="4"
+                        labelSpanL="3"
+                        labelSpanM="4"
+                        labelSpanS="12"
+                        columnsXL="2"
+                        columnsL="2"
+                        columnsM="1"
+                    >
+                        <f:content>
+                            <Label
+                                text="Full Name"
+                                required="true"
+                            />
+                            <Input
+                                id="idFullName"
+                                value="{HostelModel>/CustomerName}"
+                                placeholder="Enter full name"
+                                liveChange=".onInputLiveChange"
+                                maxLength="60"
+                            />
+
+                            <Label
+                                text="Date of Birth"
+                                required="true"
+                            />
+                            <DatePicker
+                                id="idDOB"
+                                value="{HostelModel>/DateOfBirth}"
+                                valueFormat="dd/MM/yyyy"
+                                displayFormat="dd/MM/yyyy"
+                                change=".onDateChange"
+                            />
+
+                            <Label
+                                text="Gender"
+                                required="true"
+                            />
+                            <ComboBox
+                                id="idGender"
+                                placeholder="Select Gender"
+                                selectedKey="{HostelModel>/Gender}"
+                            >
+                                <core:ListItem
+                                    key="Male"
+                                    text="Male"
+                                />
+                                <core:ListItem
+                                    key="Female"
+                                    text="Female"
+                                />
+                                <core:ListItem
+                                    key="Other"
+                                    text="Other"
+                                />
+                            </ComboBox>
+                            <Label
+                                text="Mobile Number"
+                                required="true"
+                            />
+                            <Input
+                                id="idMobile"
+                                value="{HostelModel>/MobileNo}"
+                                placeholder="Enter 10-digit mobile number"
+                                maxLength="10"
+                                liveChange=".onValidateMobile"
+                            />
+                        </f:content>
+                    </f:SimpleForm>
+                </WizardStep>
+
+                <!-- 🏠 Step 2: Room Details -->
+                <WizardStep
+                    id="idStepRoom"
+                    title="Room Details"
+                    validated="false"
+                >
+                    <f:SimpleForm
+                        editable="true"
+                        layout="ResponsiveGridLayout"
+                        labelSpanXL="4"
+                        labelSpanL="3"
+                        labelSpanM="4"
+                        labelSpanS="12"
+                        columnsXL="2"
+                        columnsL="2"
+                        columnsM="1"
+                    >
+                        <f:content>
+                            <Label
+                                text="Desired Room Type"
+                                required="true"
+                            />
+                            <ComboBox
+                                id="idRoomType"
+                                placeholder="Select Room Type"
+                                selectedKey="{HostelModel>/RoomType}"
+                            >
+                                <core:ListItem
+                                    key="Single"
+                                    text="Single Room"
+                                />
+                                <core:ListItem
+                                    key="Double"
+                                    text="Double Sharing"
+                                />
+                                <core:ListItem
+                                    key="Triple"
+                                    text="Triple Sharing"
+                                />
+                            </ComboBox>
+
+                            <Label
+                                text="Start Date"
+                                required="true"
+                            />
+                            <DatePicker
+                                id="idStartDate"
+                                value="{HostelModel>/StartDate}"
+                                valueFormat="dd/MM/yyyy"
+                                displayFormat="dd/MM/yyyy"
+                                change=".onDateChange"
+                            />
+                        </f:content>
+                    </f:SimpleForm>
+                </WizardStep>
+
+                <!-- 📁 Step 3: Document Upload -->
+                <WizardStep
+                    id="idStepDocuments"
+                    title="Document Upload"
+                    validated="false"
+                >
+                    <VBox class="sapUiMediumMarginTop sapUiContentPadding">
+                        <Toolbar design="Transparent">
+                            <Title
+                                text="Upload Documents"
+                                level="H4"
+                            />
+                        </Toolbar>
+
+                        <Text
+                            text="Upload student ID or any Government ID proof."
+                            class="sapUiSmallMarginBottom sapUiSmallMarginTop"
+                        />
+
+                        <Label
+                            text="Upload File"
+                            required="true"
+                        />
+                        <u:FileUploader
+                            id="idFileUploader"
+                            name="studentDocument"
+                            placeholder="Choose a file to upload"
+                            width="300px"
+                            fileType="jpg,png,pdf"
+                            maximumFileSize="10"
+                            change=".onFileUploaderChange"
+                            tooltip="Only JPG, PNG, or PDF files under 10MB allowed"
+                        />
+                    </VBox>
+                </WizardStep>
+            </Wizard>
+        </content>
+
+        <!-- Wizard Footer Navigation -->
+        <buttons>
+            <Button
+                id="idWizardBackBtn"
+                text="Previous"
+                type="Transparent"
+                press=".onWizardBack"
+                enabled="false"
+            />
+
+            <Button
+                id="idWizardNextBtn"
+                text="Next"
+                type="Emphasized"
+                press=".onWizardNext"
+            />
+
+            <Button
+                id="idWizardSubmitBtn"
+                text="Submit"
+                visible="false"
+                type="Accept"
+                press=".onSaveDialog"
+            />
+
+            <Button
+                text="Cancel"
+                type="Reject"
+                press=".onCancelDialog"
+            />
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>

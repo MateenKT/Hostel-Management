@@ -90,6 +90,13 @@
           "target": [
             "TargetTilepage"
           ]
+        },
+         {
+          "name": "RouteAdmin",
+          "pattern": "Admin",
+          "target": [
+            "TargetAdmin"
+          ]
         }
       ],
       "targets": {
@@ -106,6 +113,13 @@
           "clearControlAggregation": false,
           "viewId": "TilePage",
           "viewName": "TilePage"
+        },
+        "TargetAdmin": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "Admin",
+          "viewName": "Admin"
         }
       }
     },
