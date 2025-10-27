@@ -1,13 +1,30 @@
-<mvc:View
-	xmlns:mvc="sap.ui.core.mvc"
-	xmlns="sap.m"
-	xmlns:l="sap.ui.layout"
-	xmlns:core="sap.ui.core">
-	 <Page id="idpage" showHeader="true" >
-     <content>
-          <Text text="🏠 Welcome to the Home Section!"  />
-     </content>
-     </Page>
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout">
+  <Carousel id="customSlideCarousel" width="100%" height="300px" loop="true" showPageIndicator="true">
+    <!-- Slide 1 -->
+    <VBox width="100%" height="100%" class="customTileSlide" >
+      <HBox width="100%" justifyContent="SpaceBetween" alignItems="Start" class="slideHBox1">
+        <VBox width="60%" class="sapUiContentPadding">
+          <Title text="Cloth Washing Rooms" level="H1"  />
+          <Text text="The cloth washing room is equipped with washing machines, dryers, and ironing facilities, providing residents with a clean and convenient space to do their laundry." />
+        </VBox>
+        <VBox width="35%" alignItems="End" justifyContent="Center">
+          <!-- <Button text="Book Now" type="Emphasized" press="onPressSlide1" /> -->
+        </VBox>
+      </HBox>
+    </VBox>
 
-  
-</mvc:View>
+    <!-- Slide 2 -->
+    <VBox width="100%" height="100%" class="customTileSlide2" >
+      <HBox width="100%" justifyContent="SpaceBetween" alignItems="Start" >
+        <VBox width="60%" class="sapUiContentPadding">
+          <Title text="Morden Kitchen" level="H2" />
+          <Text text="The food kitchen room in the hostel is a clean, well-equipped space where residents can prepare their own meals, featuring cooking stoves, refrigerators, utensils, and dining areas for a convenient and homely cooking experience." />
+        </VBox>
+        <VBox width="35%" alignItems="End" justifyContent="Center">
+          <Button text="See Pricing" type="Default" press="onPressSlide2" />
+        </VBox>
+      </HBox>
+    </VBox>
+    <!-- Add more slides as required -->
+  </Carousel>
+</core:FragmentDefinition>

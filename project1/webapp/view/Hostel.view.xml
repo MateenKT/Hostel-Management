@@ -13,11 +13,12 @@
 				<Image src="./image/LOGO.png" height="250px" width="250px" class="sapUiTinyMarginTop weblogo"  tooltip="Company Logo"/>
 				<!-- <Title level="H1" text="SHAH HOSTEL" class="custom-text"/> -->
 				<ToolbarSpacer/>
-				<Button  text="LOGIN / SIGN UP" class="loginButton" tooltip="{i18n>tooltipLogin}" press="onpressLogin">
+				<Button  text="LOGIN / SIGN UP"  id="loginButton" class="loginButton" tooltip="{i18n>tooltipLogin}" press="onpressLogin">
 					<layoutData>
 						<OverflowToolbarLayoutData priority="NeverOverflow"/>
 					</layoutData>
 				</Button>
+                <Avatar src="./image/LOGO.png" visible="true" id="ProfileAvatar" displaySize="XS" tooltip="Profile pic" press="onPressAvatar"/>
 			</tnt:ToolHeader>
 		</tnt:header>
 		<tnt:subHeader>
@@ -80,31 +81,30 @@
             <Image src="./image/DoubleBed.png" width="380px" height="320px" class="section-image" />
         </HBox>
         <Text class="hr-text" text="Double Bed Room"/>
-        <Text class="description-text" text="A private and comfortable space, single bed, study desk with chair, wardrobe or storage area. privacy, quietness, and convenience"/>
-        <HBox justifyContent="Center">
+        <Text class="description-text" text="wqwqwqwqwq da d wqwqwqwqwq da dwqwqwqwqwq da dwqwqwqwqwq da dwqwqwqwqwq da d"/>
+        <HBox justifyContent="Center" >
             <Button text="Book Now" press="onDoubleRoomPress" width="200px"/>
         </HBox>
     </VBox>
 
     <!-- Four Bed -->
-    <VBox visible="{VisibilityModel>/fourVisible}" class="HostelCard" backgroundDesign="Solid">
-        <HBox justifyContent="Center" class="section-image">
-            <Image src="./image/4Bed.png" width="380px" height="320px" class="section-image" />
+    <VBox visible="{VisibilityModel>/fourVisible}" class="HostelCard" backgroundDesign="Translucent">
+        <HBox justifyContent="Center" class="section-image" >
+            <Image src="./image/4Bed.png"  class="section-image" />
         </HBox>
         <Text class="hr-text" text="Four Bed Room"/>
-        <Text class="description-text " text="{i18n>FourBedDesc}"/>
+        <Text class="description-text " text="wqwqwqwqwq da d"/>
         <HBox justifyContent="Center">
             <Button text="Book Now" press="onFourRoomPress" width="200px"/>
         </HBox>
     </VBox>
 </l:Grid>
-
                     </Page>
 					<Page id="idFacilities" showHeader="false" class="Products_list sapUiTinyMargin">
-						<!-- <core:Fragment fragmentName="sap.kt.com.minihrsolution.fragment.ProductList" type="XML"/> -->
+						<core:Fragment fragmentName="sap.ui.com.project1.fragment.HomePage" type="XML"/>
 					</Page>
 					<Page id="idContact" showHeader="false" class="Products_list sapUiTinyMargin">
-						<!-- <core:Fragment fragmentName="sap.kt.com.minihrsolution.fragment.Project" type="XML"/> -->
+						<core:Fragment fragmentName="sap.ui.com.project1.fragment.ContactPage" type="XML"/>
 					</Page>
 					<ScrollContainer id="idAdddata" horizontal="false" vertical="true" height="100%" class="sapUiContentPadding career-background sapUiTinyMargin">
 						<!-- <core:Fragment fragmentName="sap.kt.com.minihrsolution.fragment.CareerPage" type="XML"/> -->

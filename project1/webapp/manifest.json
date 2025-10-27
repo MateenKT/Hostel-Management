@@ -83,6 +83,13 @@
           "target": [
             "TargetHostel"
           ]
+        },
+        {
+          "name": "TilePage",
+          "pattern": "TilePage",
+          "target": [
+            "TargetTilepage"
+          ]
         }
       ],
       "targets": {
@@ -92,6 +99,13 @@
           "clearControlAggregation": false,
           "viewId": "Hostel",
           "viewName": "Hostel"
+        },
+        "TargetTilepage": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "TilePage",
+          "viewName": "TilePage"
         }
       }
     },

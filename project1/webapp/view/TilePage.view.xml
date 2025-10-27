@@ -1,0 +1,42 @@
+<mvc:View controllerName="sap.ui.com.project1.controller.TilePage"  xmlns:mvc="sap.ui.core.mvc" displayBlock="true" 
+	xmlns="sap.m" 
+	xmlns:ux="sap.uxap" 
+	xmlns:core="sap.ui.core" 
+	xmlns:layout="sap.ui.layout" 
+	xmlns:l="sap.ui.layout" 
+	xmlns:f="sap.f" 
+	xmlns:card="sap.f.cards">
+    <App >
+    <Page  id="idPageTile" class="service-background" showHeader="true" enableScrolling="false">
+    <headerContent>
+				<Text text="{= 'Welcome ' + ${LoginModel>/EmployeeName} }" class="boldBlueText sapUiLargeMarginBegin" />
+				<ToolbarSpacer />
+				<Button press="Tile_onLogPress" icon="sap-icon://log" />
+			</headerContent>
+            <ux:ObjectPageLayout upperCaseAnchorBar="false" id="id_ObjectPageLayoutTile">
+            <ux:sections>
+            
+<ux:ObjectPageSection id="id_Sectiontile" titleUppercase="false" title="Home" visible="{= ${TileAccessModel>/Home} === '1' ? true : false}">
+									<ux:subSections>
+										<ux:ObjectPageSubSection titleUppercase="false">
+											<ux:blocks>
+												<layout:HorizontalLayout allowWrapping="true" class="sapUiTinyMargin">
+													<GenericTile visible="true" class="sapUiMediumMargin" header="{i18n>headerInbox}" press="TileV_onpressInbox">
+														<TileContent unit="{i18n>tileMyInboxFooter}">
+															<ImageContent src="sap-icon://inbox" />
+														</TileContent>
+													</GenericTile>
+													
+												</layout:HorizontalLayout>
+											</ux:blocks>
+										</ux:ObjectPageSubSection>
+									</ux:subSections>
+								</ux:ObjectPageSection>
+
+
+
+            </ux:sections>
+            </ux:ObjectPageLayout>
+    </Page>
+    </App>
+</mvc:View>

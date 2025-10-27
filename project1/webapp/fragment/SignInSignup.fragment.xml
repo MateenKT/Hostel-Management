@@ -24,10 +24,13 @@
             <!-- Sign In Panel -->
             <Panel id="signInPanel" expandable="false">
                 <VBox>
-                    <Input id="signInuserid" placeholder="UserID" type="Email" width="100%" required="true" />
+                    <Input id="signInusername" placeholder="User Name" type="Email" width="100%" required="true" />
                     <Label text="Login with"/>
-                    <RadioButton text="Password" />
-                    <RadioButton text="OTP" />
+                    <HBox alignItems="End" justifyContent="Start">
+                       <RadioButton text="Password"   class="sapUiTinyMarginEnd " selected="{LoginViewModel>/isPasswordSelected}" />
+                    <RadioButton text="OTP"   class="sapUiTinyMarginEnd "  selected="{LoginViewModel>/isOtpSelected}"/>
+                    <Button text="Send OTP" press="onPressOTP" />
+                    </HBox>
                     <Input id="signInPassword" placeholder="Password" type="Password" width="100%" required="true" />
                     <HBox justifyContent="SpaceBetween" class="sapUiTinyMarginTop">
                         <Button text="Forgot Password?" type="Transparent" press="onForgotPassword"/>
@@ -44,8 +47,12 @@
                     <Input id="signUpPhone" placeholder="Mobile Number" value="{LoginMode>Mobileno}" type="Tel" width="100%" required="true" />
                     <Input id="signUpPassword" value="{LoginMode>password}" placeholder="Create Password" type="Password" width="100%" required="true" />
                     <Input id="signUpConfirmPassword" value="{LoginMode>comfirmpass}" placeholder="Confirm Password" type="Password" width="100%" required="true" />
-                    <Button text="Sign Up" type="Emphasized" width="100px" class="sapUiTinyMarginTop" press="onSignUp"/>
+                   
                 </VBox>
+                <HBox justifyContent="End" alignItems="Center">
+                 <Button text="Sign Up" type="Emphasized" width="100px" class="sapUiTinyMarginTop" press="onSignUp"/>
+                </HBox>
+                
             </Panel>
         </VBox>
     </Dialog>

@@ -1,0 +1,22 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout">
+  <Dialog id="profileDialog"  horizontalScrolling="false" verticalScrolling="false" contentWidth="420px">
+  <customHeader>
+    <Bar>
+      <contentMiddle>
+        <Title text="My Account" />
+      </contentMiddle>
+      <contentRight>
+        <Button type="Transparent" icon="sap-icon://decline" press="onProfileDialogClose"/>
+      </contentRight>
+    </Bar>
+  </customHeader>
+    <VBox alignItems="Center" class="sapUiMediumMargin sapUiContentPadding">
+      <Avatar src="{profileData>/photo}" initials="{profileData>/initials}" displaySize="XL" press="onEditProfilePic"/>
+      <Title text="{profileData>/name}" class="sapUiSmallMarginTop"/>
+      <Text text="{profileData>/email}" />
+      <Text text="{profileData>/phone}" />
+      <Button text="Change Profile Picture" press="onEditProfilePic" class="sapUiTinyMarginTop" />
+      <Button text="Logout" press="onProfileLogout" type="Critical" class="sapUiTinyMarginTop" />
+    </VBox>
+  </Dialog>
+</core:FragmentDefinition>

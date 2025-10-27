@@ -8,7 +8,12 @@ sap.ui.define([
     return Controller.extend("sap.ui.com.project1.controller.Hostel", {
 
         onInit: function () {
-            this._loadFilteredData("KLB01");
+             var oView = this.getView();
+             var oAvatar = oView.byId("ProfileAvatar"); // Change to your avatar ID if needed
+                if (oAvatar) {
+                    oAvatar.setVisible(false);
+                }
+            // this._loadFilteredData("KLB01");
         },
 
         _loadFilteredData: function (sCompanyCode) {
@@ -81,13 +86,14 @@ sap.ui.define([
             this._oSignDialog.open();
             return;
         },
-        onDialogClose:function(){
-            this._oSignDialog.close()  },
+        onDialogClose: function () {
+            this._oSignDialog.close()
+        },
 
-            _onFieldclear:function(){
-                var ofield 
-            },
-        onSwitchToSignIn: function () {   
+        _onFieldclear: function () {
+            var ofield
+        },
+        onSwitchToSignIn: function () {
             var oSignInPanel = sap.ui.getCore().byId("signInPanel");
             var oSignUpPanel = sap.ui.getCore().byId("signUpPanel");
             oSignInPanel.setVisible(true);
@@ -100,46 +106,155 @@ sap.ui.define([
             oSignInPanel.setVisible(false);
             oSignUpPanel.setVisible(true);
         },
-       onSignUp: function() {
-    var oDialog = this._oSignDialog;  // Assumes you stored the fragment dialog in this._oAuthDialog
+        onSignUp: function () {
+            var oDialog = this._oSignDialog;  // Assumes you stored the fragment dialog in this._oAuthDialog
 
-    // Fetch user input values by ID with fragment's scoping: Fragment.byId(fragmentId, controlId)
-    var sFullName = sap.ui.getCore().byId("signUpName").getValue();
-    var sEmail = sap.ui.getCore().byId("signUpEmail").getValue();
-    var sPhone = sap.ui.getCore().byId("signUpPhone").getValue();
-    var sPassword = sap.ui.getCore().byId("signUpPassword").getValue();
-    var sConfirmPass = sap.ui.getCore().byId("signUpConfirmPassword").getValue();
+            // Fetch user input values by ID with fragment's scoping: Fragment.byId(fragmentId, controlId)
+            var sFullName = sap.ui.getCore().byId("signUpName").getValue();
+            var sEmail = sap.ui.getCore().byId("signUpEmail").getValue();
+            var sPhone = sap.ui.getCore().byId("signUpPhone").getValue();
+            var sPassword = sap.ui.getCore().byId("signUpPassword").getValue();
+            var sConfirmPass = sap.ui.getCore().byId("signUpConfirmPassword").getValue();
 
-    // Basic validation example
-    if (!sFullName || !sEmail || !sPassword || !sConfirmPass ) {
-        sap.m.MessageToast.show("Please enter all required fields correctly.");
+            // Basic validation example
+            if (!sFullName || !sEmail || !sPassword || !sConfirmPass) {
+                sap.m.MessageToast.show("Please enter all required fields correctly.");
+                return;
+            }
+
+            var oPayload = {
+                data: {
+                    UserName: sFullName,
+                    EmailID: sEmail,
+                    MobileNo: sPhone,
+                    Password: btoa(sPassword)
+                }
+            };
+            $.ajax({
+                url: "https://rest.kalpavrikshatechnologies.com/HM_Login",
+                method: "POST",
+                contentType: "application/json",
+                headers: {
+                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+                },
+                data: JSON.stringify(oPayload),
+                success: function (response) {
+                    sap.m.MessageToast.show("Sign Up successful!");
+                    oDialog.close();
+                },
+                error: function (xhr, status, error) {
+                    sap.m.MessageToast.show("Error in Sign Up: " + error);
+                }
+            });
+        }
+        ,
+       onSignIn: function() {
+    var sUsername = sap.ui.getCore().byId("signInusername").getValue();
+    var sPassword = sap.ui.getCore().byId("signInPassword").getValue();
+
+    if (!sUsername || !sPassword) {
+        sap.m.MessageToast.show("Please enter both username and password.");
         return;
     }
 
-    var oPayload = {
-        UserName: sFullName,
-        EmailID: sEmail,
-        MobileNo: sPhone,
-        Password: sPassword
-    };
+    var sUrl = "https://rest.kalpavrikshatechnologies.com/HM_Login"; 
 
     $.ajax({
-        url: "https://rest.kalpavrikshatechnologies.com/HM_Login", 
-        method: "POST",
+        url: sUrl,
+        type: "GET",
         contentType: "application/json",
-         headers: {
-          name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-          password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-         },
-        data: JSON.stringify(oPayload),
-        success: function(response) {
-            sap.m.MessageToast.show("Sign Up successful!");
-            oDialog.close(); 
+        headers: {
+            name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+            password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
         },
+        success: function(response) {
+            var aUsers = response?.commentData || []; // Adjust key based on backend response
+            var bMatchFound = false;
+
+            for (var i = 0; i < aUsers.length; i++) {
+                // Matching username and base64-encoded password
+                if (aUsers[i].UserName === sUsername && aUsers[i].Password === btoa(sPassword)) {
+                    bMatchFound = true;
+                    break;
+                }
+            }
+            if (bMatchFound) {
+                sap.m.MessageToast.show("Login Successful! Welcome, " + sUsername);
+                var oView = this.getView();
+                var oLoginBtn = oView.byId("loginButton"); // Ensure this ID matches your XML
+                if (oLoginBtn) {
+                    oLoginBtn.setVisible(false);
+                }
+                 if(bMatchFound.Role === ""){
+                   return;
+            }else{
+                 this.getOwnerComponent().getRouter().navTo("TilePage"); 
+            }
+
+                // Optional: Show avatar or profile icon
+                var oAvatar = oView.byId("ProfileAvatar"); // Change to your avatar ID if needed
+                if (oAvatar) {
+                    oAvatar.setVisible(true);
+                }
+
+                // Close dialog
+                if (this._oSignDialog) {
+                    this._oSignDialog.close();
+                }
+
+            } else {
+                sap.m.MessageToast.show("Invalid credentials. Please try again.");
+            }
+           
+        }.bind(this),
+        
         error: function(xhr, status, error) {
-            sap.m.MessageToast.show("Error in Sign Up: " + error);
+            console.error("AJAX Error:", error);
+            sap.m.MessageToast.show("Failed to fetch login data: " + error);
         }
     });
+},
+
+       onPressAvatar: function() {
+    if (!this._oProfileDialog) {
+        sap.ui.core.Fragment.load({
+            name: "sap.ui.com.project1.fragment.ManageProfile", // Adjust the path accordingly
+            controller: this
+        }).then(function(oDialog) {
+            this._oProfileDialog = oDialog;
+            this.getView().addDependent(oDialog);
+
+            // Example user info; replace with real model data
+            var oProfileModel = new JSONModel({
+                photo: "./image.jpg", // path to the avatar/profile picture
+                initials: "S",
+                name: "Sai",
+                email: "sai@example.com",
+                phone: "6372938414"
+            });
+            oDialog.setModel(oProfileModel, "profileData");
+
+            oDialog.open();
+        }.bind(this));
+    } else {
+        this._oProfileDialog.open();
+    }
+},
+
+onProfileLogout: function() {
+    // Close the dialog and perform logout logic
+    if (this._oProfileDialog) this._oProfileDialog.close();
+    sap.m.MessageToast.show("You have been logged out.");
+  
+},
+
+onEditProfilePic: function() {
+    sap.m.MessageToast.show("Profile picture edit not implemented yet.");
+  
+},
+onProfileDialogClose:function(){
+     this._oProfileDialog.close()
 }
 
 
