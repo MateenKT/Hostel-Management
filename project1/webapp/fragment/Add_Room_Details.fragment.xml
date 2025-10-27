@@ -1,0 +1,127 @@
+<c:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:c="sap.ui.core"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+        xmlns:u="sap.ui.unified"
+>
+    <Dialog
+        id="sds1"
+        title="Add Room Details"
+        type="Message"
+        class="sapUiContentPadding"
+    >
+        <f:SimpleForm
+            editable="true"
+            layout="ResponsiveGridLayout"
+            labelSpanXL="4"
+            labelSpanL="3"
+            labelSpanM="4"
+            labelSpanS="12"
+            columnsXL="2"
+            columnsL="2"
+            columnsM="1"
+        >
+            <f:content>
+             <Label
+                    text="Branch Code"
+                    required="true"
+                />
+                   <ComboBox
+                                id="idRoomType2"
+                                placeholder="Select branch Code"
+                                selectedKey="{RoomModel>/BranchCode}"
+                            >
+                                <core:ListItem
+                                    key="KLB01"
+                                    text="KLB01"
+                                />
+                                <core:ListItem
+                                    key="Double"
+                                    text="Od001"
+                                />
+                                <core:ListItem
+                                    key="Triple"
+                                    text="Bglr001"
+                                />
+                             </ComboBox>
+            
+                <Label
+                    text="Bed Type"
+                    required="true"
+                />
+                <ComboBox
+                    id="idBedType"
+                    placeholder="Select Bed Type"
+                    selectedKey="{RoomModel>/BedType}"
+                >
+                    <core:ListItem
+                        key="Single"    
+                        text="Single Bed"
+                    />
+                    <core:ListItem
+                        key="Double"
+                        text="Double Bed"
+                    />
+                    <core:ListItem
+                        key="Four"
+                        text="Four Bed"
+                    />
+      
+                             </ComboBox>
+                                <Label
+                                text="Price"
+                                required="true"
+                            />
+                            <Input
+                                id="idPrice"
+                                value="{RoomModel>/Price}"
+                                placeholder="Enter Price"
+                                maxLength="60"
+                            />
+                              <Label
+                            text="Add image"
+                            required="true"
+                        />
+                        <u:FileUploader
+                            id="idFileUploader1"
+                            name="studentDocument"
+                            placeholder="Choose a file to upload"
+                            fileType="jpg,png,pdf"
+                            maximumFileSize="10"
+                            change=".onFileUploaderChange"
+                            tooltip="Only JPG, PNG, or PDF files under 10MB allowed"
+                        />
+                         <Label
+                            text="Desscription"
+                            required="true"
+                            
+                        />
+                      <TextArea
+                      maxLength="100" 
+                      placeholder="Enter Description"
+                      value="{RoomModel>/Description}"
+                      />
+            </f:content>
+        </f:SimpleForm>
+        <footer>
+            <Toolbar>
+                <ToolbarSpacer />
+                <Button
+                    text="Save"
+                    press="AR_onsavebuttonpress"
+                    type="Accept"
+                    id="AR_id_saveButton"
+                    class="marginRight"
+                />
+                <Button
+                    text="Cancel"
+                    press="AR_onCancelButtonPress"
+                    type="Reject"
+                    id="AR_id_CancelButton"
+                    class="marginRight"
+                />
+            </Toolbar>
+        </footer>
+    </Dialog>
+</c:FragmentDefinition>
