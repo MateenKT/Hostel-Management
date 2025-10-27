@@ -31,7 +31,7 @@
                     <RadioButton text="OTP"   class="sapUiTinyMarginEnd "  selected="{LoginViewModel>/isOtpSelected}"/>
                     <Button text="Send OTP" press="onPressOTP" />
                     </HBox>
-                    <Input id="signInPassword" placeholder="Password" type="Password" width="100%" required="true" />
+                    <Input id="signInPassword" placeholder="Password" submit="onSignIn" type="Password" width="100%" required="true" />
                     <HBox justifyContent="SpaceBetween" class="sapUiTinyMarginTop">
                         <Button text="Forgot Password?" type="Transparent" press="onForgotPassword"/>
                         <Button text="Sign In" type="Accept" width="100px" press="onSignIn"/>

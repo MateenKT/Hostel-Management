@@ -171,7 +171,7 @@
                     </f:SimpleForm>
                 </WizardStep>
 
-                <!-- 🏠 Step 2: Room Details -->
+                <!--  Step 2: Room Details -->
                 <WizardStep
                     id="idStepRoom"
                     title="Room Details"

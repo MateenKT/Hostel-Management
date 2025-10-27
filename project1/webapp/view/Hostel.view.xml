@@ -13,7 +13,7 @@
 				<Image src="./image/LOGO.png" height="250px" width="250px" class="sapUiTinyMarginTop weblogo"  tooltip="Company Logo"/>
 				<!-- <Title level="H1" text="SHAH HOSTEL" class="custom-text"/> -->
 				<ToolbarSpacer/>
-				<Button  text="LOGIN / SIGN UP"  id="loginButton" class="loginButton" tooltip="{i18n>tooltipLogin}" press="onpressLogin">
+				<Button  text="SIGN IN / SIGN UP"  id="loginButton" class="loginButton" tooltip="{i18n>tooltipLogin}" press="onpressLogin">
 					<layoutData>
 						<OverflowToolbarLayoutData priority="NeverOverflow"/>
 					</layoutData>
@@ -31,7 +31,7 @@
 						<IconTabFilter key="idRooms" text="Rooms"/>
 						<IconTabFilter key="idFacilities" text="Facilities"/>
 						<IconTabFilter key="idContact" text="Contact"/>
-						<IconTabFilter key="idAdddata" text="Add Data"/>
+						<!-- <IconTabFilter key="idAdddata" text="Add Data"/> -->
 						
 					</items>
 				</IconTabHeader>
@@ -70,6 +70,8 @@
         </HBox>
         <Text class="hr-text" text="Single Bed Room"/>
         <Text class="description-text" text="{VisibilityModel>/singleDesc}"/>
+        <Text class="description-text" text="The price will be {VisibilityModel>/singlePrice}"/>
+        <!-- <Text class="description-text" text="{VisibilityModel>/}"/> -->
         <HBox justifyContent="Center">
             <Button text="Book Now" press="onSingleRoomPress" width="200px" >  
 			 <customData>
@@ -86,6 +88,7 @@
         </HBox>
         <Text class="hr-text" text="Double Bed Room"/>
         <Text class="description-text" text="wqwqwqwqwq d"/>
+		   <Text class="description-text" text="The price will be {VisibilityModel>/doublePrice}"/>
         <HBox justifyContent="Center" >
             <Button text="Book Now" press="onDoubleRoomPress" width="200px">
 				 <customData>
@@ -103,6 +106,7 @@
         </HBox>
         <Text class="hr-text" text="Four Bed Room"/>
         <Text class="description-text " text="wqwqwqwqwq da d"/>
+		 <Text class="description-text" text="The price will be {VisibilityModel>/fourPrice}"/>
         <HBox justifyContent="Center">
             <Button text="Book Now" press="onFourRoomPress" width="200px">
 				 <customData>

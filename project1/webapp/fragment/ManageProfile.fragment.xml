@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout">
-  <Dialog id="profileDialog"  horizontalScrolling="false" verticalScrolling="false" contentWidth="420px">
+  <Dialog id="profileDialog" horizontalScrolling="false" verticalScrolling="false" contentWidth="760px" contentHeight="550px" class="profile-dialog-bg" xmlns:f="sap.ui.layout.form">
   <customHeader>
     <Bar>
       <contentMiddle>
@@ -10,13 +10,56 @@
       </contentRight>
     </Bar>
   </customHeader>
-    <VBox alignItems="Center" class="sapUiMediumMargin sapUiContentPadding">
-      <Avatar src="{profileData>/photo}" initials="{profileData>/initials}" displaySize="XL" press="onEditProfilePic"/>
-      <Title text="{profileData>/name}" class="sapUiSmallMarginTop"/>
-      <Text text="{profileData>/email}" />
-      <Text text="{profileData>/phone}" />
-      <Button text="Change Profile Picture" press="onEditProfilePic" class="sapUiTinyMarginTop" />
-      <Button text="Logout" press="onProfileLogout" type="Critical" class="sapUiTinyMarginTop" />
+    <VBox>
+      <!-- Header with background -->
+      <HBox class="profile-header-bg" width="100%">
+        <VBox justifyContent="Center" alignItems="Start" width="100%">
+          <HBox alignItems="Center" class="sapUiMediumMargin">
+            <Avatar src="{profileData>/photo}" initials="{profileData>/initials}" displaySize="XL" class="profile-avatar"/>
+            <VBox alignItems="Start" class="sapUiSmallMarginBegin">
+              <Title text="{profileData>/name}" level="H2"/>
+              <HBox>
+                <Text text="{profileData>/phone}" class="profile-contact-text" />
+                <Text text="  |  " />
+                <Text text="{profileData>/email}" class="profile-contact-text" />
+              </HBox>
+            </VBox>
+          </HBox>
+        </VBox> 
+      </HBox>
+      <!-- Completion alert -->
+      <HBox class="profile-completion-bar sapUiSmallMargin">
+        <ObjectStatus text="Complete your profile" state="Warning" />
+        <Button text="Add Email" type="Emphasized" class="sapUiTinyMarginBeginEnd"/>
+      </HBox>
+      <HBox height="100%">
+        <!-- Sidebar -->
+        <VBox width="200px" class="profile-sidebar">
+         <List mode="None" noDataText="" items="{profileMenuModel>/items}" showSeparators="None" itemPress="SectionPress">
+    <StandardListItem title="{profileMenuModel>title}" icon="{profileMenuModel>icon}" type="Active"/>
+</List>
+
+        </VBox>
+        <!-- Main Profile Content -->
+        <VBox class="sapUiContentPadding" width="100%" height="100%">
+          <Title text="General Information" level="H3"/>
+          <f:SimpleForm editable="true" layout="ColumnLayout">
+            <Label text="First Name"/>
+            <Input value="{profileData>/name}"/>
+            <Label text="Last Name"/>
+            <Input value="{profileData>/lastName}"/>
+            <Label text="Gender"/>
+            <Select selectedKey="{profileData>/gender}">
+              <core:Item key="MALE" text="MALE"/>
+              <core:Item key="FEMALE" text="FEMALE"/>
+            </Select>
+            <Label text="Date of Birth"/>
+            <DatePicker value="{profileData>/dob}"/>
+            <Label text="Nationality"/>
+            <Input value="{profileData>/nationality}"/>
+          </f:SimpleForm>
+        </VBox>
+      </HBox>
     </VBox>
   </Dialog>
 </core:FragmentDefinition>
