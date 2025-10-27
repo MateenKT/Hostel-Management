@@ -9,6 +9,18 @@ sap.ui.define([
     return Controller.extend("sap.ui.com.project1.controller.TilePage",{
         onInit:function(){
             
+        },
+        TileV_onpressInbox:function(){
+              var oRouter = this.getOwnerComponent().getRouter();
+               oRouter.navTo("RouteAdmin");
+        },
+        Tile_onLogPress:function(){
+              var oRouter = this.getOwnerComponent().getRouter();
+               oRouter.navTo("RouteHostel");
+        },
+        TileV_onpressroomdetails:function(){
+             var oRouter = this.getOwnerComponent().getRouter();
+               oRouter.navTo("RouteRoomDetails");
         }
     })
 })

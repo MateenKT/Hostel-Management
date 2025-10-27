@@ -88,7 +88,10 @@
                 mode="SingleSelectLeft"
                 width="auto"
                 class="sapUiResponsiveMargin"
-                items="{path: 'HostelModel>/'}"
+                items="{path: 'HostelModel>/',  sorter: [{
+                    path: 'RoomType',
+                    group: true
+                }]}"
             >
                 <headerToolbar>
                     <OverflowToolbar>
@@ -133,6 +136,14 @@
                             text="Date Of Birth"
                         />
                     </Column>
+                      <Column
+                        minScreenWidth="Tablet"
+                        demandPopin="true"
+                    >
+                        <Text
+                            text="Emial ID"
+                        />
+                    </Column>
                     <Column
                         minScreenWidth="Tablet"
                         demandPopin="true"
@@ -157,14 +168,14 @@
                             text="Status"
                         />
                     </Column>
-                    <Column
+                    <!-- <Column
                         minScreenWidth="Tablet"
                         demandPopin="true"
                     >
                         <Text
                             text="Room Type"
                         />
-                    </Column>
+                    </Column> -->
                     <Column
                         minScreenWidth="Tablet"
                         demandPopin="true"
@@ -193,8 +204,21 @@
                            <Text
                                 text="{path:'HostelModel>DateOfBirth',formatter: '.Formatter.formatDate'}"
                             />
+                            <Text text="{HostelModel>CustomerEmail}" />
+
                             <Text text="{HostelModel>MobileNo}" />
-                            <Text text="{HostelModel>PAN}" />
+                            <Text
+                             text="{path:'HostelModel>StartDate',formatter: '.Formatter.formatDate'}" />
+                            <Text text="{HostelModel>Status}" />
+                            <!-- <Text text="{HostelModel>RoomType}" /> -->
+                            <Text text="{HostelModel>RoomNumber}" />
+                           <Button
+                            text="View"
+                            press="HM_viewroom"
+                            type="Transparent"
+                        />
+
+                            
                            
                            
                         </cells>

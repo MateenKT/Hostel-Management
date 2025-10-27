@@ -24,7 +24,7 @@
                 >
                     <f:SimpleForm
                         editable="true"
-                        layout="ResponsiveGridLayout"
+                        layout="ColumnLayout"
                         labelSpanXL="4"
                         labelSpanL="3"
                         labelSpanM="4"
@@ -91,6 +91,82 @@
                                 maxLength="10"
                                 liveChange=".onValidateMobile"
                             />
+                            <Label
+                                text="E-mail"
+                                required="true"
+                            />
+                            <Input
+                                id="idE-mail"
+                                value="{HostelModel>/CustomerEmail}"
+                                placeholder="Enter email id"
+                                maxLength="60"
+                            />
+                            <Label
+                                text="Country"
+                                required="true"
+                            />
+                            <ComboBox
+                                id="idCountry"
+                                placeholder="Select Country"
+                                selectedKey="{HostelModel>/Country}"
+                            >
+                                <core:ListItem
+                                    key="Male"
+                                    text="India"
+                                />
+                                <core:ListItem
+                                    key="Female"
+                                    text="USA"
+                                />
+                                <core:ListItem
+                                    key="Other"
+                                    text="Other"
+                                />
+                            </ComboBox>
+                            <Label
+                                text="State"
+                                required="true"
+                            />
+                            <ComboBox
+                                id="idState"
+                                placeholder="Select State"
+                                selectedKey="{HostelModel>/State}"
+                            >
+                                <core:ListItem
+                                    key="Karantaka"
+                                    text="Karantaka"
+                                />
+                                <core:ListItem
+                                    key="AndhraPradesh"
+                                    text="Andhra Pradesh"
+                                />
+                                <core:ListItem
+                                    key="Other"
+                                    text="Other"
+                                />
+                            </ComboBox>
+                            <Label
+                                text="City"
+                                required="true"
+                            />
+                            <ComboBox
+                                id="idCity"
+                                placeholder="Select City"
+                                selectedKey="{HostelModel>/City}"
+                            >
+                                <core:ListItem
+                                    key="Gulbarga"
+                                    text="Gulbarga"
+                                />
+                                <core:ListItem
+                                    key="Hyderabad"
+                                    text="Hyderabad"
+                                />
+                                <core:ListItem
+                                    key="Other"
+                                    text="Other"
+                                />
+                            </ComboBox>
                         </f:content>
                     </f:SimpleForm>
                 </WizardStep>
@@ -103,7 +179,7 @@
                 >
                     <f:SimpleForm
                         editable="true"
-                        layout="ResponsiveGridLayout"
+                        layout="ColumnLayout"
                         labelSpanXL="4"
                         labelSpanL="3"
                         labelSpanM="4"
@@ -117,24 +193,25 @@
                                 text="Desired Room Type"
                                 required="true"
                             />
-                            <ComboBox
+                            <Input
                                 id="idRoomType"
-                                placeholder="Select Room Type"
-                                selectedKey="{HostelModel>/RoomType}"
+                                value="{HostelModel>/RoomType}"
+                                editable="false"
+                            />
+                            <Label
+                                text="Room Type"
+                                required="true"
+                            />
+                            <RadioButtonGroup
+                                id="roomTypeGroup"
+                                columns="2"
+                                select=".onRoomTypeSelect"
                             >
-                                <core:ListItem
-                                    key="Single"
-                                    text="Single Room"
-                                />
-                                <core:ListItem
-                                    key="Double"
-                                    text="Double Sharing"
-                                />
-                                <core:ListItem
-                                    key="Triple"
-                                    text="Triple Sharing"
-                                />
-                            </ComboBox>
+                                <buttons>
+                                    <RadioButton text="AC" />
+                                    <RadioButton text="Non-AC" />
+                                </buttons>
+                            </RadioButtonGroup>
 
                             <Label
                                 text="Start Date"
@@ -146,6 +223,15 @@
                                 valueFormat="dd/MM/yyyy"
                                 displayFormat="dd/MM/yyyy"
                                 change=".onDateChange"
+                            />
+                             <Label
+                                text="Price"
+                                required="true"
+                            />
+                            <Input
+                                id="idPrice1"
+                                value=""
+                                editable="false"
                             />
                         </f:content>
                     </f:SimpleForm>
@@ -178,12 +264,13 @@
                             id="idFileUploader"
                             name="studentDocument"
                             placeholder="Choose a file to upload"
-                            width="300px"
+                            width="500px"
                             fileType="jpg,png,pdf"
                             maximumFileSize="10"
                             change=".onFileUploaderChange"
                             tooltip="Only JPG, PNG, or PDF files under 10MB allowed"
                         />
+                        
                     </VBox>
                 </WizardStep>
             </Wizard>

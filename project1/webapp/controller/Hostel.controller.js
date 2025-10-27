@@ -8,16 +8,18 @@ sap.ui.define([
     return Controller.extend("sap.ui.com.project1.controller.Hostel", {
 
         onInit: function () {
-             var oView = this.getView();
-             var oAvatar = oView.byId("ProfileAvatar"); // Change to your avatar ID if needed
-                if (oAvatar) {
-                    oAvatar.setVisible(false);
-                }
-                    var model = new JSONModel({
+            var oView = this.getView();
+            var oAvatar = oView.byId("ProfileAvatar"); // Change to your avatar ID if needed
+            if (oAvatar) {
+                oAvatar.setVisible(false);
+            }
+            var model = new JSONModel({
                 CustomerName: "",
                 MobileNo: "",
                 Gender: "",
-                DateOfBirth: ""
+                DateOfBirth: "",
+                CustomerEmail: "",
+                RoomType: "",
 
             });
             this.getView().setModel(model, "HostelModel");
@@ -157,115 +159,114 @@ sap.ui.define([
             });
         }
         ,
-       onSignIn: function() {
-    var sUsername = sap.ui.getCore().byId("signInusername").getValue();
-    var sPassword = sap.ui.getCore().byId("signInPassword").getValue();
+        onSignIn: function () {
+            var sUsername = sap.ui.getCore().byId("signInusername").getValue();
+            var sPassword = sap.ui.getCore().byId("signInPassword").getValue();
 
-    if (!sUsername || !sPassword) {
-        sap.m.MessageToast.show("Please enter both username and password.");
-        return;
-    }
-
-    var sUrl = "https://rest.kalpavrikshatechnologies.com/HM_Login"; 
-
-    $.ajax({
-        url: sUrl,
-        type: "GET",
-        contentType: "application/json",
-        headers: {
-            name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-            password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-        },
-        success: function(response) {
-            var aUsers = response?.commentData || []; // Adjust key based on backend response
-            var bMatchFound = false;
-
-            for (var i = 0; i < aUsers.length; i++) {
-                // Matching username and base64-encoded password
-                if (aUsers[i].UserName === sUsername && aUsers[i].Password === btoa(sPassword)) {
-                    bMatchFound = true;
-                    break;
-                }
-            }
-            if (bMatchFound) {
-                sap.m.MessageToast.show("Login Successful! Welcome, " + sUsername);
-                var oView = this.getView();
-                var oLoginBtn = oView.byId("loginButton"); // Ensure this ID matches your XML
-                if (oLoginBtn) {
-                    oLoginBtn.setVisible(false);
-                }
-                 if(bMatchFound.Role === ""){
-                   return;
-            }else{
-                 this.getOwnerComponent().getRouter().navTo("TilePage"); 
+            if (!sUsername || !sPassword) {
+                sap.m.MessageToast.show("Please enter both username and password.");
+                return;
             }
 
-                // Optional: Show avatar or profile icon
-                var oAvatar = oView.byId("ProfileAvatar"); // Change to your avatar ID if needed
-                if (oAvatar) {
-                    oAvatar.setVisible(true);
+            var sUrl = "https://rest.kalpavrikshatechnologies.com/HM_Login";
+
+            $.ajax({
+                url: sUrl,
+                type: "GET",
+                contentType: "application/json",
+                headers: {
+                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+                },
+                success: function (response) {
+                    var aUsers = response?.commentData || []; // Adjust key based on backend response
+                    var bMatchFound = false;
+
+                    for (var i = 0; i < aUsers.length; i++) {
+                        // Matching username and base64-encoded password
+                        if (aUsers[i].UserName === sUsername && aUsers[i].Password === btoa(sPassword)) {
+                            bMatchFound = true;
+                            break;
+                        }
+                    }
+                    if (bMatchFound) {
+                        sap.m.MessageToast.show("Login Successful! Welcome, " + sUsername);
+                        var oView = this.getView();
+                        var oLoginBtn = oView.byId("loginButton"); // Ensure this ID matches your XML
+                        if (oLoginBtn) {
+                            oLoginBtn.setVisible(false);
+                        }
+                        if (bMatchFound.Role === "") {
+                            return;
+                        } else {
+                            this.getOwnerComponent().getRouter().navTo("TilePage");
+                        }
+
+                        // Optional: Show avatar or profile icon
+                        var oAvatar = oView.byId("ProfileAvatar"); // Change to your avatar ID if needed
+                        if (oAvatar) {
+                            oAvatar.setVisible(true);
+                        }
+
+                        // Close dialog
+                        if (this._oSignDialog) {
+                            this._oSignDialog.close();
+                        }
+
+                    } else {
+                        sap.m.MessageToast.show("Invalid credentials. Please try again.");
+                    }
+
+                }.bind(this),
+
+                error: function (xhr, status, error) {
+                    console.error("AJAX Error:", error);
+                    sap.m.MessageToast.show("Failed to fetch login data: " + error);
                 }
-
-                // Close dialog
-                if (this._oSignDialog) {
-                    this._oSignDialog.close();
-                }
-
-            } else {
-                sap.m.MessageToast.show("Invalid credentials. Please try again.");
-            }
-           
-        }.bind(this),
-        
-        error: function(xhr, status, error) {
-            console.error("AJAX Error:", error);
-            sap.m.MessageToast.show("Failed to fetch login data: " + error);
-        }
-    });
-},
-
-       onPressAvatar: function() {
-    if (!this._oProfileDialog) {
-        sap.ui.core.Fragment.load({
-            name: "sap.ui.com.project1.fragment.ManageProfile", // Adjust the path accordingly
-            controller: this
-        }).then(function(oDialog) {
-            this._oProfileDialog = oDialog;
-            this.getView().addDependent(oDialog);
-
-            // Example user info; replace with real model data
-            var oProfileModel = new JSONModel({
-                photo: "./image.jpg", // path to the avatar/profile picture
-                initials: "S",
-                name: "Sai",
-                email: "sai@example.com",
-                phone: "6372938414"
             });
-            oDialog.setModel(oProfileModel, "profileData");
+        },
 
-            oDialog.open();
-        }.bind(this));
-    } else {
-        this._oProfileDialog.open();
-    }
-},
+        onPressAvatar: function () {
+            if (!this._oProfileDialog) {
+                sap.ui.core.Fragment.load({
+                    name: "sap.ui.com.project1.fragment.ManageProfile", // Adjust the path accordingly
+                    controller: this
+                }).then(function (oDialog) {
+                    this._oProfileDialog = oDialog;
+                    this.getView().addDependent(oDialog);
 
-onProfileLogout: function() {
-    // Close the dialog and perform logout logic
-    if (this._oProfileDialog) this._oProfileDialog.close();
-    sap.m.MessageToast.show("You have been logged out.");
-  
-},
+                    // Example user info; replace with real model data
+                    var oProfileModel = new JSONModel({
+                        photo: "./image.jpg", // path to the avatar/profile picture
+                        initials: "S",
+                        name: "Sai",
+                        email: "sai@example.com",
+                        phone: "6372938414"
+                    });
+                    oDialog.setModel(oProfileModel, "profileData");
 
-onEditProfilePic: function() {
-    sap.m.MessageToast.show("Profile picture edit not implemented yet.");
-  
-},
-onProfileDialogClose:function(){
-     this._oProfileDialog.close()
-},
-  onSingleRoomPress: function () {
+                    oDialog.open();
+                }.bind(this));
+            } else {
+                this._oProfileDialog.open();
+            }
+        },
 
+        onProfileLogout: function () {
+            // Close the dialog and perform logout logic
+            if (this._oProfileDialog) this._oProfileDialog.close();
+            sap.m.MessageToast.show("You have been logged out.");
+
+        },
+
+        onEditProfilePic: function () {
+            sap.m.MessageToast.show("Profile picture edit not implemented yet.");
+
+        },
+        onProfileDialogClose: function () {
+            this._oProfileDialog.close()
+        },
+        Bookfragment: function () {
             if (!this.FCIA_Dialog) {
                 var oView = this.getView();
                 this.FCIA_Dialog = sap.ui.xmlfragment("sap.ui.com.project1.fragment.Book_Room", this);
@@ -277,6 +278,13 @@ onProfileDialogClose:function(){
                 this.FCIA_Dialog.open();
 
             }
+        },
+        onSingleRoomPress: function (oEvent) {
+            this.Bookfragment();
+            const oButton = oEvent.getSource();
+            const sRoomType = oButton.data("roomType");
+            sap.ui.getCore().byId("idRoomType").setValue(sRoomType);
+
 
         },
         onCancelDialog: function () {
@@ -313,13 +321,13 @@ onProfileDialogClose:function(){
         },
 
         onWizardBack: function () {
-         
-            const oWizard = sap.ui.getCore().byId("idHostelWizard");
-            const oNextButton =  sap.ui.getCore().byId("idWizardNextBtn");
-            const oBackButton =  sap.ui.getCore().byId("idWizardBackBtn");
-            const oSubmitButton =  sap.ui.getCore().byId("idWizardSubmitBtn");
 
-         
+            const oWizard = sap.ui.getCore().byId("idHostelWizard");
+            const oNextButton = sap.ui.getCore().byId("idWizardNextBtn");
+            const oBackButton = sap.ui.getCore().byId("idWizardBackBtn");
+            const oSubmitButton = sap.ui.getCore().byId("idWizardSubmitBtn");
+
+
             oWizard.previousStep();
 
             const aSteps = oWizard.getSteps();
@@ -335,80 +343,103 @@ onProfileDialogClose:function(){
             MessageToast.show("Wizard completed successfully!");
         },
 
-        onSaveDialog: function () {
-            // Final form submission logic
-            MessageBox.success("Form submitted successfully!");
-        },
+        // onSaveDialog: function () {
+        //     // Final form submission logic
+        //     MessageBox.success("Form submitted successfully!");
+        // },
 
         onCancelDialog: function () {
             this.FCIA_Dialog.close();
             sap.ui.getCore().byId("idHostelWizardDialog").close();
         },
-    //     onSaveDialog:function(){
-    //             var payload=this.getView().getModel("HostelModel").getData();
-    //              payload.DateOfBirth=payload.DateOfBirth.split("/").reverse().join("-");
+        //     onSaveDialog:function(){
+        //             var payload=this.getView().getModel("HostelModel").getData();
+        //              payload.DateOfBirth=payload.DateOfBirth.split("/").reverse().join("-");
 
-              
-    //         $.ajax({
-    //     url: "https://rest.kalpavrikshatechnologies.com/HM_Customer",
-    //     method: "POST",
-    //     contentType: "application/json",
-    //      headers: {
-    //       name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-    //       password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-    //      },
-    //     data: JSON.stringify({data:payload}),
-    //     success: function(response) {
-    //     }
-    //     })
-    // },
-    onSaveDialog: function () {
-    var payload = this.getView().getModel("HostelModel").getData();
 
-    payload.DateOfBirth = payload.DateOfBirth.split("/").reverse().join("-");
+        //         $.ajax({
+        //     url: "https://rest.kalpavrikshatechnologies.com/HM_Customer",
+        //     method: "POST",
+        //     contentType: "application/json",
+        //      headers: {
+        //       name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+        //       password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+        //      },
+        //     data: JSON.stringify({data:payload}),
+        //     success: function(response) {
+        //     }
+        //     })
+        // },
+        onSaveDialog: function () {
+            var payload = this.getView().getModel("HostelModel").getData();
+            payload.StartDate = payload.StartDate.split("/").reverse().join("-");
+            payload.Status = "New";
+            payload.RoomType = this.getView().getModel("HostelModel").getProperty("/RoomType");
 
-    var oFileUploader = sap.ui.getCore().byId("idFileUploader");
-    var aFiles = oFileUploader.oFileUpload.files;
-
-    if (!aFiles.length) {
-        sap.m.MessageBox.error("Please select a file to upload.");
-        return;
-    }
-
-    var oFile = aFiles[0];
-    var reader = new FileReader();
-
-    reader.onload = function (e) {
-        var sBase64 = e.target.result.split(",")[1]; 
-        payload.FileName = oFile.name;
-        payload.FileContent = sBase64;
-
-        $.ajax({
-            url: "https://rest.kalpavrikshatechnologies.com/HM_Customer",
-            method: "POST",
-            contentType: "application/json",
-            headers: {
-                name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-            },
-            data: JSON.stringify({ data: payload }),
-            success: function (response) {
-                sap.m.MessageToast.show("Data and file uploaded successfully!");
-            },
-            error: function (err) {
-                sap.m.MessageBox.error("Error uploading data or file.");
+            if (payload.DateOfBirth) {
+                payload.DateOfBirth = payload.DateOfBirth.split("/").reverse().join("-");
             }
-        });
-    };
 
-    reader.readAsDataURL(oFile);
-}
-,
-    onDoubleRoomPress:function(){
-        var oRouter = this.getOwnerComponent().getRouter();
-        oRouter.navTo("RouteAdmin");
-    },
- 
+            var oFileUploader = sap.ui.getCore().byId("idFileUploader");
+            var aFiles = oFileUploader.oFileUpload.files;
+
+            if (!aFiles.length) {
+                sap.m.MessageBox.error("Please select a file to upload.");
+                return;
+            }
+
+            var oFile = aFiles[0]; // single file
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                var sBase64 = e.target.result.split(",")[1];
+                payload.Documents = [
+                    {
+                        DocumentType: "ID Proof",
+                        File: sBase64,
+                        FileName: oFile.name.split(".")[0],
+                        FileType: oFile.name.split(".").pop(),
+
+                    }
+                ];
+                //    Documents: "Uploaded via web",
+                //                 EmployeeID: "emp-001"
+                $.ajax({
+                    url: "https://rest.kalpavrikshatechnologies.com/HM_Customer",
+                    method: "POST",
+                    contentType: "application/json",
+                    headers: {
+                        name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                        password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+                    },
+                    data: JSON.stringify({ data: payload }),
+                    success: function (response) {
+                        sap.m.MessageToast.show("Booking successfully!");
+
+                        oFileUploader.setValue("");
+
+                    }.bind(this),
+                    error: function (err) {
+                        sap.m.MessageBox.error("Error uploading data or file.");
+                    }
+                });
+            };
+            this.FCIA_Dialog.close();
+            reader.readAsDataURL(oFile);
+        },
+        onDoubleRoomPress: function (oEvent) {
+            this.Bookfragment();
+            const oButton = oEvent.getSource();
+            this.sRoomType = oButton.data("roomType");
+            sap.ui.getCore().byId("idRoomType").setValue(this.sRoomType);
+        },
+        onFourRoomPress: function (oEvent) {
+            this.Bookfragment();
+            const oButton = oEvent.getSource();
+            const sRoomType = oButton.data("roomType");
+            sap.ui.getCore().byId("idRoomType").setValue(sRoomType);
+        }
+
 
 
 

@@ -71,7 +71,11 @@
         <Text class="hr-text" text="Single Bed Room"/>
         <Text class="description-text" text="{VisibilityModel>/singleDesc}"/>
         <HBox justifyContent="Center">
-            <Button text="Book Now" press="onSingleRoomPress" width="200px" />
+            <Button text="Book Now" press="onSingleRoomPress" width="200px" >  
+			 <customData>
+        <core:CustomData key="roomType" value="Single Bed" />
+             </customData>
+</Button>
         </HBox>
     </VBox>
 
@@ -81,9 +85,14 @@
             <Image src="./image/DoubleBed.png" width="380px" height="320px" class="section-image" />
         </HBox>
         <Text class="hr-text" text="Double Bed Room"/>
-        <Text class="description-text" text="wqwqwqwqwq da d wqwqwqwqwq da dwqwqwqwqwq da dwqwqwqwqwq da dwqwqwqwqwq da d"/>
+        <Text class="description-text" text="wqwqwqwqwq d"/>
         <HBox justifyContent="Center" >
-            <Button text="Book Now" press="onDoubleRoomPress" width="200px"/>
+            <Button text="Book Now" press="onDoubleRoomPress" width="200px">
+				 <customData>
+        <core:CustomData key="roomType" value="Double Bed" />
+             </customData>
+</Button>
+
         </HBox>
     </VBox>
 
@@ -95,7 +104,11 @@
         <Text class="hr-text" text="Four Bed Room"/>
         <Text class="description-text " text="wqwqwqwqwq da d"/>
         <HBox justifyContent="Center">
-            <Button text="Book Now" press="onFourRoomPress" width="200px"/>
+            <Button text="Book Now" press="onFourRoomPress" width="200px">
+				 <customData>
+        <core:CustomData key="roomType" value="Four Bed" />
+             </customData>
+</Button>
         </HBox>
     </VBox>
 </l:Grid>

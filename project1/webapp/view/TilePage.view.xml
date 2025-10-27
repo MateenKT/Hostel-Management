@@ -21,12 +21,16 @@
 										<ux:ObjectPageSubSection titleUppercase="false">
 											<ux:blocks>
 												<layout:HorizontalLayout allowWrapping="true" class="sapUiTinyMargin">
-													<GenericTile visible="true" class="sapUiMediumMargin" header="{i18n>headerInbox}" press="TileV_onpressInbox">
-														<TileContent unit="{i18n>tileMyInboxFooter}">
+													<GenericTile visible="true" class="sapUiMediumMargin" header="Assign Rooms" press="TileV_onpressInbox">
+														<TileContent unit="Assign Rooms">
 															<ImageContent src="sap-icon://inbox" />
 														</TileContent>
 													</GenericTile>
-													
+													<GenericTile visible="true" class="sapUiMediumMargin" header="Add Room Details" press="TileV_onpressroomdetails">
+														<TileContent unit="Add Room Details">
+															<ImageContent src="sap-icon://inbox" />
+														</TileContent>
+													</GenericTile>
 												</layout:HorizontalLayout>
 											</ux:blocks>
 										</ux:ObjectPageSubSection>

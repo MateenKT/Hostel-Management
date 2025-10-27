@@ -97,6 +97,13 @@
           "target": [
             "TargetAdmin"
           ]
+        },
+        {
+          "name": "RouteRoomDetails",
+          "pattern": "RoomDetails",
+          "target": [
+            "TargetRoomDetails"
+          ]
         }
       ],
       "targets": {
@@ -120,6 +127,13 @@
           "clearControlAggregation": false,
           "viewId": "Admin",
           "viewName": "Admin"
+        },
+          "TargetRoomDetails": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "Room_Details",
+          "viewName": "Room_Details"
         }
       }
     },
