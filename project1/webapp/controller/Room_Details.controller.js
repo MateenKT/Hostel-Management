@@ -1,38 +1,139 @@
 sap.ui.define([
-	"sap/ui/core/mvc/Controller"
-], function(
-	Controller
+    "sap/ui/core/mvc/Controller",
+    "sap/ui/model/json/JSONModel",
+], function (
+    Controller,
+    JSONModel
 ) {
-	"use strict";
+    "use strict";
 
-	return Controller.extend("sap.ui.com.project1.controller.Room_Details", {
+    return Controller.extend("sap.ui.com.project1.controller.Room_Details", {
         onInit: function () {
+            this.getOwnerComponent().getRouter().getRoute("RouteRoomDetails").attachMatched(this._onRouteMatched, this);
+        },
+        _onRouteMatched: function () {
+            var model = new JSONModel({
+                BranchCode: "",
+                RoomNo: "",
+                BedTypes: "",
+                Price: "",
+
+            });
+            this.getView().setModel(model, "RoomModel")
+            this.Onsearch()
 
         },
-          HM_AddRoom: function (oEvent) {
-            //  var table = this.byId("idPOTable");
-            // var selected = table.getSelectedItem();
-            // if(!selected){
-            //     sap.m.MessageToast.show("Please select a record to assign room.");
-            //     return;
-            // }
-            //       var Model = selected.getBindingContext("HostelModel");
-            // var data = Model.getObject();
+        HM_AddRoom: function (oEvent) {
+            var oView = this.getView();
 
             if (!this.AR_Dialog) {
-                var oView = this.getView();
-                this.AR_Dialog = sap.ui.xmlfragment("sap.ui.com.project1.fragment.Add_Room_Details", this);
+                this.AR_Dialog = sap.ui.xmlfragment(oView.getId(), "sap.ui.com.project1.fragment.Add_Room_Details", this);
                 oView.addDependent(this.AR_Dialog);
-
-                // sap.ui.getCore().byId("idCustomerNameText").setText(data.CustomerName);
-                this.AR_Dialog.open();
-            } else {
-                //  sap.ui.getCore().byId("idCustomerNameText").setText(data.CustomerName);
-                this.AR_Dialog.open();
             }
+
+            oView.byId("idFileUploader1").setVisible(false);
+            oView.byId("idDescription").setVisible(false);
+
+            // Open the dialog
+            this.AR_Dialog.open();
         },
-            AR_onCancelButtonPress: function () {
+        HM_EditRoom: function (oEvent) {
+
+            var table = this.byId("id_ARD_Table");
+            var selected = table.getSelectedItem();
+            if (!selected) {
+                sap.m.MessageToast.show("Please select a record to Edit room.");
+                return;
+            }
+            var Model = selected.getBindingContext("RoomDetailsModel");
+            var data = Model.getObject();
+            var oView = this.getView();
+
+            if (!this.AR_Dialog) {
+                this.AR_Dialog = sap.ui.xmlfragment(oView.getId(), "sap.ui.com.project1.fragment.Add_Room_Details", this);
+                oView.addDependent(this.AR_Dialog);
+            }
+            this.getView().getModel("RoomModel").setData(data);
+
+            oView.byId("idFileUploader1").setVisible(false);
+            oView.byId("idDescription").setVisible(false);
+
+            // Open the dialog
+            this.AR_Dialog.open();
+        },
+
+        AR_onCancelButtonPress: function () {
             this.AR_Dialog.close();
         },
-	});
+        onNavBack: function () {
+            var oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("TilePage");
+        },
+        AR_onsavebuttonpress: function () {
+            var oView = this.getView();
+            var Payload = oView.getModel("RoomModel").getData();
+            Payload.Price = parseInt(Payload.Price);
+
+            var sUrl = "https://rest.kalpavrikshatechnologies.com/HM_Rooms";
+            var sMethod = "POST";
+            var oBody = { data: Payload };
+
+            if (Payload.ID) {
+                sUrl = sUrl;
+                sMethod = "PUT";
+
+                oBody.filters = {
+                    ID: Payload.ID
+                };
+            }
+
+            $.ajax({
+                url: sUrl,
+                method: sMethod,
+                contentType: "application/json",
+                headers: {
+                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+                },
+                data: JSON.stringify(oBody),
+                success: function (response) {
+                    if (sMethod === "POST") {
+                        sap.m.MessageToast.show("Room added successfully!");
+                    } else {
+                        sap.m.MessageToast.show("Room updated successfully!");
+                    }
+                    this.Onsearch(); // Refresh table
+                    this.AR_Dialog.close();
+
+                }.bind(this),
+                error: function (err) {
+                    sap.m.MessageBox.error("Error saving data (Add/Update).");
+                    console.error(err);
+                }
+            });
+        },
+        Onsearch: function () {
+            sap.ui.core.BusyIndicator.show(0);
+
+            $.ajax({
+                url: "https://rest.kalpavrikshatechnologies.com/HM_Rooms",
+                method: "GET",
+                contentType: "application/json",
+                headers: {
+                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+                },
+                success: function (response) {
+                    var model = new JSONModel(response.commentData);
+                    this.getView().setModel(model, "RoomDetailsModel");
+                    sap.ui.core.BusyIndicator.hide();
+
+
+                }.bind(this),
+                error: function (err) {
+                    sap.m.MessageBox.error("Error uploading data or file.");
+                }
+            });
+        }
+    });
 });

@@ -55,7 +55,7 @@
                 <ToolbarSpacer />
                 <Button
                     text="Save"
-                    press="FCIA_onsavebuttonpress"
+                    press="ARNO_onsavebuttonpress"
                     type="Accept"
                     id="HM_id_saveButton"
                     class="marginRight"

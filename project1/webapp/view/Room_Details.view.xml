@@ -46,12 +46,12 @@
                         <fb:control>
                             <ComboBox
                                 id="PO_id_CustomerName1"
-                                items="{HostelModel>/}"
+                                items="{RoomDetailsModel>/}"
                                 showClearIcon="true"
                             >
                                 <core:Item
-                                    key="{HostelModel>CustomerName}"
-                                    text="{HostelModel>CustomerName}"
+                                    key="{RoomDetailsModel>RoomNo}"
+                                    text="{RoomDetailsModel>RoomNo}"
                                 />
                             </ComboBox>
                         </fb:control>
@@ -68,12 +68,12 @@
                         <fb:control>
                             <ComboBox
                                 id="PO_id_CompanyName1"
-                                items="{HostelModel>/}"
+                                items="{RoomDetailsModel>/}"
                                 showClearIcon="true"
                             >
                                 <core:ListItem
-                                    key="{HostelModel>companyCode}"
-                                    text="{HostelModel>companyCode}"
+                                    key="{RoomDetailsModel>BedTypes}"
+                                    text="{RoomDetailsModel>BedTypes}"
                                 />
                             </ComboBox>
                         </fb:control>
@@ -83,26 +83,28 @@
              
             </fb:FilterBar>
             <Table
-                id="idPOTable"
+                id="id_ARD_Table"
                 sticky="ColumnHeaders,HeaderToolbar"
                 mode="SingleSelectLeft"
                 width="auto"
                 class="sapUiResponsiveMargin"
-                items="{path: 'HostelModel>/',  sorter: [{
-                    path: 'RoomType',
-                    group: true
-                }]}"
+                items="{path: 'RoomDetailsModel>/'}"
             >
                 <headerToolbar>
                     <OverflowToolbar>
                         <Title
-                            text="Booking List ({=${HostelModel>/}.length})"
+                            text="Room List ({=${RoomDetailsModel>/}.length})"
                         />
                         <ToolbarSpacer />
                         <Button
-                            text="Add Room"
+                            text="Create Room"
                             press="HM_AddRoom"
                             type="Accept"
+                        />
+                           <Button
+                            text="Edit"
+                            press="HM_EditRoom"
+                            type="Ghost"
                         />
                         
                      
@@ -149,20 +151,17 @@
                     <ColumnListItem
                     >
                         <cells>
-							<Text text="{HostelModel>CustomerName}" />
+							<Text text="{RoomDetailsModel>BranchCode}" />
 							
-                            <Text text="{HostelModel>Gender}" />
-                           <Text
-                                text="{path:'HostelModel>DateOfBirth',formatter: '.Formatter.formatDate'}"
-                            />
-                            <Text text="{HostelModel>CustomerEmail}" />
+                            <Text text="{RoomDetailsModel>RoomNo}" />
+                        
+                            <Text text="{RoomDetailsModel>BedTypes}" />
 
-                            <Text text="{HostelModel>MobileNo}" />
-                            <Text
-                             text="{path:'HostelModel>StartDate',formatter: '.Formatter.formatDate'}" />
-                            <Text text="{HostelModel>Status}" />
+                            <Text text="{RoomDetailsModel>AC_type}" />
+                          
+                            <Text text="{RoomDetailsModel>Price}" />
                             <!-- <Text text="{HostelModel>RoomType}" /> -->
-                            <Text text="{HostelModel>RoomNumber}" />
+                            <Text text="{RoomDetailsModel>RoomNumber}" />
                            <Button
                             text="View"
                             press="HM_viewroom"

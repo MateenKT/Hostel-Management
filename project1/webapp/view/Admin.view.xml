@@ -105,7 +105,7 @@
                             type="Accept"
                         />
                          <Button
-                            text="Add Room Details"
+                            text="Manage Room Information"
                             press="HM_RoomDetails"
                             type="Transparent"
                         />

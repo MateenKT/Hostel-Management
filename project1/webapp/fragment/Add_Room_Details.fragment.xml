@@ -3,11 +3,11 @@
     xmlns:c="sap.ui.core"
     xmlns:f="sap.ui.layout.form"
     xmlns:core="sap.ui.core"
-        xmlns:u="sap.ui.unified"
+    xmlns:u="sap.ui.unified"
 >
     <Dialog
         id="sds1"
-        title="Add Room Details"
+        title="Manage Room Details"
         type="Message"
         class="sapUiContentPadding"
     >
@@ -23,29 +23,50 @@
             columnsM="1"
         >
             <f:content>
-             <Label
+                <Label
                     text="Branch Code"
                     required="true"
                 />
-                   <ComboBox
-                                id="idRoomType2"
-                                placeholder="Select branch Code"
-                                selectedKey="{RoomModel>/BranchCode}"
-                            >
-                                <core:ListItem
-                                    key="KLB01"
-                                    text="KLB01"
-                                />
-                                <core:ListItem
-                                    key="Double"
-                                    text="Od001"
-                                />
-                                <core:ListItem
-                                    key="Triple"
-                                    text="Bglr001"
-                                />
-                             </ComboBox>
-            
+                <ComboBox
+                    id="idRoomType12"
+                    placeholder="Select branch Code"
+                    selectedKey="{RoomModel>/BranchCode}"
+                >
+                    <core:ListItem
+                        key="KLB01"
+                        text="KLB01"
+                    />
+                    <core:ListItem
+                        key="Double"
+                        text="Od001"
+                    />
+                    <core:ListItem
+                        key="Triple"
+                        text="Bglr001"
+                    />
+                </ComboBox>
+                <Label
+                    text="Room No"
+                    required="true"
+                />
+                <ComboBox
+                    id="idRoomNumber"
+                    placeholder="Select Room Number"
+                    selectedKey="{RoomModel>/RoomNo}"
+                >
+                    <core:ListItem
+                        key="A1"
+                        text="A1"
+                    />
+                    <core:ListItem
+                        key="A2"
+                        text="A2"
+                    />
+                    <core:ListItem
+                        key="A3"
+                        text="A3"
+                    />
+                </ComboBox>
                 <Label
                     text="Bed Type"
                     required="true"
@@ -53,10 +74,10 @@
                 <ComboBox
                     id="idBedType"
                     placeholder="Select Bed Type"
-                    selectedKey="{RoomModel>/BedType}"
+                    selectedKey="{RoomModel>/BedTypes}"
                 >
                     <core:ListItem
-                        key="Single"    
+                        key="Single"
                         text="Single Bed"
                     />
                     <core:ListItem
@@ -67,41 +88,59 @@
                         key="Four"
                         text="Four Bed"
                     />
-      
-                             </ComboBox>
-                                <Label
-                                text="Price"
-                                required="true"
-                            />
-                            <Input
-                                id="idPrice"
-                                value="{RoomModel>/Price}"
-                                placeholder="Enter Price"
-                                maxLength="60"
-                            />
-                              <Label
-                            text="Add image"
-                            required="true"
-                        />
-                        <u:FileUploader
-                            id="idFileUploader1"
-                            name="studentDocument"
-                            placeholder="Choose a file to upload"
-                            fileType="jpg,png,pdf"
-                            maximumFileSize="10"
-                            change=".onFileUploaderChange"
-                            tooltip="Only JPG, PNG, or PDF files under 10MB allowed"
-                        />
-                         <Label
-                            text="Desscription"
-                            required="true"
-                            
-                        />
-                      <TextArea
-                      maxLength="100" 
-                      placeholder="Enter Description"
-                      value="{RoomModel>/Description}"
-                      />
+                </ComboBox>
+
+                 <Label
+                    text="Room Type"
+                    required="true"
+                />
+                <ComboBox
+                    id="idActype"
+                    placeholder="Select Ac Type"
+                    selectedKey="{RoomModel>/AC_type}"
+                >
+                    <core:ListItem
+                        key="AC"
+                        text="AC"
+                    />
+                    <core:ListItem
+                        key="Non-AC"
+                        text="Non-AC"
+                    />
+                </ComboBox>
+                <Label
+                    text="Price"
+                    required="true"
+                />
+                <Input
+                    id="idPrice"
+                    value="{RoomModel>/Price}"
+                    placeholder="Enter Price"
+                    maxLength="60"
+                />
+                <Label
+                    text="Add image"
+                    required="true"
+                />
+                <u:FileUploader
+                    id="idFileUploader1"
+                    name="studentDocument"
+                    placeholder="Choose a file to upload"
+                    fileType="jpg,png,pdf"
+                    maximumFileSize="10"
+                    change=".onFileUploaderChange"
+                    tooltip="Only JPG, PNG, or PDF files under 10MB allowed"
+                />
+                <Label
+                    text="Desscription"
+                    required="true"
+                />
+                <TextArea
+                id="idDescription"
+                    maxLength="100"
+                    placeholder="Enter Description"
+                    value="{RoomModel>/Description}"
+                />
             </f:content>
         </f:SimpleForm>
         <footer>

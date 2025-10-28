@@ -33,7 +33,7 @@ sap.ui.define([
         ]
     });
     oView.setModel(oProfileMenuModel, "profileMenuModel");
-            this._loadFilteredData("KLB01");
+            // this._loadFilteredData("KLB01");
         },
 
         _loadFilteredData: function (sBranchCode) {
@@ -303,9 +303,13 @@ sap.ui.define([
         },
         onSingleRoomPress: function (oEvent) {
             this.Bookfragment();
+           var price= this.getView().getModel("VisibilityModel").getData();
+
             const oButton = oEvent.getSource();
             const sRoomType = oButton.data("roomType");
             sap.ui.getCore().byId("idRoomType").setValue(sRoomType);
+            sap.ui.getCore().byId("idPrice1").setValue(price.singlePrice);
+
 
 
         },
@@ -452,16 +456,27 @@ sap.ui.define([
         onDoubleRoomPress: function (oEvent) {
             this.Bookfragment();
             const oButton = oEvent.getSource();
+             var price= this.getView().getModel("VisibilityModel").getData();
+
             this.sRoomType = oButton.data("roomType");
             sap.ui.getCore().byId("idRoomType").setValue(this.sRoomType);
+            sap.ui.getCore().byId("idPrice1").setValue(price.doublePrice);
+
         },
-        onFourRoomPress: function (oEvent) {
-            this.Bookfragment();
-            const oButton = oEvent.getSource();
-            const sRoomType = oButton.data("roomType");
-            sap.ui.getCore().byId("idRoomType").setValue(sRoomType);
-        }
-,
+        onpressBookrooms: function (oEvent) {
+                 var oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("TilePage");
+        //     this.Bookfragment();
+        //     const oButton = oEvent.getSource();
+        //                var price= this.getView().getModel("VisibilityModel").getData();
+
+        //     const sRoomType = oButton.data("roomType");
+        //     sap.ui.getCore().byId("idRoomType").setValue(sRoomType);
+        //  sap.ui.getCore().byId("idPrice1").setValue(price.fourPrice);
+
+       
+
+        },
 SectionPress: function(oEvent) {
     var oSelectedItem = oEvent.getParameter("listItem");
     if (oSelectedItem) {
