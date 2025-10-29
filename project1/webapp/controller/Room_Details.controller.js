@@ -15,7 +15,6 @@ sap.ui.define([
             var model = new JSONModel({
                 BranchCode: "",
                 RoomNo: "",
-                BedTypes: "",
                 Price: "",
 
             });
@@ -31,8 +30,10 @@ sap.ui.define([
                 oView.addDependent(this.AR_Dialog);
             }
 
-            oView.byId("idFileUploader1").setVisible(false);
+            oView.byId("idFileUploader12").setVisible(false);
             oView.byId("idDescription").setVisible(false);
+            oView.byId("idCity").setVisible(false);
+
 
             // Open the dialog
             this.AR_Dialog.open();
@@ -55,7 +56,7 @@ sap.ui.define([
             }
             this.getView().getModel("RoomModel").setData(data);
 
-            oView.byId("idFileUploader1").setVisible(false);
+            oView.byId("idFileUploader12").setVisible(false);
             oView.byId("idDescription").setVisible(false);
 
             // Open the dialog
@@ -112,6 +113,39 @@ sap.ui.define([
                 }
             });
         },
+        HM_DeleteRoom:function(){
+            var table = this.byId("id_ARD_Table");
+            var selected = table.getSelectedItem();
+            if (!selected) {
+                sap.m.MessageToast.show("Please select a record to Delete room.");
+                return;
+            }
+            var Model = selected.getBindingContext("RoomDetailsModel");
+            var data = Model.getObject();
+
+            var oBody = {};
+             oBody.filters = {
+                    ID: data.ID
+                };
+
+           $.ajax({
+                url: "https://rest.kalpavrikshatechnologies.com/HM_Rooms",
+                method: "DELETE",
+                contentType: "application/json",
+                data: JSON.stringify(oBody),
+                headers: {
+                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+                },
+                success: function (response) {
+                    sap.m.MessageToast.show("Record DELETE successfully!");
+                     this.Onsearch()
+                }.bind(this),
+                error: function (xhr) {
+                    sap.m.MessageToast.show("Error: " + xhr.statusText);
+                }
+            });
+        },
         Onsearch: function () {
             sap.ui.core.BusyIndicator.show(0);
 
@@ -134,6 +168,38 @@ sap.ui.define([
                     sap.m.MessageBox.error("Error uploading data or file.");
                 }
             });
+        },
+        RD_onSearch:function(){
+             var oView = this.getView();
+
+            var oFilterBar = oView.byId("RD_id_FilterbarEmployee");
+
+            var oTable = oView.byId("id_ARD_Table");
+            var oBinding = oTable.getBinding("items");
+
+            var sCustomerName = oView.byId("RD_id_CustomerName1").getSelectedKey() || oView.byId("RD_id_CustomerName1").getValue();
+            var sCustomerID = oView.byId("RD_id_CompanyName1").getSelectedKey() || oView.byId("RD_id_CompanyName1").getValue();
+
+            var aFilters = [];
+
+            if (sCustomerName) {
+                aFilters.push(new sap.ui.model.Filter("RoomNo", sap.ui.model.FilterOperator.Contains, sCustomerName));
+            }
+
+            if (sCustomerID) {
+                aFilters.push(new sap.ui.model.Filter("BedType", sap.ui.model.FilterOperator.Contains, sCustomerID));
+            }
+
+            var oCombinedFilter = new sap.ui.model.Filter({
+                filters: aFilters,
+                and: true
+            });
+
+            oBinding.filter(oCombinedFilter); 
+        },
+        RD_onPressClear:function(){
+            this.getView().byId("RD_id_CustomerName1").setSelectedKey("")
+             this.getView().byId("RD_id_CompanyName1").setSelectedKey("")
         }
     });
 });

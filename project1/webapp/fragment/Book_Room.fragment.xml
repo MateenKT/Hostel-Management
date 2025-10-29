@@ -212,7 +212,29 @@
                                     <RadioButton text="Non-AC" />
                                 </buttons>
                             </RadioButtonGroup>
-
+                            <Label
+                                text="Price"
+                                required="true"
+                            />
+                            <Input
+                                id="idPrice1"
+                                value=""
+                                editable="false"
+                            />
+                            <Label
+                                text="Food Type"
+                                required="true"
+                            />
+                            <RadioButtonGroup
+                                id="FoodTypeGroup"
+                                columns="2"
+                                select=".onFoodTypeGroupSelect"
+                            >
+                                <buttons>
+                                    <RadioButton text="Veg" />
+                                    <RadioButton text="Non-Veg" />
+                                </buttons>
+                            </RadioButtonGroup>
                             <Label
                                 text="Start Date"
                                 required="true"
@@ -223,15 +245,6 @@
                                 valueFormat="dd/MM/yyyy"
                                 displayFormat="dd/MM/yyyy"
                                 change=".onDateChange"
-                            />
-                             <Label
-                                text="Price"
-                                required="true"
-                            />
-                            <Input
-                                id="idPrice1"
-                                value=""
-                                editable="false"
                             />
                         </f:content>
                     </f:SimpleForm>
@@ -270,7 +283,6 @@
                             change=".onFileUploaderChange"
                             tooltip="Only JPG, PNG, or PDF files under 10MB allowed"
                         />
-                        
                     </VBox>
                 </WizardStep>
             </Wizard>

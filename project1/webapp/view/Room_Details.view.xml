@@ -24,12 +24,12 @@
     </customHeader>
         <content>
             <fb:FilterBar
-                id="PO_id_FilterbarEmployee"
+                id="RD_id_FilterbarEmployee"
                 persistencyKey="myPersKey"
                 useToolbar="false"
-                clear="PO_onPressClear"
+                clear="RD_onPressClear"
                 showClearOnFB="true"
-                search="HM_onSearch"
+                search="RD_onSearch"
                 filterChange="IA_.onFilterChange"
                 afterVariantLoad="IA_.onAfterVariantLoad"
                 showFilterConfiguration="false"
@@ -45,7 +45,7 @@
                     >
                         <fb:control>
                             <ComboBox
-                                id="PO_id_CustomerName1"
+                                id="RD_id_CustomerName1"
                                 items="{RoomDetailsModel>/}"
                                 showClearIcon="true"
                             >
@@ -67,13 +67,13 @@
                     >
                         <fb:control>
                             <ComboBox
-                                id="PO_id_CompanyName1"
+                                id="RD_id_CompanyName1"
                                 items="{RoomDetailsModel>/}"
                                 showClearIcon="true"
                             >
                                 <core:ListItem
-                                    key="{RoomDetailsModel>BedTypes}"
-                                    text="{RoomDetailsModel>BedTypes}"
+                                    key="{RoomDetailsModel>BedType}"
+                                    text="{RoomDetailsModel>BedType}"
                                 />
                             </ComboBox>
                         </fb:control>
@@ -105,6 +105,11 @@
                             text="Edit"
                             press="HM_EditRoom"
                             type="Ghost"
+                        />
+                           <Button
+                            text="Delete"
+                            press="HM_DeleteRoom"
+                            type="Reject"
                         />
                         
                      
@@ -155,7 +160,7 @@
 							
                             <Text text="{RoomDetailsModel>RoomNo}" />
                         
-                            <Text text="{RoomDetailsModel>BedTypes}" />
+                            <Text text="{RoomDetailsModel>BedType}" />
 
                             <Text text="{RoomDetailsModel>AC_type}" />
                           

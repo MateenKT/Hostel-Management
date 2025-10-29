@@ -45,6 +45,28 @@
                         text="Bglr001"
                     />
                 </ComboBox>
+                 <Label
+                    text="City"
+                    required="true"
+                />
+                <ComboBox
+                    id="idCity"
+                    placeholder="Select City"
+                    selectedKey="{RoomModel>/City}"
+                >
+                    <core:ListItem
+                        key="Kalburgi"
+                        text="Kalburgi"
+                    />
+                    <core:ListItem
+                        key="Bidar"
+                        text="Bidar"
+                    />
+                    <core:ListItem
+                        key="Hyderabad"
+                        text="Hyderabad"
+                    />
+                </ComboBox>
                 <Label
                     text="Room No"
                     required="true"
@@ -74,7 +96,7 @@
                 <ComboBox
                     id="idBedType"
                     placeholder="Select Bed Type"
-                    selectedKey="{RoomModel>/BedTypes}"
+                    selectedKey="{RoomModel>/BedType}"
                 >
                     <core:ListItem
                         key="Single"
@@ -123,7 +145,7 @@
                     required="true"
                 />
                 <u:FileUploader
-                    id="idFileUploader1"
+                    id="idFileUploader12"
                     name="studentDocument"
                     placeholder="Choose a file to upload"
                     fileType="jpg,png,pdf"
@@ -132,7 +154,7 @@
                     tooltip="Only JPG, PNG, or PDF files under 10MB allowed"
                 />
                 <Label
-                    text="Desscription"
+                    text="Description"
                     required="true"
                 />
                 <TextArea

@@ -1,8 +1,9 @@
 sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel",
-    "sap/m/MessageToast"
-], function (Controller, JSONModel, MessageToast) {
+    "sap/m/MessageToast",
+    "sap/m/MessageBox"
+], function (Controller, JSONModel, MessageToast, MessageBox) {
     "use strict";
 
     return Controller.extend("sap.ui.com.project1.controller.Hostel", {
@@ -24,16 +25,16 @@ sap.ui.define([
             });
             this.getView().setModel(model, "HostelModel");
 
-             var oProfileMenuModel = new sap.ui.model.json.JSONModel({
-        items: [
-            { title: "My Profile", icon: "sap-icon://person-placeholder", key: "profile" },
-            { title: "Room-Mates", icon: "sap-icon://collaborate", key: "co-travellers" },
-            { title: "Booking History", icon: "sap-icon://connected", key: "devices" },
-            { title: "Logout", icon: "sap-icon://log", key: "logout" }
-        ]
-    });
-    oView.setModel(oProfileMenuModel, "profileMenuModel");
-            // this._loadFilteredData("KLB01");
+            var oProfileMenuModel = new sap.ui.model.json.JSONModel({
+                items: [
+                    { title: "My Profile", icon: "sap-icon://person-placeholder", key: "profile" },
+                    { title: "Room-Mates", icon: "sap-icon://collaborate", key: "co-travellers" },
+                    { title: "Booking History", icon: "sap-icon://connected", key: "devices" },
+                    { title: "Logout", icon: "sap-icon://log", key: "logout" }
+                ]
+            });
+            oView.setModel(oProfileMenuModel, "profileMenuModel");
+            this._loadFilteredData("KLB01");
         },
 
         _loadFilteredData: function (sBranchCode) {
@@ -52,7 +53,7 @@ sap.ui.define([
                 },
                 success: function (response) {
                     console.log("Service call success", response);
-                    const allRooms = response?.commentData || [];
+                    const allRooms = response?.HM_Master_Data || [];
 
                     // Use all rooms without filtering by Status
                     const singleRoom = allRooms.find(room => room.BedType === "Single");
@@ -67,8 +68,8 @@ sap.ui.define([
                         doubleDesc: doubleRoom ? doubleRoom.Description : "",
                         fourDesc: fourRoom ? fourRoom.Description : "",
                         singlePrice: singleRoom ? singleRoom.Price : "",
-        doublePrice: doubleRoom ? doubleRoom.Price : "",
-        fourPrice: fourRoom ? fourRoom.Price : ""
+                        doublePrice: doubleRoom ? doubleRoom.Price : "",
+                        fourPrice: fourRoom ? fourRoom.Price : ""
                     });
                     oView.setModel(oVisibilityModel, "VisibilityModel");
 
@@ -170,76 +171,75 @@ sap.ui.define([
                     sap.m.MessageToast.show("Error in Sign Up: " + error);
                 }
             });
-        }
-        ,
-     onSignIn: function() {
-    var sUsername = sap.ui.getCore().byId("signInusername").getValue();
-    var sPassword = sap.ui.getCore().byId("signInPassword").getValue();
-
-    if (!sUsername || !sPassword) {
-        sap.m.MessageToast.show("Please enter both username and password.");
-        return;
-    }
-    var sUrl = "https://rest.kalpavrikshatechnologies.com/HM_Login";
-
-    $.ajax({
-        url: sUrl,
-        type: "GET",
-        contentType: "application/json",
-        headers: {
-            name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-            password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
         },
-        success: function(response) {
-            var aUsers = response?.commentData || [];
-            var oMatchedUser = null;
+        onSignIn: function () {
+            var sUsername = sap.ui.getCore().byId("signInusername").getValue();
+            var sPassword = sap.ui.getCore().byId("signInPassword").getValue();
 
-            for (var i = 0; i < aUsers.length; i++) {
-                if (
-                    aUsers[i].UserName === sUsername &&
-                    aUsers[i].Password === btoa(sPassword)
-                ) {
-                    oMatchedUser = aUsers[i];
-                    break;
-                }
+            if (!sUsername || !sPassword) {
+                sap.m.MessageToast.show("Please enter both username and password.");
+                return;
             }
-            if (oMatchedUser) {
-                sap.m.MessageToast.show("Login Successful! Welcome, " + sUsername);
-                var oView = this.getView();
-                var oLoginBtn = oView.byId("loginButton");
-            
-                if (oLoginBtn) {
-                    oLoginBtn.setVisible(false);
+            var sUrl = "https://rest.kalpavrikshatechnologies.com/HM_Login";
+
+            $.ajax({
+                url: sUrl,
+                type: "GET",
+                contentType: "application/json",
+                headers: {
+                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+                },
+                success: function (response) {
+                    var aUsers = response?.commentData || [];
+                    var oMatchedUser = null;
+
+                    for (var i = 0; i < aUsers.length; i++) {
+                        if (
+                            aUsers[i].UserName === sUsername &&
+                            aUsers[i].Password === btoa(sPassword)
+                        ) {
+                            oMatchedUser = aUsers[i];
+                            break;
+                        }
+                    }
+                    if (oMatchedUser) {
+                        sap.m.MessageToast.show("Login Successful! Welcome, " + sUsername);
+                        var oView = this.getView();
+                        var oLoginBtn = oView.byId("loginButton");
+
+                        if (oLoginBtn) {
+                            oLoginBtn.setVisible(false);
+                        }
+                        var oAvatar = oView.byId("ProfileAvatar");
+                        if (oAvatar) {
+                            oAvatar.setVisible(true);
+                        }
+                        // Store user info in controller or as a global model
+                        this._oLoggedInUser = oMatchedUser; // Store for later profile usage
+
+                        sap.ui.getCore().byId("signInusername").setValue("");
+                        sap.ui.getCore().byId("signInPassword").setValue("");
+
+                        if (this._oSignDialog) {
+                            this._oSignDialog.close();
+                        }
+                    } else {
+                        sap.m.MessageToast.show("Invalid credentials. Please try again.");
+                    }
+                }.bind(this),
+
+                error: function (xhr, status, error) {
+                    console.error("AJAX Error:", error);
+                    sap.m.MessageToast.show("Failed to fetch login data: " + error);
                 }
-                var oAvatar = oView.byId("ProfileAvatar");
-                if (oAvatar) {
-                    oAvatar.setVisible(true);
-                }
-                // Store user info in controller or as a global model
-                this._oLoggedInUser = oMatchedUser; // Store for later profile usage
-
-           sap.ui.getCore().byId("signInusername").setValue("");
-   sap.ui.getCore().byId("signInPassword").setValue("");
-   
-                if (this._oSignDialog) {
-                    this._oSignDialog.close();
-                }
-            } else {
-                sap.m.MessageToast.show("Invalid credentials. Please try again.");
-            }
-        }.bind(this),
-
-        error: function(xhr, status, error) {
-            console.error("AJAX Error:", error);
-            sap.m.MessageToast.show("Failed to fetch login data: " + error);
-        }
-    });
-},
+            });
+        },
 
 
-       onPressAvatar: function () {
-    var oUser = this._oLoggedInUser || {}; // Get stored user (from login)
-    var sPhoto = "./image.jpg"; 
+        onPressAvatar: function () {
+            var oUser = this._oLoggedInUser || {}; // Get stored user (from login)
+            var sPhoto = "./image.jpg";
 
             if (!this._oProfileDialog) {
                 sap.ui.core.Fragment.load({
@@ -249,26 +249,26 @@ sap.ui.define([
                     this._oProfileDialog = oDialog;
                     this.getView().addDependent(oDialog);
 
-                            var oProfileModel = new JSONModel({
+                    var oProfileModel = new JSONModel({
                         photo: sPhoto,
                         initials: oUser.UserName ? oUser.UserName.charAt(0).toUpperCase() : "",
                         name: oUser.UserName || "",
-                        email: oUser.EmailID|| "",
+                        email: oUser.EmailID || "",
                         phone: oUser.MobileNo || ""
                     });
                     oDialog.setModel(oProfileModel, "profileData");
                     oDialog.open();
                 }.bind(this));
             } else {
-        // Update model every time in case user changed
-        var oProfileModel = new JSONModel({
-            photo: sPhoto,
-            initials: oUser.UserName ? oUser.UserName.charAt(0).toUpperCase() : "",
-            name: oUser.UserName || "",
-            email: oUser.Email || "",
-            phone: oUser.MobileNo || ""
-        });
-        this._oProfileDialog.setModel(oProfileModel, "profileData");
+                // Update model every time in case user changed
+                var oProfileModel = new JSONModel({
+                    photo: sPhoto,
+                    initials: oUser.UserName ? oUser.UserName.charAt(0).toUpperCase() : "",
+                    name: oUser.UserName || "",
+                    email: oUser.Email || "",
+                    phone: oUser.MobileNo || ""
+                });
+                this._oProfileDialog.setModel(oProfileModel, "profileData");
                 this._oProfileDialog.open();
             }
         },
@@ -301,17 +301,23 @@ sap.ui.define([
 
             }
         },
-        onSingleRoomPress: function (oEvent) {
-            this.Bookfragment();
-           var price= this.getView().getModel("VisibilityModel").getData();
+        onSingleRoomPress: async function (oEvent) {
+            if (this._oLoggedInUser === undefined) {
+                MessageBox.alert("Please Signin to book a room.");
+                return;
+            }
+
+
+            var price = this.getView().getModel("VisibilityModel").getData();
 
             const oButton = oEvent.getSource();
             const sRoomType = oButton.data("roomType");
+            await this.Bookfragment();
             sap.ui.getCore().byId("idRoomType").setValue(sRoomType);
             sap.ui.getCore().byId("idPrice1").setValue(price.singlePrice);
-
-
-
+            sap.ui.getCore().byId("idFullName").setValue(this._oLoggedInUser.UserName);
+            sap.ui.getCore().byId("idE-mail").setValue(this._oLoggedInUser.EmailID);
+            // this.getView().getModel("HostelModel").setData(this._oLoggedInUser);
         },
         onCancelDialog: function () {
             this.FCIA_Dialog.close();
@@ -397,10 +403,12 @@ sap.ui.define([
         //     })
         // },
         onSaveDialog: function () {
+            var logindata=this._oLoggedInUser
             var payload = this.getView().getModel("HostelModel").getData();
             payload.StartDate = payload.StartDate.split("/").reverse().join("-");
             payload.Status = "New";
             payload.RoomType = this.getView().getModel("HostelModel").getProperty("/RoomType");
+            payload.LoginID=logindata.ID
 
             if (payload.DateOfBirth) {
                 payload.DateOfBirth = payload.DateOfBirth.split("/").reverse().join("-");
@@ -423,8 +431,8 @@ sap.ui.define([
                     {
                         DocumentType: "ID Proof",
                         File: sBase64,
-                        FileName: oFile.name.split(".")[0],
-                        FileType: oFile.name.split(".").pop(),
+                        FileName: oFile.name[0],
+                        FileType: oFile.type,
 
                     }
                 ];
@@ -454,9 +462,14 @@ sap.ui.define([
             reader.readAsDataURL(oFile);
         },
         onDoubleRoomPress: function (oEvent) {
+            if (this._oLoggedInUser === undefined) {
+                MessageBox.alert("Please signin to book a room.");
+                return;
+            }
+
             this.Bookfragment();
             const oButton = oEvent.getSource();
-             var price= this.getView().getModel("VisibilityModel").getData();
+            var price = this.getView().getModel("VisibilityModel").getData();
 
             this.sRoomType = oButton.data("roomType");
             sap.ui.getCore().byId("idRoomType").setValue(this.sRoomType);
@@ -464,46 +477,46 @@ sap.ui.define([
 
         },
         onpressBookrooms: function (oEvent) {
-                 var oRouter = this.getOwnerComponent().getRouter();
+            var oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("TilePage");
-        //     this.Bookfragment();
-        //     const oButton = oEvent.getSource();
-        //                var price= this.getView().getModel("VisibilityModel").getData();
+            //     this.Bookfragment();
+            //     const oButton = oEvent.getSource();
+            //                var price= this.getView().getModel("VisibilityModel").getData();
 
-        //     const sRoomType = oButton.data("roomType");
-        //     sap.ui.getCore().byId("idRoomType").setValue(sRoomType);
-        //  sap.ui.getCore().byId("idPrice1").setValue(price.fourPrice);
+            //     const sRoomType = oButton.data("roomType");
+            //     sap.ui.getCore().byId("idRoomType").setValue(sRoomType);
+            //  sap.ui.getCore().byId("idPrice1").setValue(price.fourPrice);
 
-       
+
 
         },
-SectionPress: function(oEvent) {
-    var oSelectedItem = oEvent.getParameter("listItem");
-    if (oSelectedItem) {
-        var oContext = oSelectedItem.getBindingContext("profileMenuModel");
-        var oSectionData = oContext ? oContext.getObject() : null;
+        SectionPress: function (oEvent) {
+            var oSelectedItem = oEvent.getParameter("listItem");
+            if (oSelectedItem) {
+                var oContext = oSelectedItem.getBindingContext("profileMenuModel");
+                var oSectionData = oContext ? oContext.getObject() : null;
 
-        if (oSectionData && oSectionData.key === "logout") {
-            var oView = this.getView();
+                if (oSectionData && oSectionData.key === "logout") {
+                    var oView = this.getView();
 
-            // Show login button
-            var oLoginBtn = oView.byId("loginButton");
-            if (oLoginBtn) {
-                oLoginBtn.setVisible(true);
+                    // Show login button
+                    var oLoginBtn = oView.byId("loginButton");
+                    if (oLoginBtn) {
+                        oLoginBtn.setVisible(true);
+                    }
+
+                    // Hide profile avatar
+                    var oAvatar = oView.byId("ProfileAvatar");
+                    if (oAvatar) {
+                        oAvatar.setVisible(false);
+                    }
+                    if (this._oProfileDialog) this._oProfileDialog.close();
+                    // Optionally, perform logout logic here (clear session, navigate, etc.)
+                } else {
+                    // Handle other menu item selections as needed
+                }
             }
-
-            // Hide profile avatar
-            var oAvatar = oView.byId("ProfileAvatar");
-            if (oAvatar) {
-                oAvatar.setVisible(false);
-            }
-         if (this._oProfileDialog) this._oProfileDialog.close();
-            // Optionally, perform logout logic here (clear session, navigate, etc.)
-        } else {
-            // Handle other menu item selections as needed
         }
-    }
-}
 
 
 

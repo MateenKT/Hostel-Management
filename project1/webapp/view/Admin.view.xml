@@ -72,8 +72,8 @@
                                 showClearIcon="true"
                             >
                                 <core:ListItem
-                                    key="{HostelModel>companyCode}"
-                                    text="{HostelModel>companyCode}"
+                                    key="{HostelModel>RoomNumber}"
+                                    text="{HostelModel>RoomNumber}"
                                 />
                             </ComboBox>
                         </fb:control>

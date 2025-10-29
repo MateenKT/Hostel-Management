@@ -32,21 +32,16 @@
                     required="true"
                 />
                 <ComboBox
+                id="idRoomNumber1"
                     placeholder="Select Room Number"
                     selectedKey="{HostelModel>/RoomNumber}"
+                           items="{RoomDetailsModel>/}"
                 >
                     <core:ListItem
-                        key="Room1"
-                        text="RN001"
+                        key="{RoomDetailsModel>RoomNo}"
+                        text="{RoomDetailsModel>RoomNo}"
                     />
-                    <core:ListItem
-                        key="Room2"
-                        text="RN002"
-                    />
-                    <core:ListItem
-                        key="Room3"
-                        text="RN003"
-                    />
+                  
                 </ComboBox>
             </f:content>
         </f:SimpleForm>

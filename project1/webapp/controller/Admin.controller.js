@@ -15,8 +15,39 @@ sap.ui.define([
         onInit: function () {
             this.getOwnerComponent().getRouter().getRoute("RouteAdmin").attachMatched(this._onRouteMatched, this);
         },
-        _onRouteMatched: function () {
-            sap.ui.core.BusyIndicator.show(0);
+        _onRouteMatched:async function () {
+            
+         await  this.Cust_read()
+            $.ajax({
+                url: "https://rest.kalpavrikshatechnologies.com/HM_Rooms",
+                method: "GET",
+                contentType: "application/json",
+                headers: {
+                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+                },
+                success: function (response) {
+                    var model = new JSONModel(response.commentData);
+                    this.getView().setModel(model, "RoomDetailsModel");
+                    sap.ui.core.BusyIndicator.hide();
+
+
+                }.bind(this),
+                error: function (err) {
+                    sap.m.MessageBox.error("Error uploading data or file.");
+                }
+            });
+            var model = new JSONModel({
+                BranchCode: "",
+                BedType: "",
+                Price: "",
+                Description: "",
+
+            });
+            this.getView().setModel(model, "RoomModel")
+        },
+        Cust_read:function(){
+                 sap.ui.core.BusyIndicator.show(0);
             $.ajax({
                 url: "https://rest.kalpavrikshatechnologies.com/HM_Customer",
                 method: "GET",
@@ -31,18 +62,15 @@ sap.ui.define([
                     sap.ui.core.BusyIndicator.hide();
                 }.bind(this),
             })
-            var model = new JSONModel({
-                BranchCode: "",
-                BedType: "",
-                Price: "",
-                Description: "",
-
-            });
-            this.getView().setModel(model, "RoomModel")
         },
-     HM_viewroom: function (oEvent) {
+    HM_viewroom: function (oEvent) {
     var oContext = oEvent.getSource().getBindingContext("HostelModel");
     var oData = oContext.getObject();
+
+    if (!oData.Documents || !oData.Documents.length) {
+        sap.m.MessageBox.error("No document found for this room!");
+        return;
+    }
 
     var sBase64 = oData.Documents[0].File;
 
@@ -51,8 +79,21 @@ sap.ui.define([
         return;
     }
 
+    sBase64 = sBase64.replace(/\s/g, "");
+
+    try {
+        if (!sBase64.startsWith("iVB") && !sBase64.startsWith("data:image")) {
+            var decoded = atob(sBase64);
+            if (decoded.startsWith("iVB")) {
+                sBase64 = decoded;
+            }
+        }
+    } catch (e) {
+        console.error("Base64 decode failed:", e);
+    }
+
     if (!sBase64.startsWith("data:image")) {
-        sBase64 = "data:image/png;base64," + sBase64;
+        sBase64 = "data:image/jpeg;base64," + sBase64;
     }
 
     var oImage = new sap.m.Image({
@@ -66,7 +107,7 @@ sap.ui.define([
         contentWidth: "400px",
         contentHeight: "500px",
         verticalScrolling: true,
-        content: oImage,
+        content: [oImage],
         endButton: new sap.m.Button({
             text: "Close",
             press: function () {
@@ -80,7 +121,7 @@ sap.ui.define([
 
     oDialog.open();
 },
-           HM_AssignRoom: function (oEvent) {
+        HM_AssignRoom: function (oEvent) {
             var table = this.byId("idPOTable");
             var selected = table.getSelectedItem();
             if (!selected) {
@@ -88,96 +129,117 @@ sap.ui.define([
                 return;
             }
             var Model = selected.getBindingContext("HostelModel");
-            var data = Model.getObject();
-
+            this.data = Model.getObject();
+           this.getView().getModel("RoomDetailsModel")
             if (!this.HM_Dialog) {
                 var oView = this.getView();
                 this.HM_Dialog = sap.ui.xmlfragment("sap.ui.com.project1.fragment.Assign_Room", this);
                 oView.addDependent(this.HM_Dialog);
 
-                sap.ui.getCore().byId("idCustomerNameText").setText(data.CustomerName);
+                sap.ui.getCore().byId("idCustomerNameText").setText(this.data.CustomerName);
                 this.HM_Dialog.open();
             } else {
-                sap.ui.getCore().byId("idCustomerNameText").setText(data.CustomerName);
+                sap.ui.getCore().byId("idCustomerNameText").setText(this.data.CustomerName);
                 this.HM_Dialog.open();
             }
         },
-     HM_RoomDetails: function (oEvent) {
-    var oView = this.getView();
+        HM_RoomDetails: function (oEvent) {
+            var oView = this.getView();
 
-    if (!this.ARD_Dialog) {
-        this.ARD_Dialog = sap.ui.xmlfragment(oView.getId(), "sap.ui.com.project1.fragment.Add_Room_Details", this);
-        oView.addDependent(this.ARD_Dialog);
-    }
-    oView.byId("idRoomNumber").setVisible(false);
-    this.ARD_Dialog.open();
-},
-
-    AR_onsavebuttonpress: function () {
-    var oView = this.getView();
-    var Payload = oView.getModel("RoomModel").getData();
-    Payload.Price=parseInt(Payload.Price);
-    var oFileUploader = sap.ui.getCore().byId("idFileUploader1");
-    var aFiles = oFileUploader.oFileUpload.files;
-
-    if (!aFiles.length) {
-        sap.m.MessageBox.error("Please select a file to upload.");
-        return;
-    }
-
-    var oFile = aFiles[0]; 
-    var reader = new FileReader();
-
-    reader.onload = function (e) {
-        var sBase64 = e.target.result.split(",")[1];
-        Payload.File = sBase64;
-        Payload.FileName = oFile.name;
-
-        // Perform AJAX call only after file is fully read
-        $.ajax({
-            url: "https://rest.kalpavrikshatechnologies.com/HM_Master_Data",
-            method: "POST",
-            contentType: "application/json",
-            headers: {
-                name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-            },
-            data: JSON.stringify({ data: Payload }),
-            success: function (response) {
-                sap.m.MessageToast.show("Data and file uploaded successfully!");
-                if (this.FCIA_Dialog) {
-                    this.FCIA_Dialog.close();
-                }
-                oFileUploader.setValue("");
-            }.bind(this),
-            error: function (err) {
-                sap.m.MessageBox.error("Error uploading data or file.");
+            if (!this.ARD_Dialog) {
+                this.ARD_Dialog = sap.ui.xmlfragment(oView.getId(), "sap.ui.com.project1.fragment.Add_Room_Details", this);
+                oView.addDependent(this.ARD_Dialog);
             }
-        });
-    }.bind(this);
+            oView.byId("idRoomNumber").setVisible(false);
+            oView.byId("idActype").setVisible(false);
 
-    reader.readAsDataURL(oFile);
-},
-ARNO_onsavebuttonpress:function(oEvent){
-     var oContext = oEvent.getSource().getBindingContext("HostelModel");
-    var oData = oContext.getObject();
-   $.ajax({
+            this.ARD_Dialog.open();
+        },
+
+        AR_onsavebuttonpress: function () {
+            var oView = this.getView();
+            var Payload = oView.getModel("RoomModel").getData();
+            Payload.Price = parseInt(Payload.Price);
+            var oFileUploader = this.byId("idFileUploader12");
+            var aFiles = oFileUploader.oFileUpload.files;
+
+            // if (!aFiles.length) {
+            //     sap.m.MessageBox.error("Please select a file to upload.");
+            //     return;
+            // }
+
+            var oFile = aFiles[0];
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                var sBase64 = e.target.result.split(",")[1];
+                Payload.File = sBase64;
+                Payload.FileName = oFile.name;
+                Payload.FileType = oFile.type;
+
+
+                // Perform AJAX call only after file is fully read
+                $.ajax({
+                    url: "https://rest.kalpavrikshatechnologies.com/HM_Master_Data",
+                    method: "POST",
+                    contentType: "application/json",
+                    headers: {
+                        name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                        password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+                    },
+                    data: JSON.stringify({ data: Payload }),
+                    success: function (response) {
+                        sap.m.MessageToast.show("Data and file uploaded successfully!");
+                        if (this.FCIA_Dialog) {
+                            this.FCIA_Dialog.close();
+                        }
+                        oFileUploader.setValue("");
+                              this.ARD_Dialog.close();
+                    }.bind(this),
+                    error: function (err) {
+                        sap.m.MessageBox.error("Error uploading data or file.");
+                    }
+                });
+            }.bind(this);
+
+            reader.readAsDataURL(oFile);
+        },
+        ARNO_onsavebuttonpress: function (oEvent) {
+            var payload = this.data
+            payload.RoomNumber = sap.ui.getCore().byId("idRoomNumber1").getSelectedKey();
+            payload.Status = "Booked";
+            delete payload.Documents
+            delete payload.Payments
+            delete payload.Bookings
+
+
+
+
+            var oBody = { data: payload };
+
+            oBody.filters = {
+                CustomerID: payload.CustomerID
+            };
+             
+            $.ajax({
                 url: "https://rest.kalpavrikshatechnologies.com/HM_Customer",
                 method: "PUT",
                 contentType: "application/json",
-                data: JSON.stringify(oData),
+                data: JSON.stringify(oBody),
                 headers: {
                     name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
                     password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
                 },
                 success: function (response) {
                     sap.m.MessageToast.show("Record updated successfully!");
-                },
+                    this.Cust_read()
+                         this.HM_Dialog.close();
+                }.bind(this),
                 error: function (xhr) {
                     sap.m.MessageToast.show("Error: " + xhr.statusText);
                 }
             });
-},
+        },
         AR_onCancelButtonPress: function () {
             this.ARD_Dialog.close();
         },
@@ -246,6 +308,11 @@ ARNO_onsavebuttonpress:function(oEvent){
         onHome: function () {
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("RouteHostel");
+        },
+        PO_onPressClear:function(){
+             this.getView().byId("PO_id_CustomerName").setSelectedKey("")
+             this.getView().byId("PO_id_CompanyName").setSelectedKey("")
+
         }
 
 
