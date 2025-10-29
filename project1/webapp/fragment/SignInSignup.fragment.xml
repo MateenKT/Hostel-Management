@@ -16,10 +16,17 @@
     
         <VBox>
             <!-- Switch Button -->
-            <HBox justifyContent="Center" class="sapUiTinyMarginBottom">
-                <Button text="Sign In" width="100px" type="Emphasized" press="onSwitchToSignIn"/>
-                <Button text="Sign Up" width="100px" type="Transparent" press="onSwitchToSignUp"/>
-            </HBox>
+          <HBox justifyContent="Center" class="switch-toggle-container">
+    <Button text="SIGN IN"
+            type="Transparent"
+            class="switch-toggle-btn {= ${LoginViewModel>/selectedAccountType} === 'personal' ? 'active' : 'inactive'}"
+            press="onSwitchToSignIn" />
+    <Button text="SIGN UP"
+            type="Transparent"
+            class="switch-toggle-btn {= ${LoginViewModel>/selectedAccountType} === 'biz' ? 'active' : 'inactive'}"
+            press="onSwitchToSignUp" />
+</HBox>
+
 
             <!-- Sign In Panel -->
             <Panel id="signInPanel" expandable="false">

@@ -105,6 +105,7 @@
  line-height: 1;
   color: white;
   font-size: 48px;
+  text-shadow:0 2px 5px rgba(0,0,0,0.1);
   font-weight: bold;
   font-family: Arial, Helvetica, sans-serif !important;
 }
@@ -359,3 +360,63 @@
     color: #333333 !important;
     font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
 }
+.switch-toggle-container {
+    background: #fff;
+    border-radius: 32px;
+    box-shadow: 0 4px 12px 0 rgba(60,70,90,0.08);
+    padding: 4px;
+    width: 420px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 auto 18px auto;
+}
+
+.switch-toggle-btn {
+    font-weight: bold;
+    font-size: 1.2rem;
+    border-radius: 32px !important;
+    transition: background 0.2s, color 0.2s;
+    box-shadow: none !important;
+    margin: 0 2px;
+    padding: 0.8rem 2.2rem;
+    min-width: 160px;
+    border: none;
+}
+
+.switch-toggle-btn.active {
+    background: linear-gradient(90deg,#2596ff 0,#1669e6 100%);
+    color: #fff !important;
+}
+
+.switch-toggle-btn.inactive {
+    background: transparent;
+    color: #333 !important;
+}
+
+.customSearchBar.sapMInput { 
+    /* background: #1bb2bf  !important;           
+    border-radius: 30px !important;            */
+    box-shadow: 0 2px 8px rgba(80,80,0,0.11); 
+   padding: 6px 16px 6px 18px !important;    
+     /* border: 2px solid #1bb2bf  !important;     */
+     margin-top: -200px !important;
+}
+
+.customSearchBar .sapMInputBaseInner {
+    border-radius: 3px !important;            /* Ensure inner input is round */
+    background: #f9f9f9 !important;            /* Light input background */
+    color: #333 !important;
+}
+
+.customSearchBar .sapMInputBaseIcon {
+    color: #fff !important;                    /* White icon inside circle */
+    background: #1bb2bf  !important;            /* Yellow icon background */
+    border-radius: 18px !important;            /* Circle icon */
+    padding: 5px !important;                   /* Add space around icon */
+    margin-right: 8px;
+}
+
+.customSearchBar input::-webkit-input-placeholder { color: #999; font-size: 1.1em;}
+.customSearchBar input:-ms-input-placeholder { color: #999; font-size: 1.1em;}
+.customSearchBar input::placeholder { color: #999; font-size: 1.1em;}

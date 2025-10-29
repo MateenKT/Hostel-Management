@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout">
-  <Dialog id="profileDialog" horizontalScrolling="false" verticalScrolling="false" contentWidth="760px" contentHeight="550px" class="profile-dialog-bg" xmlns:f="sap.ui.layout.form">
+  <Dialog id="profileDialog" horizontalScrolling="false" verticalScrolling="true" contentWidth="560px" contentHeight="550px" class="profile-dialog-bg" xmlns:f="sap.ui.layout.form" stretch="true">
   <customHeader>
     <Bar>
       <contentMiddle>
@@ -27,39 +27,61 @@
           </HBox>
         </VBox> 
       </HBox>
-      <!-- Completion alert -->
-      <HBox class="profile-completion-bar sapUiSmallMargin">
-        <ObjectStatus text="Complete your profile" state="Warning" />
-        <Button text="Add Email" type="Emphasized" class="sapUiTinyMarginBeginEnd"/>
-      </HBox>
-      <HBox height="100%">
-        <!-- Sidebar -->
-        <VBox width="200px" class="profile-sidebar">
-         <List mode="None" noDataText="" items="{profileMenuModel>/items}" showSeparators="None" itemPress="SectionPress">
-    <StandardListItem title="{profileMenuModel>title}" icon="{profileMenuModel>icon}" type="Active"/>
-</List>
+      <VBox>
+  <HBox height="100%">
+    <!-- Sidebar list (Keep as is) -->
+    <VBox width="200px" class="profile-sidebar">
+      <List mode="None" noDataText="" items="{profileMenuModel>/items}" showSeparators="None" itemPress=".SectionPress">
+        <StandardListItem title="{profileMenuModel>title}" icon="{profileMenuModel>icon}" type="Active"/>
+      </List>
+    </VBox>
+    <!-- Main Profile Content -->
+    <VBox class="sapUiContentPadding" width="100%" height="100%">
+      <!-- My Profile Section (visible if section is 'profile') -->
+      <VBox visible="{= ${profileSectionModel>/selectedSection} === 'profile' }">
+        <Title text="General Information" level="H3"/>
+        <f:SimpleForm editable="true" layout="ColumnLayout">
+          <!-- All Profile Input Fields -->
+          <Label text="First Name"/>
+          <Input value="{profileData>/name}"/>
+          <Label text="Last Name"/>
+          <Input value="{profileData>/lastName}"/>
+          <Label text="Gender"/>
+          <Select selectedKey="{profileData>/gender}">
+            <core:Item key="MALE" text="MALE"/>
+            <core:Item key="FEMALE" text="FEMALE"/>
+          </Select>
+          <Label text="Date of Birth"/>
+          <DatePicker value="{profileData>/dob}"/>
+          <Label text="Nationality"/>
+          <Input value="{profileData>/nationality}"/>
+        </f:SimpleForm>
+      </VBox>
+      <!-- Booking History Section (visible if section is 'devices') -->
+      <VBox visible="{= ${profileSectionModel>/selectedSection} === 'devices' }">
+        <Title text="Booking History" level="H3"/>
+        <Table items="{profileData>/bookings}">
+          <columns>
+            <Column><Text text="Date"/></Column>
+            <Column><Text text="Room"/></Column>
+            <Column><Text text="Amount"/></Column>
+          </columns>
+          <items>
+            <ColumnListItem>
+              <cells>
+                <Text text="{profileData>date}"/>
+                <Text text="{profileData>room}"/>
+                <Text text="{profileData>amount}"/>
+              </cells>
+            </ColumnListItem>
+          </items>
+        </Table>
+      </VBox>
+   
+    </VBox>
+  </HBox>
+</VBox>
 
-        </VBox>
-        <!-- Main Profile Content -->
-        <VBox class="sapUiContentPadding" width="100%" height="100%">
-          <Title text="General Information" level="H3"/>
-          <f:SimpleForm editable="true" layout="ColumnLayout">
-            <Label text="First Name"/>
-            <Input value="{profileData>/name}"/>
-            <Label text="Last Name"/>
-            <Input value="{profileData>/lastName}"/>
-            <Label text="Gender"/>
-            <Select selectedKey="{profileData>/gender}">
-              <core:Item key="MALE" text="MALE"/>
-              <core:Item key="FEMALE" text="FEMALE"/>
-            </Select>
-            <Label text="Date of Birth"/>
-            <DatePicker value="{profileData>/dob}"/>
-            <Label text="Nationality"/>
-            <Input value="{profileData>/nationality}"/>
-          </f:SimpleForm>
-        </VBox>
-      </HBox>
     </VBox>
   </Dialog>
 </core:FragmentDefinition>

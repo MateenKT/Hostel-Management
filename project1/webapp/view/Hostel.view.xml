@@ -13,12 +13,12 @@
 				<Image src="./image/LOGO.png" height="250px" width="250px" class="sapUiTinyMarginTop weblogo"  tooltip="Company Logo"/>
 				<!-- <Title level="H1" text="SHAH HOSTEL" class="custom-text"/> -->
 				<ToolbarSpacer/>
-				<Button  text="SIGN IN / SIGN UP"  id="loginButton" class="loginButton" tooltip="{i18n>tooltipLogin}" press="onpressLogin">
+				<Button  text="SIGN IN / SIGN UP"  id="loginButton" class=" sapUiSmallMarginTop loginButton" tooltip="{i18n>tooltipLogin}" press="onpressLogin">
 					<layoutData>
 						<OverflowToolbarLayoutData priority="NeverOverflow"/>
 					</layoutData>
 				</Button>
-                <Avatar src="./image/LOGO.png" visible="true" id="ProfileAvatar" displaySize="XS" tooltip="Profile pic" press="onPressAvatar"/>
+                <Avatar  visible="true" id="ProfileAvatar" initials="{profileData>/initials}"  displaySize="XS" tooltip="Profile pic" press="onPressAvatar"/>
 			</tnt:ToolHeader>
 		</tnt:header>
 		<tnt:subHeader>
@@ -44,10 +44,10 @@
 						<l:Grid defaultSpan="XL12 L12 M12 S12" width="100%" class="position-welcome" >
 							<VBox class="sapUiLargeMarginTop">
 								<Text class="custom-welcome sapUiTinyMarginTopBottom" textAlign="Center" text="WelCome To "/>
-								<Text class="custom-welcome sapUiMediumMarginBegin sapUiTinyMarginTopBottom " text="Shah Hostel"/>
-								<Text text="Your New Home Away to me" class="custom-tagline sapUiTinyMarginTop sapUiLargeMarginBegin"/>
+								<Text class="custom-welcome  sapUiTinyMarginTopBottom " text="Shah Hostel"/>
+								<Text text="Your New Home Away to me" class="custom-tagline sapUiTinyMarginTop "/>
 							</VBox>
-                           
+						
 						</l:Grid>
                          <Button text="Book Room" class="RoomBook sapUiLargeMarginBegin " press="onpressBookrooms" />
 					</ScrollContainer>
@@ -57,9 +57,21 @@
 						<l:Grid defaultSpan="XL12 L12 M12 S12" width="100%" class="position-welcome">
 							<VBox class="sapUiLargeMarginTop">
 								<Text class="Welcomeroomtext sapUiTinyMarginTopBottom" textAlign="Center" text="Book Your Room "/>
-								<Text class="Welcomeroomtext sapUiMediumMarginBegin sapUiTinyMarginTopBottom " text="Shah Hostel"/>
-								<Text text="Your New Home Away to me" class="Welcomeroomtext sapUiTinyMarginTop sapUiLargeMarginBegin"/>
+								<Text class="Welcomeroomtext  sapUiTinyMarginTopBottom " text="Shah Hostel"/>
+								<Text text="Your New Home Away to me" class="Welcomeroomtext sapUiTinyMarginTop "/>
 							</VBox>
+								<!-- <HBox width="100%" justifyContent="End" alignItems="Center">
+    <Input 
+        width="350px"
+        placeholder="Search location..." 
+        valueLiveUpdate="true"
+        change="onSearchChange"
+        class="customSearchBar"
+        showValueHelp="true"
+        valueHelpIconSrc="sap-icon://search"
+        />
+</HBox> -->
+
 						</l:Grid>
 					</ScrollContainer>
                     <l:Grid defaultSpan="XL4 L4 M6 S12" width="100%"  hSpacing="2" vSpacing="2" class="HostelGrid">
@@ -71,7 +83,6 @@
         <Text class="hr-text" text="Single Bed Room"/>
         <Text class="description-text" text="{VisibilityModel>/singleDesc}"/>
         <Text class="description-text" text="The price will be {VisibilityModel>/singlePrice}"/>
-        <!-- <Text class="description-text" text="{VisibilityModel>/}"/> -->
         <HBox justifyContent="Center">
             <Button text="Book Now" press="onSingleRoomPress" width="200px" >  
 			 <customData>
@@ -87,7 +98,7 @@
             <Image src="./image/DoubleBed.png" width="380px" height="320px" class="section-image" />
         </HBox>
         <Text class="hr-text" text="Double Bed Room"/>
-        <Text class="description-text" text="wqwqwqwqwq d"/>
+        <Text class="description-text" text=""/>
 		   <Text class="description-text" text="The price will be {VisibilityModel>/doublePrice}"/>
         <HBox justifyContent="Center" >
             <Button text="Book Now" press="onDoubleRoomPress" width="200px">
@@ -105,7 +116,7 @@
             <Image src="./image/4Bed.png"  class="section-image" />
         </HBox>
         <Text class="hr-text" text="Four Bed Room"/>
-        <Text class="description-text " text="wqwqwqwqwq da d"/>
+        <Text class="description-text " text=""/>
 		 <Text class="description-text" text="The price will be {VisibilityModel>/fourPrice}"/>
         <HBox justifyContent="Center">
             <Button text="Book Now" press="onFourRoomPress" width="200px">
@@ -116,6 +127,10 @@
         </HBox>
     </VBox>
 </l:Grid>
+
+    
+	
+
                     </Page>
 					<Page id="idFacilities" showHeader="false" class="Products_list sapUiTinyMargin">
 						<core:Fragment fragmentName="sap.ui.com.project1.fragment.HomePage" type="XML"/>
