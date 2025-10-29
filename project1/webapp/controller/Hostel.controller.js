@@ -44,6 +44,14 @@ sap.ui.define([
                 selectedSection: "profile"  // default section shown on dialog open
             });
             this.getView().setModel(oProfileSectionModel, "profileSectionModel");
+            const aBranches = [
+                { BranchCode: "KLB01", BranchName: "Kalaburgi" },
+                { BranchCode: "BR002", BranchName: "Mumbai" },
+                { BranchCode: "BR003", BranchName: "Nagpur" },
+                { BranchCode: "BR004", BranchName: "Nashik" }
+            ];
+            const oBranchModel = new JSONModel({ Branches: aBranches });
+            this.getView().setModel(oBranchModel, "BranchModel");
    
             // this._loadFilteredData("KLB01");
             this.onpressLogin()
@@ -570,7 +578,6 @@ onSearchRooms: function () {
                 MessageBox.alert("Please Signin to book a room.");
                 return;
             }
-
 
             var price = this.getView().getModel("VisibilityModel").getData();
 
