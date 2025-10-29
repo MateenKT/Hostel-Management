@@ -58,6 +58,8 @@ sap.ui.define([
 
             oView.byId("idFileUploader12").setVisible(false);
             oView.byId("idDescription").setVisible(false);
+            oView.byId("idCity").setVisible(false);
+
 
             // Open the dialog
             this.AR_Dialog.open();

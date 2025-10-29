@@ -294,7 +294,7 @@ sap.ui.define([
             }
 
             if (sCustomerID) {
-                aFilters.push(new sap.ui.model.Filter("companyCode", sap.ui.model.FilterOperator.Contains, sCustomerID));
+                aFilters.push(new sap.ui.model.Filter("RoomNumber", sap.ui.model.FilterOperator.Contains, sCustomerID));
             }
 
             var oCombinedFilter = new sap.ui.model.Filter({
