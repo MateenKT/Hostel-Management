@@ -73,7 +73,7 @@ sap.ui.define([
                 isRadioVisible: false,
             });
             this.getOwnerComponent().setModel(omodel, "LoginModel");
-
+      this._loadFilteredData("KLB01")
         },
         onUserlivechange: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
@@ -83,20 +83,13 @@ sap.ui.define([
         _loadFilteredData: async function (sBranchCode) {
             try {
                 const oView = this.getView();
-                const sUrl = "https://rest.kalpavrikshatechnologies.com/HM_Master_Data";
-                const sFilteredUrl = `${sUrl}?BranchCode=${encodeURIComponent(sBranchCode)}`;
 
-                const response = await $.ajax({
-                    url: sFilteredUrl,
-                    type: "GET",
-                    contentType: "application/json",
-                    headers: {
-                        name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                        password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-                    }
+                // Call your reusable AJAX helper
+                const response = await this.ajaxReadWithJQuery("HM_BedType", {
+                    BranchCode: sBranchCode
                 });
 
-                const allRooms = response?.HM_Master_Data || [];
+                const allRooms = response?.HM_BedType || [];
 
                 // Filter rooms with matching BranchCode (case-insensitive)
                 const matchedRooms = allRooms.filter(room =>
@@ -104,38 +97,30 @@ sap.ui.define([
                 );
 
                 // Find room types only in matchedRooms
-                const singleRoom = matchedRooms.find(room => room.BedType === "Single");
+                const singleRoom = matchedRooms.find(room => room.BedType === "Single Bed");
                 const doubleRoom = matchedRooms.find(room => room.BedType === "Double");
                 const fourRoom = matchedRooms.find(room => room.BedType === "Four");
 
                 // Base64 image conversion function
                 const convertBase64ToImage = (base64String, fileType) => {
-                    // Remove whitespace from base64
-                    let sBase64 = base64String.replace(/\s/g, "");
+                    if (!base64String) return "./image/Fallback.png";
 
-                    // Attempt to decode if not in expected format
+                    let sBase64 = base64String.replace(/\s/g, "");
                     try {
                         if (!sBase64.startsWith("iVB") && !sBase64.startsWith("data:image")) {
                             const decoded = atob(sBase64);
-
-                            if (decoded.startsWith("iVB")) {
-                                sBase64 = decoded;
-                            }
+                            if (decoded.startsWith("iVB")) sBase64 = decoded;
                         }
                     } catch (e) {
-                        // Safely ignore decode error, fallback to original base64
                         console.warn("Base64 decode error:", e);
                     }
 
-                    // Use correct image type (default to jpeg if not provided)
                     const mimeType = fileType || "image/jpeg";
-                    if (!sBase64) return "./image/Fallback.png";
                     if (sBase64.startsWith("data:image")) return sBase64;
                     return `data:${mimeType};base64,${sBase64}`;
                 };
 
-
-                // Prepare model data for visibility and images (using the fileType/MimeType property!)
+                // Prepare model data for visibility and images
                 const oVisibilityData = {
                     singleVisible: !!singleRoom,
                     doubleVisible: !!doubleRoom,
@@ -147,31 +132,25 @@ sap.ui.define([
                     doublePrice: doubleRoom?.Price || "",
                     fourPrice: fourRoom?.Price || "",
                     singleImg: singleRoom?.File
-                        ? convertBase64ToImage(singleRoom.File, singleRoom.MimeType || singleRoom.FileType || "image/jpeg")
+                        ? convertBase64ToImage(singleRoom.File, singleRoom.MimeType || singleRoom.FileType)
                         : "./image/SingleBed.png",
                     doubleImg: doubleRoom?.File
-                        ? convertBase64ToImage(doubleRoom.File, doubleRoom.MimeType || doubleRoom.FileType || "image/jpeg")
+                        ? convertBase64ToImage(doubleRoom.File, doubleRoom.MimeType || doubleRoom.FileType)
                         : "./image/DoubleBed.png",
                     fourImg: fourRoom?.File
-                        ? convertBase64ToImage(fourRoom.File, fourRoom.MimeType || fourRoom.FileType || "image/jpeg")
+                        ? convertBase64ToImage(fourRoom.File, fourRoom.MimeType || fourRoom.FileType)
                         : "./image/4Bed.png"
                 };
 
                 // Bind view models
-                const oVisibilityModel = new JSONModel(oVisibilityData);
-                oView.setModel(oVisibilityModel, "VisibilityModel");
-
-                // Only matchedRooms are set in the RoomModel
-                const oRoomsModel = new JSONModel({ Rooms: matchedRooms });
-                oView.setModel(oRoomsModel, "RoomModel");
+                oView.setModel(new sap.ui.model.json.JSONModel(oVisibilityData), "VisibilityModel");
+                oView.setModel(new sap.ui.model.json.JSONModel({ Rooms: matchedRooms }), "RoomModel");
 
             } catch (error) {
                 console.error("Data Load Failed:", error);
                 sap.m.MessageToast.show("Error fetching room data.");
             }
         },
-
-
 
         onTabSelect: function (oEvent) {
             var oItem = oEvent.getParameter("item");
@@ -182,66 +161,65 @@ sap.ui.define([
             if (page && page.scrollTo) page.scrollTo(0, 0);
 
             // --- Open popup only when "Rooms" tab is selected ---
-            if (sKey === "idRooms") {
-                var that = this;
+            // if (sKey === "idRooms") {
+            //     var that = this;
 
-                // Initialize BranchModel if not yet done
-                if (!this.getView().getModel("BranchModel")) {
-                    const aBranches = [
-                        { BranchCode: "KLB01", BranchName: "Kalaburgi" },
-                        { BranchCode: "BR002", BranchName: "Mumbai" },
-                        { BranchCode: "BR003", BranchName: "Nagpur" },
-                        { BranchCode: "BR004", BranchName: "Nashik" }
-                    ];
-                    const oBranchModel = new sap.ui.model.json.JSONModel({ Branches: aBranches });
-                    this.getView().setModel(oBranchModel, "BranchModel");
-                }
+            //     // Initialize BranchModel if not yet done
+            //     if (!this.getView().getModel("BranchModel")) {
+            //         const aBranches = [
+            //             { BranchCode: "KLB01", BranchName: "Kalaburgi" },
+            //             { BranchCode: "BR002", BranchName: "Mumbai" },
+            //             { BranchCode: "BR003", BranchName: "Nagpur" },
+            //             { BranchCode: "BR004", BranchName: "Nashik" }
+            //         ];
+            //         const oBranchModel = new sap.ui.model.json.JSONModel({ Branches: aBranches });
+            //         this.getView().setModel(oBranchModel, "BranchModel");
+            //     }
 
-                // Create popup dynamically (only once)
-                if (!this._oLocationDialog) {
-                    this._oLocationDialog = new sap.m.Dialog({
-                        title: "Search Rooms by Location",
-                        type: "Message",
-                        contentWidth: "400px",
-                        draggable: true,
-                        resizable: true,
-                        content: [
-                            new sap.m.VBox({
-                                width: "100%",
-                                items: [
-                                    new sap.m.Label({ text: "Select Location", labelFor: "idBranchCombo" }),
-                                    new sap.m.ComboBox("idBranchCombo", {
-                                        width: "100%",
-                                        placeholder: "Select City...",
-                                        items: {
-                                            path: "BranchModel>/Branches",
-                                            template: new sap.ui.core.Item({
-                                                key: "{BranchModel>BranchCode}",
-                                                text: "{BranchModel>BranchName}"
-                                            })
-                                        }
-                                    }),
-                                    new sap.m.Button({
-                                        text: "Search",
-                                        type: "Emphasized",
-                                        icon: "sap-icon://search",
-                                        press: function () {
-                                            that.onSearchRooms();
-                                        }
-                                    })
-                                ]
-                            })
-                        ]
-                    });
+            //     // Create popup dynamically (only once)
+            //     if (!this._oLocationDialog) {
+            //         this._oLocationDialog = new sap.m.Dialog({
+            //             title: "Search Rooms by Location",
+            //             type: "Message",
+            //             contentWidth: "400px",
+            //             draggable: true,
+            //             resizable: true,
+            //             content: [
+            //                 new sap.m.VBox({
+            //                     width: "100%",
+            //                     items: [
+            //                         new sap.m.Label({ text: "Select Location", labelFor: "idBranchCombo" }),
+            //                         new sap.m.ComboBox("idBranchCombo", {
+            //                             width: "100%",
+            //                             placeholder: "Select City...",
+            //                             items: {
+            //                                 path: "BranchModel>/Branches",
+            //                                 template: new sap.ui.core.Item({
+            //                                     key: "{BranchModel>BranchCode}",
+            //                                     text: "{BranchModel>BranchName}"
+            //                                 })
+            //                             }
+            //                         }),
+            //                         new sap.m.Button({
+            //                             text: "Search",
+            //                             type: "Emphasized",
+            //                             icon: "sap-icon://search",
+            //                             press: function () {
+            //                                 that.onSearchRooms();
+            //                             }
+            //                         })
+            //                     ]
+            //                 })
+            //             ]
+            //         });
 
-                    this.getView().addDependent(this._oLocationDialog);
-                }
+            //         this.getView().addDependent(this._oLocationDialog);
+            //     }
 
-                // Open popup every time the tab is selected
-                this._oLocationDialog.open();
-            }
+            //     // Open popup every time the tab is selected
+            //     this._oLocationDialog.open();
+            // }
         },
-
 
         onpressBookrooms: function () {
             var oTabHeader = this.byId("mainTabHeader");
@@ -458,7 +436,7 @@ sap.ui.define([
 
             try {
                 //  Fetch all registered users (no payload — server ignores it anyway)
-                const oResponse = await this.ajaxReadWithJQuery("HM_Login","");
+                const oResponse = await this.ajaxReadWithJQuery("HM_Login", "");
 
                 const aUsers = oResponse?.commentData || [];
 
@@ -602,23 +580,41 @@ sap.ui.define([
             }
         },
         onSingleRoomPress: async function (oEvent) {
-            if (this._oLoggedInUser === undefined) {
-                MessageBox.alert("Please Signin to book a room.");
+            if (!this._oLoggedInUser) {
+                sap.m.MessageBox.show(
+                    "Please sign in to book a room.",
+                    {
+                        icon: sap.m.MessageBox.Icon.WARNING,
+                        title: "Authentication Required",
+                        actions: ["Continue", "OK"],
+                        emphasizedAction: "Continue",
+                        onClose: async (sAction) => {
+                            if (sAction === "OK") {
+                             
+                                await this.onpressLogin();
+                            }else{
+                                await this.Bookfragment();
+                            }
+                        }
+                    }
+                );
                 return;
             }
 
-            var price = this.getView().getModel("VisibilityModel").getData();
-
+            // If logged in, continue with room booking logic
             const oButton = oEvent.getSource();
             const sRoomType = oButton.data("roomType");
+            const oVisibilityData = this.getView().getModel("VisibilityModel").getData();
+
             await this.Bookfragment();
+
             sap.ui.getCore().byId("idRoomType").setValue(sRoomType);
-            sap.ui.getCore().byId("idPrice1").setValue(price.singlePrice);
+            sap.ui.getCore().byId("idPrice1").setValue(oVisibilityData.singlePrice);
             sap.ui.getCore().byId("idFullName").setValue(this._oLoggedInUser.UserName);
             sap.ui.getCore().byId("idE-mail").setValue(this._oLoggedInUser.EmailID);
             sap.ui.getCore().byId("idMobile").setValue(this._oLoggedInUser.MobileNo);
-            // this.getView().getModel("HostelModel").setData(this._oLoggedInUser);
         },
+
         onCancelDialog: function () {
             this.FCIA_Dialog.close();
         },

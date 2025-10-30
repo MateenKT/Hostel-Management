@@ -109,6 +109,22 @@
 
         </HBox>
     </VBox>
+	<VBox visible="{VisibilityModel>/doubleVisible}" class="HostelCard" backgroundDesign="Solid">
+        <HBox justifyContent="Center" class="section-image">
+            <Image src="./image/DoubleBed.png" width="380px" height="320px" class="section-image" />
+        </HBox>
+        <Text class="hr-text" text="Triple Bed Room"/>
+        <Text class="description-text" text="{VisibilityModel>/doubleDesc}"/>
+		   <Text class="description-text" text="The price will be {VisibilityModel>/doublePrice}"/>
+        <HBox justifyContent="Center" >
+            <Button text="Book Now" press="onDoubleRoomPress" width="200px">
+				 <customData>
+        <core:CustomData key="roomType" value="Triple Bed" />
+             </customData>
+</Button>
+
+        </HBox>
+    </VBox>
 
     <!-- Four Bed -->
     <VBox visible="{VisibilityModel>/fourVisible}" class="HostelCard" backgroundDesign="Translucent">
