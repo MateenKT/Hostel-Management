@@ -98,7 +98,7 @@
             <Image src="./image/DoubleBed.png" width="380px" height="320px" class="section-image" />
         </HBox>
         <Text class="hr-text" text="Double Bed Room"/>
-        <Text class="description-text" text=""/>
+        <Text class="description-text" text="{VisibilityModel>/doubleDesc}"/>
 		   <Text class="description-text" text="The price will be {VisibilityModel>/doublePrice}"/>
         <HBox justifyContent="Center" >
             <Button text="Book Now" press="onDoubleRoomPress" width="200px">

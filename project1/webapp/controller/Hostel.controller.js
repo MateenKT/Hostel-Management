@@ -1,13 +1,13 @@
 sap.ui.define([
-    "sap/ui/core/mvc/Controller",
+        "./BaseController",
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast",
     "sap/m/MessageBox",
      "../utils/validation"
-], function (Controller, JSONModel, MessageToast, MessageBox,utils) {
+], function (BaseController, JSONModel, MessageToast, MessageBox,utils) {
     "use strict";
 
-    return Controller.extend("sap.ui.com.project1.controller.Hostel", {
+    return BaseController.extend("sap.ui.com.project1.controller.Hostel", {
 
         onInit: function () {
 
@@ -686,24 +686,38 @@ sap.ui.define([
         //     })
         // },
         onSaveDialog: function () {
-            var logindata = this._oLoggedInUser
-            var payload = this.getView().getModel("HostelModel").getData();
-            payload.StartDate = payload.StartDate.split("/").reverse().join("-");
-            payload.Status = "New";
-            payload.RoomType = this.getView().getModel("HostelModel").getProperty("/RoomType");
-            payload.LoginID = logindata.ID
+            var Data = this.getView().getModel("HostelModel").getData();
+        
 
-            if (payload.DateOfBirth) {
-                payload.DateOfBirth = payload.DateOfBirth.split("/").reverse().join("-");
+            var payload={
+                CustomerName: Data.CustomerName,
+                MobileNo: Data.MobileNo,
+                Gender: Data.Gender,
+                DateOfBirth: Data.DateOfBirth.split("/").reverse().join("-"),
+                CustomerEmail: Data.CustomerEmail,
+                Country: Data.Country,
+                State: Data.State,
+                City: Data.City,
+                PermanentAddress: Data.Address,
+                Booking:{
+                    PaymentType: Data.PaymentType,
+                    StartDate: Data.StartDate.split("/").reverse().join("-"),
+                    EndDate: Data.EndDate.split("/").reverse().join("-"),
+                    RentPrice: Data.Price,
+                    Status: "New",
+                }
+            
+
             }
+
 
             var oFileUploader = sap.ui.getCore().byId("idFileUploader");
             var aFiles = oFileUploader.oFileUpload.files;
 
-            if (!aFiles.length) {
-                sap.m.MessageBox.error("Please select a file to upload.");
-                return;
-            }
+            // if (!aFiles.length) {
+            //     sap.m.MessageBox.error("Please select a file to upload.");
+            //     return;
+            // }
 
             var oFile = aFiles[0]; // single file
             var reader = new FileReader();
@@ -745,21 +759,24 @@ sap.ui.define([
             reader.readAsDataURL(oFile);
         },
         onDoubleRoomPress: function (oEvent) {
-            if (this._oLoggedInUser === undefined) {
-                MessageBox.alert("Please signin to book a room.");
-                return;
-            }
 
-            this.Bookfragment();
-            const oButton = oEvent.getSource();
-            var price = this.getView().getModel("VisibilityModel").getData();
+                 var oRouter = this.getOwnerComponent().getRouter();
+                 oRouter.navTo("TilePage");
+            // if (this._oLoggedInUser === undefined) {
+            //     MessageBox.alert("Please signin to book a room.");
+            //     return;
+            // }
 
-            this.sRoomType = oButton.data("roomType");
-            sap.ui.getCore().byId("idRoomType").setValue(this.sRoomType);
-            sap.ui.getCore().byId("idPrice1").setValue(price.doublePrice);
-            sap.ui.getCore().byId("idFullName").setValue(this._oLoggedInUser.UserName);
-            sap.ui.getCore().byId("idE-mail").setValue(this._oLoggedInUser.EmailID);
-            sap.ui.getCore().byId("idMobile").setValue(this._oLoggedInUser.MobileNo);
+            // this.Bookfragment();
+            // const oButton = oEvent.getSource();
+            // var price = this.getView().getModel("VisibilityModel").getData();
+
+            // this.sRoomType = oButton.data("roomType");
+            // sap.ui.getCore().byId("idRoomType").setValue(this.sRoomType);
+            // sap.ui.getCore().byId("idPrice1").setValue(price.doublePrice);
+            // sap.ui.getCore().byId("idFullName").setValue(this._oLoggedInUser.UserName);
+            // sap.ui.getCore().byId("idE-mail").setValue(this._oLoggedInUser.EmailID);
+            // sap.ui.getCore().byId("idMobile").setValue(this._oLoggedInUser.MobileNo);
 
         },
         // onpressBookrooms: function (oEvent) {

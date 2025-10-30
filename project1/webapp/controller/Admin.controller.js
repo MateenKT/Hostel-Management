@@ -1,42 +1,45 @@
 sap.ui.define([
-    "sap/ui/core/mvc/Controller",
+    "./BaseController",
     "../model/formatter",
-    "sap/ui/model/json/JSONModel",
-
+    "sap/ui/model/json/JSONModel"
 ], function (
-    Controller,
+    BaseController,
     Formatter,
     JSONModel
 ) {
     "use strict";
 
-    return Controller.extend("sap.ui.com.project1.controller.Admin", {
+    return BaseController.extend("sap.ui.com.project1.controller.Admin", {
         Formatter: Formatter,
+
         onInit: function () {
             this.getOwnerComponent().getRouter().getRoute("RouteAdmin").attachMatched(this._onRouteMatched, this);
         },
         _onRouteMatched:async function () {
             
-         await  this.Cust_read()
-            $.ajax({
-                url: "https://rest.kalpavrikshatechnologies.com/HM_Rooms",
-                method: "GET",
-                contentType: "application/json",
-                headers: {
-                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-                },
-                success: function (response) {
-                    var model = new JSONModel(response.commentData);
-                    this.getView().setModel(model, "RoomDetailsModel");
-                    sap.ui.core.BusyIndicator.hide();
+        //  await  this.Cust_read()
+            // $.ajax({
+            //     url: "https://rest.kalpavrikshatechnologies.com/HM_Rooms",
+            //     method: "GET",
+            //     contentType: "application/json",
+            //     headers: {
+            //         name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+            //         password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+            //     },
+            //     success: function (response) {
+            //         var model = new JSONModel(response.commentData);
+            //         this.getView().setModel(model, "RoomDetailsModel");
+            //         sap.ui.core.BusyIndicator.hide();
 
 
-                }.bind(this),
-                error: function (err) {
-                    sap.m.MessageBox.error("Error uploading data or file.");
-                }
-            });
+            //     }.bind(this),
+            //     error: function (err) {
+            //         sap.m.MessageBox.error("Error uploading data or file.");
+            //     }
+            // });
+               this.ajaxReadWithJQuery("HM_Rooms","").then((oData) => {
+                    var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
+               })
             var model = new JSONModel({
                 BranchCode: "",
                 BedType: "",
@@ -147,20 +150,19 @@ sap.ui.define([
             var oView = this.getView();
 
             if (!this.ARD_Dialog) {
-                this.ARD_Dialog = sap.ui.xmlfragment(oView.getId(), "sap.ui.com.project1.fragment.Add_Room_Details", this);
+                this.ARD_Dialog = sap.ui.xmlfragment(oView.getId(), "sap.ui.com.project1.fragment.Bed_Type", this);
                 oView.addDependent(this.ARD_Dialog);
             }
-            oView.byId("idRoomNumber").setVisible(false);
-            oView.byId("idActype").setVisible(false);
+            // oView.byId("idRoomNumber").setVisible(false);
+            // oView.byId("idActype").setVisible(false);
 
             this.ARD_Dialog.open();
         },
 
         AR_onsavebuttonpress: function () {
             var oView = this.getView();
-            var Payload = oView.getModel("RoomModel").getData();
-            Payload.Price = parseInt(Payload.Price);
-            var oFileUploader = this.byId("idFileUploader12");
+            var Payload = oView.getModel("BedModel").getData();
+            var oFileUploader = this.byId("idFileUploader");
             var aFiles = oFileUploader.oFileUpload.files;
 
             // if (!aFiles.length) {
@@ -180,7 +182,7 @@ sap.ui.define([
 
                 // Perform AJAX call only after file is fully read
                 $.ajax({
-                    url: "https://rest.kalpavrikshatechnologies.com/HM_Master_Data",
+                    url: "https://rest.kalpavrikshatechnologies.com/HM_BedType",
                     method: "POST",
                     contentType: "application/json",
                     headers: {

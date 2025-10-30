@@ -6,7 +6,7 @@
 >
     <Dialog
         id="idHostelWizardDialog"
-        title="Hostel Registration Form"
+        title="Hostel Booking Form"
         type="Message"
         stretchOnPhone="true"
         class="sapUiContentPadding"
@@ -101,6 +101,7 @@
                                 placeholder="Enter email id"
                                 maxLength="60"
                             />
+                          
                             <Label
                                 text="Country"
                                 required="true"
@@ -167,6 +168,16 @@
                                     text="Other"
                                 />
                             </ComboBox>
+                              <Label
+                                text="Address"
+                                required="true"
+                            />
+                            <TextArea
+                                id="Address"
+                                value="{HostelModel>/Address}"
+                                placeholder="Enter address"
+                                maxLength="60"
+                            />
                         </f:content>
                     </f:SimpleForm>
                 </WizardStep>
@@ -218,9 +229,31 @@
                             />
                             <Input
                                 id="idPrice1"
-                                value=""
+                                value="{HostelModel>/Price}"
                                 editable="false"
                             />
+                            <Label
+                                text="Payment Method"
+                                required="true"
+                            />
+                            <ComboBox
+                                id="idPaymentMethod"
+                                placeholder="Select Payment Method"
+                                selectedKey="{HostelModel>/PaymentType}"
+                            >
+                                <core:ListItem
+                                    key="Yearly"
+                                    text="Yearly"
+                                />
+                                <core:ListItem
+                                    key="Monthly"
+                                    text="Monthly"
+                                />
+                                <core:ListItem
+                                    key="Daily"
+                                    text="Daily"
+                                />
+                            </ComboBox>
                             <Label
                                 text="Food Type"
                                 required="true"
@@ -242,6 +275,17 @@
                             <DatePicker
                                 id="idStartDate"
                                 value="{HostelModel>/StartDate}"
+                                valueFormat="dd/MM/yyyy"
+                                displayFormat="dd/MM/yyyy"
+                                change=".onDateChange"
+                            />
+                            <Label
+                                text="End Date"
+                                required="true"
+                            />
+                            <DatePicker
+                                id="idEndDate"
+                                value="{HostelModel>/EndDate}"
                                 valueFormat="dd/MM/yyyy"
                                 displayFormat="dd/MM/yyyy"
                                 change=".onDateChange"
@@ -271,7 +315,6 @@
 
                         <Label
                             text="Upload File"
-                            required="true"
                         />
                         <u:FileUploader
                             id="idFileUploader"

@@ -67,28 +67,17 @@
                         text="Hyderabad"
                     />
                 </ComboBox>
-                <Label
+              
+                  <Label
                     text="Room No"
                     required="true"
                 />
-                <ComboBox
+                <Input
                     id="idRoomNumber"
-                    placeholder="Select Room Number"
-                    selectedKey="{RoomModel>/RoomNo}"
-                >
-                    <core:ListItem
-                        key="A1"
-                        text="A1"
-                    />
-                    <core:ListItem
-                        key="A2"
-                        text="A2"
-                    />
-                    <core:ListItem
-                        key="A3"
-                        text="A3"
-                    />
-                </ComboBox>
+                    value="{RoomModel>/RoomNo}"
+                    placeholder="Enter Price"
+                    maxLength="60"
+                />
                 <Label
                     text="Bed Type"
                     required="true"
