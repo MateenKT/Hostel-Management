@@ -1,6 +1,7 @@
 <core:FragmentDefinition
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
+      xmlns:f="sap.ui.layout.form"
     xmlns:l="sap.ui.layout">
     <Dialog id="authDialog"  draggable="true" resizable="true" class="authDialog">
     <customHeader>
@@ -27,7 +28,6 @@
             press="onSwitchToSignUp" />
 </HBox>
 
-
             <!-- Sign In Panel -->
             <Panel id="signInPanel" expandable="false">
                 <VBox>
@@ -47,20 +47,97 @@
             </Panel>
 
             <!-- Sign Up Panel -->
-            <Panel id="signUpPanel" expandable="false" visible="false">
-                <VBox>
-                    <Input id="signUpName" placeholder="Full Name" value="{LoginMode>fullname}" width="100%" required="true" />
-                    <Input id="signUpEmail" placeholder="Email" value="{LoginMode>Email}" type="Email" width="100%" required="true" />
-                    <Input id="signUpPhone" placeholder="Mobile Number" value="{LoginMode>Mobileno}" type="Tel" width="100%" required="true" />
-                    <Input id="signUpPassword" value="{LoginMode>password}" placeholder="Create Password" type="Password" width="100%" required="true" />
-                    <Input id="signUpConfirmPassword" value="{LoginMode>comfirmpass}" placeholder="Confirm Password" type="Password" width="100%" required="true" />
-                   
-                </VBox>
-                <HBox justifyContent="End" alignItems="Center">
-                 <Button text="Sign Up" type="Emphasized" width="100px" class="sapUiTinyMarginTop" press="onSignUp"/>
-                </HBox>
-                
-            </Panel>
+          <Panel id="signUpPanel" headerText="Sign Up" expandable="false" visible="false">
+    <content>
+        <f:SimpleForm
+            id="signUpForm"
+            editable="true"
+            layout="ResponsiveGridLayout"
+            labelSpanL="3"
+            labelSpanM="3"
+            emptySpanL="1"
+            emptySpanM="1"
+            columnsL="2"
+            columnsM="1"
+            class="sapUiNoContentPadding sapUiSmallMarginTop">
+
+            <!-- Row 1: Salutation + Full Name -->
+            <Label text="Salutation" required="true" />
+            <Label text="Full Name" required="true" />
+
+            <ComboBox id="signUpSalutation"
+                      placeholder="Select"
+                      selectedKey="{LoginMode>salutation}"
+                      width="100%"
+                      required="true">
+                <core:Item key="Mr." text="Mr." />
+                <core:Item key="Ms." text="Ms." />
+                <core:Item key="Mrs." text="Mrs." />
+                <core:Item key="Dr." text="Dr." />
+            </ComboBox>
+
+            <Input id="signUpName"
+                 valueState="{LoginViewModel>/userIdValueState}"
+                   placeholder="Full Name" 
+                   required="true"  liveChange="onUserlivechange" valueStateText="Enter Name" />
+
+            <!-- Row 2: Email (full width) -->
+            <Label text="Email" required="true" />
+            <Input id="signUpEmail"
+                   value="{LoginMode>Email}"
+                   placeholder="Email"
+                   type="Email"
+                   required="true"  liveChange="onEmailliveChange"/>
+
+            <!-- Row 3: STD Code + Mobile Number -->
+            <Label text="STD Code" required="true" />
+            <Label text="Mobile Number" required="true" />
+
+            <ComboBox id="signUpSTDCode"
+                      selectedKey="{LoginMode>STDCode}"
+                      placeholder="Select"
+                      width="100%"
+                      required="true">
+                <core:Item key="+91" text="+91 (India)" />
+                <core:Item key="+1" text="+1 (USA)" />
+                <core:Item key="+44" text="+44 (UK)" />
+                <core:Item key="+61" text="+61 (Australia)" />
+            </ComboBox>
+
+            <Input id="signUpPhone"
+                   value="{LoginMode>Mobileno}"
+                   placeholder="Mobile Number"
+                   type="Tel"
+                   required="true" />
+
+            <!-- Row 4: Password -->
+            <Label text="Create Password" required="true" />
+            <Input id="signUpPassword"
+                   value="{LoginMode>password}"
+                   placeholder="Create Password"
+                   type="Password"
+                   required="true" />
+
+            <!-- Row 5: Confirm Password -->
+            <Label text="Confirm Password" required="true" />
+            <Input id="signUpConfirmPassword"
+                   value="{LoginMode>comfirmpass}"
+                   placeholder="Confirm Password"
+                   type="Password"
+                   required="true" />
+        </f:SimpleForm>
+
+        <!-- Sign Up Button -->
+        <HBox justifyContent="End" class="sapUiSmallMarginTop">
+            <Button text="Sign Up"
+                    type="Emphasized"
+                    width="120px"
+                    press="onSignUp" />
+        </HBox>
+    </content>
+</Panel>
+
+
         </VBox>
     </Dialog>
 </core:FragmentDefinition>

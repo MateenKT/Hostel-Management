@@ -2,8 +2,9 @@ sap.ui.define([
     "sap/ui/core/mvc/Controller",
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast",
-    "sap/m/MessageBox"
-], function (Controller, JSONModel, MessageToast, MessageBox) {
+    "sap/m/MessageBox",
+     "../utils/validation"
+], function (Controller, JSONModel, MessageToast, MessageBox,utils) {
     "use strict";
 
     return Controller.extend("sap.ui.com.project1.controller.Hostel", {
@@ -52,9 +53,12 @@ sap.ui.define([
             ];
             const oBranchModel = new JSONModel({ Branches: aBranches });
             this.getView().setModel(oBranchModel, "BranchModel");
-
+//  this.i18nModel = this.getView().getModel("i18n").getResourceBundle();
             // this._loadFilteredData("KLB01");
             this.onpressLogin()
+        },
+        onUserlivechange:function(oEvent){
+             utils._LCvalidateMandatoryField(oEvent);
         },
 
         // _base64ToBlob: function (base64Data, mimeType) {
@@ -360,8 +364,12 @@ sap.ui.define([
             oSignInPanel.setVisible(false);
             oSignUpPanel.setVisible(true);
         },
+        onEmailliveChange:function(oEvent){
+          utils._LCvalidateEmail(oEvent);
+        },
         onSignUp: function () {
             var oDialog = this._oSignDialog;  // Assumes you stored the fragment dialog in this._oAuthDialog
+            var ofrag = sap.ui.getCore();
 
             // Fetch user input values by ID with fragment's scoping: Fragment.byId(fragmentId, controlId)
             var sFullName = sap.ui.getCore().byId("signUpName").getValue();
@@ -371,10 +379,13 @@ sap.ui.define([
             var sConfirmPass = sap.ui.getCore().byId("signUpConfirmPassword").getValue();
 
             // Basic validation example
-            if (!sFullName || !sEmail || !sPassword || !sConfirmPass) {
-                sap.m.MessageToast.show("Please enter all required fields correctly.");
-                return;
-            }
+           if (
+            !utils._LCvalidateMandatoryField(ofrag.byId("signUpName"), "ID") ||
+            !utils._LCvalidateEmail(ofrag.byId("signUpEmail"), "ID")
+          ) {
+            MessageToast.show("error");
+            return;
+          }
 
             var oPayload = {
                 data: {
