@@ -1,0 +1,124 @@
+<c:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:c="sap.ui.core"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+    xmlns:u="sap.ui.unified"
+>
+    <Dialog
+        id="sds12"
+        title="Bed Details"
+        type="Message"
+        class="sapUiContentPadding"
+    >
+        <f:SimpleForm
+            editable="true"
+            layout="ResponsiveGridLayout"
+            labelSpanXL="4"
+            labelSpanL="3"
+            labelSpanM="4"
+            labelSpanS="12"
+            columnsXL="2"
+            columnsL="2"
+            columnsM="1"
+        >
+            <f:content>
+             <Label
+                    text="Branch Code"
+                    required="true"
+                />
+                <ComboBox
+                    id="idRoomType12"
+                    placeholder="Select branch Code"
+                    selectedKey="{BedModel>/BranchCode}"
+                >
+                    <core:ListItem
+                        key="KLB01"
+                        text="KLB01"
+                    />
+                    <core:ListItem
+                        key="Od001"
+                        text="Od001"
+                    />
+                    <core:ListItem
+                        key="Bglr001"
+                        text="Bglr001"
+                    />
+                </ComboBox>
+                <Label
+                    text="Bed Type"
+                    required="true"
+                />
+                <ComboBox
+                    id="idBedType"
+                    placeholder="Select Bed Type"
+                    selectedKey="{BedModel>/Name}"
+                >
+                    <core:ListItem
+                        key="Single Bed"
+                        text="Single Bed"
+                    />
+                    <core:ListItem
+                        key="Double Bed"
+                        text="Double Bed"
+                    />
+                    <core:ListItem
+                        key="Four Bed"
+                        text="Four Bed"
+                    />
+                </ComboBox>
+                 <Label
+                    text="Room Type"
+                    required="true"
+                />
+                <ComboBox
+                    id="idRoomtype"
+                    placeholder="Select Room type"
+                    selectedKey="{BedModel>/ACType}"
+                >
+                    <core:ListItem
+                        key="AC"
+                        text="AC"
+                    />
+                    <core:ListItem
+                        key="Non-Ac"
+                        text="Non-Ac"
+                    />
+                </ComboBox>
+                 
+                    <Label
+                    text="Add image"
+                    required="true"
+                />
+                <u:FileUploader
+                    id="idFileUploader"
+                    name="studentDocument"
+                    placeholder="Choose a file to upload"
+                    fileType="jpg,png,pdf"
+                    maximumFileSize="10"
+                    change=".onFileUploaderChange"
+                    tooltip="Only JPG, PNG, or PDF files under 10MB allowed"
+                />
+            </f:content>
+        </f:SimpleForm>
+        <footer>
+            <Toolbar>
+                <ToolbarSpacer />
+                <Button
+                    text="Save"
+                    press="AR_onsavebuttonpress"
+                    type="Accept"
+                    id="AR_id_saveButton"
+                    class="marginRight"
+                />
+                <Button
+                    text="Cancel"
+                    press="AR_onCancelButtonPress"
+                    type="Reject"
+                    id="AR_id_CancelButton"
+                    class="marginRight"
+                />
+            </Toolbar>
+        </footer>
+    </Dialog>
+</c:FragmentDefinition>
