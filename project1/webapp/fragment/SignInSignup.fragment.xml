@@ -26,19 +26,22 @@
             type="Transparent"
             class="switch-toggle-btn {= ${LoginViewModel>/selectedAccountType} === 'biz' ? 'active' : 'inactive'}"
             press="onSwitchToSignUp" />
-</HBox>
+    </HBox>
 
             <!-- Sign In Panel -->
             <Panel id="signInPanel" expandable="false">
                 <VBox>
-                    <Input id="signInusername" placeholder="User Name" type="Email" width="100%" required="true" />
+                 <Label text="User Name"  required="true" />
+                    <Input id="signInusername" placeholder="User Name" type="Email" width="100%" required="true" liveChange="onUserlivechange" valueStateText="Enter Name"  />
                     <Label text="Login with"/>
                     <HBox alignItems="End" justifyContent="Start">
                        <RadioButton text="Password"   class="sapUiTinyMarginEnd " selected="{LoginViewModel>/isPasswordSelected}" />
                     <RadioButton text="OTP"   class="sapUiTinyMarginEnd "  selected="{LoginViewModel>/isOtpSelected}"/>
                     <Button text="Send OTP" press="onPressOTP" />
                     </HBox>
-                    <Input id="signInPassword" placeholder="Password" submit="onSignIn" type="Password" width="100%" required="true" />
+                   <Label text="Password" id="id_frgnewpass" required="true" />
+					<Input id="signinPassword"  placeholder="{i18n>placenewpass}" valueState="{}"  type="Password" liveChange="SM_onChnageSetAndConfirm"  showValueHelp="true" valueStateText="Enter Password" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility" maxLength="50" />
+
                     <HBox justifyContent="SpaceBetween" class="sapUiTinyMarginTop">
                         <Button text="Forgot Password?" type="Transparent" press="onForgotPassword"/>
                         <Button text="Sign In" type="Accept" width="100px" press="onSignIn"/>
@@ -47,7 +50,7 @@
             </Panel>
 
             <!-- Sign Up Panel -->
-          <Panel id="signUpPanel" headerText="Sign Up" expandable="false" visible="false">
+          <Panel id="signUpPanel" expandable="false" visible="false">
     <content>
         <f:SimpleForm
             id="signUpForm"
@@ -61,70 +64,36 @@
             columnsM="1"
             class="sapUiNoContentPadding sapUiSmallMarginTop">
 
-            <!-- Row 1: Salutation + Full Name -->
-            <Label text="Salutation" required="true" />
             <Label text="Full Name" required="true" />
-
-            <ComboBox id="signUpSalutation"
-                      placeholder="Select"
-                      selectedKey="{LoginMode>salutation}"
-                      width="100%"
-                      required="true">
-                <core:Item key="Mr." text="Mr." />
-                <core:Item key="Ms." text="Ms." />
-                <core:Item key="Mrs." text="Mrs." />
-                <core:Item key="Dr." text="Dr." />
-            </ComboBox>
-
             <Input id="signUpName"
-                 valueState="{LoginViewModel>/userIdValueState}"
+                value="{LoginMode>/fullname}"
                    placeholder="Full Name" 
                    required="true"  liveChange="onUserlivechange" valueStateText="Enter Name" />
 
             <!-- Row 2: Email (full width) -->
             <Label text="Email" required="true" />
             <Input id="signUpEmail"
-                   value="{LoginMode>Email}"
+                   value="{LoginMode>/Email}"
                    placeholder="Email"
                    type="Email"
                    required="true"  liveChange="onEmailliveChange"/>
 
-            <!-- Row 3: STD Code + Mobile Number -->
-            <Label text="STD Code" required="true" />
+         
             <Label text="Mobile Number" required="true" />
-
-            <ComboBox id="signUpSTDCode"
-                      selectedKey="{LoginMode>STDCode}"
-                      placeholder="Select"
-                      width="100%"
-                      required="true">
-                <core:Item key="+91" text="+91 (India)" />
-                <core:Item key="+1" text="+1 (USA)" />
-                <core:Item key="+44" text="+44 (UK)" />
-                <core:Item key="+61" text="+61 (Australia)" />
-            </ComboBox>
-
             <Input id="signUpPhone"
-                   value="{LoginMode>Mobileno}"
+                   value="{LoginMode>/Mobileno}"
                    placeholder="Mobile Number"
-                   type="Tel"
+                   liveChange="onMobileLivechnage"
+                   valueStateText="Enter MobileNo"
                    required="true" />
 
-            <!-- Row 4: Password -->
-            <Label text="Create Password" required="true" />
-            <Input id="signUpPassword"
-                   value="{LoginMode>password}"
-                   placeholder="Create Password"
-                   type="Password"
-                   required="true" />
+                    <Label text="Create Password"  required="true" />
+					<Input id="signUpPassword"  placeholder="Enter Password" value="{LoginMode>/password}" valueState="{LoginViewModel>/frgNewPasswordValueState}"  type="Password" liveChange="SM_onChnageSetAndConfirm"  showValueHelp="true" valueStateText="Enter Password" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility" maxLength="50" />
 
-            <!-- Row 5: Confirm Password -->
-            <Label text="Confirm Password" required="true" />
-            <Input id="signUpConfirmPassword"
-                   value="{LoginMode>comfirmpass}"
-                   placeholder="Confirm Password"
-                   type="Password"
-                   required="true" />
+
+                    <Label text="Confirm Password"  required="true" />
+					<Input id="signUpConfirmPassword"  placeholder="Enter Confirm Password" value="{LoginMode>/comfirmpass}" valueState="{}"  type="Password" change="FSM_onConfirm"  showValueHelp="true" valueStateText="Enter Confirm Password" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility" maxLength="50" />
+
         </f:SimpleForm>
 
         <!-- Sign Up Button -->

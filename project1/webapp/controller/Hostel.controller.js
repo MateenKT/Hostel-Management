@@ -1,10 +1,10 @@
 sap.ui.define([
-        "./BaseController",
+    "./BaseController",
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast",
     "sap/m/MessageBox",
-     "../utils/validation"
-], function (BaseController, JSONModel, MessageToast, MessageBox,utils) {
+    "../utils/validation"
+], function (BaseController, JSONModel, MessageToast, MessageBox, utils) {
     "use strict";
 
     return BaseController.extend("sap.ui.com.project1.controller.Hostel", {
@@ -40,6 +40,14 @@ sap.ui.define([
 
             })
             oView.setModel(login, "LoginViewModel")
+            var ologin = new JSONModel({
+                fullname: "",
+                Email: "",
+                Mobileno: "",
+                password: "",
+                comfirmpass: ""
+            })
+            this.getView().setModel(ologin, "LoginMode");
 
             var oProfileSectionModel = new JSONModel({
                 selectedSection: "profile"  // default section shown on dialog open
@@ -53,55 +61,25 @@ sap.ui.define([
             ];
             const oBranchModel = new JSONModel({ Branches: aBranches });
             this.getView().setModel(oBranchModel, "BranchModel");
-//  this.i18nModel = this.getView().getModel("i18n").getResourceBundle();
-            // this._loadFilteredData("KLB01");
-            this.onpressLogin()
+            const omodel = new JSONModel({
+                // for Database connection
+                url: "https://rest.kalpavrikshatechnologies.com/",
+                headers: {
+                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                    password:
+                        "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
+                    "Content-Type": "application/json",
+                },
+                isRadioVisible: false,
+            });
+            this.getOwnerComponent().setModel(omodel, "LoginModel");
+
         },
-        onUserlivechange:function(oEvent){
-             utils._LCvalidateMandatoryField(oEvent);
+        onUserlivechange: function (oEvent) {
+            utils._LCvalidateMandatoryField(oEvent);
         },
 
-        // _base64ToBlob: function (base64Data, mimeType) {
-        //     const byteCharacters = atob(base64Data);
-        //     const byteArrays = [];
 
-        //     for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-        //         const slice = byteCharacters.slice(offset, offset + 512);
-        //         const byteNumbers = new Array(slice.length);
-
-        //         for (let i = 0; i < slice.length; i++) {
-        //             byteNumbers[i] = slice.charCodeAt(i);
-        //         }
-
-        //         const byteArray = new Uint8Array(byteNumbers);
-        //         byteArrays.push(byteArray);
-        //     }
-
-        //     return new Blob(byteArrays, { type: mimeType });
-        // },
-
-        // _convertBLOBToImage: function (oBlob) {
-        //     return new Promise((resolve, reject) => {
-        //         const oImage = new Image();
-        //         oImage.onload = function () {
-        //             const MAX_WIDTH = 600; // scale for UI
-        //             const scale = MAX_WIDTH / oImage.width;
-        //             const canvas = document.createElement("canvas");
-        //             canvas.width = MAX_WIDTH;
-        //             canvas.height = oImage.height * scale;
-
-        //             const ctx = canvas.getContext("2d");
-        //             ctx.drawImage(oImage, 0, 0, canvas.width, canvas.height);
-
-        //             const dataUrl = canvas.toDataURL("image/jpeg");
-        //             resolve(dataUrl);
-        //         };
-        //         oImage.onerror = function () {
-        //             reject("Image load failed");
-        //         };
-        //         oImage.src = URL.createObjectURL(oBlob);
-        //     });
-        // },
         _loadFilteredData: async function (sBranchCode) {
             try {
                 const oView = this.getView();
@@ -364,135 +342,174 @@ sap.ui.define([
             oSignInPanel.setVisible(false);
             oSignUpPanel.setVisible(true);
         },
-        onEmailliveChange:function(oEvent){
-          utils._LCvalidateEmail(oEvent);
+        onEmailliveChange: function (oEvent) {
+            utils._LCvalidateEmail(oEvent);
         },
-        onSignUp: function () {
+
+        onMobileLivechnage: function (oEvent) {
+            utils._LCvalidateMobileNumber(oEvent)
+        },
+        SM_onTogglePasswordVisibility: function (oEvent) {
+            var oInput = oEvent.getSource();
+            var sType = oInput.getType() === "Password" ? "Text" : "Password";
+            oInput.setType(sType);
+            // Toggle the value help icon properly without losing the value
+            var sIcon =
+                sType === "Password" ? "sap-icon://show" : "sap-icon://hide";
+            oInput.setValueHelpIconSrc(sIcon);
+            // Ensure the current value of the password is retained
+            var sCurrentValue = oInput.getValue();
+            oInput.setValue(sCurrentValue);
+        },
+        SM_onChnageSetAndConfirm: function (oEvent) {
+            utils._LCvalidatePassword(oEvent);
+        },
+        FSM_onConfirm: function () {
+            const oFragModel = this.getView().getModel("LoginMode");
+            if (oFragModel.getProperty("/password") !== oFragModel.getProperty("/comfirmpass")) {
+                sap.ui.getCore().byId("signUpConfirmPassword").setValueState("Error")
+                MessageToast.show("Password Mismatch");
+                return;
+            } else {
+                sap.ui.getCore().byId("signUpConfirmPassword").setValueState("None")
+            }
+        },
+        onSignUp: async function () {
             var oDialog = this._oSignDialog;  // Assumes you stored the fragment dialog in this._oAuthDialog
             var ofrag = sap.ui.getCore();
-
-            // Fetch user input values by ID with fragment's scoping: Fragment.byId(fragmentId, controlId)
-            var sFullName = sap.ui.getCore().byId("signUpName").getValue();
-            var sEmail = sap.ui.getCore().byId("signUpEmail").getValue();
-            var sPhone = sap.ui.getCore().byId("signUpPhone").getValue();
-            var sPassword = sap.ui.getCore().byId("signUpPassword").getValue();
-            var sConfirmPass = sap.ui.getCore().byId("signUpConfirmPassword").getValue();
+            var oModel = this.getView().getModel("LoginMode");
+            var oData = oModel.getData();
 
             // Basic validation example
-           if (
-            !utils._LCvalidateMandatoryField(ofrag.byId("signUpName"), "ID") ||
-            !utils._LCvalidateEmail(ofrag.byId("signUpEmail"), "ID")
-          ) {
-            MessageToast.show("error");
-            return;
-          }
+            if (
+                !utils._LCvalidateMandatoryField(ofrag.byId("signUpName"), "ID") ||
+                !utils._LCvalidateEmail(ofrag.byId("signUpEmail"), "ID") || !utils._LCvalidateMobileNumber(ofrag.byId("signUpPhone"), "ID") || !utils._LCvalidatePassword(ofrag.byId("signUpPassword"), "ID")
+            ) {
+                MessageToast.show("Make sure all the mandatory fields are filled/validate the entered value");
+                return;
+            }
+            // Get current timestamp
+            var oNow = new Date();
+            var sTimeDate = oNow.getFullYear() + "-" +
+                String(oNow.getMonth() + 1).padStart(2, "0") + "-" +
+                String(oNow.getDate()).padStart(2, "0") + " " +
+                String(oNow.getHours()).padStart(2, "0") + ":" +
+                String(oNow.getMinutes()).padStart(2, "0") + ":" +
+                String(oNow.getSeconds()).padStart(2, "0");
 
+            // Payload
             var oPayload = {
                 data: {
-                    UserName: sFullName,
-                    EmailID: sEmail,
-                    MobileNo: sPhone,
-                    Password: btoa(sPassword)
+                    UserName: oData.fullname,
+                    EmailID: oData.Email,
+                    MobileNo: oData.Mobileno,
+                    Password: btoa(oData.password),
+                    Role: "Customer",
+                    TimeDate: sTimeDate,
+                    Status: "Active"
                 }
             };
-            $.ajax({
-                url: "https://rest.kalpavrikshatechnologies.com/HM_Login",
-                method: "POST",
-                contentType: "application/json",
-                headers: {
-                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-                },
-                data: JSON.stringify(oPayload),
-                success: function (response) {
-                    sap.m.MessageToast.show("Sign Up successful!");
-                    oDialog.close();
-                },
-                error: function (xhr, status, error) {
-                    sap.m.MessageToast.show("Error in Sign Up: " + error);
-                }
-            });
-        },
-        onSignIn: function () {
-            var sUsername = sap.ui.getCore().byId("signInusername").getValue();
-            var sPassword = sap.ui.getCore().byId("signInPassword").getValue();
 
-            if (!sUsername || !sPassword) {
-                sap.m.MessageToast.show("Please enter both username and password.");
+            try {
+                // Use your reusable helper
+                await this.ajaxCreateWithJQuery("HM_Login", oPayload);
+
+                // Handle success
+                sap.m.MessageToast.show("Sign Up successful!");
+
+                // Reset model
+                oModel.setData({
+                    salutation: "Mr.",
+                    fullname: "",
+                    Email: "",
+                    STDCode: "+91",
+                    Mobileno: "",
+                    password: "",
+                    comfirmpass: ""
+                });
+
+                if (oDialog) {
+                    oDialog.close();
+                }
+
+            } catch (err) {
+                // Handle error
+                sap.m.MessageToast.show("Error in Sign Up: " + err);
+            }
+        },
+
+        onSignIn: async function () {
+            // var ofrag = sap.ui.getCore();
+            var oModel = this.getView().getModel("LoginMode");
+            var oData = oModel.getData();
+
+            // Get input values
+            var sUsername = sap.ui.getCore().byId("signInusername").getValue();
+            var sPassword = sap.ui.getCore().byId("signinPassword").getValue();
+
+            // Basic validation example
+            if (
+                !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID") ||
+                !utils._LCvalidatePassword(sap.ui.getCore().byId("signinPassword"), "ID")
+            ) {
+                sap.m.MessageToast.show("Make sure all the mandatory fields are filled/validate the entered value");
                 return;
             }
 
-            var sUrl = "https://rest.kalpavrikshatechnologies.com/HM_Login";
+            try {
+                //  Fetch all registered users (no payload — server ignores it anyway)
+                const oResponse = await this.ajaxReadWithJQuery("HM_Login","");
 
-            $.ajax({
-                url: sUrl,
-                type: "GET",
-                contentType: "application/json",
-                headers: {
-                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-                },
-                success: function (response) {
-                    var aUsers = response?.commentData || [];
-                    var oMatchedUser = null;
+                const aUsers = oResponse?.commentData || [];
 
-                    for (var i = 0; i < aUsers.length; i++) {
-                        if (
-                            aUsers[i].UserName === sUsername &&
-                            aUsers[i].Password === btoa(sPassword)
-                        ) {
-                            oMatchedUser = aUsers[i];
-                            break;
-                        }
+                //  Compare user-entered credentials with database records
+                const oMatchedUser = aUsers.find(user =>
+                    user.UserName === sUsername && user.Password === btoa(sPassword)
+                );
+
+                if (oMatchedUser) {
+                    sap.m.MessageToast.show("Login Successful! Welcome, " + sUsername);
+
+                    const oView = this.getView();
+                    const oLoginBtn = oView.byId("loginButton");
+                    const oAvatar = oView.byId("ProfileAvatar");
+
+                    if (oLoginBtn) oLoginBtn.setVisible(false);
+                    if (oAvatar) oAvatar.setVisible(true);
+
+                    //  Store logged-in user info for later use (Profile, Dashboard, etc.)
+                    this._oLoggedInUser = oMatchedUser;
+
+                    //  Optionally store in a global model for reuse
+                    const oUserModel = new sap.ui.model.json.JSONModel(oMatchedUser);
+                    sap.ui.getCore().setModel(oUserModel, "LoggedUser");
+
+                    //  Clear fields
+                    sap.ui.getCore().byId("signInusername").setValue("");
+                    sap.ui.getCore().byId("signinPassword").setValue("");
+
+                    // Close dialog
+                    if (this._oSignDialog) {
+                        this._oSignDialog.close();
                     }
-                    if (oMatchedUser) {
-                        sap.m.MessageToast.show("Login Successful! Welcome, " + sUsername);
-                        var oView = this.getView();
-                        var oLoginBtn = oView.byId("loginButton");
 
-                        if (oLoginBtn) {
-                            oLoginBtn.setVisible(false);
-                        }
-                        var oAvatar = oView.byId("ProfileAvatar");
-                        if (oAvatar) {
-                            oAvatar.setVisible(true);
-                        }
-                        // Store user info in controller or as a global model
-                        this._oLoggedInUser = oMatchedUser; // Store for later profile usage
+                    // //  Navigate based on role
+                    // if (oMatchedUser.Role && oMatchedUser.Role.trim() !== "") {
+                    //     const oRouter = sap.ui.core.UIComponent.getRouterFor(this);
+                    //     oRouter.navTo("TilePage");
+                    // } else {
+                    //     sap.m.MessageToast.show("Welcome, " + sUsername + "! You are logged in successfully.");
+                    // }
 
-                        // Clear inputs
-                        sap.ui.getCore().byId("signInusername").setValue("");
-                        sap.ui.getCore().byId("signInPassword").setValue("");
-
-                        if (this._oSignDialog) {
-                            this._oSignDialog.close();
-                        }
-
-                        //  Check role
-                        if (oMatchedUser.Role && oMatchedUser.Role.trim() !== "") {
-                            // User has a role → navigate to tilepage
-                            var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
-                            oRouter.navTo("TilePage");
-                        } else {
-
-                            sap.m.MessageToast.show(
-                                "Welcome, " + sUsername + "! You are logged in successfully "
-                            );
-                        }
-
-                    } else {
-                        sap.m.MessageToast.show("Invalid credentials. Please try again.");
-                    }
-                }.bind(this),
-
-                error: function (xhr, status, error) {
-                    console.error("AJAX Error:", error);
-                    sap.m.MessageToast.show("Failed to fetch login data: " + error);
+                } else {
+                    sap.m.MessageToast.show("Invalid credentials. Please try again.");
                 }
-            });
+
+            } catch (err) {
+                console.error("Login Error:", err);
+                sap.m.MessageToast.show("Failed to fetch login data: " + err);
+            }
         },
-
-
 
 
         onPressAvatar: async function () {
@@ -658,11 +675,6 @@ sap.ui.define([
             MessageToast.show("Wizard completed successfully!");
         },
 
-        // onSaveDialog: function () {
-        //     // Final form submission logic
-        //     MessageBox.success("Form submitted successfully!");
-        // },
-
         onCancelDialog: function () {
             this.FCIA_Dialog.close();
             sap.ui.getCore().byId("idHostelWizardDialog").close();
@@ -687,9 +699,9 @@ sap.ui.define([
         // },
         onSaveDialog: function () {
             var Data = this.getView().getModel("HostelModel").getData();
-        
 
-            var payload={
+
+            var payload = {
                 CustomerName: Data.CustomerName,
                 MobileNo: Data.MobileNo,
                 Gender: Data.Gender,
@@ -699,14 +711,14 @@ sap.ui.define([
                 State: Data.State,
                 City: Data.City,
                 PermanentAddress: Data.Address,
-                Booking:{
+                Booking: {
                     PaymentType: Data.PaymentType,
                     StartDate: Data.StartDate.split("/").reverse().join("-"),
                     EndDate: Data.EndDate.split("/").reverse().join("-"),
                     RentPrice: Data.Price,
                     Status: "New",
                 }
-            
+
 
             }
 
@@ -760,8 +772,8 @@ sap.ui.define([
         },
         onDoubleRoomPress: function (oEvent) {
 
-                 var oRouter = this.getOwnerComponent().getRouter();
-                 oRouter.navTo("TilePage");
+            var oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("TilePage");
             // if (this._oLoggedInUser === undefined) {
             //     MessageBox.alert("Please signin to book a room.");
             //     return;
