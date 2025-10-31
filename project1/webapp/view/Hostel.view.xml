@@ -60,17 +60,11 @@
 								<Text class="Welcomeroomtext  sapUiTinyMarginTopBottom " text="Shah Hostel"/>
 								<Text text="Your New Home Away to me" class="Welcomeroomtext sapUiTinyMarginTop "/>
 							</VBox>
-								<!-- <HBox width="100%" justifyContent="End" alignItems="Center">
-    <Input 
-        width="350px"
-        placeholder="Search location..." 
-        valueLiveUpdate="true"
-        change="onSearchChange"
-        class="customSearchBar"
-        showValueHelp="true"
-        valueHelpIconSrc="sap-icon://search"
-        />
-</HBox> -->
+								<HBox width="100%" justifyContent="End" alignItems="Center">
+
+  <Button text="Filter" icon="sap-icon://filter" class="customSearchBar"
+   press="onpressFilter"  width="200px" />
+</HBox>
 
 						</l:Grid>
 					</ScrollContainer>
@@ -78,7 +72,7 @@
     <!-- Single Bed -->
     <VBox visible="{VisibilityModel>/singleVisible}" class="HostelCard" backgroundDesign="Solid">
         <HBox justifyContent="Center" class="section-image">
-            <Image src="./image/SingleBed.png" width="380px" height="320px" class="section-image" />
+            <Image src="{VisibilityModel>/singleImg}" width="380px" height="320px" class="section-image" />
         </HBox>
         <Text class="hr-text" text="Single Bed Room"/>
         <Text class="description-text" text="{VisibilityModel>/singleDesc}"/>
@@ -95,7 +89,7 @@
     <!-- Double Bed -->
     <VBox visible="{VisibilityModel>/doubleVisible}" class="HostelCard" backgroundDesign="Solid">
         <HBox justifyContent="Center" class="section-image">
-            <Image src="./image/DoubleBed.png" width="380px" height="320px" class="section-image" />
+            <Image src="{VisibilityModel>/doubleImg}" width="380px" height="320px" class="section-image" />
         </HBox>
         <Text class="hr-text" text="Double Bed Room"/>
         <Text class="description-text" text="{VisibilityModel>/doubleDesc}"/>
@@ -109,7 +103,7 @@
 
         </HBox>
     </VBox>
-	<VBox visible="{VisibilityModel>/doubleVisible}" class="HostelCard" backgroundDesign="Solid">
+	<!-- <VBox visible="{VisibilityModel>/doubleVisible}" class="HostelCard" backgroundDesign="Solid">
         <HBox justifyContent="Center" class="section-image">
             <Image src="./image/DoubleBed.png" width="380px" height="320px" class="section-image" />
         </HBox>
@@ -124,12 +118,12 @@
 </Button>
 
         </HBox>
-    </VBox>
+    </VBox> -->
 
     <!-- Four Bed -->
     <VBox visible="{VisibilityModel>/fourVisible}" class="HostelCard" backgroundDesign="Translucent">
         <HBox justifyContent="Center" class="section-image" >
-            <Image src="./image/4Bed.png"  class="section-image" />
+            <Image src="{VisibilityModel>/fourImg}"  class="section-image" />
         </HBox>
         <Text class="hr-text" text="Four Bed Room"/>
         <Text class="description-text " text=""/>
