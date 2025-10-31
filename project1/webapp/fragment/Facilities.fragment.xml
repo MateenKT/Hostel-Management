@@ -79,6 +79,19 @@
                     placeholder="Enter Price"
                     maxLength="60"
                 />
+                  <Label
+                    text="Add image"
+                    required="true"
+                />
+                <u:FileUploader
+                    id="idFileUploderFacility"
+                    name="studentDocument"
+                    placeholder="Choose a file to upload"
+                    fileType="jpg,png,pdf"
+                    maximumFileSize="10"
+                    change=".onFileUploaderChange"
+                    tooltip="Only JPG, PNG, or PDF files under 10MB allowed"
+                />
             </f:content>
         </f:SimpleForm>
         <footer>
