@@ -668,39 +668,41 @@ sap.ui.define([
             }
         },
         onSingleRoomPress: async function (oEvent) {
-            if (!this._oLoggedInUser) {
-                sap.m.MessageBox.show(
-                    "Please sign in to book a room.",
-                    {
-                        icon: sap.m.MessageBox.Icon.WARNING,
-                        title: "Authentication Required",
-                        actions: ["Continue", "OK"],
-                        emphasizedAction: "Continue",
-                        onClose: async (sAction) => {
-                            if (sAction === "OK") {
+              var oRouter = this.getOwnerComponent().getRouter();
+                 oRouter.navTo("RouteBookRoom");
+            // if (!this._oLoggedInUser) {
+            //     sap.m.MessageBox.show(
+            //         "Please sign in to book a room.",
+            //         {
+            //             icon: sap.m.MessageBox.Icon.WARNING,
+            //             title: "Authentication Required",
+            //             actions: ["Continue", "OK"],
+            //             emphasizedAction: "Continue",
+            //             onClose: async (sAction) => {
+            //                 if (sAction === "OK") {
 
-                                await this.onpressLogin();
-                            } else {
-                                await this.Bookfragment();
-                            }
-                        }
-                    }
-                );
-                return;
-            }
+            //                     await this.onpressLogin();
+            //                 } else {
+            //                     await this.Bookfragment();
+            //                 }
+            //             }
+            //         }
+            //     );
+            //     return;
+            // }
 
-            // If logged in, continue with room booking logic
-            const oButton = oEvent.getSource();
-            const sRoomType = oButton.data("roomType");
-            const oVisibilityData = this.getView().getModel("VisibilityModel").getData();
+            // // If logged in, continue with room booking logic
+            // const oButton = oEvent.getSource();
+            // const sRoomType = oButton.data("roomType");
+            // const oVisibilityData = this.getView().getModel("VisibilityModel").getData();
 
-            await this.Bookfragment();
+            // await this.Bookfragment();
 
-            sap.ui.getCore().byId("idRoomType").setValue(sRoomType);
-            sap.ui.getCore().byId("idPrice1").setValue(oVisibilityData.singlePrice);
-            sap.ui.getCore().byId("idFullName").setValue(this._oLoggedInUser.UserName);
-            sap.ui.getCore().byId("idE-mail").setValue(this._oLoggedInUser.EmailID);
-            sap.ui.getCore().byId("idMobile").setValue(this._oLoggedInUser.MobileNo);
+            // sap.ui.getCore().byId("idRoomType").setValue(sRoomType);
+            // sap.ui.getCore().byId("idPrice1").setValue(oVisibilityData.singlePrice);
+            // sap.ui.getCore().byId("idFullName").setValue(this._oLoggedInUser.UserName);
+            // sap.ui.getCore().byId("idE-mail").setValue(this._oLoggedInUser.EmailID);
+            // sap.ui.getCore().byId("idMobile").setValue(this._oLoggedInUser.MobileNo);
         },
 
         onCancelDialog: function () {
@@ -923,248 +925,6 @@ sap.ui.define([
         },
 
 
-onNoOfPersonSelect: function (oEvent) {
-    var iPersons = parseInt(oEvent.getSource().getSelectedKey());
-    var oVBox = sap.ui.getCore().byId("idPersonalContainer");
-    var oModel = this.getView().getModel("HostelModel");
-    var oData = oModel.getData();
-
-    // Initialize array
-    oData.Persons = [];
-
-    // Clear previous content
-    oVBox.removeAllItems();
-
-    for (var i = 0; i < iPersons; i++) {
-        // Create data structure per person
-        oData.Persons.push({
-            FullName: "",
-            DateOfBirth: "",
-            Gender: "",
-            MobileNo: "",
-            CustomerEmail: "",
-            Country: "",
-            State: "",
-            City: "",
-            Facilities: {
-                RoomType: "",
-                SelectedFacilities: [],
-                MealPlan: ""
-            },
-            Document: "",
-            FileName: "",
-            FileType: ""
-        });
-
-        // Person Details Form
-        var oForm = new sap.ui.layout.form.SimpleForm({
-            editable: true,
-            title: "Person " + (i + 1) + " Details",
-            layout: "ColumnLayout",
-            labelSpanXL: 4,
-            labelSpanL: 3,
-            labelSpanM: 4,
-            labelSpanS: 12,
-            columnsXL: 2,
-            columnsL: 2,
-            columnsM: 1,
-            content: [
-                new sap.m.Label({ text: "Full Name", required: true }),
-                new sap.m.Input({
-                    value: "{HostelModel>/Persons/" + i + "/FullName}",
-                    placeholder: "Enter full name"
-                }),
-                new sap.m.Label({ text: "Date of Birth", required: true }),
-                new sap.m.DatePicker({
-                    value: "{HostelModel>/Persons/" + i + "/DateOfBirth}",
-                    valueFormat: "dd/MM/yyyy",
-                    displayFormat: "dd/MM/yyyy",
-                    placeholder: "Select date of birth"
-                }),
-                new sap.m.Label({ text: "Gender", required: true }),
-                new sap.m.ComboBox({
-                    selectedKey: "{HostelModel>/Persons/" + i + "/Gender}",
-                    items: [
-                        new sap.ui.core.ListItem({ key: "Male", text: "Male" }),
-                        new sap.ui.core.ListItem({ key: "Female", text: "Female" }),
-                        new sap.ui.core.ListItem({ key: "Other", text: "Other" })
-                    ]
-                }),
-                new sap.m.Label({ text: "Mobile Number", required: true }),
-                new sap.m.Input({
-                    value: "{HostelModel>/Persons/" + i + "/MobileNo}",
-                    placeholder: "Enter 10-digit mobile number",
-                    maxLength: 10
-                }),
-                new sap.m.Label({ text: "Email", required: true }),
-                new sap.m.Input({
-                    value: "{HostelModel>/Persons/" + i + "/CustomerEmail}",
-                    placeholder: "Enter email"
-                }),
-                new sap.m.Label({ text: "Country", required: true }),
-                new sap.m.ComboBox({
-                    selectedKey: "{HostelModel>/Persons/" + i + "/Country}",
-                    placeholder: "Select Country",
-                    items: [
-                        new sap.ui.core.ListItem({ key: "India", text: "India" }),
-                        new sap.ui.core.ListItem({ key: "USA", text: "USA" }),
-                        new sap.ui.core.ListItem({ key: "Other", text: "Other" })
-                    ]
-                }),
-                new sap.m.Label({ text: "State", required: true }),
-                new sap.m.ComboBox({
-                    selectedKey: "{HostelModel>/Persons/" + i + "/State}",
-                    placeholder: "Select State",
-                    items: [
-                        new sap.ui.core.ListItem({ key: "Karnataka", text: "Karnataka" }),
-                        new sap.ui.core.ListItem({ key: "Andhra Pradesh", text: "Andhra Pradesh" }),
-                        new sap.ui.core.ListItem({ key: "Other", text: "Other" })
-                    ]
-                }),
-                new sap.m.Label({ text: "City", required: true }),
-                new sap.m.ComboBox({
-                    selectedKey: "{HostelModel>/Persons/" + i + "/City}",
-                    placeholder: "Select City",
-                    items: [
-                        new sap.ui.core.ListItem({ key: "Gulbarga", text: "Gulbarga" }),
-                        new sap.ui.core.ListItem({ key: "Hyderabad", text: "Hyderabad" }),
-                        new sap.ui.core.ListItem({ key: "Other", text: "Other" })
-                    ]
-                })
-            ]
-        });
-
-        // Facilities Form
-        var oFacilitiesForm = new sap.ui.layout.form.SimpleForm({
-            editable: true,
-            title: "Facilities",
-            layout: "ColumnLayout",
-            content: [
-                new sap.m.Label({ text: "Facilities" }),
-                new sap.m.MultiComboBox({
-                    selectedKeys: "{HostelModel>/Persons/" + i + "/Facilities/SelectedFacilities}",
-                    items: [
-                        new sap.ui.core.ListItem({ key: "WiFi", text: "WiFi" }),
-                        new sap.ui.core.ListItem({ key: "Laundry", text: "Laundry" }),
-                        new sap.ui.core.ListItem({ key: "AC", text: "Air Conditioning" })
-                    ]
-                }),
-                new sap.m.Label({ text: "Meal Plan" }),
-                new sap.m.ComboBox({
-                    selectedKey: "{HostelModel>/Persons/" + i + "/Facilities/MealPlan}",
-                    items: [
-                        new sap.ui.core.ListItem({ key: "Veg", text: "Veg" }),
-                        new sap.ui.core.ListItem({ key: "Non-Veg", text: "Non-Veg" }),
-                        new sap.ui.core.ListItem({ key: "None", text: "No Meal" })
-                    ]
-                })
-            ]
-        });
-
-        // Document Upload Form
-        var oDocument = new sap.ui.layout.form.SimpleForm({
-            editable: true,
-            title: "Document Upload",
-            layout: "ColumnLayout",
-            content: [
-                new sap.m.Label({ text: "Upload Document" }),
-                new sap.ui.unified.FileUploader({
-                    name: "file",
-                    uploadUrl: "",
-                    uploadOnChange: false,
-                    width: "100%",
-                    customData: [new sap.ui.core.CustomData({ key: "index", value: i })],
-                    change: function (oEvent) {
-                        var index = parseInt(oEvent.getSource().data("index"));
-                        var oFile = oEvent.getParameter("files")[0];
-                        if (oFile) {
-                            var reader = new FileReader();
-                            reader.onload = function (e) {
-                                var sBase64 = e.target.result.split(",")[1];
-                                var oModel1 = oModel;
-                                var oData = oModel1.getData();
-                                oData.Persons[index].Document = sBase64;
-                                oData.Persons[index].FileName = oFile.name;
-                                oData.Persons[index].FileType = oFile.type;
-                                oModel.refresh(true);
-                            }.bind(this);
-                            reader.readAsDataURL(oFile);
-                        }
-                    }
-                })
-            ]
-        });
-
-        // Add all forms to the container
-        oVBox.addItem(oForm);
-        oVBox.addItem(oFacilitiesForm);
-        oVBox.addItem(oDocument);
-    }
-
-    oModel.refresh(true);
-},
-
-// Save function
-onSaveDialog: function () {
-    var oModel = this.getView().getModel("HostelModel");
-    var Data = oModel.getData();
-
-    var formattedPayload = Data.Persons.map(function (p) {
-        return {
-            CustomerName: p.FullName,
-            MobileNo: p.MobileNo,
-            Gender: p.Gender,
-            DateOfBirth: p.DateOfBirth ? p.DateOfBirth.split("/").reverse().join("-") : "",
-            CustomerEmail: p.CustomerEmail,
-            Country: p.Country,
-            State: p.State,
-            City: p.City,
-            Booking: [
-                {
-                    NoOfPersons: Data.Person,
-                    PaymentType: Data.PaymentType,
-                    StartDate: Data.StartDate.split("/").reverse().join("-"),
-                    EndDate: Data.EndDate.split("/").reverse().join("-"),
-                    RentPrice: Data.Price,
-                    Status: "New"
-                }
-            ],
-            Documents: p.Document ? [
-                {
-                    DocumentType: "ID Proof",
-                    File: p.Document,
-                    FileName: p.FileName || "Document",
-                    FileType: p.FileType || "application/pdf"
-                }
-            ] : []
-        };
-    });
-
-    $.ajax({
-        url: "https://rest.kalpavrikshatechnologies.com/HM_Customer",
-        method: "POST",
-        contentType: "application/json",
-        headers: {
-            name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-            password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-        },
-        data: JSON.stringify({ data: formattedPayload }),
-        success: function () {
-            sap.m.MessageToast.show("Booking successful!");
-
-            // Clear all file uploaders
-            Data.Persons.forEach(function (_, idx) {
-                var uploader = sap.ui.getCore().byId("idFileUploader_" + idx);
-                if (uploader) uploader.setValue("");
-            });
-        },
-        error: function () {
-            sap.m.MessageBox.error("Error uploading data or file.");
-        }
-    });
-
-    this.FCIA_Dialog.close();
-}
 
 
 
