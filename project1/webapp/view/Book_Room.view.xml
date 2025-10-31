@@ -15,6 +15,7 @@
                 id="idHostelWizard"
                 complete=".onWizardComplete"
                 class="sapUiSizeCompact"
+                renderMode="Page"
             >
                 <!-- 🏠 Step 1: Room Details -->
                 <WizardStep
@@ -36,10 +37,10 @@
                     >
                         <f:content>
                             <Label text="Desired Room Type" required="true" />
-                            <Input id="idRoomType" value="{HostelModel>/RoomType}" editable="false" width="100%" />
+                            <Input id="idRoomType" value="Single Bed" editable="false" width="100%" />
 
                             <Label text="Price" required="true" />
-                            <Input id="idPrice1" value="{HostelModel>/Price}" editable="false" width="100%" />
+                            <Input id="idPrice1" value="10000" editable="false" width="100%" />
 
                             <Label text="Payment Method" required="true" />
                             <ComboBox

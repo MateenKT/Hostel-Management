@@ -17,9 +17,53 @@ sap.ui.define([
                 DateOfBirth: "",
                 CustomerEmail: "",
                 RoomType: "",
+
             });
             this.getView().setModel(model, "HostelModel");
+               
+                 
+                  setTimeout(() => {
+                this._LoadFacilities()
+            }, 100);
             },
+          _LoadFacilities: async function () {
+    const oView = this.getView();
+    const Response = await this.ajaxReadWithJQuery("HM_ExtraFacilities", {});
+
+    // Extract array safely
+    const aFacilities = Response?.data || [];
+
+    // Helper function to convert Base64 → data:image URL
+    const convertBase64ToImage = (base64String, fileType) => {
+        if (!base64String) return "./image/Fallback.png";
+        let sBase64 = base64String.replace(/\s/g, "");
+        try {
+            if (!sBase64.startsWith("iVB") && !sBase64.startsWith("data:image")) {
+                const decoded = atob(sBase64);
+                if (decoded.startsWith("iVB")) sBase64 = decoded;
+            }
+        } catch (e) {
+            console.warn("Base64 decode error:", e);
+        }
+        const mimeType = fileType || "image/jpeg";
+        if (sBase64.startsWith("data:image")) return sBase64;
+        return `data:${mimeType};base64,${sBase64}`;
+    };
+
+    // Convert images and prepare data
+    const aFinalFacilities = aFacilities.map(f => ({
+        FacilityID: f.FacilityID,
+        FacilityName: f.FacilityName,
+        Image: convertBase64ToImage(f.FicilityImage, f.FileType)
+    }));
+
+    //  Wrap in object for proper binding
+    const oFacilityModel = new sap.ui.model.json.JSONModel({ Facilities: aFinalFacilities });
+    oView.setModel(oFacilityModel, "FacilityModel");
+
+    console.log(" FacilityModel loaded:", oFacilityModel.getData());
+},
+
             onWizardNext: function () {
             const oDialog = this.FCIA_Dialog;
             const oWizard = this.getView().byId("idHostelWizard");
@@ -177,15 +221,75 @@ onNoOfPersonSelect:async function (oEvent) {
             ]
         });
 
-        // Facilities Form
-        var oFacilitiesForm = new sap.ui.layout.form.SimpleForm({
-            editable: true,
-            title: "Facilities",
-            layout: "ColumnLayout",
-            content: [
-               
-            ]
-        });
+     
+      // --- Facilities Section ---
+var oFacilitiesBox = new sap.m.VBox({
+    width: "100%",
+    items: [
+        new sap.m.Label({
+            text: "Select Facilities",
+            design: "Bold"
+        }),
+        new sap.m.FlexBox({
+            id: "idFacilitiesContainer_" + i,
+            wrap: "Wrap",
+            alignItems: "Center",
+            justifyContent: "Start",
+            items: {
+                path: "FacilityModel>/Facilities",
+                template: new sap.m.VBox({
+                    width: "220px",
+                    height: "160px",
+                    alignItems: "Center",
+                    justifyContent: "Center",
+                    styleClass: "facilityBox",
+                    customData: [
+                        new sap.ui.core.CustomData({
+                            key: "facilityName",
+                            value: "{FacilityModel>FacilityName}"
+                        }),
+                        new sap.ui.core.CustomData({
+                            key: "facilityID",
+                            value: "{FacilityModel>FacilityID}"
+                        })
+                    ],
+                    items: [
+                        new sap.m.Image({
+                            src: "{FacilityModel>Image}",
+                            width: "220px",
+                            height: "160px",
+                            densityAware: false
+                        }),
+                        new sap.m.Button({  
+                            text: "{FacilityModel>FacilityName}",
+                            type: "Transparent",
+                            width: "220px",
+                             height: "160px",
+                              alignItems: "Center",
+                            press: function (oEvent) {
+                                var that = this;
+                                const sName = oEvent.getSource().getText();
+                                const sContainerId = oEvent.getSource().getParent().getParent().getId();
+                                const iPersonIndex = parseInt(sContainerId.split("_").pop());
+                                const oHostelModel = that.getView().getModel("HostelModel");
+                                const aPersons = oHostelModel.getProperty("/Persons");
+
+                                if (!aPersons[iPersonIndex].Facilities.SelectedFacilities.includes(sName)) {
+                                    aPersons[iPersonIndex].Facilities.SelectedFacilities.push(sName);
+                                    sap.m.MessageToast.show(sName + " added for Person " + (iPersonIndex + 1));
+                                }
+                                
+                                oHostelModel.refresh(true);
+                            }.bind(this)
+                        })
+                    ]
+                }).addStyleClass("facilityDynamicBox")
+            }
+        })
+    ]
+});
+
+
 
         // Document Upload Form
         var oDocument = new sap.ui.layout.form.SimpleForm({
@@ -222,9 +326,10 @@ onNoOfPersonSelect:async function (oEvent) {
         });
 
         // Add all forms to the container
-        oVBox.addItem(oForm);
-        oVBox.addItem(oFacilitiesForm);
-        oVBox.addItem(oDocument);
+      oVBox.addItem(oForm);
+oVBox.addItem(oFacilitiesBox);
+oVBox.addItem(oDocument);
+
     }
 
     oModel.refresh(true);

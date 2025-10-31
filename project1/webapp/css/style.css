@@ -421,3 +421,24 @@
 .customSearchBar input::-webkit-input-placeholder { color: #999; font-size: 1.1em;}
 .customSearchBar input:-ms-input-placeholder { color: #999; font-size: 1.1em;}
 .customSearchBar input::placeholder { color: #999; font-size: 1.1em;}
+
+/* Facilities Section */
+.facilityDynamicBox {
+    position: relative;
+    margin: 10px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    background-size: cover;
+    background-position: center;
+}
+
+.facilityDynamicBox .sapMBtn {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white !important;
+    border-radius: 8px;
+}
