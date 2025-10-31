@@ -135,14 +135,7 @@
                             text="Bed Type"
                         />
                     </Column>
-                     <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text
-                            text="Ac Type"
-                        />
-                    </Column>
+                  
                     <Column
                         minScreenWidth="Tablet"
                         demandPopin="true"
@@ -160,9 +153,8 @@
 							
                             <Text text="{RoomDetailsModel>RoomNo}" />
                         
-                            <Text text="{RoomDetailsModel>BedType}" />
+                            <Text text="{RoomDetailsModel>BedTypeName}" />
 
-                            <Text text="{RoomDetailsModel>AC_type}" />
                           
                             <Text text="{RoomDetailsModel>Price}" />
                             <!-- <Text text="{HostelModel>RoomType}" /> -->

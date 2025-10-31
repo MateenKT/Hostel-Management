@@ -32,7 +32,7 @@ sap.ui.define([
 
             oView.byId("idFileUploader12").setVisible(false);
             oView.byId("idDescription").setVisible(false);
-            oView.byId("idCity").setVisible(false);
+            // oView.byId("idCity").setVisible(false);
 
 
             // Open the dialog
@@ -58,7 +58,7 @@ sap.ui.define([
 
             oView.byId("idFileUploader12").setVisible(false);
             oView.byId("idDescription").setVisible(false);
-            oView.byId("idCity").setVisible(false);
+            // oView.byId("idCity").setVisible(false);
 
 
             // Open the dialog
@@ -75,18 +75,20 @@ sap.ui.define([
         AR_onsavebuttonpress: function () {
             var oView = this.getView();
             var Payload = oView.getModel("RoomModel").getData();
+            var RoomDetailsModel = oView.getModel("RoomDetailsModel").getData();
+
             Payload.Price = parseInt(Payload.Price);
 
             var sUrl = "https://rest.kalpavrikshatechnologies.com/HM_Rooms";
             var sMethod = "POST";
             var oBody = { data: Payload };
 
-            if (Payload.ID) {
+            if (Payload.RoomNo===RoomDetailsModel[0].RoomNo) {
                 sUrl = sUrl;
                 sMethod = "PUT";
 
                 oBody.filters = {
-                    ID: Payload.ID
+                    RoomNo: Payload.RoomNo
                 };
             }
 
@@ -127,7 +129,7 @@ sap.ui.define([
 
             var oBody = {};
              oBody.filters = {
-                    ID: data.ID
+                    RoomNo: data.RoomNo
                 };
 
            $.ajax({

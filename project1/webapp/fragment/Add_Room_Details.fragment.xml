@@ -45,28 +45,7 @@
                         text="Bglr001"
                     />
                 </ComboBox>
-                 <Label
-                    text="City"
-                    required="true"
-                />
-                <ComboBox
-                    id="idCity"
-                    placeholder="Select City"
-                    selectedKey="{RoomModel>/City}"
-                >
-                    <core:ListItem
-                        key="Kalburgi"
-                        text="Kalburgi"
-                    />
-                    <core:ListItem
-                        key="Bidar"
-                        text="Bidar"
-                    />
-                    <core:ListItem
-                        key="Hyderabad"
-                        text="Hyderabad"
-                    />
-                </ComboBox>
+               
               
                   <Label
                     text="Room No"
@@ -75,7 +54,7 @@
                 <Input
                     id="idRoomNumber"
                     value="{RoomModel>/RoomNo}"
-                    placeholder="Enter Price"
+                    placeholder="Enter Room No"
                     maxLength="60"
                 />
                 <Label
@@ -85,7 +64,7 @@
                 <ComboBox
                     id="idBedType"
                     placeholder="Select Bed Type"
-                    selectedKey="{RoomModel>/BedType}"
+                    selectedKey="{RoomModel>/BedTypeName}"
                 >
                     <core:ListItem
                         key="Single"
@@ -101,24 +80,7 @@
                     />
                 </ComboBox>
 
-                 <Label
-                    text="Room Type"
-                    required="true"
-                />
-                <ComboBox
-                    id="idActype"
-                    placeholder="Select Ac Type"
-                    selectedKey="{RoomModel>/AC_type}"
-                >
-                    <core:ListItem
-                        key="AC"
-                        text="AC"
-                    />
-                    <core:ListItem
-                        key="Non-AC"
-                        text="Non-AC"
-                    />
-                </ComboBox>
+                
                 <Label
                     text="Price"
                     required="true"

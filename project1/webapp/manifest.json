@@ -104,6 +104,20 @@
           "target": [
             "TargetRoomDetails"
           ]
+        },
+          {
+          "name": "RouteBedDetails",
+          "pattern": "BedDetails",
+          "target": [
+            "TargetBedDetails"
+          ]
+        },
+         {
+          "name": "RouteFacilitis",
+          "pattern": "Facilitis",
+          "target": [
+            "TargetFacilitis"
+          ]
         }
       ],
       "targets": {
@@ -134,6 +148,20 @@
           "clearControlAggregation": false,
           "viewId": "Room_Details",
           "viewName": "Room_Details"
+        },
+         "TargetBedDetails": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "Bed_Details",
+          "viewName": "Bed_Details"
+        },
+         "TargetFacilitis": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "Facilitis",
+          "viewName": "Facilitis"
         }
       }
     },

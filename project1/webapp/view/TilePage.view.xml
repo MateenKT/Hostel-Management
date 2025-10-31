@@ -31,6 +31,16 @@
 															<ImageContent src="sap-icon://inbox" />
 														</TileContent>
 													</GenericTile>
+													<GenericTile visible="true" class="sapUiMediumMargin" header="Add Bed Details" press="TileV_onpressbeddetails">
+														<TileContent unit="Add Bed Details">
+															<ImageContent src="sap-icon://inbox" />
+														</TileContent>
+													</GenericTile>
+														<GenericTile visible="true" class="sapUiMediumMargin" header="Add Extra facilities" press="TileV_onpressextrafacilities">
+														<TileContent unit="Add Extra facilities">
+															<ImageContent src="sap-icon://inbox" />
+														</TileContent>
+													</GenericTile>
 												</layout:HorizontalLayout>
 											</ux:blocks>
 										</ux:ObjectPageSubSection>

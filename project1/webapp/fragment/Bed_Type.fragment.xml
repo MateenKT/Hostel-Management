@@ -85,7 +85,16 @@
                         text="Non-Ac"
                     />
                 </ComboBox>
-                 
+                    <Label
+                    text="No Of Beds"
+                    required="true"
+                />
+                 <Input
+                    id="idR"
+                    value="{BedModel>/NoOfPerson}"
+                    placeholder="Enter No Of Beds"
+                    maxLength="60"
+                />
                     <Label
                     text="Add image"
                     required="true"
@@ -106,14 +115,14 @@
                 <ToolbarSpacer />
                 <Button
                     text="Save"
-                    press="AR_onsavebuttonpress"
+                    press="BT_onsavebuttonpress"
                     type="Accept"
                     id="AR_id_saveButton"
                     class="marginRight"
                 />
                 <Button
                     text="Cancel"
-                    press="AR_onCancelButtonPress"
+                    press="BT_onCancelButtonPress"
                     type="Reject"
                     id="AR_id_CancelButton"
                     class="marginRight"

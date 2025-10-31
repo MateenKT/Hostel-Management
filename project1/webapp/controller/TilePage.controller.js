@@ -21,6 +21,14 @@ sap.ui.define([
         TileV_onpressroomdetails:function(){
              var oRouter = this.getOwnerComponent().getRouter();
                oRouter.navTo("RouteRoomDetails");
+        },
+        TileV_onpressbeddetails:function(){
+                  var oRouter = this.getOwnerComponent().getRouter();
+               oRouter.navTo("RouteBedDetails");
+        },
+        TileV_onpressextrafacilities:function(){
+                var oRouter = this.getOwnerComponent().getRouter();
+               oRouter.navTo("RouteFacilitis");
         }
     })
 })

@@ -104,12 +104,6 @@
                             press="HM_AssignRoom"
                             type="Accept"
                         />
-                         <Button
-                            text="Add Bed"
-                            press="HM_RoomDetails"
-                            type="Transparent"
-                        />
-                     
                     </OverflowToolbar>
                 </headerToolbar>
                 <columns>

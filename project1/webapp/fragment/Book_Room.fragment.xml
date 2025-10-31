@@ -17,170 +17,6 @@
                 complete=".onWizardComplete"
             >
                 <!-- 🧍 Step 1: Personal Information -->
-                <WizardStep
-                    id="idStepPersonal"
-                    title="Personal Information"
-                    validated="false"
-                >
-                    <f:SimpleForm
-                        editable="true"
-                        layout="ColumnLayout"
-                        labelSpanXL="4"
-                        labelSpanL="3"
-                        labelSpanM="4"
-                        labelSpanS="12"
-                        columnsXL="2"
-                        columnsL="2"
-                        columnsM="1"
-                    >
-                        <f:content>
-                            <Label
-                                text="Full Name"
-                                required="true"
-                            />
-                            <Input
-                                id="idFullName"
-                                value="{HostelModel>/CustomerName}"
-                                placeholder="Enter full name"
-                                liveChange=".onInputLiveChange"
-                                maxLength="60"
-                            />
-
-                            <Label
-                                text="Date of Birth"
-                                required="true"
-                            />
-                            <DatePicker
-                                id="idDOB"
-                                value="{HostelModel>/DateOfBirth}"
-                                valueFormat="dd/MM/yyyy"
-                                displayFormat="dd/MM/yyyy"
-                                change=".onDateChange"
-                            />
-
-                            <Label
-                                text="Gender"
-                                required="true"
-                            />
-                            <ComboBox
-                                id="idGender"
-                                placeholder="Select Gender"
-                                selectedKey="{HostelModel>/Gender}"
-                            >
-                                <core:ListItem
-                                    key="Male"
-                                    text="Male"
-                                />
-                                <core:ListItem
-                                    key="Female"
-                                    text="Female"
-                                />
-                                <core:ListItem
-                                    key="Other"
-                                    text="Other"
-                                />
-                            </ComboBox>
-                            <Label
-                                text="Mobile Number"
-                                required="true"
-                            />
-                            <Input
-                                id="idMobile"
-                                value="{HostelModel>/MobileNo}"
-                                placeholder="Enter 10-digit mobile number"
-                                maxLength="10"
-                                liveChange=".onValidateMobile"
-                            />
-                            <Label
-                                text="E-mail"
-                                required="true"
-                            />
-                            <Input
-                                id="idE-mail"
-                                value="{HostelModel>/CustomerEmail}"
-                                placeholder="Enter email id"
-                                maxLength="60"
-                            />
-                          
-                            <Label
-                                text="Country"
-                                required="true"
-                            />
-                            <ComboBox
-                                id="idCountry"
-                                placeholder="Select Country"
-                                selectedKey="{HostelModel>/Country}"
-                            >
-                                <core:ListItem
-                                    key="Male"
-                                    text="India"
-                                />
-                                <core:ListItem
-                                    key="Female"
-                                    text="USA"
-                                />
-                                <core:ListItem
-                                    key="Other"
-                                    text="Other"
-                                />
-                            </ComboBox>
-                            <Label
-                                text="State"
-                                required="true"
-                            />
-                            <ComboBox
-                                id="idState"
-                                placeholder="Select State"
-                                selectedKey="{HostelModel>/State}"
-                            >
-                                <core:ListItem
-                                    key="Karantaka"
-                                    text="Karantaka"
-                                />
-                                <core:ListItem
-                                    key="AndhraPradesh"
-                                    text="Andhra Pradesh"
-                                />
-                                <core:ListItem
-                                    key="Other"
-                                    text="Other"
-                                />
-                            </ComboBox>
-                            <Label
-                                text="City"
-                                required="true"
-                            />
-                            <ComboBox
-                                id="idCity"
-                                placeholder="Select City"
-                                selectedKey="{HostelModel>/City}"
-                            >
-                                <core:ListItem
-                                    key="Gulbarga"
-                                    text="Gulbarga"
-                                />
-                                <core:ListItem
-                                    key="Hyderabad"
-                                    text="Hyderabad"
-                                />
-                                <core:ListItem
-                                    key="Other"
-                                    text="Other"
-                                />
-                            </ComboBox>
-                              <Label
-                                text="Address"
-                                required="true"
-                            />
-                            <TextArea
-                                id="Address"
-                                value="{HostelModel>/Address}"
-                                placeholder="Enter address"
-                                maxLength="60"
-                            />
-                        </f:content>
-                    </f:SimpleForm>
-                </WizardStep>
 
                 <!--  Step 2: Room Details -->
                 <WizardStep
@@ -209,20 +45,13 @@
                                 value="{HostelModel>/RoomType}"
                                 editable="false"
                             />
-                            <Label
-                                text="Room Type"
-                                required="true"
-                            />
-                            <RadioButtonGroup
-                                id="roomTypeGroup"
-                                columns="2"
-                                select=".onRoomTypeSelect"
-                            >
+                            <!-- <Label text="Room Type" required="true" />
+                            <RadioButtonGroup id="roomTypeGroup" columns="2" select=".onRoomTypeSelect">
                                 <buttons>
                                     <RadioButton text="AC" />
                                     <RadioButton text="Non-AC" />
                                 </buttons>
-                            </RadioButtonGroup>
+                            </RadioButtonGroup> -->
                             <Label
                                 text="Price"
                                 required="true"
@@ -255,19 +84,32 @@
                                 />
                             </ComboBox>
                             <Label
-                                text="Food Type"
+                                text="No of persons"
                                 required="true"
                             />
-                            <RadioButtonGroup
-                                id="FoodTypeGroup"
-                                columns="2"
-                                select=".onFoodTypeGroupSelect"
+                            <ComboBox
+                                id="id_Noofperson"
+                                placeholder="Select Person"
+                                selectedKey="{HostelModel>/Person}"
+                                selectionChange=".onNoOfPersonSelect"
                             >
+                                <core:ListItem
+                                    key="1"
+                                    text="1"
+                                />
+                                <core:ListItem
+                                    key="2"
+                                    text="2"
+                                />
+                            </ComboBox>
+                            <!-- <Input placeholder="Enter No of persons" /> -->
+                            <!-- <Label text="Food Type" required="true" />
+                            <RadioButtonGroup id="FoodTypeGroup" columns="2" select=".onFoodTypeGroupSelect">
                                 <buttons>
                                     <RadioButton text="Veg" />
                                     <RadioButton text="Non-Veg" />
                                 </buttons>
-                            </RadioButtonGroup>
+                            </RadioButtonGroup> -->
                             <Label
                                 text="Start Date"
                                 required="true"
@@ -293,9 +135,19 @@
                         </f:content>
                     </f:SimpleForm>
                 </WizardStep>
+                <WizardStep
+                    id="idStepPersonal"
+                    title="Personal Information"
+                    validated="false"
+                >
+                    <VBox
+                        id="idPersonalContainer"
+                        class="sapUiSmallMargin"
+                    />
+                </WizardStep>
 
                 <!-- 📁 Step 3: Document Upload -->
-                <WizardStep
+                <!-- <WizardStep
                     id="idStepDocuments"
                     title="Document Upload"
                     validated="false"
@@ -313,9 +165,7 @@
                             class="sapUiSmallMarginBottom sapUiSmallMarginTop"
                         />
 
-                        <Label
-                            text="Upload File"
-                        />
+                        <Label text="Upload File" />
                         <u:FileUploader
                             id="idFileUploader"
                             name="studentDocument"
@@ -327,7 +177,7 @@
                             tooltip="Only JPG, PNG, or PDF files under 10MB allowed"
                         />
                     </VBox>
-                </WizardStep>
+                </WizardStep> -->
             </Wizard>
         </content>
 
