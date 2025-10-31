@@ -1,0 +1,104 @@
+<c:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:c="sap.ui.core"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+    xmlns:u="sap.ui.unified"
+>
+    <Dialog
+        id="FacilitiesDialog"
+        title="Manage Room Details"
+        type="Message"
+        class="sapUiContentPadding"
+    >
+        <f:SimpleForm
+            editable="true"
+            layout="ResponsiveGridLayout"
+            labelSpanXL="4"
+            labelSpanL="3"
+            labelSpanM="4"
+            labelSpanS="12"
+            columnsXL="2"
+            columnsL="2"
+            columnsM="1"
+        >
+            <f:content>
+              <Label
+                    text="Branch Code"
+                    required="true"
+                />
+                <ComboBox
+                    id="idRoomType123"
+                    placeholder="Select branch Code"
+                    selectedKey="{FacilitiesModel>/BranchCode}"
+                >
+                    <core:ListItem
+                        key="KLB01"
+                        text="KLB01"
+                    />
+                    <core:ListItem
+                        key="Double"
+                        text="Od001"
+                    />
+                    <core:ListItem
+                        key="Triple"
+                        text="Bglr001"
+                    />
+                </ComboBox>
+                <Label
+                    text="Facility Name"
+                    required="true"
+                />
+                <Input
+                    id="idFacilityName"
+                    value="{FacilitiesModel>/FacilityName}"
+                    placeholder="Enter Facility Name"
+                    maxLength="60"
+                    />
+               
+              
+                <Label
+                    text="Type"
+                    required="true"
+                />
+            
+                <Input
+                    id="idFacilityName1"
+                    value="{FacilitiesModel>/Type}"
+                    placeholder="Enter Type"
+                    maxLength="60"
+                    />
+                
+                <Label
+                    text="Price"
+                    required="true"
+                />
+                <Input
+                    id="idPrice"
+                    value="{FacilitiesModel>/Price}"
+                    placeholder="Enter Price"
+                    maxLength="60"
+                />
+            </f:content>
+        </f:SimpleForm>
+        <footer>
+            <Toolbar>
+                <ToolbarSpacer />
+                <Button
+                    text="Save"
+                    press="FD_onsavebuttonpress"
+                    type="Accept"
+                    id="AR_id_saveButton"
+                    class="marginRight"
+                />
+                <Button
+                    text="Cancel"
+                    press="FD_onCancelButtonPress"
+                    type="Reject"
+                    id="FD_id_CancelButton"
+                    class="marginRight"
+                />
+            </Toolbar>
+        </footer>
+    </Dialog>
+</c:FragmentDefinition>
