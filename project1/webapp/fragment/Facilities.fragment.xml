@@ -55,8 +55,7 @@
                     placeholder="Enter Facility Name"
                     maxLength="60"
                     />
-               
-              
+
                 <Label
                     text="Type"
                     required="true"

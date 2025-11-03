@@ -1,0 +1,81 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+    xmlns:smartField="sap.ui.comp.smartfield"
+>
+    <Panel
+        headerText="General Information"
+        expandable="false"
+        class="customPanelHeader"
+    >
+        <f:SimpleForm
+            editable="true"
+            layout="ColumnLayout"
+            columnsM="3"
+            columnsL="4"
+            columnsXL="6"
+        >
+            <f:content>
+                <!-- Booking Details -->
+                <core:Title text="Room Booking Details" />
+                <Input value="U002" visible="false"/>
+               <Label text="Desired Room Type" required="true" />
+                            <Input id="idRoomType1" value="{HostelModel>/RoomType}" editable="false" width="100%" />
+
+                            <Label text="Price" required="true" />
+                            <Input id="idPrice2" value="{HostelModel>/Price}" editable="false" width="100%" />
+                
+                 <Label text="Payment Method" required="true" />
+                            <ComboBox
+                                id="idPaymentMethod1"
+                                placeholder="Select Payment Method"
+                                selectedKey="{HostelModel>/PaymentType}"
+                                width="100%"
+                               selectionChange="onFieldValidation"
+                            >
+                                <core:ListItem key="Yearly" text="Yearly" />
+                                <core:ListItem key="Monthly" text="Monthly" />
+                                <core:ListItem key="Daily" text="Daily" />
+                            </ComboBox>
+                <!-- Project Address -->
+                <core:Title text="Select Person" />
+               <Label text="No of Persons" required="true" />
+                            <ComboBox
+                                id="id_Noofperson1"
+                                placeholder="Select Person"
+                                selectedKey="{HostelModel>/Person}"
+                               selectionChange="onNoOfPersonSelect"
+                                width="100%"
+                                change="onFieldValidation"
+                            >
+                                <core:ListItem key="1" text="1" />
+                                <core:ListItem key="2" text="2" />
+                            </ComboBox>
+
+                <!-- Site Contact -->
+                <core:Title text="Dates" />
+                <Label text="Start Date" required="true" />
+                            <DatePicker
+                                id="idStartDate1"
+                                value="{HostelModel>/StartDate}"
+                                valueFormat="dd/MM/yyyy"
+                                displayFormat="dd/MM/yyyy"
+                                change="onFieldValidation"
+                                width="100%"
+                            />
+
+                            <Label text="End Date" required="true" />
+                            <DatePicker
+                                id="idEndDate1"
+                                value="{HostelModel>/EndDate}"
+                                valueFormat="dd/MM/yyyy"
+                                displayFormat="dd/MM/yyyy"
+                                change="onFieldValidation"
+                                width="100%"
+                            />
+    
+            </f:content>
+        </f:SimpleForm>
+    </Panel>
+</core:FragmentDefinition>

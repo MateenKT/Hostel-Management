@@ -1,0 +1,45 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+    xmlns:smartField="sap.ui.comp.smartfield"
+>
+    <Panel
+        headerText="General Information"
+        expandable="false"
+        class="customPanelHeader"
+    >
+        <f:SimpleForm
+            editable="true"
+            layout="ColumnLayout"
+            columnsM="3"
+            columnsL="4"
+            columnsXL="6"
+        >
+            <f:content>
+                <!-- Booking Details -->
+                <core:Title text="{i18n>bookingDetailsTitle}" />
+               <Label text="Desired Room Type" required="true" />
+                            <Text id="idRoomType2" text="{HostelModel>/RoomType}"  />
+
+                            <Label text="Price" required="true" />
+                            <Text id="idPrice3" text="{HostelModel>/Price}"   />
+                
+                 <Label text="Payment Method" required="true" />
+                            <Text text="{HostelModel>/PaymentType}"/>
+                <!-- Project Address -->
+                <core:Title text="Select Person" />
+               <Label text="No of Persons" required="true" />
+                           <Text text="{HostelModel>/Person}"/>
+
+                <!-- Site Contact -->
+                <core:Title text="Dates" />
+                <Label text="Start Date" required="true" />
+                           <Text text="{HostelModel>/StartDate}"/>
+                            <Label text="End Date" required="true" />
+                           <Text text="{HostelModel>/EndDate}"/>
+             
+            </f:content>
+        </f:SimpleForm>
+    </Panel>
+</core:FragmentDefinition>

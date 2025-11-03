@@ -442,3 +442,80 @@
     color: white !important;
     border-radius: 8px;
 }
+/* header */
+.customRedBar {
+    background-color: #1bb2bf !important;
+    color: white !important;
+    height: 40px !important;
+    /* Set your desired height */
+    min-height: 40px !important;
+    line-height: 40px !important;
+    /* Vertically center text/icons if needed */
+}
+.customRedBar .sapMBtnIcon {
+    color: white !important;
+    fill: white !important;
+}
+.customPanelHeader .sapMPanelHdr {
+    background-color:#1bb2bf  !important;
+    color: white !important;
+    font-weight: bold !important;
+    border-radius: 0 !important;
+}
+
+.customPanelHeader {
+    border-radius: 0 !important;
+}
+
+/* Image + Label container */
+.imageContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* Image full size */
+.serviceImage {
+  object-fit: cover;
+  border-radius: 8px;
+  margin-top: 10px !important;
+}
+
+/* Label over image */
+.serviceLabel {
+  position: absolute !important;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #e74c3c !important;
+  color: #fff !important;
+  font-weight: bold !important;
+  text-align: center !important;
+  padding: 10px 0 !important;
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px;
+  text-decoration: none !important;
+}
+
+/* Main card style */
+.serviceCard {
+  position: relative;
+  width: 264px;
+  height: 178px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.serviceCard:hover {
+  transform: scale(1.03);
+}
+
+/* Selected state */
+.serviceCardSelected .serviceLabel {
+  background-color: #b80000 !important;
+}
+

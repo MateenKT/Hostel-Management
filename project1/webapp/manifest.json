@@ -125,6 +125,13 @@
           "target": [
             "TargetBookRoom"
           ]
+        },
+         {
+          "name": "RouteBookRoomSummary",
+          "pattern": "BookRoomSummary",
+          "target": [
+            "TargetBookRoomSummary"
+          ]
         }
       ],
       "targets": {
@@ -176,6 +183,13 @@
           "clearControlAggregation": false,
           "viewId": "Book_Room",
           "viewName": "Book_Room"
+        },
+         "TargetBookRoomSummary": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "Book_RoomSummary",
+          "viewName": "Book_RoomSummary"
         }
       }
     },

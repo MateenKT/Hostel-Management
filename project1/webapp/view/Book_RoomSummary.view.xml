@@ -1,0 +1,79 @@
+<mvc:View
+    controllerName="sap.ui.com.project1.controller.Book_RoomSummary"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns="sap.m"
+    xmlns:layout="sap.ui.layout"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+    xmlns:object="sap.uxap"
+>
+    <VBox class="sapUiMediumMarginBottom">
+        <core:Fragment
+            fragmentName="sap.ui.com.project1.fragment.GeneralInfoDisplay"
+            type="XML"
+        />
+    </VBox>
+    <VBox class="sapUiMediumMarginBottom">
+        
+     
+              
+
+
+    </VBox>
+     <!--<VBox class="sapUiMediumMarginBottom">
+        <VBox
+            visible="{= ${oTCModel>/Visiblity/Services/TrafficManagement} || ${oTCModel>/Visiblity/Services/TrafficManagementVehicles} }"
+        >
+            <core:Fragment
+                fragmentName="com.sap.winslow.customerportal.customerportal.fragment.Traffic_Control.PermitDisp"
+                type="XML"
+            />
+        </VBox>
+        <VBox
+            visible="{= ${oTCModel>/Visiblity/Services/TrafficManagement} || ${oTCModel>/Visiblity/Services/TrafficManagementVehicles} }"
+        >
+            <core:Fragment
+                fragmentName="com.sap.winslow.customerportal.customerportal.fragment.Traffic_Control.NonSpecificServiceDisp"
+                type="XML"
+            />
+        </VBox>
+        <VBox visible="{oTCModel>/Visiblity/Services/TrafficManagement}">
+            <core:Fragment
+                fragmentName="com.sap.winslow.customerportal.customerportal.fragment.Traffic_Control.TrafficManagementDisp"
+                type="XML"
+            />
+        </VBox>
+
+        <VBox
+            visible="{oTCModel>/Visiblity/Services/TrafficManagementVehicles}"
+        >
+            <core:Fragment
+                fragmentName="com.sap.winslow.customerportal.customerportal.fragment.Traffic_Control.TrafficControlVehiclesDisp"
+                type="XML"
+            />
+        </VBox>
+
+        <VBox visible="{oTCModel>/Visiblity/Services/TrafficEquipment}">
+            <core:Fragment
+                fragmentName="com.sap.winslow.customerportal.customerportal.fragment.Traffic_Control.TrafficEquipmentDisp"
+                type="XML"
+            />
+        </VBox>
+
+        <VBox visible="{oTCModel>/Visiblity/Services/SiteChecks}">
+            <core:Fragment
+                fragmentName="com.sap.winslow.customerportal.customerportal.fragment.Traffic_Control.SiteChecksDisp"
+                type="XML"
+            />
+        </VBox>
+
+        <VBox visible="{oTCModel>/Visiblity/Services/Aftercare}">
+            <core:Fragment
+                fragmentName="com.sap.winslow.customerportal.customerportal.fragment.Traffic_Control.AftercareDisp"
+                type="XML"
+            />
+        </VBox> -->
+
+       
+    <!-- </VBox> -->
+</mvc:View>

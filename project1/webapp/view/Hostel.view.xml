@@ -95,7 +95,7 @@
         <Text class="description-text" text="{VisibilityModel>/doubleDesc}"/>
 		   <Text class="description-text" text="The price will be {VisibilityModel>/doublePrice}"/>
         <HBox justifyContent="Center" >
-            <Button text="Book Now" press="onDoubleRoomPress" width="200px">
+            <Button text="Book Now" press="onSingleRoomPress" width="200px">
 				 <customData>
         <core:CustomData key="roomType" value="Double Bed" />
              </customData>

@@ -667,7 +667,7 @@ sap.ui.define([
 
             }
         },
-        onSingleRoomPress: async function (oEvent) {
+        onSingleRoomPress: async function () {
               var oRouter = this.getOwnerComponent().getRouter();
                  oRouter.navTo("RouteBookRoom");
             // if (!this._oLoggedInUser) {
