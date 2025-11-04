@@ -1,0 +1,93 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+>
+    <Panel
+        headerText="{= 'Personal Information - ' + ${HostelModel>FullName} }"
+        expandable="false"
+        class="customPanelHeader"
+    >
+        <f:SimpleForm
+            editable="false"
+            layout="ColumnLayout"
+            columnsM="1"
+            columnsL="2"
+            columnsXL="2"
+            labelSpanXL="4"
+            labelSpanL="3"
+            labelSpanM="4"
+            labelSpanS="12"
+        >
+            <f:content>
+                <core:Title text="" />
+
+                <Label text="Full Name" />
+                <Text text="{HostelModel>FullName}" />
+
+                <Label text="Date of Birth" />
+                <Text text="{HostelModel>DateOfBirth}" />
+
+                <Label text="Gender" />
+                <Text text="{HostelModel>Gender}" />
+
+                <Label text="Mobile Number" />
+                <Text text="{HostelModel>MobileNo}" />
+
+                <Label text="Email" />
+                <Text text="{HostelModel>CustomerEmail}" />
+
+                <Label text="Country" />
+                <Text text="{HostelModel>Country}" />
+
+                <Label text="State" />
+                <Text text="{HostelModel>State}" />
+
+                <Label text="City" />
+                <Text text="{HostelModel>City}" />
+                
+            </f:content>
+        </f:SimpleForm>
+       <VBox
+    visible="{= ${HostelModel>Facilities/SelectedFacilities}.length > 0 }"
+    class="sapUiSmallMarginTop"
+>
+    <Toolbar>
+        <Title text="Selected Facilities" level="H4" />
+    </Toolbar>
+
+    <!-- Display selected facilities as cards side by side -->
+    <FlexBox
+        wrap="Wrap"
+        alignItems="Start"
+        justifyContent="Start"
+        class="sapUiSmallMarginTop"
+        items="{
+            path: 'HostelModel>Facilities/SelectedFacilities'
+        }"
+    >
+        <VBox
+            width="200px"
+            height="200px"
+            class="sapUiSmallMargin serviceCard"
+            alignItems="Center"
+            justifyContent="Center"
+        >
+            <Image
+                src="{HostelModel>Image}"
+                width="180px"
+                height="140px"
+                class="serviceImage"
+                densityAware="false"
+            />
+            <Text
+                text="{HostelModel>FacilityName}"
+                class="sapUiTinyMarginTop facilityNameText"
+            />
+        </VBox>
+    </FlexBox>
+</VBox>
+
+
+    </Panel>
+</core:FragmentDefinition>

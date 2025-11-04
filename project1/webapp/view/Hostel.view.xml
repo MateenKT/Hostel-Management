@@ -74,11 +74,11 @@
         <HBox justifyContent="Center" class="section-image">
             <Image src="{VisibilityModel>/singleImg}" width="380px" height="320px" class="section-image" />
         </HBox>
-        <Text class="hr-text" text="Single Bed Room"/>
+        <Text class="hr-text" text="{VisibilityModel>/singleName}"/>
         <Text class="description-text" text="{VisibilityModel>/singleDesc}"/>
         <Text class="description-text" text="The price will be {VisibilityModel>/singlePrice}"/>
         <HBox justifyContent="Center">
-            <Button text="Book Now" press="onSingleRoomPress" width="200px" >  
+            <Button text="Book Now" press="onRoomBookPress" width="200px" >  
 			 <customData>
         <core:CustomData key="roomType" value="Single Bed" />
              </customData>
@@ -91,11 +91,11 @@
         <HBox justifyContent="Center" class="section-image">
             <Image src="{VisibilityModel>/doubleImg}" width="380px" height="320px" class="section-image" />
         </HBox>
-        <Text class="hr-text" text="Double Bed Room"/>
+        <Text class="hr-text" text="{VisibilityModel>/doubleName}"/>
         <Text class="description-text" text="{VisibilityModel>/doubleDesc}"/>
 		   <Text class="description-text" text="The price will be {VisibilityModel>/doublePrice}"/>
         <HBox justifyContent="Center" >
-            <Button text="Book Now" press="onSingleRoomPress" width="200px">
+            <Button text="Book Now" press="onRoomBookPress" width="200px">
 				 <customData>
         <core:CustomData key="roomType" value="Double Bed" />
              </customData>
@@ -103,33 +103,17 @@
 
         </HBox>
     </VBox>
-	<!-- <VBox visible="{VisibilityModel>/doubleVisible}" class="HostelCard" backgroundDesign="Solid">
-        <HBox justifyContent="Center" class="section-image">
-            <Image src="./image/DoubleBed.png" width="380px" height="320px" class="section-image" />
-        </HBox>
-        <Text class="hr-text" text="Triple Bed Room"/>
-        <Text class="description-text" text="{VisibilityModel>/doubleDesc}"/>
-		   <Text class="description-text" text="The price will be {VisibilityModel>/doublePrice}"/>
-        <HBox justifyContent="Center" >
-            <Button text="Book Now" press="onDoubleRoomPress" width="200px">
-				 <customData>
-        <core:CustomData key="roomType" value="Triple Bed" />
-             </customData>
-</Button>
-
-        </HBox>
-    </VBox> -->
-
+	
     <!-- Four Bed -->
     <VBox visible="{VisibilityModel>/fourVisible}" class="HostelCard" backgroundDesign="Translucent">
         <HBox justifyContent="Center" class="section-image" >
             <Image src="{VisibilityModel>/fourImg}"  class="section-image" />
         </HBox>
-        <Text class="hr-text" text="Four Bed Room"/>
+        <Text class="hr-text" text="{VisibilityModel>/fourName}"/>
         <Text class="description-text " text=""/>
 		 <Text class="description-text" text="The price will be {VisibilityModel>/fourPrice}"/>
         <HBox justifyContent="Center">
-            <Button text="Book Now" press="onFourRoomPress" width="200px">
+            <Button text="Book Now" press="onRoomBookPress" width="200px">
 				 <customData>
         <core:CustomData key="roomType" value="Four Bed" />
              </customData>
@@ -137,9 +121,6 @@
         </HBox>
     </VBox>
 </l:Grid>
-
-    
-	
 
                     </Page>
 					<Page id="idFacilities" showHeader="false" class="Products_list sapUiTinyMargin">

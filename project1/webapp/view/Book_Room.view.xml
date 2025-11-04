@@ -104,15 +104,15 @@
                 <ToolbarSpacer />
                 <Button
                     text="Submit"
-                    visible="false"
+                    visible="{OBTNModel>/Submit}"
                     type="Emphasized"
-                    press="TC_onSubmitPress"
+                    press="onSubmitPress"
                 />
                 <Button
-                    text="{i18n>cancleButText}"
-                    visible="false"
+                    text="Cancel"
+                    visible="{OBTNModel>/Cancel}"
                     type="Transparent"
-                    press="TC_onCancelPress"
+                    press="onCancelPress"
                 />
                 <Button
                     text="Previous"

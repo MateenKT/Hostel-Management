@@ -13,18 +13,18 @@
             editable="true"
             layout="ColumnLayout"
             columnsM="3"
-            columnsL="4"
+            columnsL="3"
             columnsXL="6"
         >
             <f:content>
                 <!-- Booking Details -->
                 <core:Title text="Room Booking Details" />
-                <Input value="U002" visible="false"/>
+              <!-- <Input id="idUserID" value="{HostelModel>/UserID}" visible="true" /> -->
                <Label text="Desired Room Type" required="true" />
                             <Input id="idRoomType1" value="{HostelModel>/RoomType}" editable="false" width="100%" />
-
-                            <Label text="Price" required="true" />
-                            <Input id="idPrice2" value="{HostelModel>/Price}" editable="false" width="100%" />
+                               
+                            <!-- <Label text="Price" required="true" />
+                            <Input id="idPrice2" value="{HostelModel>/Price}" editable="false" width="100%" /> -->
                 
                  <Label text="Payment Method" required="true" />
                             <ComboBox
@@ -38,7 +38,7 @@
                                 <core:ListItem key="Monthly" text="Monthly" />
                                 <core:ListItem key="Daily" text="Daily" />
                             </ComboBox>
-                <!-- Project Address -->
+              
                 <core:Title text="Select Person" />
                <Label text="No of Persons" required="true" />
                             <ComboBox

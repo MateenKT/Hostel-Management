@@ -79,10 +79,33 @@ sap.ui.define([
              setTimeout(() => {
                 this._loadFilteredData("KLB01");
             }, 100);
+             setTimeout(() => {
+                this.onReadcallforRoom()
+            }, 100);
         },
         onUserlivechange: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
         },
+        onReadcallforRoom: async function () {
+    try {
+        const oView = this.getView();
+
+        //  Call backend to get all room data
+        const oResponse = await this.ajaxReadWithJQuery("HM_Rooms", {});
+        const aRooms = oResponse?.data || [];
+        const oRoomModel = new JSONModel({
+            Rooms: aRooms
+        });
+
+        //  Bind model to the view
+        oView.setModel(oRoomModel, "RoomCountModel");
+
+
+    } catch (err) {
+        console.error("Error reading rooms:", err);
+        sap.m.MessageToast.show("Failed to load room data.");
+    }
+},
 
         _loadBranchCode: async function () {
             const oView = this.getView();
@@ -93,6 +116,7 @@ sap.ui.define([
 
 
         _loadFilteredData: async function (sBranchCode, sACType) {
+
     try {
         const oView = this.getView();
         // Call backend to get all room data for this branch
@@ -140,6 +164,10 @@ sap.ui.define([
 
         // Prepare VisibilityModel
         const oVisibilityData = {
+
+            singleName: singleRoom?.Name || "Single Bed",
+            doubleName: doubleRoom?.Name || "Double Bed",
+            fourName: fourRoom?.Name || "Four Bed",
             singleVisible: !!singleRoom,
             doubleVisible: !!doubleRoom,
             fourVisible: !!fourRoom,
@@ -161,15 +189,14 @@ sap.ui.define([
         };
 
         // Bind models
-        oView.setModel(new sap.ui.model.json.JSONModel(oVisibilityData), "VisibilityModel");
-        oView.setModel(new sap.ui.model.json.JSONModel({ Rooms: matchedRooms }), "RoomModel");
+        oView.setModel(new JSONModel(oVisibilityData), "VisibilityModel");
+        oView.setModel(new JSONModel({ Rooms: matchedRooms }), "RoomModel");
 
     } catch (error) {
         console.error("Data Load Failed:", error);
         sap.m.MessageToast.show("Error fetching room data.");
     }
 },
-
 
         onTabSelect: function (oEvent) {
             var oItem = oEvent.getParameter("item");
@@ -179,66 +206,6 @@ sap.ui.define([
             var page = this.byId(sKey);
             if (page && page.scrollTo) page.scrollTo(0, 0);
 
-            // --- Open popup only when "Rooms" tab is selected ---
-            // if (sKey === "idRooms") {
-            //     var that = this;
-
-            //     // // Initialize BranchModel if not yet done
-            //     // if (!this.getView().getModel("BranchModel")) {
-            //     //     const aBranches = [
-            //     //         { BranchCode: "KLB01", BranchName: "Kalaburgi" },
-            //     //         { BranchCode: "BR002", BranchName: "Mumbai" },
-            //     //         { BranchCode: "BR003", BranchName: "Nagpur" },
-            //     //         { BranchCode: "BR004", BranchName: "Nashik" }
-            //     //     ];
-            //     //     const oBranchModel = new sap.ui.model.json.JSONModel({ Branches: aBranches });
-            //     //     this.getView().setModel(oBranchModel, "BranchModel");
-            //     // }
-
-            //     // Create popup dynamically (only once)
-            //     if (!this._oLocationDialog) {
-            //         this._oLocationDialog = new sap.m.Dialog({
-            //             title: "Search Rooms by Location",
-            //             type: "Message",
-            //             contentWidth: "400px",
-            //             draggable: true,
-            //             resizable: true,
-            //             content: [
-            //                 new sap.m.VBox({
-            //                     width: "100%",
-            //                     items: [
-            //                         new sap.m.Label({ text: "Select Location", labelFor: "idBranchCombo" }),
-            //                         new sap.m.ComboBox("idBranchCombo", {
-            //                             width: "100%",
-            //                             placeholder: "Select City...",
-            //                             items: {
-            //                                 path: "sBRModel>/",
-            //                                 template: new sap.ui.core.Item({
-            //                                     key: "{sBRModel>BranchID}",
-            //                                     text: "{sBRModel>Name}",
-            //                                 })
-            //                             }
-            //                         }),
-
-            //                         new sap.m.Button({
-            //                             text: "Search",
-            //                             type: "Emphasized",
-            //                             icon: "sap-icon://search",
-            //                             press: function () {
-            //                                 that.onSearchRooms();
-            //                             }
-            //                         })
-            //                     ]
-            //                 })
-            //             ]
-            //         });
-
-            //         this.getView().addDependent(this._oLocationDialog);
-            //     }
-
-            //     // Open popup every time the tab is selected
-            //     this._oLocationDialog.open();
-            // }
         },
 
        onpressFilter: function () {
@@ -522,12 +489,13 @@ sap.ui.define([
             var oData = oModel.getData();
 
             // Get input values
+            var sUserid = sap.ui.getCore().byId("signInuserid").getValue();
             var sUsername = sap.ui.getCore().byId("signInusername").getValue();
             var sPassword = sap.ui.getCore().byId("signinPassword").getValue();
 
             // Basic validation example
             if (
-                !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID") ||
+               !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInuserid"), "ID")|| !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID") ||
                 !utils._LCvalidatePassword(sap.ui.getCore().byId("signinPassword"), "ID")
             ) {
                 sap.m.MessageToast.show("Make sure all the mandatory fields are filled/validate the entered value");
@@ -542,7 +510,7 @@ sap.ui.define([
 
                 //  Compare user-entered credentials with database records
                 const oMatchedUser = aUsers.find(user =>
-                    user.UserName === sUsername && user.Password === btoa(sPassword)
+                   user.UserID === sUserid && user.UserName === sUsername && user.Password === btoa(sPassword)
                 );
 
                 if (oMatchedUser) {
@@ -554,13 +522,13 @@ sap.ui.define([
 
                     if (oLoginBtn) oLoginBtn.setVisible(false);
                     if (oAvatar) oAvatar.setVisible(true);
-
+   
                     //  Store logged-in user info for later use (Profile, Dashboard, etc.)
                     this._oLoggedInUser = oMatchedUser;
 
                     //  Optionally store in a global model for reuse
                     const oUserModel = new JSONModel(oMatchedUser);
-                    sap.ui.getCore().setModel(oUserModel, "LoggedUser");
+                    sap.ui.getCore().setModel(oUserModel, "HostelModel");
 
                     //  Clear fields
                     sap.ui.getCore().byId("signInusername").setValue("");
@@ -664,46 +632,64 @@ sap.ui.define([
 
             } else {
                 this.FCIA_Dialog.open();
-
             }
         },
-        onSingleRoomPress: async function () {
-              var oRouter = this.getOwnerComponent().getRouter();
-                 oRouter.navTo("RouteBookRoom");
-            // if (!this._oLoggedInUser) {
-            //     sap.m.MessageBox.show(
-            //         "Please sign in to book a room.",
-            //         {
-            //             icon: sap.m.MessageBox.Icon.WARNING,
-            //             title: "Authentication Required",
-            //             actions: ["Continue", "OK"],
-            //             emphasizedAction: "Continue",
-            //             onClose: async (sAction) => {
-            //                 if (sAction === "OK") {
+      
+     onRoomBookPress: function (oEvent) {
+    try {
+        // Get the clicked button and its custom data
+        const oButton = oEvent.getSource();
+        const sRoomType = oButton.data("roomType"); 
 
-            //                     await this.onpressLogin();
-            //                 } else {
-            //                     await this.Bookfragment();
-            //                 }
-            //             }
-            //         }
-            //     );
-            //     return;
-            // }
+        // Get VisibilityModel from the view
+        const oVisibilityModel = this.getView().getModel("VisibilityModel");
+        if (!oVisibilityModel) {
+            sap.m.MessageToast.show("Room details not found.");
+            return;
+        }
 
-            // // If logged in, continue with room booking logic
-            // const oButton = oEvent.getSource();
-            // const sRoomType = oButton.data("roomType");
-            // const oVisibilityData = this.getView().getModel("VisibilityModel").getData();
+        // Get logged-in user ID
+        const sUserID = sap.ui.getCore().getModel("HostelModel")?.getProperty("/UserID") || "";
 
-            // await this.Bookfragment();
+        // Get the correct price based on room type
+        let sPrice = "";
+        switch (sRoomType) {
+            case "Single Bed":
+                sPrice = oVisibilityModel.getProperty("/singlePrice");
+                break;
+            case "Double Bed":
+                sPrice = oVisibilityModel.getProperty("/doublePrice");
+                break;
+            case "Four Bed":
+                sPrice = oVisibilityModel.getProperty("/fourPrice");
+                break;
+            default:
+                sPrice = "";
+        }
 
-            // sap.ui.getCore().byId("idRoomType").setValue(sRoomType);
-            // sap.ui.getCore().byId("idPrice1").setValue(oVisibilityData.singlePrice);
-            // sap.ui.getCore().byId("idFullName").setValue(this._oLoggedInUser.UserName);
-            // sap.ui.getCore().byId("idE-mail").setValue(this._oLoggedInUser.EmailID);
-            // sap.ui.getCore().byId("idMobile").setValue(this._oLoggedInUser.MobileNo);
-        },
+        // Create or update global HostelModel
+        const oHostelModel = new JSONModel({
+            UserID: sUserID,
+            RoomType: sRoomType,
+            Price: sPrice,
+            PaymentType: "",
+            Person: "",
+            StartDate: "",
+            EndDate: ""
+        });
+
+        sap.ui.getCore().setModel(oHostelModel, "HostelModel");
+
+        // Navigate to booking page
+        this.getOwnerComponent().getRouter().navTo("RouteBookRoom");
+
+    } catch (err) {
+        console.error("Booking navigation error:", err);
+        sap.m.MessageToast.show("Error while booking room.");
+    }
+},
+
+
 
         onCancelDialog: function () {
             this.FCIA_Dialog.close();
@@ -765,97 +751,7 @@ sap.ui.define([
             this.FCIA_Dialog.close();
             sap.ui.getCore().byId("idHostelWizardDialog").close();
         },
-        //     onSaveDialog:function(){
-        //             var payload=this.getView().getModel("HostelModel").getData();
-        //              payload.DateOfBirth=payload.DateOfBirth.split("/").reverse().join("-");
-
-
-        //         $.ajax({
-        //     url: "https://rest.kalpavrikshatechnologies.com/HM_Customer",
-        //     method: "POST",
-        //     contentType: "application/json",
-        //      headers: {
-        //       name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-        //       password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-        //      },
-        //     data: JSON.stringify({data:payload}),
-        //     success: function(response) {
-        //     }
-        //     })
-        // },
-        // onSaveDialog: function () {
-        //     var Data = this.getView().getModel("HostelModel").getData();
-
-
-        //     var payload = {
-        //         CustomerName: Data.CustomerName,
-        //         MobileNo: Data.MobileNo,
-        //         Gender: Data.Gender,
-        //         DateOfBirth: Data.DateOfBirth.split("/").reverse().join("-"),
-        //         CustomerEmail: Data.CustomerEmail,
-        //         Country: Data.Country,
-        //         State: Data.State,
-        //         City: Data.City,
-        //         PermanentAddress: Data.Address,
-        //         Booking: {
-        //             PaymentType: Data.PaymentType,
-        //             StartDate: Data.StartDate.split("/").reverse().join("-"),
-        //             EndDate: Data.EndDate.split("/").reverse().join("-"),
-        //             RentPrice: Data.Price,
-        //             Status: "New",
-        //         }
-
-
-        //     }
-
-
-        //     var oFileUploader = sap.ui.getCore().byId("idFileUploader");
-        //     var aFiles = oFileUploader.oFileUpload.files;
-
-        //     // if (!aFiles.length) {
-        //     //     sap.m.MessageBox.error("Please select a file to upload.");
-        //     //     return;
-        //     // }
-
-        //     var oFile = aFiles[0]; // single file
-        //     var reader = new FileReader();
-
-        //     reader.onload = function (e) {
-        //         var sBase64 = e.target.result.split(",")[1];
-        //         payload.Documents = [
-        //             {
-        //                 DocumentType: "ID Proof",
-        //                 File: sBase64,
-        //                 FileName: oFile.name[0],
-        //                 FileType: oFile.type,
-
-        //             }
-        //         ];
-        //         //    Documents: "Uploaded via web",
-        //         //                 EmployeeID: "emp-001"
-        //         $.ajax({
-        //             url: "https://rest.kalpavrikshatechnologies.com/HM_Customer",
-        //             method: "POST",
-        //             contentType: "application/json",
-        //             headers: {
-        //                 name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-        //                 password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-        //             },
-        //             data: JSON.stringify({ data: payload }),
-        //             success: function (response) {
-        //                 sap.m.MessageToast.show("Booking successfully!");
-
-        //                 oFileUploader.setValue("");
-
-        //             }.bind(this),
-        //             error: function (err) {
-        //                 sap.m.MessageBox.error("Error uploading data or file.");
-        //             }
-        //         });
-        //     };
-        //     this.FCIA_Dialog.close();
-        //     reader.readAsDataURL(oFile);
-        // },
+        
         onDoubleRoomPress: function (oEvent) {
 
             // var oRouter = this.getOwnerComponent().getRouter();

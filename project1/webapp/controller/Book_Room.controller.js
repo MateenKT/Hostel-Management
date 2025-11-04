@@ -10,15 +10,24 @@ sap.ui.define([
 	return BaseController.extend("sap.ui.com.project1.controller.Book_Room", {
 
             onInit: function () {
-               var oModel = new JSONModel({
-        RoomType: "Single Bed",
-        Price: "10000",
-        PaymentType: "",
-        Person: "",
-        StartDate: "",
-        EndDate: ""
-    });
-    this.getView().setModel(oModel, "HostelModel");
+                  let oHostelModel = sap.ui.getCore().getModel("HostelModel");
+
+    if (!oHostelModel) {
+        // If not found, create a fallback model
+        oHostelModel = new JSONModel({
+            UserID: "",
+            RoomType: "",
+            Price: "",
+            PaymentType: "",
+            Person: "",
+            StartDate: "",
+            EndDate: ""
+        });
+        sap.ui.getCore().setModel(oHostelModel, "HostelModel");
+    }
+
+    // Set it on the view
+    this.getView().setModel(oHostelModel, "HostelModel");
                
                   setTimeout(() => {
                 this._LoadFacilities()
@@ -29,11 +38,15 @@ sap.ui.define([
                 Submit:false,
                 Cancel:false,
                 NXTVis:true,
-                PERVIOUSVIS:false
+                PERVIOUSVIS:false,
+                
 
             })
             this.getView().setModel(oBTn,"OBTNModel")
-
+                 
+            //       setTimeout(() => {
+            //   this.onReadcallforRoom();
+            // }, 100);
             },
           _LoadFacilities: async function () {
     const oView = this.getView();
@@ -67,9 +80,30 @@ sap.ui.define([
     }));
 
     //  Wrap in object for proper binding
-    const oFacilityModel = new sap.ui.model.json.JSONModel({ Facilities: aFinalFacilities });
+    const oFacilityModel = new JSONModel({ Facilities: aFinalFacilities });
     oView.setModel(oFacilityModel, "FacilityModel");
 },
+// onReadcallforRoom: async function () {
+//     try {
+//         const oView = this.getView();
+
+//         //  Call backend to get all room data
+//         const oResponse = await this.ajaxReadWithJQuery("HM_Rooms", {});
+//         const aRooms = oResponse?.data || [];
+//         const oRoomModel = new JSONModel({
+//             Rooms: aRooms
+//         });
+
+//         //  Bind model to the view
+//         oView.setModel(oRoomModel, "RoomCountModel");
+
+
+//     } catch (err) {
+//         console.error("Error reading rooms:", err);
+//         sap.m.MessageToast.show("Failed to load room data.");
+//     }
+// },
+
 
 onNoOfPersonSelect: async function (oEvent) {
     const iPersons = parseInt(oEvent.getSource().getSelectedKey());
@@ -77,13 +111,14 @@ onNoOfPersonSelect: async function (oEvent) {
     const oModel = this.getView().getModel("HostelModel");
     const oFacilityModel = this.getView().getModel("FacilityModel");
     const oData = oModel.getData();
-
+    const sUserID = oData.UserID;
     // Reset previous data and UI
     oData.Persons = [];
     oVBox.removeAllItems();
 
     for (let i = 0; i < iPersons; i++) {
         oData.Persons.push({
+            UserID: sUserID,
             FullName: "",
             DateOfBirth: "",
             Gender: "",
@@ -113,10 +148,24 @@ onNoOfPersonSelect: async function (oEvent) {
             columnsM: 1,
             content: [
                 new sap.m.Label({ text: "Full Name", required: true }),
+                 new sap.m.ComboBox({
+                    selectedKey: "{HostelModel>/Persons/" + i + "/Salutation}",
+                    items: [
+                        new sap.ui.core.ListItem({ key: "Mr", text: "Mr" }),
+                        new sap.ui.core.ListItem({ key: "Mrs", text: "Mrs" })
+                    ]
+                }),
                 new sap.m.Input({
                     value: "{HostelModel>/Persons/" + i + "/FullName}",
                     placeholder: "Enter full name"
                 }),
+                 new sap.m.Label({ text: "UserID", required: true ,visible:true}),
+              new sap.m.Input({
+    value: "{HostelModel>/Persons/" + i + "/UserID}",
+    editable: false,
+    visible: true
+}),
+
                 new sap.m.Label({ text: "Date of Birth", required: true }),
                 new sap.m.DatePicker({
                     value: "{HostelModel>/Persons/" + i + "/DateOfBirth}",
@@ -133,6 +182,13 @@ onNoOfPersonSelect: async function (oEvent) {
                     ]
                 }),
                 new sap.m.Label({ text: "Mobile Number", required: true }),
+                 new sap.m.ComboBox({
+                    selectedKey: "{HostelModel>/Persons/" + i + "/StdCode}",
+                    items: [
+                        new sap.ui.core.ListItem({ key: "+91", text: "+91" }),
+                       
+                    ]
+                }),
                 new sap.m.Input({
                     value: "{HostelModel>/Persons/" + i + "/MobileNo}",
                     placeholder: "Enter 10-digit mobile number",
@@ -162,14 +218,24 @@ onNoOfPersonSelect: async function (oEvent) {
                 new sap.m.Input({
                     value: "{HostelModel>/Persons/" + i + "/City}",
                     placeholder: "Enter City"
+                }),
+                new sap.m.Label({ text: "Address", required: true }),
+
+                new sap.m.TextArea({
+                    value: "{HostelModel>/Persons/" + i + "/Address}",
+                    placeholder: "Enter Permanent Address",
+                    rows:3
                 })
             ]
         });
 
-        // ---- Facilities Section ----
+       // ---- Facilities Section ----
 const oFacilitiesBox = new sap.m.VBox({
     width: "100%",
+    style: "margin-top: 2rem;", // Adds spacing from top
+    visible: "{= ${FacilityModel>/Facilities}.length > 0 }", // Hide section if no facilities
     items: [
+        // Header
         new sap.m.Toolbar({
             content: [
                 new sap.m.Title({
@@ -182,72 +248,116 @@ const oFacilitiesBox = new sap.m.VBox({
             styleClass: "facilityHeader"
         }),
 
+        // Facility cards container
         new sap.m.FlexBox({
             wrap: "Wrap",
             alignItems: "Start",
             justifyContent: "SpaceAround",
             items: {
                 path: "FacilityModel>/Facilities",
-             template: new sap.m.VBox({
-    width: "264px",
-    height: "178px",
-    alignItems: "Center",
-    justifyContent: "Center",
-    styleClass: "serviceCard",
-    items: [
-        new sap.m.VBox({
-           width: "264px",
-             height: "178px",
-            styleClass: "imageContainer",
-            items: [
-                new sap.m.Image({
-                    src: "{FacilityModel>Image}",
+                template: new sap.m.VBox({
                     width: "264px",
-                    height: "178px",
-                    class: "serviceImage",
-                    densityAware: false,
-                    press: function (oEvent) {
-                        const sFacility = oEvent.getSource().getBindingContext("FacilityModel").getObject().FacilityName;
-                        const aPersons = oModel.getProperty("/Persons");
-                        const aSelected = aPersons[i].Facilities.SelectedFacilities;
-                        const oCard = oEvent.getSource().getParent().getParent();
+                    height: "200px",
+                    alignItems: "Center",
+                    justifyContent: "Center",
+                    styleClass: "serviceCard",
+                    items: [
+                        new sap.m.VBox({
+                            width: "264px",
+                            height: "178px",
+                            styleClass: "imageContainer",
+                            items: [
+                                // Facility image
+                                new sap.m.Image({
+                                    src: "{FacilityModel>Image}",
+                                    width: "264px",
+                                    height: "178px",
+                                    class: "serviceImage",
+                                    densityAware: false,
+                                    press: function (oEvent) {
+                                        const oCtx = oEvent.getSource().getBindingContext("FacilityModel");
+                                        const sFacility = oCtx.getObject().FacilityName;
+                                        const aPersons = oModel.getProperty("/Persons");
+                                        const aSelected = aPersons[i].Facilities.SelectedFacilities;
+                                        const oCard = oEvent.getSource().getParent().getParent();
 
-                        const bAlreadySelected = aSelected.includes(sFacility);
-                        if (bAlreadySelected) {
-                            const idx = aSelected.indexOf(sFacility);
-                            aSelected.splice(idx, 1);
-                            oCard.removeStyleClass("serviceCardSelected");
-                            sap.m.MessageToast.show(sFacility + " removed for Person " + (i + 1));
-                        } else {
-                            aSelected.push(sFacility);
-                            oCard.addStyleClass("serviceCardSelected");
-                            sap.m.MessageToast.show(sFacility + " added for Person " + (i + 1));
-                        }
+                                        const bAlreadySelected = aSelected.includes(sFacility);
+                                       if (bAlreadySelected) {
+    const idx = aSelected.findIndex(f => f.FacilityName === sFacility);
+    aSelected.splice(idx, 1);
+    oCard.removeStyleClass("serviceCardSelected");
+  
+} else {
+    const oFacilityObj = oCtx.getObject(); // contains FacilityName + Image
+    aSelected.push({
+        FacilityName: oFacilityObj.FacilityName,
+        Image: oFacilityObj.Image
+    });
+    oCard.addStyleClass("serviceCardSelected");
+   
+}
 
-                        oModel.refresh(true);
-                    }
-                }),
+                                        oModel.refresh(true);
+                                    }
+                                }),
 
-                // Facility name over image using HTML control
-                new sap.ui.core.HTML({
-                    content:
-                        `<div class="serviceLabel">{FacilityModel>FacilityName}</div>`
-                }).bindElement("FacilityModel>")
-            ]
-        })
-    ]
-})
+                                // Facility name overlay (clickable)
+                                (() => {
+                                    const oHTML = new sap.ui.core.HTML({
+                                        content: `
+                                            <div class="facility-overlay">
+                                                <a href="#" class="facility-overlay-link">{FacilityModel>FacilityName}</a>
+                                            </div>
+                                        `
+                                    }).bindElement("FacilityModel>");
+
+                                    oHTML.addEventDelegate({
+                                        onclick: function (oEvent) {
+                                            const oCtx = oHTML.getBindingContext("FacilityModel");
+                                            const sFacility = oCtx.getObject().FacilityName;
+                                            const aPersons = oModel.getProperty("/Persons");
+                                            const aSelected = aPersons[i].Facilities.SelectedFacilities;
+
+                                            // Find parent VBox (the card)
+                                            const oCard = oHTML.getParent().getParent();
+
+                                            const bAlreadySelected = aSelected.includes(sFacility);
+                                            if (bAlreadySelected) {
+                                                const idx = aSelected.indexOf(sFacility);
+                                                aSelected.splice(idx, 1);
+                                                oCard.removeStyleClass("serviceCardSelected");
+                                               
+                                            } else {
+                                                aSelected.push(sFacility);
+                                                oCard.addStyleClass("serviceCardSelected");
+                                               
+                                            }
+
+                                            oModel.refresh(true);
+                                            oEvent.preventDefault();
+                                        }
+                                    });
+
+                                    return oHTML;
+                                })()
+                            ]
+                        })
+                    ]
+                })
             }
         })
     ]
 });
+
+
+
         // ---- Document Upload Section ----
         const oDocument = new sap.ui.layout.form.SimpleForm({
             editable: true,
             title: "Document Upload",
             layout: "ColumnLayout",
             content: [
-                new sap.m.Label({ text: "Upload Document" }),
+                new sap.m.Label({ text: "Upload ID Proof" }),
                 new sap.ui.unified.FileUploader({
                     width: "100%",
                     customData: [new sap.ui.core.CustomData({ key: "index", value: i })],
@@ -256,7 +366,7 @@ const oFacilitiesBox = new sap.m.VBox({
                         const oFile = oEvent.getParameter("files")[0];
                         if (oFile) {
                             const reader = new FileReader();
-                            reader.onload = function (e) {
+                            reader.onload = function (e) { 
                                 const sBase64 = e.target.result.split(",")[1];
                                 oData.Persons[index].Document = sBase64;
                                 oData.Persons[index].FileName = oFile.name;
@@ -281,29 +391,81 @@ const oFacilitiesBox = new sap.m.VBox({
 },
 
 TC_onDialogNextButton: function () {
-    const oWizard = this.getView().byId("TC_id_wizard");
+    const oView = this.getView();
+    const oWizard = oView.byId("TC_id_wizard");
     const oCurrentStep = oWizard.getCurrentStep();
-    const oBtnModel = this.getView().getModel("OBTNModel");
-    const oGeneralModel = this.getView().getModel("HostelModel");
+    const oHostelModel = oView.getModel("HostelModel");
+    const oBtnModel = oView.getModel("OBTNModel");
 
     oBtnModel.setProperty("/PERVIOUSVIS", true);
 
-    if (oCurrentStep === this.createId("TC_id_stepGeneralInfo")) {
-        const oData = oGeneralModel.getData();
+    //  Step 1: Validate only in Personal Info Step
+    if (oCurrentStep === this.createId("TC_id_stepPersonalInfo")) {
+        const aPersons = oHostelModel.getProperty("/Persons");
 
-        if (!oData.PaymentType || !oData.Person) {
-            sap.m.MessageToast.show("Please fill all required fields before continuing");
+        if (!aPersons || !aPersons.length) {
+            sap.m.MessageToast.show("Please fill personal info before continuing");
             return;
         }
 
-        // Default values if empty
-        if (!oData.RoomType) oData.RoomType = "Single Bed";
-        if (!oData.Price) oData.Price = "10000";
+        const aMandatoryFields = [
+            "FullName", "DateOfBirth", "Gender", "MobileNo",
+            "CustomerEmail", "Country", "State", "City"
+        ];
+
+        let bAllValid = true;
+
+        aPersons.forEach((oPerson, iIndex) => {
+            aMandatoryFields.forEach((sField) => {
+                const sValue = oPerson[sField];
+                const sFieldPath = `/Persons/${iIndex}/${sField}`;
+
+                const aInputs = oView.findElements(true, (oControl) => {
+                    return (
+                        oControl.getBinding("value") &&
+                        oControl.getBinding("value").getPath() === sFieldPath
+                    );
+                });
+
+                const oInput = aInputs[0];
+                if (!sValue || sValue.trim() === "") {
+                    bAllValid = false;
+                    if (oInput) {
+                        oInput.setValueState("Error");
+                        oInput.setValueStateText(sField + " is required");
+                    }
+                } else {
+                    if (oInput) {
+                        oInput.setValueState("None");
+                    }
+                }
+            });
+        });
+
+        if (!bAllValid) {
+            sap.m.MessageBox.warning("Please fill all mandatory fields before proceeding.");
+            return;
+        }
     }
 
+    // Move to next step
     oWizard.nextStep();
-},
 
+    // Get next step ID (after moving)
+    const oNextStep = oWizard.getCurrentStep();
+
+    // Show Submit/Cancel only when in Summary step
+    if (oNextStep === this.createId("id_Summary")) {
+        oBtnModel.setProperty("/Submit", true);
+        oBtnModel.setProperty("/Cancel", true);
+        oBtnModel.setProperty("/NXTVis", false);
+        oBtnModel.setProperty("/PERVIOUSVIS", false);
+    } else {
+        oBtnModel.setProperty("/Submit", false);
+        oBtnModel.setProperty("/Cancel", false);
+        oBtnModel.setProperty("/NXTVis", true);
+    }
+},
 
 TC_onDialogBackButton: function () {
     const oWizard = this.getView().byId("TC_id_wizard");
@@ -311,13 +473,49 @@ TC_onDialogBackButton: function () {
 },
 
 // Save function
-onSaveDialog: function () {
-    var oModel = this.getView().getModel("HostelModel");
-    var Data = oModel.getData();
+onSubmitPress: async function () {
+    const oModel = this.getView().getModel("HostelModel");
+    const oData = oModel.getData();
 
-    var formattedPayload = Data.Persons.map(function (p) {
-        return {
-            CustomerName: p.FullName,
+    try {
+        //  Format payload according to your new structure
+        const formattedPayload = oData.Persons.map((p) => {
+            const bookingData = [];
+            const facilityData = [];
+
+
+            // If booking data exists, push it to array
+           if (p.StartDate && p.Price) {
+    bookingData.push({
+        BookingDate: p.StartDate ? p.StartDate.split("/").reverse().join("-") : "",
+        RentPrice: p.Price,
+        NoOfPersons: p.Person || oData.Person,
+        StartDate: p.StartDate ? p.StartDate.split("/").reverse().join("-") : "",
+        EndDate: p.EndDate ? p.EndDate.split("/").reverse().join("-") : "",
+        Status: "New",
+        PaymentType: p.PaymentType || oData.PaymentType,
+        BedType: p.RoomType || oData.RoomType
+    });
+}
+
+             if (p.Facilities && p.Facilities.SelectedFacilities && p.Facilities.SelectedFacilities.length > 0) {
+                p.Facilities.SelectedFacilities.forEach(fac => {
+                    facilityData.push({
+                        PaymentID: "",
+                        FacilityName: fac.FacilityName || fac, // In case you only stored string name
+                        StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
+                        EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
+                        PaidStatus: "Pending"
+                    });
+                });
+            }
+
+            // Return formatted entry
+            return {
+                Salutation:p.Salutation,
+               CustomerName: p.FullName,
+               UserID:p.UserID,
+               STDCode:p.StdCode,
             MobileNo: p.MobileNo,
             Gender: p.Gender,
             DateOfBirth: p.DateOfBirth ? p.DateOfBirth.split("/").reverse().join("-") : "",
@@ -325,51 +523,53 @@ onSaveDialog: function () {
             Country: p.Country,
             State: p.State,
             City: p.City,
-            Booking: [
-                {
-                    NoOfPersons: Data.Person,
-                    PaymentType: Data.PaymentType,
-                    StartDate: Data.StartDate.split("/").reverse().join("-"),
-                    EndDate: Data.EndDate.split("/").reverse().join("-"),
-                    RentPrice: Data.Price,
-                    Status: "New"
-                }
-            ],
-            Documents: p.Document ? [
-                {
-                    DocumentType: "ID Proof",
-                    File: p.Document,
-                    FileName: p.FileName || "Document",
-                    FileType: p.FileType || "application/pdf"
-                }
-            ] : []
+            PermanentAddress:p.Address,
+                Documents: p.Document
+                    ? [
+                        {
+                            DocumentType: p.DocumentType || "ID Proof",
+                            File: p.Document,
+                            FileName: p.FileName || "Document",
+                            FileType: p.FileType || "application/pdf"
+                        }
+                    ]
+                    : [],
+                Booking: bookingData,
+                FacilityItems: facilityData 
+            };
+        });
+
+        //  Final payload structure
+        const oPayload = {
+            data: formattedPayload
         };
-    });
 
-    $.ajax({
-        url: "https://rest.kalpavrikshatechnologies.com/HM_Customer",
-        method: "POST",
-        contentType: "application/json",
-        headers: {
-            name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-            password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-        },
-        data: JSON.stringify({ data: formattedPayload }),
-        success: function () {
-            sap.m.MessageToast.show("Booking successful!");
+        //  Use your reusable AJAX helper
+        await this.ajaxCreateWithJQuery("HM_Customer", oPayload);
 
-            // Clear all file uploaders
-            Data.Persons.forEach(function (_, idx) {
-                var uploader = sap.ui.getCore().byId("idFileUploader_" + idx);
-                if (uploader) uploader.setValue("");
-            });
-        },
-        error: function () {
-            sap.m.MessageBox.error("Error uploading data or file.");
+        //  On success
+        var oroute = this.getOwnerComponent().getRouter()
+        oroute.navTo("RouteHostel")
+        sap.m.MessageToast.show("Booking successful!");
+
+        // Clear uploaded files
+        oData.Persons.forEach((_, idx) => {
+            const uploader = sap.ui.getCore().byId("idFileUploader_" + idx);
+            if (uploader) uploader.setValue("");
+        });
+
+        // Close dialog if exists
+        if (this.FCIA_Dialog) {
+            this.FCIA_Dialog.close();
         }
-    });
 
-    this.FCIA_Dialog.close();
+    } catch (err) {
+        sap.m.MessageBox.error("Error while booking: " + err);
+    }
+},
+onCancelPress:function(){
+     var oRouter  = this.getOwnerComponent().getRouter()
+     oRouter.navTo("RouteHostel")
 },
 
 onFieldValidation: function () {
@@ -378,20 +578,21 @@ onFieldValidation: function () {
     var oBtnModel = oView.getModel("OBTNModel");
 
     var sRoomType = oView.byId("idRoomType1")?.getValue() || "";
-    var sPrice = oView.byId("idPrice2")?.getValue() || "";
+    // var sPrice = oView.byId("idPrice2")?.getValue() || "";
     var sPayment = oHostelModel.PaymentType || oView.byId("idPaymentMethod1")?.getSelectedKey() || "";
     var sPerson = oHostelModel.Person || oView.byId("id_Noofperson1")?.getSelectedKey() || "";
     var sStartDate = oHostelModel.StartDate || oView.byId("idStartDate1")?.getValue() || "";
     var sEndDate = oHostelModel.EndDate || oView.byId("idEndDate1")?.getValue() || "";
 
-    var bAllFilled = sRoomType && sPrice && sPayment && sPerson && sStartDate && sEndDate;
+    var bAllFilled = sRoomType  && sPayment && sPerson && sStartDate && sEndDate;
 
     //  Force Boolean (true/false) type — critical fix
     oBtnModel.setProperty("/Next", !!bAllFilled);
     // oBtnModel.setProperty("/PERVIOUSVIS", !!bAllFilled);
 },
-
-
-
-	});
+  onNavBack: function () {
+            var oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("RouteHostel");
+        },
+});
 });

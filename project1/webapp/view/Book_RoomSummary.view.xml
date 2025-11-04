@@ -13,13 +13,24 @@
             type="XML"
         />
     </VBox>
-    <VBox class="sapUiMediumMarginBottom">
-        
-     
-              
 
-
-    </VBox>
+    <!-- Personal Info Section -->
+    <List
+        id="idPersonalSummaryList"
+        headerText="Personal Information"
+        items="{
+            path: 'HostelModel>/Persons'
+        }"
+        inset="false"
+    >
+        <CustomListItem>
+            <core:Fragment
+                fragmentName="sap.ui.com.project1.fragment.PersonalInfoDisplay"
+                type="XML"
+                binding="{HostelModel>}"
+            />
+        </CustomListItem>
+    </List>
      <!--<VBox class="sapUiMediumMarginBottom">
         <VBox
             visible="{= ${oTCModel>/Visiblity/Services/TrafficManagement} || ${oTCModel>/Visiblity/Services/TrafficManagementVehicles} }"
