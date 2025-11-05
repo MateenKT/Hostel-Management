@@ -46,12 +46,12 @@
                         <fb:control>
                             <ComboBox
                                 id="PO_id_CustomerName"
-                                items="{HostelModel>/}"
+                                items="{BedDetails>/}"
                                 showClearIcon="true"
                             >
                                 <core:Item
-                                    key="{HostelModel>CustomerName}"
-                                    text="{HostelModel>CustomerName}"
+                                    key="{BedDetails>Name}"
+                                    text="{BedDetails>Name}"
                                 />
                             </ComboBox>
                         </fb:control>
@@ -68,12 +68,12 @@
                         <fb:control>
                             <ComboBox
                                 id="PO_id_CompanyName"
-                                items="{HostelModel>/}"
+                                items="{BedDetails>/}"
                                 showClearIcon="true"
                             >
                                 <core:ListItem
-                                    key="{HostelModel>RoomNumber}"
-                                    text="{HostelModel>RoomNumber}"
+                                    key="{BedDetails>BranchCode}"
+                                    text="{BedDetails>BranchCode}"
                                 />
                             </ComboBox>
                         </fb:control>
@@ -93,7 +93,7 @@
                 <headerToolbar>
                     <OverflowToolbar>
                         <Title
-                            text="Booking List ({=${BedDetails>/}.length})"
+                            text="BED List ({=${BedDetails>/}.length})"
                         />
                         <ToolbarSpacer />
                          <Button
@@ -143,7 +143,7 @@
                         demandPopin="true"
                     >
                         <Text
-                            text="No of Beds"
+                            text="Max Beds"
                         />
                     </Column>
                     <Column

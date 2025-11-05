@@ -159,5 +159,43 @@ sap.ui.define([
 
       }
     },
+    
+    _fetchCommonData: async function (entityName, modelName, filter = "") {
+      if (modelName.split(" ")[1] === "TraineeFlag") {
+        var flag = modelName.split(" ")[1]
+        modelName = modelName.split(" ")[0];
+      }
+      if (!this.getOwnerComponent().getModel("LoginModel")) {
+        BusyIndicator.hide();
+        return;
+      }
+      let url = this.getOwnerComponent().getModel("LoginModel").getData().url + entityName;
+      try {
+        await new Promise((resolve, reject) => {
+          $.ajax({
+            url: url,
+            method: "GET",
+            headers: this.getOwnerComponent().getModel("LoginModel").getData().headers,
+            data: filter,
+            success: function (data) {
+              if (data) {
+                var oModel = new JSONModel(data.data);
+                this.getOwnerComponent().setModel(oModel, modelName);
+              }
+              resolve(data);
+              if (flag === "TraineeFlag") {
+                this.closeBusyDialog();
+              }
+            }.bind(this),
+            error: function (err) {
+              reject(err);
+            }
+          });
+        });
+
+      } catch (error) {
+        sap.m.MessageToast.show(error.responseJSON?.message || "Technical error, please contact the administrator");
+      }
+    },
   })
 });

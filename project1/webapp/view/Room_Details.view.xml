@@ -72,8 +72,8 @@
                                 showClearIcon="true"
                             >
                                 <core:ListItem
-                                    key="{RoomDetailsModel>BedType}"
-                                    text="{RoomDetailsModel>BedType}"
+                                    key="{RoomDetailsModel>BedTypeName}"
+                                    text="{RoomDetailsModel>BedTypeName}"
                                 />
                             </ComboBox>
                         </fb:control>
@@ -119,7 +119,7 @@
                 
 					   <Column demandPopin="true">
                         <Text
-                            text="Hostel ID"
+                            text="Branch Code"
                         />
                     </Column>
                     <Column demandPopin="true">
@@ -135,7 +135,14 @@
                             text="Bed Type"
                         />
                     </Column>
-                  
+                   <Column
+                        minScreenWidth="Tablet"
+                        demandPopin="true"
+                    >
+                        <Text
+                            text="No Of Beds"
+                        />
+                    </Column>
                     <Column
                         minScreenWidth="Tablet"
                         demandPopin="true"
@@ -154,11 +161,12 @@
                             <Text text="{RoomDetailsModel>RoomNo}" />
                         
                             <Text text="{RoomDetailsModel>BedTypeName}" />
+                            <Text text="{RoomDetailsModel>NoofPerson}" />
+
 
                           
                             <Text text="{RoomDetailsModel>Price}" />
                             <!-- <Text text="{HostelModel>RoomType}" /> -->
-                            <Text text="{RoomDetailsModel>RoomNumber}" />
                            <Button
                             text="View"
                             press="HM_viewroom"

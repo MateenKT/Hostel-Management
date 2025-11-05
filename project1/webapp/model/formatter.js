@@ -13,6 +13,18 @@ sap.ui.define([
             }
             return sDate;
         },
-   }
+          formatObjectStatus: function (sStatus) {
+            switch (sStatus) {
+                case "New":
+                    return "Indication05";
+                case "Assigned":
+                    return "Success";
+                default:
+                    return "Indication01";
 
+            }
+        },
+
+        
+   }
 });

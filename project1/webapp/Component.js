@@ -5,9 +5,10 @@
 sap.ui.define([
         "sap/ui/core/UIComponent",
         "sap/ui/Device",
-        "sap/ui/com/project1/model/models"
+        "sap/ui/com/project1/model/models",
+         "sap/ui/model/json/JSONModel",
     ],
-    function (UIComponent, Device, models) {
+    function (UIComponent, Device, models,JSONModel) {
         "use strict";
 
         return UIComponent.extend("sap.ui.com.project1.Component", {
@@ -30,8 +31,48 @@ sap.ui.define([
                 // set the device model
                 this.setModel(models.createDeviceModel(), "device");
 
+                this._fetchCommonData("HM_Branch", "BranchModel","");
+
                 
+
+                
+            },
+              _fetchCommonData: async function (entityName, modelName, filter = "") {
+            // If already loaded, skip
+            if (this.getModel(modelName)) return;
+
+            const url =  "https://rest.kalpavrikshatechnologies.com/" + entityName;
+            const headers = {
+              name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+              password:
+                "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
+              "Content-Type": "application/json",
+            } ;
+
+            try {
+                const result = await new Promise((resolve, reject) => {
+                    $.ajax({
+                        url: url,
+                        method: "GET",
+                        headers: headers,
+                        data: filter,
+                        success: function (data) {
+                            resolve(data);
+                        },
+                        error: function (err) {
+                            reject(err);
+                        }
+                    });
+                });
+
+                if (result && result.data) {
+                    const oModel = new JSONModel(result.data);
+                    this.setModel(oModel, modelName);
+                }
+            } catch (error) {
+                MessageToast.show(error?.responseJSON?.message || "Error loading " + entityName);
             }
+        }
         });
     }
 );

@@ -26,7 +26,10 @@
                     text="Customer Name"
                     required="true"
                 />
-                <Text id="idCustomerNameText" text="{HostelModel>/CustomerName}" />
+                <Text 
+                id="idCustomerNameText" 
+                text="{HostelModel>/CustomerName}"
+                 />
                 <Label
                     text="Assign Room"
                     required="true"
@@ -35,11 +38,11 @@
                 id="idRoomNumber1"
                     placeholder="Select Room Number"
                     selectedKey="{HostelModel>/RoomNumber}"
-                           items="{RoomDetailsModel>/}"
+                           items="{AvailableRoomsModel>/}"
                 >
                     <core:ListItem
-                        key="{RoomDetailsModel>RoomNo}"
-                        text="{RoomDetailsModel>RoomNo}"
+                        key="{AvailableRoomsModel>RoomNo}"
+                        text="{AvailableRoomsModel>RoomNo}"
                     />
                   
                 </ComboBox>

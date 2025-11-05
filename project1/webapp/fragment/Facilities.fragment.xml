@@ -7,7 +7,7 @@
 >
     <Dialog
         id="FacilitiesDialog"
-        title="Manage Room Details"
+        title="Add facilities"
         type="Message"
         class="sapUiContentPadding"
     >
@@ -31,19 +31,16 @@
                     id="idRoomType123"
                     placeholder="Select branch Code"
                     selectedKey="{FacilitiesModel>/BranchCode}"
+                       items="{BranchModel>/}"
+                       showSecondaryValues="true"
                 >
-                    <core:ListItem
-                        key="KLB01"
-                        text="KLB01"
+                 
+                      <core:ListItem
+                        key="{BranchModel>BranchID}"
+                        text="{BranchModel>BranchID}"
+                        additionalText="{BranchModel>Name}"
                     />
-                    <core:ListItem
-                        key="Double"
-                        text="Od001"
-                    />
-                    <core:ListItem
-                        key="Triple"
-                        text="Bglr001"
-                    />
+                  
                 </ComboBox>
                 <Label
                     text="Facility Name"
@@ -55,7 +52,8 @@
                     placeholder="Enter Facility Name"
                     maxLength="60"
                     />
-
+               
+              
                 <Label
                     text="Type"
                     required="true"
@@ -90,6 +88,7 @@
                     maximumFileSize="10"
                     change=".onFileUploaderChange"
                     tooltip="Only JPG, PNG, or PDF files under 10MB allowed"
+                    value=""
                 />
             </f:content>
         </f:SimpleForm>

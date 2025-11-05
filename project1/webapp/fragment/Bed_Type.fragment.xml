@@ -23,7 +23,7 @@
             columnsM="1"
         >
             <f:content>
-             <Label
+                <Label
                     text="Branch Code"
                     required="true"
                 />
@@ -31,25 +31,21 @@
                     id="idRoomType12"
                     placeholder="Select branch Code"
                     selectedKey="{BedModel>/BranchCode}"
+                    items="{BranchModel>/}"
+                    change="onbranchChange"
+                    showSecondaryValues="true"
                 >
                     <core:ListItem
-                        key="KLB01"
-                        text="KLB01"
-                    />
-                    <core:ListItem
-                        key="Od001"
-                        text="Od001"
-                    />
-                    <core:ListItem
-                        key="Bglr001"
-                        text="Bglr001"
+                        key="{BranchModel>BranchID}"
+                        text="{BranchModel>BranchID}"
+                        additionalText="{BranchModel>Name}"
                     />
                 </ComboBox>
                 <Label
                     text="Bed Type"
                     required="true"
                 />
-                <ComboBox
+                <!-- <ComboBox
                     id="idBedType"
                     placeholder="Select Bed Type"
                     selectedKey="{BedModel>/Name}"
@@ -65,9 +61,15 @@
                     <core:ListItem
                         key="Four Bed"
                         text="Four Bed"
-                    />
-                </ComboBox>
-                 <Label
+                    /> -->
+                <Input
+                    id="idBedType"
+                    value="{BedModel>/Name}"
+                    placeholder="Enter Bed Type"
+                    maxLength="60"
+                    liveChange="onNameInputLiveChange"
+                />
+                <Label
                     text="Room Type"
                     required="true"
                 />
@@ -75,6 +77,7 @@
                     id="idRoomtype"
                     placeholder="Select Room type"
                     selectedKey="{BedModel>/ACType}"
+                    change="onbranchChange"
                 >
                     <core:ListItem
                         key="AC"
@@ -85,17 +88,18 @@
                         text="Non-Ac"
                     />
                 </ComboBox>
-                    <Label
+                <Label
                     text="No Of Beds"
                     required="true"
                 />
-                 <Input
+                <Input
                     id="idR"
                     value="{BedModel>/NoOfPerson}"
                     placeholder="Enter No Of Beds"
-                    maxLength="60"
+                    liveChange="onNameInputLiveChange"
+                    type="Number"
                 />
-                    <Label
+                <Label
                     text="Add image"
                     required="true"
                 />
@@ -107,6 +111,7 @@
                     maximumFileSize="10"
                     change=".onFileUploaderChange"
                     tooltip="Only JPG, PNG, or PDF files under 10MB allowed"
+                    value=""
                 />
             </f:content>
         </f:SimpleForm>

@@ -31,23 +31,58 @@
                     id="idRoomType12"
                     placeholder="Select branch Code"
                     selectedKey="{RoomModel>/BranchCode}"
+                    selectionChange=".onBranchChange"
+                    valueStateText="Please select a valid Branch Code"
+                    items="{BranchModel>/}"
+                    showSecondaryValues="true"
                 >
                     <core:ListItem
-                        key="KLB01"
-                        text="KLB01"
-                    />
-                    <core:ListItem
-                        key="Double"
-                        text="Od001"
-                    />
-                    <core:ListItem
-                        key="Triple"
-                        text="Bglr001"
+                        key="{BranchModel>BranchID}"
+                        text="{BranchModel>BranchID}"
+                        additionalText="{BranchModel>Name}"
                     />
                 </ComboBox>
-               
-              
-                  <Label
+
+                <Label
+                    text="Bed Type"
+                    required="true"
+                />
+                <ComboBox
+                    id="idBedType"
+                    placeholder="Select Bed Type"
+                    width="100%"
+                    visible="false"
+                    selectedKey="{RoomModel>/BedTypeName}"
+                    items="{BedTypeModel>/}"
+                    selectionChange=".onBedTypeChange"
+                    valueStateText="Please select a valid Bed Type"
+                >
+                    <core:ListItem
+                        key="{= ${BedTypeModel>Name} + ' - ' + ${BedTypeModel>ACType} }"
+                        text="{= ${BedTypeModel>Name} + ' - ' + ${BedTypeModel>ACType} }"
+                    />
+                </ComboBox>
+                <Label
+                    text="AC Type"
+                    required="true"
+                />
+                <ComboBox
+                    id="idAcType"
+                    placeholder="Select Bed Type"
+                    width="100%"
+                    visible="false"
+                    selectedKey="{RoomModel>/ACType}"
+
+                    items="{BedTypeModel>/}"
+                    valueStateText="Please select a valid AC Type"
+                    change="onACtypeChange"
+                >
+                    <core:Item
+                        key="{BedTypeModel>ACType}"
+                        text="{BedTypeModel>ACType}"
+                    />
+                </ComboBox>
+                <Label
                     text="Room No"
                     required="true"
                 />
@@ -56,31 +91,22 @@
                     value="{RoomModel>/RoomNo}"
                     placeholder="Enter Room No"
                     maxLength="60"
+                    liveChange="onRoomNoInputLiveChange"
+                    valueStateText="Room No cannot be empty"
                 />
                 <Label
-                    text="Bed Type"
+                    text="No Of person"
                     required="true"
                 />
-                <ComboBox
-                    id="idBedType"
-                    placeholder="Select Bed Type"
-                    selectedKey="{RoomModel>/BedTypeName}"
-                >
-                    <core:ListItem
-                        key="Single"
-                        text="Single Bed"
-                    />
-                    <core:ListItem
-                        key="Double"
-                        text="Double Bed"
-                    />
-                    <core:ListItem
-                        key="Four"
-                        text="Four Bed"
-                    />
-                </ComboBox>
+                <Input
+                    id="idRoomNumber13"
+                    value="{RoomModel>/NoofPerson}"
+                    placeholder="Enter No of person"
+                    type="Number"
+                    liveChange="onRoomNoInputLiveChange"
+                    valueStateText="No of person cannot be empty"
+                />
 
-                
                 <Label
                     text="Price"
                     required="true"
@@ -89,30 +115,9 @@
                     id="idPrice"
                     value="{RoomModel>/Price}"
                     placeholder="Enter Price"
-                    maxLength="60"
-                />
-                <Label
-                    text="Add image"
-                    required="true"
-                />
-                <u:FileUploader
-                    id="idFileUploader12"
-                    name="studentDocument"
-                    placeholder="Choose a file to upload"
-                    fileType="jpg,png,pdf"
-                    maximumFileSize="10"
-                    change=".onFileUploaderChange"
-                    tooltip="Only JPG, PNG, or PDF files under 10MB allowed"
-                />
-                <Label
-                    text="Description"
-                    required="true"
-                />
-                <TextArea
-                id="idDescription"
-                    maxLength="100"
-                    placeholder="Enter Description"
-                    value="{RoomModel>/Description}"
+                    maxLength="7"
+                    liveChange="onPriceInputLiveChange"
+                    valueStateText="Please enter a valid amount"
                 />
             </f:content>
         </f:SimpleForm>
