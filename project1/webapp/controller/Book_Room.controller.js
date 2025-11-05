@@ -76,33 +76,15 @@ sap.ui.define([
     const aFinalFacilities = aFacilities.map(f => ({
         FacilityID: f.FacilityID,
         FacilityName: f.FacilityName,
-        Image: convertBase64ToImage(f.FicilityImage, f.FileType)
+        Image: convertBase64ToImage(f.FicilityImage, f.FileType),
+        Price: Number(f.Price)
     }));
 
     //  Wrap in object for proper binding
     const oFacilityModel = new JSONModel({ Facilities: aFinalFacilities });
     oView.setModel(oFacilityModel, "FacilityModel");
 },
-// onReadcallforRoom: async function () {
-//     try {
-//         const oView = this.getView();
 
-//         //  Call backend to get all room data
-//         const oResponse = await this.ajaxReadWithJQuery("HM_Rooms", {});
-//         const aRooms = oResponse?.data || [];
-//         const oRoomModel = new JSONModel({
-//             Rooms: aRooms
-//         });
-
-//         //  Bind model to the view
-//         oView.setModel(oRoomModel, "RoomCountModel");
-
-
-//     } catch (err) {
-//         console.error("Error reading rooms:", err);
-//         sap.m.MessageToast.show("Failed to load room data.");
-//     }
-// },
 
 
 onNoOfPersonSelect: async function (oEvent) {
@@ -127,15 +109,18 @@ onNoOfPersonSelect: async function (oEvent) {
             Country: "",
             State: "",
             City: "",
-            Facilities: { RoomType: "", SelectedFacilities: [], MealPlan: "" },
+            Facilities: {
+       SelectedFacilities: [] },
             Document: "",
             FileName: "",
-            FileType: ""
+            FileType: "",
+             TotalRent: parseFloat(oData.Price) || 0,
+
         });
 
         // ---- Person Information Form ----
         const oForm = new sap.ui.layout.form.SimpleForm({
-            editable: true,
+            editable: true,     
         
             title: "Person " + (i + 1) + " Details",
             layout: "ColumnLayout",
@@ -276,28 +261,35 @@ const oFacilitiesBox = new sap.m.VBox({
                                     densityAware: false,
                                     press: function (oEvent) {
                                         const oCtx = oEvent.getSource().getBindingContext("FacilityModel");
-                                        const sFacility = oCtx.getObject().FacilityName;
-                                        const aPersons = oModel.getProperty("/Persons");
-                                        const aSelected = aPersons[i].Facilities.SelectedFacilities;
-                                        const oCard = oEvent.getSource().getParent().getParent();
+                                       const oFacilityObj = oCtx.getObject(); 
+const aPersons = oModel.getProperty("/Persons");
+const aSelected = aPersons[i].Facilities.SelectedFacilities;
+const oCard = oEvent.getSource().getParent().getParent();
+let bAlreadySelected = aSelected.find(f => f.FacilityName === oFacilityObj.FacilityName);
 
-                                        const bAlreadySelected = aSelected.includes(sFacility);
-                                       if (bAlreadySelected) {
-    const idx = aSelected.findIndex(f => f.FacilityName === sFacility);
+if (bAlreadySelected) {
+    // Remove facility
+    const idx = aSelected.findIndex(f => f.FacilityName === oFacilityObj.FacilityName);
     aSelected.splice(idx, 1);
     oCard.removeStyleClass("serviceCardSelected");
-  
 } else {
-    const oFacilityObj = oCtx.getObject(); // contains FacilityName + Image
+    // Add facility
     aSelected.push({
         FacilityName: oFacilityObj.FacilityName,
+        Price: oFacilityObj.Price,
         Image: oFacilityObj.Image
     });
     oCard.addStyleClass("serviceCardSelected");
-   
 }
 
-                                        oModel.refresh(true);
+// Recalculate total rent for this person
+let total = 0;
+aSelected.forEach(f => total += Number(f.Price || 0));
+aPersons[i].TotalRent = total;
+
+//  Refresh the model to update binding
+oModel.refresh(true);
+
                                     }
                                 }),
 
@@ -376,7 +368,12 @@ const oFacilitiesBox = new sap.m.VBox({
                             reader.readAsDataURL(oFile);
                         }
                     }
-                })
+                }),
+                new sap.m.Label({ text: "Rent Price" }),
+new sap.m.Text({
+    text: "{HostelModel>/Persons/" + i + "/TotalRent}"
+})
+
             ]
         });
 
@@ -478,31 +475,31 @@ onSubmitPress: async function () {
     const oData = oModel.getData();
 
     try {
-        //  Format payload according to your new structure
+        // Format payload according to your new structure
         const formattedPayload = oData.Persons.map((p) => {
             const bookingData = [];
             const facilityData = [];
 
+            // ✅ FIX: Use oData for booking fields, not individual person object
+            if (oData.StartDate && oData.Price) {
+                bookingData.push({
+                    BookingDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
+                    RentPrice: oData.Price,
+                    NoOfPersons: oData.Person || oData.Persons.length,
+                    StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
+                    EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
+                    Status: "New",
+                    PaymentType: oData.PaymentType || "",
+                    BedType: oData.RoomType || ""
+                });
+            }
 
-            // If booking data exists, push it to array
-           if (p.StartDate && p.Price) {
-    bookingData.push({
-        BookingDate: p.StartDate ? p.StartDate.split("/").reverse().join("-") : "",
-        RentPrice: p.Price,
-        NoOfPersons: p.Person || oData.Person,
-        StartDate: p.StartDate ? p.StartDate.split("/").reverse().join("-") : "",
-        EndDate: p.EndDate ? p.EndDate.split("/").reverse().join("-") : "",
-        Status: "New",
-        PaymentType: p.PaymentType || oData.PaymentType,
-        BedType: p.RoomType || oData.RoomType
-    });
-}
-
-             if (p.Facilities && p.Facilities.SelectedFacilities && p.Facilities.SelectedFacilities.length > 0) {
+            // ✅ FIX: Handle both object and string facility formats
+            if (p.Facilities && p.Facilities.SelectedFacilities && p.Facilities.SelectedFacilities.length > 0) {
                 p.Facilities.SelectedFacilities.forEach(fac => {
                     facilityData.push({
                         PaymentID: "",
-                        FacilityName: fac.FacilityName || fac, // In case you only stored string name
+                        FacilityName: typeof fac === 'string' ? fac : fac.FacilityName,
                         StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
                         EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
                         PaidStatus: "Pending"
@@ -512,18 +509,18 @@ onSubmitPress: async function () {
 
             // Return formatted entry
             return {
-                Salutation:p.Salutation,
-               CustomerName: p.FullName,
-               UserID:p.UserID,
-               STDCode:p.StdCode,
-            MobileNo: p.MobileNo,
-            Gender: p.Gender,
-            DateOfBirth: p.DateOfBirth ? p.DateOfBirth.split("/").reverse().join("-") : "",
-            CustomerEmail: p.CustomerEmail,
-            Country: p.Country,
-            State: p.State,
-            City: p.City,
-            PermanentAddress:p.Address,
+                Salutation: p.Salutation,
+                CustomerName: p.FullName,
+                UserID: p.UserID,
+                STDCode: p.StdCode,
+                MobileNo: p.MobileNo,
+                Gender: p.Gender,
+                DateOfBirth: p.DateOfBirth ? p.DateOfBirth.split("/").reverse().join("-") : "",
+                CustomerEmail: p.CustomerEmail,
+                Country: p.Country,
+                State: p.State,
+                City: p.City,
+                PermanentAddress: p.Address,
                 Documents: p.Document
                     ? [
                         {
@@ -539,17 +536,17 @@ onSubmitPress: async function () {
             };
         });
 
-        //  Final payload structure
+        // Final payload structure
         const oPayload = {
             data: formattedPayload
         };
 
-        //  Use your reusable AJAX helper
+        // Use your reusable AJAX helper
         await this.ajaxCreateWithJQuery("HM_Customer", oPayload);
 
-        //  On success
-        var oroute = this.getOwnerComponent().getRouter()
-        oroute.navTo("RouteHostel")
+        // On success
+        var oroute = this.getOwnerComponent().getRouter();
+        oroute.navTo("RouteHostel");
         sap.m.MessageToast.show("Booking successful!");
 
         // Clear uploaded files
@@ -566,7 +563,8 @@ onSubmitPress: async function () {
     } catch (err) {
         sap.m.MessageBox.error("Error while booking: " + err);
     }
-},
+}
+,
 onCancelPress:function(){
      var oRouter  = this.getOwnerComponent().getRouter()
      oRouter.navTo("RouteHostel")

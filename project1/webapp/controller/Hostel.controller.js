@@ -92,7 +92,7 @@ sap.ui.define([
 
         //  Call backend to get all room data
         const oResponse = await this.ajaxReadWithJQuery("HM_Rooms", {});
-        const aRooms = oResponse?.data || [];
+        const aRooms = oResponse?.commentData || [];
         const oRoomModel = new JSONModel({
             Rooms: aRooms
         });
@@ -243,17 +243,20 @@ sap.ui.define([
 
                     //  This section (AC Type ComboBox) only visible if user is logged in
                     new sap.m.Label("idACLabel", {
-                        text: "Select AC Type",
+                        text: "Select Bed Type",
                         // visible: !!that._oLoggedInUser // dynamically controlled
                     }),
                     new sap.m.ComboBox("idACTypeCombo", {
                         width: "100%",
-                        placeholder: "Select AC Type...",
+                        placeholder: "Select Bed Type...",
                         // visible: !!that._oLoggedInUser, // show only if logged in
-                        items: [
-                            new sap.ui.core.Item({ key: "AC", text: "AC" }),
-                            new sap.ui.core.Item({ key: "Non-AC", text: "Non-AC" })
-                        ]
+                        items: {
+                              path: "RoomCountModel>/Rooms",
+                            template: new sap.ui.core.Item({
+                                key: "{RoomCountModel>BranchCode}",
+                                text: "{RoomCountModel>BedTypeName}"
+                            })
+                        }
                     }), 
 
                     new sap.m.Button({
@@ -549,30 +552,47 @@ sap.ui.define([
         },
 
 
-       onPressAvatar: async function () {
-    const that = this;
+ onPressAvatar: async function () {
     const oUser = this._oLoggedInUser || {};
     const sPhoto = "./image.jpg";
 
     try {
-        //  Use reusable AJAX helper (same as _loadFilteredData)
-        const response = await this.ajaxReadWithJQuery("HM_Customer", {});
+        const sUserID = oUser.UserID || "";
+        if (!sUserID) {
+            sap.m.MessageToast.show("User not logged in.");
+            return;
+        }
 
-        const allCustomers = response?.Customers || [];
+        // ✅ Fetch only the logged-in user's data
+        const response = await this.ajaxReadWithJQuery("HM_Customer", {
+            $filter: `UserID eq '${sUserID}'`
+        });
 
-        //  Match bookings for logged-in user
-        const matchedBookings = allCustomers.filter(cust =>
-            cust.LoginID && cust.LoginID.toLowerCase() === oUser.ID?.toLowerCase()
-        );
+        console.log("HM_Customer Response:", response);
 
-        //  Prepare booking data for the profile dialog
-        const aBookingData = matchedBookings.map(item => ({
-            date: item.StartDate || "N/A",
-            room: item.RoomType || "N/A",
-            amount: item.Amount || "N/A"
+        // ✅ Handle correct structure
+        const aCustomers = response?.commentData || response?.Customers || response?.value || [];
+
+        if (!Array.isArray(aCustomers) || aCustomers.length === 0) {
+            sap.m.MessageToast.show("No customer data found for this user.");
+            return;
+        }
+
+        // ✅ Get first customer record
+        const oCustomer = aCustomers[0];
+        console.log("Customer Record:", oCustomer);
+
+        // ✅ Prepare booking data
+        const aBookingData = (Array.isArray(oCustomer.Booking) ? oCustomer.Booking : []).map(booking => ({
+            date: booking.StartDate ? new Date(booking.StartDate).toLocaleDateString("en-GB") : "N/A",
+            room: booking.BedType || "N/A",
+            amount: booking.RentPrice || "N/A",
+            status: booking.Status || "N/A"
         }));
 
-        //  Load profile fragment only once
+        console.log("Booking Data:", aBookingData);
+
+        // ✅ Load fragment if not already loaded
         if (!this._oProfileDialog) {
             const oDialog = await sap.ui.core.Fragment.load({
                 name: "sap.ui.com.project1.fragment.ManageProfile",
@@ -582,24 +602,38 @@ sap.ui.define([
             this.getView().addDependent(oDialog);
         }
 
-        //  Create and bind the Profile Model
-        const oProfileModel = new JSONModel({
+        // ✅ Create and bind the Profile Model
+        const oProfileModel = new sap.ui.model.json.JSONModel({
             photo: sPhoto,
             initials: oUser.UserName ? oUser.UserName.charAt(0).toUpperCase() : "",
-            name: oUser.UserName || "",
-            email: oUser.EmailID || "",
-            phone: oUser.MobileNo || "",
+            name: oCustomer.CustomerName || oUser.UserName || "",
+            email: oCustomer.CustomerEmail || oUser.EmailID || "",
+            phone: oCustomer.MobileNo || oUser.MobileNo || "",
+            dob: oCustomer.DateOfBirth
+                ? new Date(oCustomer.DateOfBirth).toLocaleDateString("en-GB")
+                : "",
+            gender: oCustomer.Gender || "",
+            nationality: oCustomer.Country || "",
             bookings: aBookingData
         });
         this._oProfileDialog.setModel(oProfileModel, "profileData");
 
-        //  Create section model (for tab switching inside profile)
-        const oSectionModel = new JSONModel({
-            selectedSection: "profile" // show profile section first
+        // ✅ Menu model (for tab switch)
+        const oMenuModel = new sap.ui.model.json.JSONModel({
+            items: [
+                { title: "My Profile", icon: "sap-icon://employee", key: "profile" },
+                { title: "Booking History", icon: "sap-icon://history", key: "devices" }
+            ]
+        });
+        this._oProfileDialog.setModel(oMenuModel, "profileMenuModel");
+
+        // ✅ Section model (default = booking if available)
+        const oSectionModel = new sap.ui.model.json.JSONModel({
+            selectedSection: aBookingData.length ? "devices" : "profile"
         });
         this._oProfileDialog.setModel(oSectionModel, "profileSectionModel");
 
-        //  Open the dialog
+        // ✅ Open the dialog
         this._oProfileDialog.open();
 
     } catch (error) {
@@ -607,6 +641,9 @@ sap.ui.define([
         sap.m.MessageToast.show("Error fetching profile details.");
     }
 },
+
+
+
 
         onProfileLogout: function () {
             // Close the dialog and perform logout logic

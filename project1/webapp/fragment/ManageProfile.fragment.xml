@@ -59,23 +59,27 @@
       </VBox>
       <!-- Booking History Section (visible if section is 'devices') -->
       <VBox visible="{= ${profileSectionModel>/selectedSection} === 'devices' }">
-        <Title text="Booking History" level="H3"/>
-        <Table items="{profileData>/bookings}">
-          <columns>
-            <Column><Text text="Date"/></Column>
-            <Column><Text text="Room"/></Column>
-            <Column><Text text="Amount"/></Column>
-          </columns>
-          <items>
-            <ColumnListItem>
-              <cells>
-                <Text text="{profileData>date}"/>
-                <Text text="{profileData>room}"/>
-                <Text text="{profileData>amount}"/>
-              </cells>
-            </ColumnListItem>
-          </items>
-        </Table>
+       <Title text="Booking History" level="H3"/>
+<Table items="{profileData>/bookings}">
+  <columns>
+    <Column><Text text="Date"/></Column>
+    <Column><Text text="Room"/></Column>
+    <Column><Text text="Amount"/></Column>
+    <Column><Text text="Status"/></Column>
+  </columns>
+  <items>
+    <ColumnListItem>
+      <cells>
+        <Text text="{profileData>date}"/>
+        <Text text="{profileData>room}"/>
+        <Text text="{profileData>amount}"/>
+        <Text text="{profileData>status}"/>
+      </cells>
+    </ColumnListItem>
+  </items>
+</Table>
+
+
       </VBox>
    
     </VBox>
