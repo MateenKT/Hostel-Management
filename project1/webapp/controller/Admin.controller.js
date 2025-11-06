@@ -20,7 +20,17 @@ sap.ui.define([
             this.getOwnerComponent().getRouter().getRoute("RouteAdmin").attachMatched(this._onRouteMatched, this);
         },
         _onRouteMatched: async function () {
-
+   const omodel = new sap.ui.model.json.JSONModel({
+                // for Database connection
+                url: "https://rest.kalpavrikshatechnologies.com/",
+                headers: {
+                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
+                    "Content-Type": "application/json",
+                },
+                isRadioVisible: false,
+            });
+            this.getOwnerComponent().setModel(omodel, "LoginModel");
             await this.Cust_read()
             // $.ajax({
             //     url: "https://rest.kalpavrikshatechnologies.com/HM_Rooms",
@@ -41,10 +51,15 @@ sap.ui.define([
             //         sap.m.MessageBox.error("Error uploading data or file.");
             //     }
             // });
-            this.ajaxReadWithJQuery("HM_Rooms", "").then((oData) => {
+          await  this.ajaxReadWithJQuery("HM_Rooms", "").then((oData) => {
                 var oFCIAerData = Array.isArray(oData.commentData) ? oData.commentData : [oData.commentData];
                 var model = new JSONModel(oFCIAerData);
                 this.getView().setModel(model, "RoomDetailsModel");
+            })
+          await  this.ajaxReadWithJQuery("HM_ExtraFacilities", "").then((oData) => {
+                var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
+                var model = new JSONModel(oFCIAerData);
+                this.getView().setModel(model, "facilitymodel");
             })
             var model = new JSONModel({
                 BranchCode: "",
@@ -328,16 +343,20 @@ sap.ui.define([
      var ID = Model.getObject()
        
             var data = sap.ui.getCore().byId("idRoomNumber1").getSelectedKey();
+            var facility = sap.ui.getCore().byId("id_facility").getSelectedKeys();
 
+   var FacilityName = facility.join(",");
       if( ID.Bookings[0].RoomNo || utils._LCstrictValidationComboBox(sap.ui.getCore().byId("idRoomNumber1"), "ID")){
-            if(data==="" ){
+            if(data===""){
                var data=ID.Bookings[0].RoomNo
             }
 
             var Payload = {
                 RoomNo: data,
-                Status: "Assigned"
-
+                Status: "Assigned",
+                FacilityItems:{
+                     	FacilityName
+                },
             }
             var oBody = { data: Payload };
 
@@ -383,7 +402,10 @@ sap.ui.define([
     var Model = selected.getBindingContext("HostelModel");
     var data = Model.getObject();
 
- 
+   if(data.Bookings[0].Status==="New" || data.Bookings[0].Status==="Closed"){
+     sap.m.MessageToast.show("The customer can not be Check Out");
+       return;
+   }
 
     var Payload = {
         Status: "Closed"
@@ -426,6 +448,11 @@ HM_ChangeRoom:function(){
     var Model = selected.getBindingContext("HostelModel");
     var data = Model.getObject();
      this.RoomNo=data.RoomNo
+
+     if(data.Bookings[0].Status==="New" || data.Bookings[0].Status==="Closed"){
+     sap.m.MessageToast.show("The customer can not be edited");
+       return;
+   }
 
      var oRoomDetailsModel = this.getView().getModel("RoomDetailsModel");
     var aRooms = oRoomDetailsModel.getData(); // All room details
@@ -482,8 +509,10 @@ HM_ChangeRoom:function(){
         this.HM_Dialog = sap.ui.xmlfragment("sap.ui.com.project1.fragment.Assign_Room", this);
         oView.addDependent(this.HM_Dialog);
     }
-    sap.ui.getCore().byId("idCustomerNameText").setText(data.CustomerName)
+    sap.ui.getCore().byId("idCustomerNameText").setText(data.CustomerName + " (" + data.CustomerID + ")");
     sap.ui.getCore().byId("idRoomNumber1").setValue(data.Bookings[0].RoomNo).setValueState("None");
+    // sap.ui.getCore().byId("id_facility").setValue(data.Bookings[0].RoomNo).setValueState("None");
+
 
     this.getView().getModel("")
     this.HM_Dialog.open();

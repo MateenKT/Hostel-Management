@@ -9,114 +9,111 @@ sap.ui.define([
 
     return BaseController.extend("sap.ui.com.project1.controller.Hostel", {
 
-        onInit: function () {
-            const omodel = new JSONModel({
-                // for Database connection
-                url: "https://rest.kalpavrikshatechnologies.com/",
-                headers: {
-                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                    password:
-                        "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
-                    "Content-Type": "application/json",
-                },
-                isRadioVisible: false,
-            });
-            this.getOwnerComponent().setModel(omodel, "LoginModel");
-            var oView = this.getView();
-            var oAvatar = oView.byId("ProfileAvatar"); // Change to your avatar ID if needed
-            if (oAvatar) {
-                oAvatar.setVisible(false);
-            }
-            var model = new JSONModel({
-                CustomerName: "",
-                MobileNo: "",
-                Gender: "",
-                DateOfBirth: "",
-                CustomerEmail: "",
-                RoomType: "",
-            });
-            this.getView().setModel(model, "HostelModel");
+       onInit: async function () {
+    const oView = this.getView();
 
-            var oProfileMenuModel = new JSONModel({
-                items: [
-                    { title: "My Profile", icon: "sap-icon://person-placeholder", key: "profile" },
-                    { title: "Booking History", icon: "sap-icon://connected", key: "devices" },
-                    { title: "Logout", icon: "sap-icon://log", key: "logout" }
-                ]
-            });
-            oView.setModel(oProfileMenuModel, "profileMenuModel");
-            var login = new JSONModel({
-                "isOtpSelected": false,
-                "isPasswordSelected": true
-
-            })
-            oView.setModel(login, "LoginViewModel")
-            var ologin = new JSONModel({
-                fullname: "",
-                Email: "",
-                Mobileno: "",
-                password: "",
-                comfirmpass: ""
-            })
-            this.getView().setModel(ologin, "LoginMode");
-
-            var oProfileSectionModel = new JSONModel({
-                selectedSection: "profile"  // default section shown on dialog open
-            });
-            this.getView().setModel(oProfileSectionModel, "profileSectionModel");
-            const aBranches = [
-                { BranchCode: "KLB01", BranchName: "Kalaburgi" },
-                { BranchCode: "BR002", BranchName: "Mumbai" },
-                { BranchCode: "BR003", BranchName: "Nagpur" },
-                { BranchCode: "BR004", BranchName: "Nashik" }
-            ];
-            const oBranchModel = new JSONModel({ Branches: aBranches });
-            this.getView().setModel(oBranchModel, "BranchModel");
-             this.BedTypedetails();
-                setTimeout(() => {
-                this.CustomerDetails();
-            }, 100);
-            setTimeout(() => {
-                this._loadBranchCode();
-            }, 100);
-
-             setTimeout(() => {
-                   this.onReadcallforRoom()
-            }, 100);
-             setTimeout(() => {
-                 this._loadFilteredData("KLB01");
-            }, 100);
-           
+    const omodel = new sap.ui.model.json.JSONModel({
+        url: "https://rest.kalpavrikshatechnologies.com/",
+        headers: {
+            name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+            password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
+            "Content-Type": "application/json"
         },
-        CustomerDetails:function(){
-            //    const response =  this.ajaxReadWithJQuery("HM_Customer", {});
-             this.ajaxReadWithJQuery("HM_Customer", "").then((oData) => {
-             var oFCIAerData = Array.isArray(oData.Customers) ? oData.Customers : [oData.Customers];
-                var model = new JSONModel(oFCIAerData);
-                this.getView().setModel(model, "CustomerModel");
-             })
-        },
-          BedTypedetails: function () {
-            // this.ajaxReadWithJQuery("HM_BedType", "").then((oData) => {
-            //     var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
-            //     var model = new JSONModel(oFCIAerData);
-            //     this.getView().setModel(model, "BedTypeModel");
-            // })
+        isRadioVisible: false
+    });
+    this.getOwnerComponent().setModel(omodel, "LoginModel");
 
-            $.ajax({
-                url: "https://rest.kalpavrikshatechnologies.com/HM_BedType",
-                method: "GET",
-                contentType: "application/json",
-                headers: {
-                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-                },
-                success: function (response) {
-                    var oModel = new sap.ui.model.json.JSONModel(response.Customers);
-                    this.getView().setModel(oModel, "BedTypeModel");
-                }.bind(this),
-            })
-        },
+    const oAvatar = oView.byId("ProfileAvatar");
+    if (oAvatar) oAvatar.setVisible(false);
+
+    const oHostelModel = new sap.ui.model.json.JSONModel({
+        CustomerName: "",
+        MobileNo: "",
+        Gender: "",
+        DateOfBirth: "",
+        CustomerEmail: "",
+        RoomType: ""
+    });
+    oView.setModel(oHostelModel, "HostelModel");
+
+    const oProfileMenuModel = new sap.ui.model.json.JSONModel({
+        items: [
+            { title: "My Profile", icon: "sap-icon://person-placeholder", key: "profile" },
+            { title: "Booking History", icon: "sap-icon://connected", key: "devices" },
+            { title: "Logout", icon: "sap-icon://log", key: "logout" }
+        ]
+    });
+    oView.setModel(oProfileMenuModel, "profileMenuModel");
+
+    const oLoginViewModel = new sap.ui.model.json.JSONModel({
+        isOtpSelected: false,
+        isPasswordSelected: true
+    });
+    oView.setModel(oLoginViewModel, "LoginViewModel");
+
+    const oLoginModeModel = new sap.ui.model.json.JSONModel({
+        fullname: "",
+        Email: "",
+        Mobileno: "",
+        password: "",
+        comfirmpass: ""
+    });
+    oView.setModel(oLoginModeModel, "LoginMode");
+
+    const oProfileSectionModel = new sap.ui.model.json.JSONModel({
+        selectedSection: "profile"
+    });
+    oView.setModel(oProfileSectionModel, "profileSectionModel");
+
+    const aBranches = [
+        { BranchCode: "KLB01", BranchName: "Kalaburgi" },
+        { BranchCode: "BR002", BranchName: "Mumbai" },
+        { BranchCode: "BR003", BranchName: "Nagpur" },
+        { BranchCode: "BR004", BranchName: "Nashik" }
+    ];
+    oView.setModel(new sap.ui.model.json.JSONModel({ Branches: aBranches }), "BranchModel");
+
+    try {
+        await this.BedTypedetails();
+        await this.CustomerDetails();
+        await this._loadBranchCode();
+        await this.onReadcallforRoom();
+        await this._loadFilteredData("KLB01","AC"); 
+    } catch (error) {
+        console.error("Error during initialization:", error);
+    }
+},
+
+       CustomerDetails: async function () {
+    try {
+        const oData = await this.ajaxReadWithJQuery("HM_Customer", {});
+        const aCustomers = Array.isArray(oData.Customers) ? oData.Customers : [oData.Customers];
+
+        const oCustomerModel = new sap.ui.model.json.JSONModel(aCustomers);
+        this.getView().setModel(oCustomerModel, "CustomerModel");
+
+        console.log("Customer details loaded successfully");
+    } catch (err) {
+        console.error("Error while fetching Customer details:", err);
+    }
+},
+
+         BedTypedetails: async function () {
+    try {
+        const oData = await this.ajaxReadWithJQuery("HM_BedType", {});
+
+        const aBedTypes = Array.isArray(oData.data)
+            ? oData.data
+            : [oData.data];
+
+        const oBedTypeModel = new sap.ui.model.json.JSONModel(aBedTypes);
+        this.getView().setModel(oBedTypeModel, "BedTypeModel");
+
+    } catch (err) {
+        console.error("Error while fetching Bed Type details:", err);
+    }
+},
+
         onUserlivechange: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
         },
@@ -142,11 +139,24 @@ sap.ui.define([
 },
 
         _loadBranchCode: async function () {
-            const oView = this.getView();
-            const Response = await this.ajaxReadWithJQuery("HM_Branch", {})
-            const abranch = Response?.data || [];
-            oView.setModel(new JSONModel(abranch), "sBRModel")
-        },
+    try {
+        const oView = this.getView();
+
+        const oResponse = await this.ajaxReadWithJQuery("HM_Branch", {});
+
+        const aBranches = Array.isArray(oResponse?.data)
+            ? oResponse.data
+            : (oResponse?.data ? [oResponse.data] : []);
+
+        const oBranchModel = new sap.ui.model.json.JSONModel(aBranches);
+        oView.setModel(oBranchModel, "sBRModel");
+
+        console.log("Branch data loaded successfully");
+    } catch (err) {
+        console.error("Error while loading branch data:", err);
+    }
+},
+
 
 
 //         _loadFilteredData: async function (sBranchCode, sACType) {
@@ -1182,8 +1192,36 @@ onBookNow: function (oEvent) {
 BR_onsavebuttonpress:function(){
      this.ARD_Dialog.close();
      this.onSearchRooms()
+},
+BR_oncancelbuttonpress:function(){
+     this.ARD_Dialog.close();
+},
+onAfterRendering: function () {
+    var oCarousel = this.byId("customSlideCarousel");
+    var iIndex = 0;
+    var that = this;
+    var iSlideCount = oCarousel.getPages().length;
+ 
+    // Clear existing interval (in case of rerender)
+    if (this._autoSlideInterval) {
+        clearInterval(this._autoSlideInterval);
+    }
+ 
+    // Set new interval
+    this._autoSlideInterval = setInterval(function () {
+        if (oCarousel && !oCarousel.bIsDestroyed) {
+            iIndex = (iIndex + 1) % iSlideCount;
+            oCarousel.setActivePage(oCarousel.getPages()[iIndex]);
+        }
+    }, 3000); // Auto-scroll every 3 seconds
+},
+ 
+onExit: function () {
+    // Clear interval when view is destroyed
+    if (this._autoSlideInterval) {
+        clearInterval(this._autoSlideInterval);
+    }
 }
-
 
 
     });

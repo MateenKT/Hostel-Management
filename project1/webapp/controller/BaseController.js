@@ -18,9 +18,9 @@ sap.ui.define([
       const queryString = new URLSearchParams(filter).toString();
       return new Promise((resolve, reject) => {
         $.ajax({
-          url: this.getView().getModel("LoginModel").getData().url + sUrl + "?" + queryString,
+          url: this.getOwnerComponent().getModel("LoginModel").getData().url + sUrl + "?" + queryString,
           method: "GET",
-          headers: this.getView().getModel("LoginModel").getData().headers,
+          headers: this.getOwnerComponent().getModel("LoginModel").getData().headers,
           success: (data) => {
             resolve(data);
           },

@@ -48,6 +48,25 @@
                     />
                   
                 </ComboBox>
+
+                   <Label
+                    text="Add Facility"
+                />
+                   <MultiComboBox
+                   id="id_facility"
+                    placeholder="Select Facility"
+                    selectedKey="{HostelModel>/Facility}"
+                           items="{facilitymodel>/}"
+                           valueStateText="Select Room No"
+                           showSecondaryValues="true"
+                >
+                    <core:ListItem
+                        key="{facilitymodel>FacilityName}"
+                        text="{facilitymodel>FacilityName}"
+                        additionalText="{facilitymodel>UnitText}"
+                    />
+                  
+                </MultiComboBox>
             </f:content>
         </f:SimpleForm>
         <footer>

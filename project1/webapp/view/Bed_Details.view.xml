@@ -93,7 +93,7 @@
                 <headerToolbar>
                     <OverflowToolbar>
                         <Title
-                            text="BED List ({=${BedDetails>/}.length})"
+                            text="Bed List ({=${BedDetails>/}.length})"
                         />
                         <ToolbarSpacer />
                          <Button
@@ -155,6 +155,14 @@
                             text="No Of Person"
                         />
                     </Column>
+                     <Column
+                        minScreenWidth="Tablet"
+                        demandPopin="true"
+                    >
+                        <Text
+                            text="Description"
+                        />
+                    </Column>
                     <Column
                         minScreenWidth="Tablet"
                         demandPopin="true"
@@ -179,14 +187,18 @@
 
 
                             <Text text="{BedDetails>NoOfPerson}" />
-
+                    <ExpandableText 
+                         text="{BedDetails>Description}"
+                         maxCharacters="20"
+                         
+                        />
+                           
                             <Button
                             text="View"
                             press="BD_viewroom"
                             type="Transparent"
                         />
-
-                            
+                        
                            
                            
                         </cells>

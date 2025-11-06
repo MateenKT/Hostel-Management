@@ -43,7 +43,7 @@
 					<ScrollContainer id="idHome" horizontal="false" vertical="true" height="100%" class="sapUiContentPadding Homepage sapUiTinyMargin">
 						<l:Grid defaultSpan="XL12 L12 M12 S12" width="100%" class="position-welcome" >
 							<VBox class="sapUiLargeMarginTop">
-								<Text class="custom-welcome sapUiTinyMarginTopBottom" textAlign="Center" text="WelCome To "/>
+								<Text class="custom-welcome sapUiTinyMarginTopBottom" textAlign="Center" text="Welcome To "/>
 								<Text class="custom-welcome  sapUiTinyMarginTopBottom " text="Shah Hostel"/>
 								<Text text="Your New Home Away to me" class="custom-tagline sapUiTinyMarginTop "/>
 							</VBox>
@@ -62,12 +62,15 @@
 							</VBox>
 								<HBox width="100%" justifyContent="End" alignItems="Center">
 
-  <Button text="Filter" icon="sap-icon://filter" class="customSearchBar"
-   press="onpressFilter"  width="200px" />
+  <!-- <Button text="Filter" icon="sap-icon://filter" class="customSearchBar"
+   press="onpressFilter"  width="200px" /> -->
 </HBox>
 
 						</l:Grid>
 					</ScrollContainer>
+
+					 <Button text="Search Location" icon="sap-icon://map" class="SearchBar"
+   press="onpressFilter"  width="200px" />
                     <!-- <l:Grid defaultSpan="XL4 L4 M6 S12" width="100%"  hSpacing="2" vSpacing="2" class="HostelGrid"> -->
     <!-- Single Bed -->
 

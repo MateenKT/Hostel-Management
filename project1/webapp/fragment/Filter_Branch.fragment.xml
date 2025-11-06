@@ -70,6 +70,13 @@
                     id="BR_id_saveButton"
                     class="marginRight"
                 />
+                  <Button
+                    text="cancel"
+                    press="BR_oncancelbuttonpress"
+                    type="Reject"
+                    id="BR_id_cancelButton"
+                    class="marginRight"
+                />
               
             </Toolbar>
         </footer>

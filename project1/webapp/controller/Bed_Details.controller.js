@@ -64,7 +64,7 @@ sap.ui.define([
                 oView.addDependent(this.ARD_Dialog);
             }
            var oClonedData = JSON.parse(JSON.stringify(data));
-          oView.getModel("BedModel").setData(oClonedData);
+            oView.getModel("BedModel").setData(oClonedData);
             var oFileNameText = oView.byId("idFileUploader");
             if (data.FileType) {
                 oFileNameText.setValue(data.FileType);
@@ -96,7 +96,9 @@ sap.ui.define([
         utils._LCstrictValidationComboBox(oView.byId("idRoomtype"), "ID") &&
         utils._LCvalidateMandatoryField(oView.byId("idR"), "ID") &&
 
-        utils._LCvalidateMandatoryField(oView.byId("id_MaxBeds"), "ID")
+        utils._LCvalidateMandatoryField(oView.byId("id_MaxBeds"), "ID") &&
+        utils._LCvalidateMandatoryField(oView.byId("id_Description"), "ID") 
+
     ) {
         if (aFiles.length === 0 && !Payload.RoomPhotos) {
             sap.m.MessageToast.show("Please select a file before saving.");
@@ -154,7 +156,7 @@ sap.ui.define([
             }
 
             await this.Onsearch();
-            sap.m.MessageToast.show("Record saved successfully.");
+            sap.m.MessageToast.show("Bed saved successfully.");
             this.ARD_Dialog.close();
 
         } catch (error) {

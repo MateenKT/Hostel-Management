@@ -116,6 +116,19 @@
                     type="Number"
                     valueStateText="Enter Max no of Beds"
                 />
+
+                 <Label
+                    text="Description"
+                    required="true"
+                />
+                <TextArea
+                    id="id_Description"
+                    value="{BedModel>/Description}"
+                    placeholder="Enter No Of Description"
+                    liveChange="onNameInputLiveChange"
+                    valueStateText="Enter Description"
+                    maxLength="100"
+                />
                
                 <Label
                     text="Add image"
