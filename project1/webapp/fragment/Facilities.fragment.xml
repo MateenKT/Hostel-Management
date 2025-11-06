@@ -35,7 +35,7 @@
 				<HBox width="100%" justifyContent="Start" alignItems="Center">
 					<VBox width="50%">
 						<Input id="FO_id_Price" value="{FacilitiesModel>/Price}"  placeholder="Enter Price"
-                         maxLength="60" liveChange=".onFacilityPriceChange"  valueStateText="{i18n>enterFacilityPrice}"/>
+                         maxLength="10" liveChange=".onFacilityPriceChange"  valueStateText="{i18n>enterFacilityPrice}"/>
 					</VBox>
 					<VBox width="50%">
 						<ComboBox  id="FO_id_Rate" items="{RateType>/}" selectedKey="Per Day" value="{FacilitiesModel>/UnitText}" change=".onFacilityRateChange" width="100%" valueStateText="{i18n>selectRateType}">

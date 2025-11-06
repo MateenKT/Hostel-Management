@@ -4,37 +4,33 @@
 	xmlns:l="sap.ui.layout"
 	xmlns:layout="sap.ui.layout">
 	<VBox class="hostelPageContainer">
-		<Carousel  id="customSlideCarousel"  width="95%" height="500px" loop="true" showPageIndicator="true" class="HostelFacilityCarousel sapUiMediumMargin">
-			<!-- Slide 1: Basic Amenities -->
+		<Carousel  id="customSlideCarousel"  width="95%" height="500px" loop="true" showPageIndicator="true" class="HostelFacilityCarousel">
 			<VBox class="facilitySlide slide1" width="100%" height="100%"></VBox>
-			<!-- Slide 2: Room Facilities -->
 			<VBox class="facilitySlide slide2" width="100%" height="100%"></VBox>
-			<!-- Slide 3: Food & Dining -->
 			<VBox class="facilitySlide slide3" width="100%" height="100%"></VBox>
-			<!-- Slide 4: Recreation & Fitness -->
 			<VBox class="facilitySlide slide4" width="100%" height="100%"></VBox>
-			<!-- Slide 5: Safety & Security -->
 			<VBox class="facilitySlide slide5" width="100%" height="100%"></VBox>
 		</Carousel>
+
 		<!-- Common Hostel Services -->
 		<VBox class="servicesContainer sapUiMediumMargin">
-			<Title text="Shah Hostel Services and Facilities" class="sectionTitle"/>
-			<layout:Grid defaultSpan="L6 M6 S12" hSpacing="2" vSpacing="2" class="servicesGrid SectionFacility">
-				<!-- Left Side (3 boxes) -->
+			<Title text="Shah Hostel Services and Facilities" wrapping="true" class="sectionTitle"/>
+			<layout:Grid defaultSpan="L6 M6 S12" hSpacing="2" vSpacing="2" class="servicesGrid">
+				<!-- Basic Amenities -->
 				<layout:content>
-					<VBox class="serviceBox">
-						<Title text="Basic Amenities" level="H3"/>
+					<VBox class="serviceSection">
+						<Title text="Basic Amenities"  level="H3" class="serviceTitle"/>
 						<Text text="• 24/7 Electricity Supply"/>
 						<Text text="• Wi-Fi / Internet Access"/>
 						<Text text="• Hot and Cold Water Supply"/>
 						<Text text="• Room Cleaning / Housekeeping"/>
-						<Text text="• Laundry Service"/>
-						<Text text="• Drinking Water Facility"/>
+						<Text text="• Laundry Service / Drinking Water Facility"/>
 					</VBox>
 				</layout:content>
+				<!-- Room Facilities -->
 				<layout:content>
-					<VBox class="serviceBox">
-						<Title text="Room Facilities" level="H3"/>
+					<VBox class="serviceSection">
+						<Title text="Room Facilities" level="H3" class="serviceTitle"/>
 						<Text text="• Bed, Mattress, Pillow, Blanket"/>
 						<Text text="• Study Table and Chair"/>
 						<Text text="• Cupboard / Locker"/>
@@ -42,34 +38,38 @@
 						<Text text="• Attached / Common Bathroom"/>
 					</VBox>
 				</layout:content>
+				<!-- Recreation and Fitness -->
 				<layout:content>
-					<VBox class="serviceBox">
-						<Title text="Food and Dining" level="H3"/>
-						<Text text="• Mess / Canteen Facility"/>
-						<Text text="• Breakfast, Lunch and Dinner Service"/>
-						<Text text="• RO Water / Lounge / TV Room"/>
-						<Text text="• Common Kitchen Area (Self Cooking)"/>
-					</VBox>
-				</layout:content>
-				<!-- Right Side (3 boxes) -->
-				<layout:content>
-					<VBox class="serviceBox">
-						<Title text="Recreation and Fitness" level="H3"/>
+					<VBox class="serviceSection">
+						<Title text="Recreation and Fitness" level="H3" class="serviceTitle"/>
 						<Text text="• 24/7 Security Guard"/>
 						<Text text="• Visitor Surveillance"/>
 						<Text text="• Fire Safety Equipment"/>
 						<Text text="• First Aid Kit"/>
 					</VBox>
 				</layout:content>
+				<!-- Food and Dining -->
 				<layout:content>
-					<VBox class="serviceBox">
-						<Title text="Safety and Security" level="H3"/>
-						<Text text="• Two-Wheeler / Car Parking"/>
+					<VBox class="serviceSection">
+						<Title text="Food and Dining" level="H3" class="serviceTitle"/>
+						<Text text="• Mess / Canteen Facility"/>
+						<Text text="• Breakfast, Lunch and Dinner Service"/>
+						<Text text="• RO Water / TV Room / Lounge"/>
+						<Text text="• Common Kitchen Area (Self-Cooking)"/>
 					</VBox>
 				</layout:content>
+				<!-- Safety and Security -->
 				<layout:content>
-					<VBox class="serviceBox">
-						<Title text="Other Services" level="H3"/>
+					<VBox class="serviceSection">
+						<Title text="Safety and Security" level="H3" class="serviceTitle"/>
+						<Text text="• Two-Wheeler / Car Parking"/>
+						<Text text="• CCTV Surveillance"/>
+					</VBox>
+				</layout:content>
+				<!-- Other Services -->
+				<layout:content>
+					<VBox class="serviceSection">
+						<Title text="Other Services" level="H3" class="serviceTitle"/>
 						<Text text="• Maintenance Support"/>
 						<Text text="• Warden / Caretaker Support"/>
 					</VBox>

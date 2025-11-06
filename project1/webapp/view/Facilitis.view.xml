@@ -79,7 +79,7 @@
                 id="id_facilityTable"
                 sticky="ColumnHeaders,HeaderToolbar"
                 mode="SingleSelectLeft"
-                width="auto"
+                width="auto" busyIndicatorDelay="0"
                 class="sapUiResponsiveMargin"
                 items="{path: 'Facilities>/'}">
 				<headerToolbar>

@@ -648,41 +648,77 @@
     font-weight: bold;
 }
 
-/* Background image styling */
+/* Carousel Container */
 .HostelFacilityCarousel {
   border-radius: 0.6rem;
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  width: 95%;
+  height: 500px;
+  margin: auto;
+  transition: height 0.3s ease;
 }
 
-/* Common style for all slides */
+/* Common Slide Styles */
 .facilitySlide {
+  width: 100%;
+  height: 100%;
   background-size: cover;
-  background-position: center;
+  background-position: center center;
   background-repeat: no-repeat;
 }
 
-/* Slide-specific images — update with your actual paths */
+/* Slide-specific Images */
 .slide1 {
-  background-image: url("../image/facility.jpg"); /* Basic Amenities */
+  background-image: url("../image/facility.jpg");
 }
 
 .slide2 {
-  background-image: url("../image/facility1.jpg"); /* Basic Amenities */
+  background-image: url("../image/facility1.jpg");
 }
 
 .slide3 {
-  background-image: url("../image/facility3.jpg"); /* Room Facilities */
+  background-image: url("../image/facility3.jpg");
 }
 
 .slide4 {
-  background-image: url("../image/facility7.jpeg"); /* Food & Dining */
+  background-image: url("../image/facility7.jpeg");
 }
 
 .slide5 {
-  background-image: url("../image/facility6.jpg"); /* Recreation & Fitness */
+  background-image: url("../image/facility6.jpg");
 }
 
+/* ✅ Responsive Adjustments */
+@media (max-width: 1024px) {
+  .HostelFacilityCarousel {
+    height: 400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .HostelFacilityCarousel {
+    height: 300px;
+  }
+}
+
+@media (max-width: 480px) {
+  .HostelFacilityCarousel {
+    height: 220px;
+    width: 100%;
+    border-radius: 0.4rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .facilitySlide {
+    background-size: cover; /* ensures image fills width and height */
+    background-position: center top;
+  }
+}
+
+.sapMCrsl {
+  touch-action: pan-y !important;
+}
 
 
 .underlineLink {
@@ -710,50 +746,40 @@
   justify-content: center;
 }
 
-/* Section title */
+.servicesContainer {
+    background-color: #ffffff;
+    padding: 2rem;
+}
+
 .sectionTitle {
-  text-align: center;
-  margin-bottom: 1.5rem;
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: #333;
+    font-weight: 600;
+    font-size: 1.6rem;
+    color: #00acc1;
+    margin-bottom: 1.5rem;
 }
 
-/* Grid layout adjustments */
 .servicesGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+    border-top: 1px solid #e0e0e0;
+    border-bottom: 1px solid #e0e0e0;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
 }
 
-/* Service box style */
-.serviceBox {
-  background: rgba(255, 255, 255, 0.85); /* translucent for better contrast */
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  backdrop-filter: blur(4px);
+.serviceSection {
+    padding: 0.5rem 0 1.5rem 0;
 }
 
-.serviceBox Title {
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: #2a2a2a;
-  margin-bottom: 0.5rem;
+.serviceTitle {
+    font-weight: 600;
+    color:#000;
+    margin-bottom: 0.5rem;
 }
 
-.serviceBox Text {
-  color: #555;
-  line-height: 1.4rem;
+.serviceSection > .sapMText {
+    font-size: 0.95rem;
+    color: #333;
+    line-height: 1.6;
 }
-
-/* Responsive design */
-@media (max-width: 768px) {
-  .servicesGrid {
-    grid-template-columns: 1fr;
-  }
-}
-
 
 
 
