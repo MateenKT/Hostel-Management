@@ -126,12 +126,12 @@
 <!-- </l:Grid> -->
 
                     </Page>
-					<Page id="idFacilities" showHeader="false" class="Products_list sapUiTinyMargin">
+					<ScrollContainer id="idFacilities" horizontal="false" vertical="true" height="100%" class="Products_list sapUiTinyMargin" >
 						<core:Fragment fragmentName="sap.ui.com.project1.fragment.HomePage" type="XML"/>
-					</Page>
-					<Page id="idContact" showHeader="false" class="Products_list sapUiTinyMargin">
+					</ScrollContainer>
+					<ScrollContainer id="idContact" horizontal="false" vertical="true" height="100%" class="Products_list sapUiTinyMargin" >
 						<core:Fragment fragmentName="sap.ui.com.project1.fragment.ContactPage" type="XML"/>
-					</Page>
+					</ScrollContainer>
 					<ScrollContainer id="idAdddata" horizontal="false" vertical="true" height="100%" class="sapUiContentPadding career-background sapUiTinyMargin">
 						<!-- <core:Fragment fragmentName="sap.kt.com.minihrsolution.fragment.CareerPage" type="XML"/> -->
 					</ScrollContainer>

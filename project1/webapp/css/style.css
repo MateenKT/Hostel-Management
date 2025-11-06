@@ -223,7 +223,7 @@
     transition: all 0.3s ease-in-out;
 }
 .contact-hero-title:hover {
-    color: #1477e1;
+    color: #00bcd4;
     transform: scale(1.2);
     text-shadow: 4px 4px 10px rgba(0,0,0,0.9);
     cursor: pointer;
@@ -250,13 +250,13 @@
 }
 .contact-text {
    font-size: 1.5rem;
-    color: #0064d9 !important;
+    color: #00bcd4  !important;
     margin: 20px 0;
     text-align: left;
     font-weight: bold;
 }
 .contact-address-box {
-  background: #2b79d1;
+  background: #00bcd4;
   color: #fff !important;
   border-radius: 8px;
   padding: 1.5rem;
@@ -290,7 +290,6 @@
     font-weight: bold;
     line-height: 1.8;  
 }
-
 .oldCompName{
    font-size: 1.2rem !important;
     font-weight: bold; 
@@ -318,10 +317,32 @@
    border-radius: 8px 0 0 8px;
 }
  
-/* Footer */
+/* Responsive for mobile */
+@media (max-width: 768px) {
+  .contact-address-box, .contact-map-box {
+    color: #fff !important;
+    width: 100%; /* stack vertically */
+    margin-bottom: 1rem;
+  }
+}
 
+.contact-address-box a,
+.contact-address-box .sapMText,
+.contact-address-box .sapMLnk {
+    color: #fff !important;
+    font-size: 14px;
+    text-decoration: none; /* optional, removes underline */
+}
+
+.contact-page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh !important;
+}
+
+/* Footer */
 .footer-bar {
-  background-color:#0064d9;
+  background-color: #1bb2bf;;
   padding: 15px 40px;
   color: #fff;
   display: flex;
@@ -329,30 +350,39 @@
   border-radius: 8px 8px 0 0;
   margin-top: 3rem;
 }
+
+/* Footer Text */
 .footer-text {
   color: #fff;
   font-size: 14px;
 }
+
+/* Footer Links */
+.footer-links {
+  gap: 30px;
+  flex: 1;
+  justify-content: center;
+}
+.footer-link {
+  color: #fff !important;
+  text-decoration: none;
+  font-size: 14px;
+}
+.footer-link:hover {
+  text-decoration: underline;
+}
+
+/* Social Icons */
 .footer-social {
   gap: 20px;
 }
-@media (max-width: 768px) {
-  .footer-bar {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    /* gap: 15px; */
-    margin-top: 2rem;
-  }
-
-  .footer-links {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .footer-social {
-    justify-content: center;
-  }
+.social-icon {
+  color: #fff !important;
+  font-size: 1.5rem;
+  transition: transform 0.3s ease;
+}
+.social-icon:hover {
+  transform: scale(1.3);
 }
 .customPageTitle{
     font-size: 20px !important;
@@ -617,6 +647,113 @@
     color: #00acc1 !important;
     font-weight: bold;
 }
+
+/* Background image styling */
+.HostelFacilityCarousel {
+  border-radius: 0.6rem;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Common style for all slides */
+.facilitySlide {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Slide-specific images — update with your actual paths */
+.slide1 {
+  background-image: url("../image/facility.jpg"); /* Basic Amenities */
+}
+
+.slide2 {
+  background-image: url("../image/facility1.jpg"); /* Basic Amenities */
+}
+
+.slide3 {
+  background-image: url("../image/facility3.jpg"); /* Room Facilities */
+}
+
+.slide4 {
+  background-image: url("../image/facility7.jpeg"); /* Food & Dining */
+}
+
+.slide5 {
+  background-image: url("../image/facility6.jpg"); /* Recreation & Fitness */
+}
+
+
+
+.underlineLink {
+   text-decoration: underline !important;
+}
+
+.sapMLnk:not(.sapMLnkDsbl) {
+    text-shadow: none !important;
+}
+
+.hostelPageContainer {
+  background-color: #fff;
+}
+
+/* Section background */
+.SectionFacility {
+  background-image: url("../image/Footer.png"); /* white page image */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  border-radius: 0.6rem;
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Section title */
+.sectionTitle {
+  text-align: center;
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Grid layout adjustments */
+.servicesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+/* Service box style */
+.serviceBox {
+  background: rgba(255, 255, 255, 0.85); /* translucent for better contrast */
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  backdrop-filter: blur(4px);
+}
+
+.serviceBox Title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2a2a2a;
+  margin-bottom: 0.5rem;
+}
+
+.serviceBox Text {
+  color: #555;
+  line-height: 1.4rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .servicesGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 
 

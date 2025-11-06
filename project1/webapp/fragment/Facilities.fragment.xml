@@ -1,17 +1,16 @@
 <c:FragmentDefinition
-    xmlns="sap.m"
-    xmlns:c="sap.ui.core"
-    xmlns:f="sap.ui.layout.form"
-    xmlns:core="sap.ui.core"
-    xmlns:u="sap.ui.unified"
->
-    <Dialog
+	xmlns="sap.m"
+	xmlns:c="sap.ui.core"
+	xmlns:f="sap.ui.layout.form"
+	xmlns:core="sap.ui.core"
+	xmlns:u="sap.ui.unified"
+    xmlns:mvc="sap.ui.core.mvc">
+	<Dialog
         id="FacilitiesDialog"
         title="Add facilities"
         type="Message"
-        class="sapUiContentPadding"
-    >
-        <f:SimpleForm
+        class="sapUiContentPadding">
+		<f:SimpleForm
             editable="true"
             layout="ResponsiveGridLayout"
             labelSpanXL="4"
@@ -20,96 +19,49 @@
             labelSpanS="12"
             columnsXL="2"
             columnsL="2"
-            columnsM="1"
-        >
-            <f:content>
-              <Label
-                    text="Branch Code"
-                    required="true"
-                />
-                <ComboBox
-                    id="idRoomType123"
-                    placeholder="Select branch Code"
-                    selectedKey="{FacilitiesModel>/BranchCode}"
-                       items="{BranchModel>/}"
-                       showSecondaryValues="true"
-                >
-                 
-                      <core:ListItem
-                        key="{BranchModel>BranchID}"
-                        text="{BranchModel>BranchID}"
-                        additionalText="{BranchModel>Name}"
-                    />
-                  
-                </ComboBox>
-                <Label
-                    text="Facility Name"
-                    required="true"
-                />
-                <Input
-                    id="idFacilityName"
-                    value="{FacilitiesModel>/FacilityName}"
-                    placeholder="Enter Facility Name"
-                    maxLength="60"
-                    />
-               
-              
-                <Label
-                    text="Type"
-                    required="true"
-                />
-            
-                <Input
-                    id="idFacilityName1"
-                    value="{FacilitiesModel>/Type}"
-                    placeholder="Enter Type"
-                    maxLength="60"
-                    />
-                
-                <Label
-                    text="Price"
-                    required="true"
-                />
-                <Input
-                    id="idPrice"
-                    value="{FacilitiesModel>/Price}"
-                    placeholder="Enter Price"
-                    maxLength="60"
-                />
-                  <Label
-                    text="Add image"
-                    required="true"
-                />
-                <u:FileUploader
-                    id="idFileUploderFacility"
-                    name="studentDocument"
-                    placeholder="Choose a file to upload"
-                    fileType="jpg,png,pdf"
-                    maximumFileSize="10"
-                    change=".onFileUploaderChange"
-                    tooltip="Only JPG, PNG, or PDF files under 10MB allowed"
-                    value=""
-                />
-            </f:content>
-        </f:SimpleForm>
-        <footer>
-            <Toolbar>
-                <ToolbarSpacer />
-                <Button
-                    text="Save"
-                    press="FD_onsavebuttonpress"
-                    type="Accept"
-                    id="AR_id_saveButton"
-                    class="marginRight"
-                />
-                <Button
-                    text="Cancel"
-                    press="FD_onCancelButtonPress"
-                    type="Reject"
-                    id="FD_id_CancelButton"
-                    class="marginRight"
-                />
-            </Toolbar>
-        </footer>
-    </Dialog>
+            columnsM="1">
+			<f:content>
+				<Label text="Branch Code" required="true"/>
+				<ComboBox id="idRoomType123" placeholder="Select branch Code" selectedKey="{FacilitiesModel>/BranchCode}"
+                 items="{BranchModel>/}" showSecondaryValues="true"  change=".onFacilitybranchChange" valueStateText="{i18n>selectBranchCode}">
+					<core:ListItem  key="{BranchModel>BranchID}"  text="{BranchModel>BranchID}" additionalText="{BranchModel>Name}"/>
+				</ComboBox>
+				<Label text="Facility Name" required="true" />
+				<Input id="idFacilityName" value="{FacilitiesModel>/FacilityName}" placeholder="Enter Facility Name"
+                 maxLength="60" liveChange=".onFacilityNameChange"  valueStateText="{i18n>enterFacilityName}" />
+				<Label text="Type" required="true"/>
+				<Input id="idFacilityName1" value="{FacilitiesModel>/Type}" placeholder="Enter Type" maxLength="60" liveChange=".onFacilityTypeChange" valueStateText="{i18n>enterFacilityType}"/> 
+				<Label text="Price" required="true"  />
+				<HBox width="100%" justifyContent="Start" alignItems="Center">
+					<VBox width="50%">
+						<Input id="FO_id_Price" value="{FacilitiesModel>/Price}"  placeholder="Enter Price"
+                         maxLength="60" liveChange=".onFacilityPriceChange"  valueStateText="{i18n>enterFacilityPrice}"/>
+					</VBox>
+					<VBox width="50%">
+						<ComboBox  id="FO_id_Rate" items="{RateType>/}" selectedKey="Per Day" value="{FacilitiesModel>/UnitText}" change=".onFacilityRateChange" width="100%" valueStateText="{i18n>selectRateType}">
+							<core:Item key="{RateType>ID}" text="{RateType>RateType}" />
+						</ComboBox>
+					</VBox>
+				</HBox>
+				<Label text="Add image" required="true" />
+					<HBox alignItems="Center" width="100%" renderType="Bare">
+						<VBox width="20%">
+							<u:FileUploader id="fileUploader" fileSizeExceed="onFileSizeExceeds" maximumFileSize="5MB" typeMissmatch="onFileTypeMissmatch" fileType="pdf,jpg,jpeg,png,doc,docx" change="onFacilityFileChange" buttonOnly="true" sameFilenameAllowed="true" iconFirst="true" buttonText="Attachment" />
+						</VBox>
+						<VBox width="80%">
+							<Tokenizer id="idTokenList" width="100%" tokenDelete="onTokenDelete" tokens="{tokenModel>/tokens}">
+								<Token key="{tokenModel>key}" text="{tokenModel>text}" />
+							</Tokenizer>
+						</VBox>
+					</HBox>
+			</f:content>
+		</f:SimpleForm>
+		<footer>
+			<Toolbar>
+				<ToolbarSpacer />
+				<Button text="Save" press="FD_onsavebuttonpress" type="Accept" id="FO_id_saveButton" class="marginRight" />
+				<Button text="Cancel" press="FD_onCancelButtonPress" type="Reject" id="FD_id_CancelButton" class="marginRight" />
+			</Toolbar>
+		</footer>
+	</Dialog>
 </c:FragmentDefinition>

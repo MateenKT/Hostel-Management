@@ -1,30 +1,95 @@
-<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout">
-  <Carousel id="customSlideCarousel" width="100%" height="300px" loop="true" showPageIndicator="true">
-    <!-- Slide 1 -->
-    <VBox width="100%" height="100%" class="customTileSlide" >
-      <HBox width="100%" justifyContent="SpaceBetween" alignItems="Start" class="slideHBox1">
-        <VBox width="60%" class="sapUiContentPadding">
-          <Title text="Cloth Washing Rooms" level="H1"  />
-          <Text text="The cloth washing room is equipped with washing machines, dryers, and ironing facilities, providing residents with a clean and convenient space to do their laundry." />
-        </VBox>
-        <VBox width="35%" alignItems="End" justifyContent="Center">
-          <!-- <Button text="Book Now" type="Emphasized" press="onPressSlide1" /> -->
-        </VBox>
-      </HBox>
-    </VBox>
-
-    <!-- Slide 2 -->
-    <VBox width="100%" height="100%" class="customTileSlide2" >
-      <HBox width="100%" justifyContent="SpaceBetween" alignItems="Start" >
-        <VBox width="60%" class="sapUiContentPadding">
-          <Title text="Morden Kitchen" level="H2" />
-          <Text text="The food kitchen room in the hostel is a clean, well-equipped space where residents can prepare their own meals, featuring cooking stoves, refrigerators, utensils, and dining areas for a convenient and homely cooking experience." />
-        </VBox>
-        <VBox width="35%" alignItems="End" justifyContent="Center">
-          <Button text="See Pricing" type="Default" press="onPressSlide2" />
-        </VBox>
-      </HBox>
-    </VBox>
-    <!-- Add more slides as required -->
-  </Carousel>
+<core:FragmentDefinition
+	xmlns="sap.m"
+	xmlns:core="sap.ui.core"
+	xmlns:l="sap.ui.layout"
+	xmlns:layout="sap.ui.layout">
+	<VBox class="hostelPageContainer">
+		<Carousel  id="customSlideCarousel"  width="95%" height="500px" loop="true" showPageIndicator="true" class="HostelFacilityCarousel sapUiMediumMargin">
+			<!-- Slide 1: Basic Amenities -->
+			<VBox class="facilitySlide slide1" width="100%" height="100%"></VBox>
+			<!-- Slide 2: Room Facilities -->
+			<VBox class="facilitySlide slide2" width="100%" height="100%"></VBox>
+			<!-- Slide 3: Food & Dining -->
+			<VBox class="facilitySlide slide3" width="100%" height="100%"></VBox>
+			<!-- Slide 4: Recreation & Fitness -->
+			<VBox class="facilitySlide slide4" width="100%" height="100%"></VBox>
+			<!-- Slide 5: Safety & Security -->
+			<VBox class="facilitySlide slide5" width="100%" height="100%"></VBox>
+		</Carousel>
+		<!-- Common Hostel Services -->
+		<VBox class="servicesContainer sapUiMediumMargin">
+			<Title text="Shah Hostel Services and Facilities" class="sectionTitle"/>
+			<layout:Grid defaultSpan="L6 M6 S12" hSpacing="2" vSpacing="2" class="servicesGrid SectionFacility">
+				<!-- Left Side (3 boxes) -->
+				<layout:content>
+					<VBox class="serviceBox">
+						<Title text="Basic Amenities" level="H3"/>
+						<Text text="• 24/7 Electricity Supply"/>
+						<Text text="• Wi-Fi / Internet Access"/>
+						<Text text="• Hot and Cold Water Supply"/>
+						<Text text="• Room Cleaning / Housekeeping"/>
+						<Text text="• Laundry Service"/>
+						<Text text="• Drinking Water Facility"/>
+					</VBox>
+				</layout:content>
+				<layout:content>
+					<VBox class="serviceBox">
+						<Title text="Room Facilities" level="H3"/>
+						<Text text="• Bed, Mattress, Pillow, Blanket"/>
+						<Text text="• Study Table and Chair"/>
+						<Text text="• Cupboard / Locker"/>
+						<Text text="• Ceiling Fan / Air Conditioning"/>
+						<Text text="• Attached / Common Bathroom"/>
+					</VBox>
+				</layout:content>
+				<layout:content>
+					<VBox class="serviceBox">
+						<Title text="Food and Dining" level="H3"/>
+						<Text text="• Mess / Canteen Facility"/>
+						<Text text="• Breakfast, Lunch and Dinner Service"/>
+						<Text text="• RO Water / Lounge / TV Room"/>
+						<Text text="• Common Kitchen Area (Self Cooking)"/>
+					</VBox>
+				</layout:content>
+				<!-- Right Side (3 boxes) -->
+				<layout:content>
+					<VBox class="serviceBox">
+						<Title text="Recreation and Fitness" level="H3"/>
+						<Text text="• 24/7 Security Guard"/>
+						<Text text="• Visitor Surveillance"/>
+						<Text text="• Fire Safety Equipment"/>
+						<Text text="• First Aid Kit"/>
+					</VBox>
+				</layout:content>
+				<layout:content>
+					<VBox class="serviceBox">
+						<Title text="Safety and Security" level="H3"/>
+						<Text text="• Two-Wheeler / Car Parking"/>
+					</VBox>
+				</layout:content>
+				<layout:content>
+					<VBox class="serviceBox">
+						<Title text="Other Services" level="H3"/>
+						<Text text="• Maintenance Support"/>
+						<Text text="• Warden / Caretaker Support"/>
+					</VBox>
+				</layout:content>
+			</layout:Grid>
+		</VBox>
+		<!-- Footer -->
+		<HBox class="footer-bar" alignItems="Center" justifyContent="SpaceBetween" width="100%" >
+			<Text text="{i18n>companynameKT}" class="footer-text"/>
+			<HBox class="footer-social" justifyContent="End">
+				<core:HTML content="&lt;a href='https://www.instagram.com/' target='_blank'&gt;
+                                  &lt;i class='fab fa-instagram social-icon'&gt;&lt;/i&gt;
+                                &lt;/a&gt;"/>
+				<core:HTML content="&lt;a href='https://www.facebook.com/' target='_blank'&gt;
+                              &lt;i class='fab fa-facebook-f social-icon'&gt;&lt;/i&gt;
+                            &lt;/a&gt;"/>
+				<core:HTML content="&lt;a href='https://www.youtube.com/' target='_blank'&gt;
+                                  &lt;i class='fab fa-youtube social-icon'&gt;&lt;/i&gt;
+                                &lt;/a&gt;"/>
+			</HBox>
+		</HBox>
+	</VBox>
 </core:FragmentDefinition>

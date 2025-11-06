@@ -57,6 +57,11 @@
         "settings": {
           "bundleName": "sap.ui.com.project1.i18n.i18n"
         }
+      },
+      "RateType": {
+            "type": "sap.ui.model.json.JSONModel",
+            "uri": "model/RateType.json",
+            "preload": true
       }
     },
     "resources": {
