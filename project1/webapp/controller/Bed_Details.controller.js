@@ -32,6 +32,18 @@ sap.ui.define([
             }
             // oView.byId("idRoomNumber").setVisible(false);
             // oView.byId("idActype").setVisible(false);
+            oView.getModel("BedModel").setData({})
+         this.byId("idFileUploader").setValue("");
+           var aControls = this.ARD_Dialog.findAggregatedObjects(true, function (oControl) {
+        return oControl instanceof sap.m.Input ||
+               oControl instanceof sap.m.ComboBox ||
+               oControl instanceof sap.m.Select;
+    });
+
+    aControls.forEach(function (oControl) {
+        oControl.setValueState("None");
+    });
+
 
             this.ARD_Dialog.open();
         },
@@ -57,7 +69,14 @@ sap.ui.define([
             if (data.FileType) {
                 oFileNameText.setValue(data.FileType);
             }
-
+   var aControls = this.ARD_Dialog.findAggregatedObjects(true, function (oControl) {
+        return oControl instanceof sap.m.Input ||
+               oControl instanceof sap.m.ComboBox ||
+               oControl instanceof sap.m.Select;
+    });
+     aControls.forEach(function (oControl) {
+        oControl.setValueState("None");
+    });
             // oView.byId("idCity").setVisible(false);
 
 
@@ -75,10 +94,12 @@ sap.ui.define([
         utils._LCstrictValidationComboBox(oView.byId("idRoomType12"), "ID") &&
         utils._LCvalidateMandatoryField(oView.byId("idBedType"), "ID") &&
         utils._LCstrictValidationComboBox(oView.byId("idRoomtype"), "ID") &&
-        utils._LCvalidateMandatoryField(oView.byId("idR"), "ID")
+        utils._LCvalidateMandatoryField(oView.byId("idR"), "ID") &&
+
+        utils._LCvalidateMandatoryField(oView.byId("id_MaxBeds"), "ID")
     ) {
         if (aFiles.length === 0 && !Payload.RoomPhotos) {
-            sap.m.MessageBox.error("Please select a file before saving.");
+            sap.m.MessageToast.show("Please select a file before saving.");
             return;
         }
 

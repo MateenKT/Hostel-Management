@@ -1,11 +1,15 @@
 sap.ui.define([
     "./BaseController",
     "../model/formatter",
-    "sap/ui/model/json/JSONModel"
+    "sap/ui/model/json/JSONModel",
+       "sap/m/MessageBox",
+           "../utils/validation"
 ], function (
     BaseController,
     Formatter,
-    JSONModel
+    JSONModel,
+    MessageBox,
+    utils
 ) {
     "use strict";
 
@@ -238,6 +242,7 @@ sap.ui.define([
 
     var oText = sap.ui.getCore().byId("idCustomerNameText");
     oText.setText(this.data.CustomerName + " (" + this.data.CustomerID + ")");
+    sap.ui.getCore().byId("idRoomNumber1").setValueState("None").setSelectedKey("");
 
     this.HM_Dialog.open();
 },
@@ -310,8 +315,24 @@ sap.ui.define([
             
         // },
         ARNO_onsavebuttonpress: function (oEvent) {
-            var ID = this.data
+            // var ID = this.data
+            var oView=this.getView()
+             var table = this.byId("idPOTable");
+    var selected = table.getSelectedItem();
+    if (!selected) {
+        sap.m.MessageToast.show("Please select a record to assign room.");
+        return;
+    }
+
+    var Model = selected.getBindingContext("HostelModel");
+     var ID = Model.getObject()
+       
             var data = sap.ui.getCore().byId("idRoomNumber1").getSelectedKey();
+
+      if( ID.Bookings[0].RoomNo || utils._LCstrictValidationComboBox(sap.ui.getCore().byId("idRoomNumber1"), "ID")){
+            if(data==="" ){
+               var data=ID.Bookings[0].RoomNo
+            }
 
             var Payload = {
                 RoomNo: data,
@@ -345,6 +366,10 @@ sap.ui.define([
                     sap.m.MessageToast.show("Error: " + xhr.statusText);
                 }
             });
+        }else{
+             sap.m.MessageToast.show("Please fill all required fields correctly before saving.");
+                return;
+        }
            
         },
       HM_EditRoom: async function (oEvent) {
@@ -357,6 +382,8 @@ sap.ui.define([
 
     var Model = selected.getBindingContext("HostelModel");
     var data = Model.getObject();
+
+ 
 
     var Payload = {
         Status: "Closed"
@@ -398,6 +425,7 @@ HM_ChangeRoom:function(){
 
     var Model = selected.getBindingContext("HostelModel");
     var data = Model.getObject();
+     this.RoomNo=data.RoomNo
 
      var oRoomDetailsModel = this.getView().getModel("RoomDetailsModel");
     var aRooms = oRoomDetailsModel.getData(); // All room details
@@ -455,7 +483,7 @@ HM_ChangeRoom:function(){
         oView.addDependent(this.HM_Dialog);
     }
     sap.ui.getCore().byId("idCustomerNameText").setText(data.CustomerName)
-    sap.ui.getCore().byId("idRoomNumber1").setValue(data.Bookings[0].RoomNo)
+    sap.ui.getCore().byId("idRoomNumber1").setValue(data.Bookings[0].RoomNo).setValueState("None");
 
     this.getView().getModel("")
     this.HM_Dialog.open();
@@ -558,6 +586,9 @@ HM_ChangeRoom:function(){
             this.getView().byId("PO_id_Status").setSelectedKey("")
 
 
+        },
+        onRoomNoChange:function(oEvent){
+              utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
         }
 
 

@@ -123,11 +123,11 @@
     vertical-align: bottom;
     font-size: 18px;
 }
-.HostelGrid {
+/* .HostelGrid {
     margin-top: 24px;
     justify-content: center;
     height: 80% !important;
-}
+} */
 
 .HostelCard {
     background: #1bb2bf;
@@ -549,6 +549,77 @@
     font-weight: bold;
     text-align: center;
 }
+.card-style {
+    width: 140px;
+    padding: 0.5rem;
+    border-radius: 10px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+    background-color: #fff;
+    align-items: center;
+    text-align: center;
+}
+
+.bedCard {
+    width: 350px;
+    height: 460px;
+    border-radius: 16px;
+    padding: 6px;
+    background-color: #00acc1; /* teal look like your example */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bedCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+}
+
+.bedCardImage {
+    object-fit: cover;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    background-color: white;
+}
+
+.bedCardContent {
+    flex: 1;
+    padding: 0.5rem;
+    color: #fff;
+    text-align: center;
+}
+
+.bedCardTitle {
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-bottom: 0.2rem;
+}
+
+.bedCardDesc {
+    font-size: 1rem;
+    color: #19191a;
+    min-height: 40px;
+}
+
+.bedCardPrice {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-top: 0.3rem;
+}
+
+.bedCardButton {
+    margin-top: auto;
+    border-radius: 10px;
+    background-color: white !important;
+    color: #00acc1 !important;
+    font-weight: bold;
+}
+
+
+
 
 
 

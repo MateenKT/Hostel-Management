@@ -107,6 +107,16 @@
                     valueStateText="No of person cannot be empty"
                 />
 
+                 <Label
+                    text="Extra Bed"
+                />
+                <Input
+                    id="idExtrabed"
+                    value="{RoomModel>/ExtraBed}"
+                    placeholder="Enter No Of ExtraBed"
+                    type="Number"
+                />
+
                 <Label
                     text="Price"
                     required="true"

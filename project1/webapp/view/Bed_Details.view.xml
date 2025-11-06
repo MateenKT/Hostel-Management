@@ -143,7 +143,16 @@
                         demandPopin="true"
                     >
                         <Text
-                            text="Max Beds"
+                            text="Max No. of Rooms"
+                        />
+                    </Column>
+
+                     <Column
+                        minScreenWidth="Tablet"
+                        demandPopin="true"
+                    >
+                        <Text
+                            text="No Of Person"
                         />
                     </Column>
                     <Column
@@ -166,6 +175,8 @@
                             <Text text="{BedDetails>Name}" />
                          
                             <Text text="{BedDetails>ACType}" />
+                            <Text text="{BedDetails>MaxBeds}" />
+
 
                             <Text text="{BedDetails>NoOfPerson}" />
 

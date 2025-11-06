@@ -68,59 +68,62 @@
 
 						</l:Grid>
 					</ScrollContainer>
-                    <l:Grid defaultSpan="XL4 L4 M6 S12" width="100%"  hSpacing="2" vSpacing="2" class="HostelGrid">
+                    <!-- <l:Grid defaultSpan="XL4 L4 M6 S12" width="100%"  hSpacing="2" vSpacing="2" class="HostelGrid"> -->
     <!-- Single Bed -->
-    <VBox visible="{VisibilityModel>/singleVisible}" class="HostelCard" backgroundDesign="Solid">
-        <HBox justifyContent="Center" class="section-image">
-            <Image src="{VisibilityModel>/singleImg}" width="380px" height="320px" class="section-image" />
-        </HBox>
-        <Text class="hr-text" text="{VisibilityModel>/singleName}"/>
-        <Text class="description-text" text="{VisibilityModel>/singleDesc}"/>
-        <Text class="description-text" text="The price will be {VisibilityModel>/singlePrice}"/>
-        <HBox justifyContent="Center">
-            <Button text="Book Now" press="onRoomBookPress" width="200px" >  
-			 <customData>
-        <core:CustomData key="roomType" value="Single Bed" />
-             </customData>
-</Button>
-        </HBox>
-    </VBox>
 
-    <!-- Double Bed -->
-    <VBox visible="{VisibilityModel>/doubleVisible}" class="HostelCard" backgroundDesign="Solid">
-        <HBox justifyContent="Center" class="section-image">
-            <Image src="{VisibilityModel>/doubleImg}" width="380px" height="320px" class="section-image" />
-        </HBox>
-        <Text class="hr-text" text="{VisibilityModel>/doubleName}"/>
-        <Text class="description-text" text="{VisibilityModel>/doubleDesc}"/>
-		   <Text class="description-text" text="The price will be {VisibilityModel>/doublePrice}"/>
-        <HBox justifyContent="Center" >
-            <Button text="Book Now" press="onRoomBookPress" width="200px">
-				 <customData>
-        <core:CustomData key="roomType" value="Double Bed" />
-             </customData>
-</Button>
+<ScrollContainer
+    height="100%"
+    horizontal="true"
+    vertical="true"
+    focusable="true"
+    class="sapUiContentPadding"
+>
+    <FlexBox
+        id="idBedTypeFlex"
+        wrap="Wrap"
+		direction="Row"
+        justifyContent="SpaceAround"
+        alignItems="Start"
+        items="{
+            path: 'VisibilityModel>/BedTypes'
+        }"
+    >
+        <items >
+            <VBox class="bedCard sapUiMediumMargin">
+                <Image
+                    src="{VisibilityModel>Image}"
+                    width="100%"
+                    height="300px"
+                    class="bedCardImage"
+                />
+                <VBox class="bedCardContent sapUiSmallMargin">
+                    <Text
+                        text="{VisibilityModel>Name}"
+                        class="bedCardTitle"
+                    />
+                    <Text
+                        text="{VisibilityModel>Description}"
+                        class="bedCardDesc"
+                        wrapping="true"
+                    />
+                    <Text
+                        text="₹ {VisibilityModel>Price}"
+                        class="bedCardPrice"
+                    />
+                    <Button
+                        text="Book Now"
+                        type="Default"
+                        press=".onBookNow"
+	                    />
+                </VBox>
+            </VBox>
+        </items>
+    </FlexBox>
+</ScrollContainer>
 
-        </HBox>
-    </VBox>
-	
-    <!-- Four Bed -->
-    <VBox visible="{VisibilityModel>/fourVisible}" class="HostelCard" backgroundDesign="Translucent">
-        <HBox justifyContent="Center" class="section-image" >
-            <Image src="{VisibilityModel>/fourImg}"  class="section-image" />
-        </HBox>
-        <Text class="hr-text" text="{VisibilityModel>/fourName}"/>
-        <Text class="description-text " text=""/>
-		 <Text class="description-text" text="The price will be {VisibilityModel>/fourPrice}"/>
-        <HBox justifyContent="Center">
-            <Button text="Book Now" press="onRoomBookPress" width="200px">
-				 <customData>
-        <core:CustomData key="roomType" value="Four Bed" />
-             </customData>
-</Button>
-        </HBox>
-    </VBox>
-</l:Grid>
+
+  
+<!-- </l:Grid> -->
 
                     </Page>
 					<Page id="idFacilities" showHeader="false" class="Products_list sapUiTinyMargin">
@@ -137,3 +140,4 @@
 		</tnt:mainContents>
 	</tnt:ToolPage>
 </mvc:View>
+

@@ -61,26 +61,35 @@ sap.ui.define([
         HM_AddRoom: function (oEvent) {
             var oView = this.getView();
             this.byId("id_ARD_Table").removeSelections();
+
+            // Load dialog fragment (only once)
             if (!this.AR_Dialog) {
-                this.AR_Dialog = sap.ui.xmlfragment(oView.getId(), "sap.ui.com.project1.fragment.Add_Room_Details", this);
+                this.AR_Dialog = sap.ui.xmlfragment(
+                    oView.getId(),
+                    "sap.ui.com.project1.fragment.Add_Room_Details",
+                    this
+                );
                 oView.addDependent(this.AR_Dialog);
             }
 
-            // Hide optional fields
+            // Reset RoomModel fields
             var oRoomModel = oView.getModel("RoomModel");
             if (oRoomModel) {
                 oRoomModel.setData({
                     BranchCode: "",
-                    BedTypeName:"",
+                    BedTypeName: "",
                     NoofPerson: "",
-                    RoomNo:"",
-                    Price:"",
-                   _isEditing: false
-                }); 
+                    RoomNo: "",
+                    Price: "",
+                    _isEditing: false
+                });
             }
+
+            // Hide optional fields
             oView.byId("idBedType").setVisible(false);
             // oView.byId("idAcType").setVisible(false);
 
+            // Reset ValueState for inputs
             var aInputIds = [
                 "idRoomType12",
                 "idBedType",
@@ -101,45 +110,43 @@ sap.ui.define([
             var oRoomDetailsModel = oView.getModel("RoomDetailsModel");
 
             var aBedTypes = oBedTypeModel.getProperty("/");
+            // this._aAllBedTypes=oBedTypeModel.getProperty("/")
             var aRoomDetails = oRoomDetailsModel.getProperty("/");
 
-            // Backup original if not stored
+            // --- Backup BedTypeModel if not already done ---
             if (this._aOriginalBedTypes && this._aOriginalBedTypes.length) {
                 oBedTypeModel.setProperty("/", JSON.parse(JSON.stringify(this._aOriginalBedTypes)));
                 aBedTypes = oBedTypeModel.getProperty("/");
             } else {
-                // Backup original only once when first time loaded
+                // Backup original only once
                 this._aOriginalBedTypes = JSON.parse(JSON.stringify(aBedTypes));
             }
 
-            // --- Filter logic ---
+            // --- Filter Logic ---
             var aFiltered = aBedTypes.filter(function (bed) {
+                // Bed side person capacity
+                var iBedNoOfPerson = bed.NoOfPerson * 2 || 0;
 
-                // Count how many rooms are already created for this BedType + Branch
-                var iCreatedCount = aRoomDetails.filter(function (room) {
-                    return room.BranchCode === bed.BranchCode &&
-                        room.BedTypeName === bed.Name;
-                }).length;
+                // Sum all NoofPerson for rooms with same BranchCode & BedTypeName
+                var iRoomNoOfPerson = aRoomDetails
+                    .filter(function (room) {
+                        return (
+                            room.BranchCode === bed.BranchCode &&
+                            room.BedTypeName === bed.Name + " - " + bed.ACType
+                        );
+                    })
+                    .reduce(function (sum, room) {
+                        return sum + (parseInt(room.NoofPerson, 10) || 0);
+                    }, 0);
 
-                // Bed side person limit
-                var iBedNoOfPerson = bed.NoOfPerson || 0;
-
-                // Find corresponding room record
-                var oRoomMatch = aRoomDetails.find(function (room) {
-                    return room.BranchCode === bed.BranchCode &&
-                        room.BedTypeName === bed.Name;
-                });
-                var iRoomNoOfPerson = oRoomMatch ? oRoomMatch.NoofPerson || 0 : 0;
-
-                // return iCreatedCount < iBedNoOfPerson && iCreatedCount < iRoomNoOfPerson;
+                // Only include bed types that haven't reached capacity
                 return iBedNoOfPerson > iRoomNoOfPerson;
-
             });
 
-            // Update model for dropdown binding
+            // Update filtered data for dropdown
             oBedTypeModel.setProperty("/", aFiltered);
 
-            // Open the dialog
+            // --- Open Dialog ---
             this.AR_Dialog.open();
         },
 
@@ -147,7 +154,6 @@ sap.ui.define([
             utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
             var oView = this.getView();
             var sBranchCode = oEvent.getParameter("selectedItem").getKey();
-
 
             // Models
             var oBedTypeModel = oView.getModel("BedTypeModel");
@@ -165,15 +171,18 @@ sap.ui.define([
                     return false;
                 }
 
-                var iCreatedCount = aRoomDetails.filter(function (room) {
-                    return room.BranchCode === sBranchCode && room.BedTypeName === bed.Name + " - " + bed.ACType;
-                });
+                // Sum NoofPerson for all existing rooms of this bed type in this branch
+                var iCreatedCount = aRoomDetails
+                    .filter(function (room) {
+                        return room.BranchCode === sBranchCode &&
+                            room.BedTypeName === bed.Name + " - " + bed.ACType;
+                    })
+                    .reduce(function (sum, room) {
+                        return sum + (room.NoofPerson || 0);
+                    }, 0);
 
-               if (iCreatedCount.length > 0) {
-    return iCreatedCount[0].NoofPerson < bed.NoOfPerson;
-} else {
-    return true;
-}
+                // Compare sum with bed capacity (NoOfPerson * 2)
+                return iCreatedCount < bed.NoOfPerson * 2;
             });
 
             // Set filtered data (for dropdown binding)
@@ -181,13 +190,8 @@ sap.ui.define([
 
             // Reset UI selections
             var oBedTypeCombo = oView.byId("idBedType");
-            // var oAcCombo = oView.byId("idAcType");
-
             oBedTypeCombo.setSelectedKey("").setVisible(true);
-            // oAcCombo.setSelectedKey("").setVisible(false);
-        }
-
-        ,
+        },
 
 
         onBedTypeChange: function (oEvent) {
@@ -234,62 +238,126 @@ sap.ui.define([
         ,
 
         HM_EditRoom: function (oEvent) {
-            var table = this.byId("id_ARD_Table");
-            var selected = table.getSelectedItem();
-            if (!selected) {
-                sap.m.MessageToast.show("Please select a record to Edit room.");
+            var oView = this.getView();
+            var oTable = this.byId("id_ARD_Table");
+            var oSelected = oTable.getSelectedItem();
+
+            if (!oSelected) {
+                sap.m.MessageToast.show("Please select a record to edit the room.");
                 return;
             }
-            var Model = selected.getBindingContext("RoomDetailsModel");
-            var data = Model.getObject();
-            var oView = this.getView();
 
+            var oContext = oSelected.getBindingContext("RoomDetailsModel");
+            var oData = oContext.getObject();
+
+            // Create dialog if not already initialized
             if (!this.AR_Dialog) {
-                this.AR_Dialog = sap.ui.xmlfragment(oView.getId(), "sap.ui.com.project1.fragment.Add_Room_Details", this);
+                this.AR_Dialog = sap.ui.xmlfragment(
+                    oView.getId(),
+                    "sap.ui.com.project1.fragment.Add_Room_Details",
+                    this
+                );
                 oView.addDependent(this.AR_Dialog);
             }
-            // oView.byId("idAcType").setVisible(true);
-            var oRoomModel = oView.getModel("RoomModel");
 
-            // Copy data of selected room into RoomModel for editing
+            // Prepare RoomModel with selected data
+            var oRoomModel = oView.getModel("RoomModel");
             oRoomModel.setData({
-                ...data,
+                ...oData,
                 _isEditing: true
             });
-            var sBranchCode = data.BranchCode;
+          this.RoomNo=oData.RoomNo
+            var sBranchCode = oData.BranchCode;
 
+            // --- Models ---
             var oBedTypeModel = oView.getModel("BedTypeModel");
             var oRoomDetailsModel = oView.getModel("RoomDetailsModel");
 
-            // Get all bed types (from a backup copy)
+            // Get all bed types (use backup if available)
             var aAllBedTypes = this._aAllBedTypes || oBedTypeModel.getProperty("/");
-            this._aAllBedTypes = aAllBedTypes; // store once
+            this._aAllBedTypes = aAllBedTypes;
 
             var aRoomDetails = oRoomDetailsModel.getProperty("/");
 
-            // Filter only the bed types for the selected branch
+            // --- Filter Logic with SUM of NoofPerson ---
             var aFiltered = aAllBedTypes.filter(function (bed) {
                 if (bed.BranchCode !== sBranchCode) {
                     return false;
                 }
 
-                var iCreatedCount = aRoomDetails.filter(function (room) {
-                    return room.BranchCode === sBranchCode && room.BedTypeName === bed.Name+ " - " + bed.ACType;
-                }).length;
+                // Bed capacity
+                var iBedNoOfPerson = bed.NoOfPerson * 2 || 0;
 
-                return iCreatedCount < bed.NoOfPerson;
+                // Sum NoofPerson for all matching rooms
+                var iRoomNoOfPerson = aRoomDetails
+                    .filter(function (room) {
+                        return (
+                            room.BranchCode === sBranchCode &&
+                            room.BedTypeName === bed.Name + " - " + bed.ACType
+                        );
+                    })
+                    .reduce(function (sum, room) {
+                        return sum + (parseInt(room.NoofPerson, 10) || 0);
+                    }, 0);
+
+                // Check if this is the current room’s bed
+                var bIsCurrentBed =
+                    oData.BedTypeName === bed.Name + " - " + bed.ACType &&
+                    oData.BranchCode === bed.BranchCode;
+
+                // Include if capacity not reached or if it's the current bed
+                return bIsCurrentBed || iBedNoOfPerson > iRoomNoOfPerson;
             });
 
-            // Set filtered data (for dropdown binding)
-            oBedTypeModel.setProperty("/", aFiltered);
+            // --- If BedType is full, lock dropdown to current one ---
+            var oCurrentBedType = aFiltered.find(function (bed) {
+                return (
+                    bed.Name + " - " + bed.ACType === oData.BedTypeName &&
+                    bed.BranchCode === oData.BranchCode
+                );
+            });
 
-            // oView.byId("idCity").setVisible(false);
+            var oDropdown = oView.byId("idBedType");
+
+            if (aFiltered.length === 1 && oCurrentBedType) {
+                // Already full — lock dropdown to this one
+                oBedTypeModel.setProperty("/", [oCurrentBedType]);
+                if (oDropdown) {
+                    oDropdown.setSelectedKey(oData.BedTypeName);
+                    // oDropdown.setEnabled(false);
+                }
+            } else {
+                // Otherwise allow selection normally
+                oBedTypeModel.setProperty("/", aFiltered);
+                if (oDropdown) {
+                    // oDropdown.setEnabled(true);
+                    oDropdown.setSelectedKey(oData.BedTypeName);
+                }
+            }
+
+            // Show BedType field
             oView.byId("idBedType").setVisible(true);
-            // oView.byId("idAcType").setVisible(true)
 
-            // Open the dialog
+            // Reset input ValueState
+            var aInputIds = [
+                "idRoomType12",
+                "idBedType",
+                "idRoomNumber",
+                "idRoomNumber13",
+                "idPrice"
+            ];
+            aInputIds.forEach(function (sId) {
+                var oInput = oView.byId(sId);
+                if (oInput && oInput.setValueState) {
+                    oInput.setValueState("None");
+                }
+            });
+
+            // --- Open Dialog ---
             this.AR_Dialog.open();
-        },
+        }
+
+        ,
 
         AR_onCancelButtonPress: function () {
             this.AR_Dialog.close();
@@ -298,114 +366,128 @@ sap.ui.define([
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("TilePage");
         },
-      AR_onsavebuttonpress: function () {
-    var oView = this.getView();
-    var oRoomModel = oView.getModel("RoomModel");
-    var oRoomDetailsModel = oView.getModel("RoomDetailsModel");
-    var oBedTypeModel = oView.getModel("BedTypeModel");
+        AR_onsavebuttonpress: function () {
+            var oView = this.getView();
+            var oRoomModel = oView.getModel("RoomModel");
+            var oRoomDetailsModel = oView.getModel("RoomDetailsModel");
+            var oBedTypeModel = oView.getModel("BedTypeModel");
 
-    var Payload = oRoomModel.getData();
+            var Payload = oRoomModel.getData();
 
-    // Remove unnecessary fields
-    delete Payload.AcType;
-    delete Payload.File;
-    delete Payload.Description;
+            // Remove unnecessary fields
+            delete Payload.AcType;
+            delete Payload.File;
+            delete Payload.Description;
 
-    var aRoomDetails = oRoomDetailsModel.getData();
-    var aBedTypes = oBedTypeModel.getData();
+            var aRoomDetails = oRoomDetailsModel.getData();
+            var aBedTypes = oBedTypeModel.getData();
 
-    Payload.Price = parseInt(Payload.Price) || 0;
-    Payload.NoofPerson = parseInt(Payload.NoofPerson) || 0;
+            Payload.Price = parseInt(Payload.Price) || 0;
+            Payload.NoofPerson = parseInt(Payload.NoofPerson) || 0;
 
-    // Field validations
-    if (
-        utils._LCstrictValidationComboBox(oView.byId("idRoomType12"), "ID") &&
-        utils._LCstrictValidationComboBox(oView.byId("idBedType"), "ID") &&
-        utils._LCvalidateMandatoryField(oView.byId("idRoomNumber"), "ID") &&
-        utils._LCvalidateMandatoryField(oView.byId("idRoomNumber13"), "ID") &&
-        utils._LCvalidateAmount(oView.byId("idPrice"), "ID")
-    ) {
-        // Check if RoomNo already exists
-        var oExistingRoom = aRoomDetails.find(function (room) {
-            return room.RoomNo === Payload.RoomNo;
-        });
+            // Field validations
+            if (
+                utils._LCstrictValidationComboBox(oView.byId("idRoomType12"), "ID") &&
+                // utils._LCstrictValidationComboBox(oView.byId("idBedType"), "ID") &&
+                (utils._LCstrictValidationComboBox(oView.byId("idBedType"), "ID") || Payload.BedTypeName) &&
+                utils._LCvalidateMandatoryField(oView.byId("idRoomNumber"), "ID") &&
+                utils._LCvalidateMandatoryField(oView.byId("idRoomNumber13"), "ID") &&
+                utils._LCvalidateAmount(oView.byId("idPrice"), "ID")
+            ) {
 
-        if (oExistingRoom && !Payload._isEditing) {
-            sap.m.MessageToast.show("Room No '" + Payload.RoomNo + "' already exists");
-            return;
-        }
 
-        // Find selected BedType
-        var oBedType = aBedTypes.find(function (bed) {
-            return bed.BranchCode === Payload.BranchCode &&
-                   (bed.Name + " - " + bed.ACType === Payload.BedTypeName);
-        });
+                // Check if RoomNo already exists
+                var oExistingRoom = aRoomDetails.find(function (room) {
+                    return room.RoomNo === Payload.RoomNo;
+                });
 
-        if (oBedType) {
-            var iTotalAllowed = oBedType.NoOfPerson || 0;
-
-            // Calculate total already created excluding current room in edit mode
-            var iAlreadyCreated = aRoomDetails.reduce(function (sum, room) {
-                if (Payload._isEditing && room.RoomNo === Payload.RoomNo) {
-                    return sum; // Skip current room in edit mode
+                if (oExistingRoom && !Payload._isEditing && oExistingRoom.RoomNo === Payload.RoomNo) {
+                    sap.m.MessageToast.show("Room No '" + Payload.RoomNo + "' already exists");
+                    return;
                 }
-                if (room.BranchCode === Payload.BranchCode &&
-                    room.BedTypeName === Payload.BedTypeName) {
-                    return sum + (parseInt(room.NoofPerson) || 0);
+                if (Payload._isEditing) {
+                    // Editing case
+                    var sOriginalRoomNo = this.RoomNo; // We'll store this when opening dialog
+
+                    if (oExistingRoom && Payload.RoomNo !== sOriginalRoomNo) {
+                        sap.m.MessageToast.show("Room No '" + Payload.RoomNo + "' already exists");
+                        return;
+                    }
                 }
-                return sum;
-            }, 0);
 
-            var iAvailable = iTotalAllowed - iAlreadyCreated;
+                // Find selected BedType
+                var oBedType = aBedTypes.find(function (bed) {
+                    return bed.BranchCode === Payload.BranchCode &&
+                        (bed.Name + " - " + bed.ACType === Payload.BedTypeName);
+                });
 
-            if (Payload.NoofPerson > iAvailable) {
-                sap.m.MessageToast.show(
-                    "Only " + iAvailable + " slot(s) are available for this bed type!"
-                );
+                if (oBedType) {
+                    var iTotalAllowed = oBedType.NoOfPerson * 2 || 0;
+
+                    // Calculate total already created excluding current room in edit mode
+                    var iAlreadyCreated = aRoomDetails.reduce(function (sum, room) {
+                        if (Payload._isEditing && room.RoomNo === Payload.RoomNo) {
+                            return sum; // Skip current room in edit mode
+                        }
+                        if (room.BranchCode === Payload.BranchCode &&
+                            room.BedTypeName === Payload.BedTypeName) {
+                            return sum + (parseInt(room.NoofPerson) || 0);
+                        }
+                        return sum;
+                    }, 0);
+
+                    var iAvailable = iTotalAllowed - iAlreadyCreated;
+
+                    if (Payload.NoofPerson > iAvailable) {
+                        sap.m.MessageToast.show(
+                            "Only " + iAvailable + " slot(s) are available for this bed type!"
+                        );
+                        return;
+                    }
+                }
+
+                // Determine POST or PUT
+                var sUrl = "https://rest.kalpavrikshatechnologies.com/HM_Rooms";
+                var sMethod = "POST";
+                var oBody = { data: Payload };
+
+                if (aRoomDetails.some(r => r.RoomNo === Payload.RoomNo)) {
+                    sMethod = "PUT";
+                    oBody.filters = { RoomNo: Payload.RoomNo };
+                }
+
+                delete Payload._isEditing;
+
+                $.ajax({
+                    url: sUrl,
+                    method: sMethod,
+                    contentType: "application/json",
+                    headers: {
+                        name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                        password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+                    },
+                    data: JSON.stringify(oBody),
+                    success: function (response) {
+                        sap.m.MessageToast.show(
+                            sMethod === "POST"
+                                ? "Room added successfully!"
+                                : "Room updated successfully!"
+                        );
+                        this.Onsearch();
+                        this.BedTypedetails()
+
+                        if (this.AR_Dialog) this.AR_Dialog.close();
+                    }.bind(this),
+                    error: function (err) {
+                        sap.m.MessageBox.error("Error saving room data (Add/Update).");
+                        console.error(err);
+                    }
+                });
+            } else {
+                sap.m.MessageToast.show("Please fill all required fields correctly before saving.");
                 return;
             }
         }
-
-        // Determine POST or PUT
-        var sUrl = "https://rest.kalpavrikshatechnologies.com/HM_Rooms";
-        var sMethod = "POST";
-        var oBody = { data: Payload };
-
-        if (aRoomDetails.some(r => r.RoomNo === Payload.RoomNo)) {
-            sMethod = "PUT";
-            oBody.filters = { RoomNo: Payload.RoomNo };
-        }
-
-        delete Payload._isEditing;
-
-        $.ajax({
-            url: sUrl,
-            method: sMethod,
-            contentType: "application/json",
-            headers: {
-                name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-            },
-            data: JSON.stringify(oBody),
-            success: function (response) {
-                sap.m.MessageToast.show(
-                    sMethod === "POST"
-                        ? "Room added successfully!"
-                        : "Room updated successfully!"
-                );
-                this.Onsearch();
-                if (this.AR_Dialog) this.AR_Dialog.close();
-            }.bind(this),
-            error: function (err) {
-                sap.m.MessageBox.error("Error saving room data (Add/Update).");
-                console.error(err);
-            }
-        });
-    } else {
-        sap.m.MessageToast.show("Please fill all required fields correctly before saving.");
-        return;
-    }
-}
 
 
         ,
@@ -446,8 +528,12 @@ sap.ui.define([
                                 },
                                 success: function (response) {
                                     sap.m.MessageToast.show("Room deleted successfully!");
-                                    this.Onsearch();
-                                    this.BedTypedetails();
+                                    // this.Onsearch();
+                                    // this.BedTypedetails();
+                                    this.Onsearch().then(() => {
+                                        // Now BedTypedetails will have the correct RoomDetails
+                                        this.BedTypedetails();
+                                    });
                                     table.removeSelections();
 
                                 }.bind(this),

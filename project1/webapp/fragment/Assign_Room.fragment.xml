@@ -39,6 +39,8 @@
                     placeholder="Select Room Number"
                     selectedKey="{HostelModel>/RoomNumber}"
                            items="{AvailableRoomsModel>/}"
+                           valueStateText="Select Room No"
+                           change="onRoomNoChange"
                 >
                     <core:ListItem
                         key="{AvailableRoomsModel>RoomNo}"

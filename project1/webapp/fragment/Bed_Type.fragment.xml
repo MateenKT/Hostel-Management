@@ -34,6 +34,7 @@
                     items="{BranchModel>/}"
                     change="onbranchChange"
                     showSecondaryValues="true"
+                    valueStateText="Select Branch Code"
                 >
                     <core:ListItem
                         key="{BranchModel>BranchID}"
@@ -68,6 +69,7 @@
                     placeholder="Enter Bed Type"
                     maxLength="60"
                     liveChange="onNameInputLiveChange"
+                    valueStateText="Enter Bed Type"
                 />
                 <Label
                     text="Room Type"
@@ -78,6 +80,8 @@
                     placeholder="Select Room type"
                     selectedKey="{BedModel>/ACType}"
                     change="onbranchChange"
+                    valueStateText="Select Room Type"
+
                 >
                     <core:ListItem
                         key="AC"
@@ -88,8 +92,8 @@
                         text="Non-Ac"
                     />
                 </ComboBox>
-                <Label
-                    text="No Of Beds"
+                 <Label
+                    text="No Of Person"
                     required="true"
                 />
                 <Input
@@ -98,7 +102,21 @@
                     placeholder="Enter No Of Beds"
                     liveChange="onNameInputLiveChange"
                     type="Number"
+                    valueStateText="Enter No of person"
                 />
+                 <Label
+                    text="Max no of rooms"
+                    required="true"
+                />
+                <Input
+                    id="id_MaxBeds"
+                    value="{BedModel>/MaxBeds}"
+                    placeholder="Enter No Of Beds"
+                    liveChange="onNameInputLiveChange"
+                    type="Number"
+                    valueStateText="Enter Max no of Beds"
+                />
+               
                 <Label
                     text="Add image"
                     required="true"

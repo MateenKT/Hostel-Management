@@ -140,7 +140,15 @@
                         demandPopin="true"
                     >
                         <Text
-                            text="No Of Beds"
+                            text="No Of persons"
+                        />
+                    </Column>
+                      <Column
+                        minScreenWidth="Tablet"
+                        demandPopin="true"
+                    >
+                        <Text
+                            text="Extra Bed"
                         />
                     </Column>
                     <Column
@@ -162,6 +170,8 @@
                         
                             <Text text="{RoomDetailsModel>BedTypeName}" />
                             <Text text="{RoomDetailsModel>NoofPerson}" />
+                            <Text text="{RoomDetailsModel>ExtraBed}" />
+
 
 
                           
