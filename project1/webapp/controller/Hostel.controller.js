@@ -1252,6 +1252,10 @@ onExit: function () {
     if (this._autoSlideInterval) {
         clearInterval(this._autoSlideInterval);
     }
+},
+onEditBooking:function(){
+      var oRouter = this.getOwnerComponent().getRouter();
+      oRouter.navTo("EditBookingDetails")
 }
 
 

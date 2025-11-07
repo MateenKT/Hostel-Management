@@ -1,9 +1,99 @@
-<core:FragmentDefinition
+<mvc:View
+    controllerName="sap.ui.com.project1.controller.EditBookingDetails"
+    xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
+    xmlns:layout="sap.ui.layout"
     xmlns:f="sap.ui.layout.form"
     xmlns:core="sap.ui.core"
 >
-    <Panel
+ <Page
+        showHeader="false"
+        class="sapUiResponsivePadding--footer sapUiResponsivePadding--floatingFooter"
+        enableScrolling="true"
+    >
+    <ScrollContainer >
+     <core:Fragment
+            fragmentName="sap.ui.com.project1.fragment.Header"
+            type="XML"
+        />
+        
+        <content>
+
+         <VBox class="sapUiSmallMargin">
+                    <Title
+                        text="Hostel Boking"
+                        class="boldBlackText"
+                    />
+
+                    <!-- Booking Status and Price -->
+                    <HBox class="sapUiSmallMarginTop">
+                        <VBox>
+                            <Text
+                                text="Room Price"
+                                class="sapUiSmallMarginBottom"
+                            />
+                            <Text
+                                text="10,000"
+                                class="largeTextBold"
+                            />
+                        </VBox>
+                        <VBox class="sapUiMediumMarginBegin">
+                            <Text
+                                text="Bed Type"
+                                class="sapUiSmallMarginBottom"
+                            />
+                            <Text
+                                text="Single Bed"
+                                class="sapUiTinyMarginEnd largeTextBold"
+                            />
+                        </VBox>
+                    </HBox>
+                </VBox>
+        
+        </content>
+    
+    <VBox class="sapUiMediumMarginBottom">
+      <Panel
+        headerText="General Information"
+        expandable="false"
+        class="customPanelHeader"
+    >
+        <f:SimpleForm
+            editable="true"
+            layout="ColumnLayout"
+            columnsM="3"
+            columnsL="4"
+            columnsXL="6"
+        >
+            <f:content>
+                <!-- Booking Details -->
+                <core:Title text="{i18n>bookingDetailsTitle}" />
+               <Label text="Desired Room Type" required="true" />
+                            <Text id="idRoomType3" text="{HostelModel>/RoomType}"  />
+
+                            <Label text="Price" required="true" />
+                            <Text id="idPrice4" text="{HostelModel>/Price}"   />
+                
+                 <Label text="Payment Method" required="true" />
+                            <Text text="{HostelModel>/PaymentType}"/>
+                <!-- Project Address -->
+                <core:Title text="Select Person" />
+               <Label text="No of Persons" required="true" />
+                           <Text text="{HostelModel>/Person}"/>
+
+                <!-- Site Contact -->
+                <core:Title text="Dates" />
+                <Label text="Start Date" required="true" />
+                           <Text text="{HostelModel>/StartDate}"/>
+                            <Label text="End Date" required="true" />
+                           <Text text="{HostelModel>/EndDate}"/>
+             
+            </f:content>
+        </f:SimpleForm>
+    </Panel>
+    </VBox>
+    <VBox>
+     <Panel
         headerText="{= 'Personal Information - ' + ${HostelModel>FullName} }"
         expandable="false"
         class="customPanelHeader"
@@ -74,7 +164,7 @@
 
 
    <Table
-    id="idFacilityRoomTable"
+    id="idFacilityRoomTableDetails"
     class="sapUiSmallMarginTop"
     items="{
         path: 'HostelModel>/AllSelectedFacilities'
@@ -158,5 +248,16 @@
         }" class="sapUiSmallMarginEnd"/>
     </HBox>
 </VBox>
+
+
+
+
+
     </Panel>
-</core:FragmentDefinition>
+    
+    </VBox>
+    </ScrollContainer>
+    
+    </Page>
+
+</mvc:View>

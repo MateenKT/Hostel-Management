@@ -137,6 +137,13 @@
           "target": [
             "TargetBookRoomSummary"
           ]
+        },
+         {
+          "name": "EditBookingDetails",
+          "pattern": "EditBookingDetails",
+          "target": [
+            "TargetEditBooking"
+          ]
         }
       ],
       "targets": {
@@ -195,6 +202,13 @@
           "clearControlAggregation": false,
           "viewId": "Book_RoomSummary",
           "viewName": "Book_RoomSummary"
+        },
+        "TargetEditBooking": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "EditBookingDetails",
+          "viewName": "EditBookingDetails"
         }
       }
     },
