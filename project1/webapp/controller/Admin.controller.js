@@ -69,6 +69,20 @@ sap.ui.define([
 
             });
             this.getView().setModel(model, "RoomModel")
+
+              var model = new JSONModel({
+                Visible:false
+                 });
+            this.getView().setModel(model, "Visiblemodel")
+
+            this.BedTypedetails();
+        },
+          BedTypedetails: function () {
+            this.ajaxReadWithJQuery("HM_BedType", "").then((oData) => {
+                var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
+                var model = new JSONModel(oFCIAerData);
+                this.getView().setModel(model, "BedTypeModel");
+            })
         },
         Cust_read: function () {
             sap.ui.core.BusyIndicator.show(0);
@@ -254,7 +268,7 @@ sap.ui.define([
         this.HM_Dialog = sap.ui.xmlfragment("sap.ui.com.project1.fragment.Assign_Room", this);
         oView.addDependent(this.HM_Dialog);
     }
-
+    this.getView().getModel("Visiblemodel").setProperty("/Visible", false)
     var oText = sap.ui.getCore().byId("idCustomerNameText");
     oText.setText(this.data.CustomerName + " (" + this.data.CustomerID + ")");
     sap.ui.getCore().byId("idRoomNumber1").setValueState("None").setSelectedKey("");
@@ -274,53 +288,53 @@ sap.ui.define([
             this.ARD_Dialog.open();
         },
 
-        AR_onsavebuttonpress: function () {
-            var oView = this.getView();
-            var Payload = oView.getModel("BedModel").getData();
-            var oFileUploader = this.byId("idFileUploader");
-            var aFiles = oFileUploader.oFileUpload.files;
+        // AR_onsavebuttonpress: function () {
+        //     var oView = this.getView();
+        //     var Payload = oView.getModel("BedModel").getData();
+        //     var oFileUploader = this.byId("idFileUploader");
+        //     var aFiles = oFileUploader.oFileUpload.files;
 
-            // if (!aFiles.length) {
-            //     sap.m.MessageBox.error("Please select a file to upload.");
-            //     return;
-            // }
+        //     // if (!aFiles.length) {
+        //     //     sap.m.MessageBox.error("Please select a file to upload.");
+        //     //     return;
+        //     // }
 
-            var oFile = aFiles[0];
-            var reader = new FileReader();
+        //     var oFile = aFiles[0];
+        //     var reader = new FileReader();
 
-            reader.onload = function (e) {
-                var sBase64 = e.target.result.split(",")[1];
-                Payload.File = sBase64;
-                Payload.FileName = oFile.name;
-                Payload.FileType = oFile.type;
+        //     reader.onload = function (e) {
+        //         var sBase64 = e.target.result.split(",")[1];
+        //         Payload.File = sBase64;
+        //         Payload.FileName = oFile.name;
+        //         Payload.FileType = oFile.type;
 
 
-                // Perform AJAX call only after file is fully read
-                $.ajax({
-                    url: "https://rest.kalpavrikshatechnologies.com/HM_BedType",
-                    method: "POST",
-                    contentType: "application/json",
-                    headers: {
-                        name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                        password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-                    },
-                    data: JSON.stringify({ data: Payload }),
-                    success: function (response) {
-                        sap.m.MessageToast.show("Data and file uploaded successfully!");
-                        if (this.FCIA_Dialog) {
-                            this.FCIA_Dialog.close();
-                        }
-                        oFileUploader.setValue("");
-                        this.ARD_Dialog.close();
-                    }.bind(this),
-                    error: function (err) {
-                        sap.m.MessageBox.error("Error uploading data or file.");
-                    }
-                });
-            }.bind(this);
+        //         // Perform AJAX call only after file is fully read
+        //         $.ajax({
+        //             url: "https://rest.kalpavrikshatechnologies.com/HM_BedType",
+        //             method: "POST",
+        //             contentType: "application/json",
+        //             headers: {
+        //                 name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+        //                 password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+        //             },
+        //             data: JSON.stringify({ data: Payload }),
+        //             success: function (response) {
+        //                 sap.m.MessageToast.show("Data and file uploaded successfully!");
+        //                 if (this.FCIA_Dialog) {
+        //                     this.FCIA_Dialog.close();
+        //                 }
+        //                 oFileUploader.setValue("");
+        //                 this.ARD_Dialog.close();
+        //             }.bind(this),
+        //             error: function (err) {
+        //                 sap.m.MessageBox.error("Error uploading data or file.");
+        //             }
+        //         });
+        //     }.bind(this);
 
-            reader.readAsDataURL(oFile);
-        },
+        //     reader.readAsDataURL(oFile);
+        // },
         // RoomNo: function () {
         //       this.ajaxReadWithJQuery("HM_Booking", "").then((oData) => {
         //         var oFCIAerData = Array.isArray(oData.commentData) ? oData.commentData : [oData.commentData];
@@ -343,9 +357,9 @@ sap.ui.define([
      var ID = Model.getObject()
        
             var data = sap.ui.getCore().byId("idRoomNumber1").getSelectedKey();
-            var facility = sap.ui.getCore().byId("id_facility").getSelectedKeys();
+            var facility = sap.ui.getCore().byId("id_facility").getSelectedKeys() || "";
 
-   var FacilityName = facility.join(",");
+    //   var FacilityName = facility.join(",");
       if( ID.Bookings[0].RoomNo || utils._LCstrictValidationComboBox(sap.ui.getCore().byId("idRoomNumber1"), "ID")){
             if(data===""){
                var data=ID.Bookings[0].RoomNo
@@ -354,9 +368,7 @@ sap.ui.define([
             var Payload = {
                 RoomNo: data,
                 Status: "Assigned",
-                FacilityItems:{
-                     	FacilityName
-                },
+              
             }
             var oBody = { data: Payload };
 
@@ -449,10 +461,10 @@ HM_ChangeRoom:function(){
     var data = Model.getObject();
      this.RoomNo=data.RoomNo
 
-     if(data.Bookings[0].Status==="New" || data.Bookings[0].Status==="Closed"){
-     sap.m.MessageToast.show("The customer can not be edited");
-       return;
-   }
+//      if(data.Bookings[0].Status==="New" || data.Bookings[0].Status==="Closed"){
+//      sap.m.MessageToast.show("The customer can not be edited");
+//        return;
+//    }
 
      var oRoomDetailsModel = this.getView().getModel("RoomDetailsModel");
     var aRooms = oRoomDetailsModel.getData(); // All room details
@@ -511,8 +523,17 @@ HM_ChangeRoom:function(){
     }
     sap.ui.getCore().byId("idCustomerNameText").setText(data.CustomerName + " (" + data.CustomerID + ")");
     sap.ui.getCore().byId("idRoomNumber1").setValue(data.Bookings[0].RoomNo).setValueState("None");
-    // sap.ui.getCore().byId("id_facility").setValue(data.Bookings[0].RoomNo).setValueState("None");
+    sap.ui.getCore().byId("id_BranchCode").setValue(data.BranchCode).setValueState("None");
 
+    sap.ui.getCore().byId("idBedType").setValue(data.Bookings[0].BedType).setValueState("None");
+
+    sap.ui.getCore().byId("AR_id_StartDate").setDateValue(new Date(data.Bookings[0].StartDate)).setValueState("None");
+    sap.ui.getCore().byId("AR_id_EndDate").setDateValue(new Date(data.Bookings[0].EndDate)).setValueState("None");
+
+
+    // sap.ui.getCore().byId("id_facility").setValue(data.Bookings[0].RoomNo).setValueState("None");
+     this.getView().getModel("Visiblemodel").setProperty("/Visible", true)
+     
 
     this.getView().getModel("")
     this.HM_Dialog.open();

@@ -187,11 +187,10 @@
 
 
                             <Text text="{BedDetails>NoOfPerson}" />
-                    <ExpandableText 
-                         text="{BedDetails>Description}"
-                         maxCharacters="20"
-                         
-                        />
+                         <ExpandableText 
+                          text="{BedDetails>Description}"
+                          maxCharacters="20"
+                          />
                            
                             <Button
                             text="View"

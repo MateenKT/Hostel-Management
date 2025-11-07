@@ -136,7 +136,7 @@
                             type="Accept"
                         />
                          <Button
-                            text="Change Room"
+                            text="Edit Room"
                             press="HM_ChangeRoom"
                             type="Default"
                         />

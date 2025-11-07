@@ -125,18 +125,18 @@ sap.ui.define([
             // --- Filter Logic ---
             var aFiltered = aBedTypes.filter(function (bed) {
                 // Bed side person capacity
-                var iBedNoOfPerson = bed.NoOfPerson * 2 || 0;
+                var iBedNoOfPerson =  bed.MaxBeds || 0;
 
                 // Sum all NoofPerson for rooms with same BranchCode & BedTypeName
                 var iRoomNoOfPerson = aRoomDetails
                     .filter(function (room) {
                         return (
                             room.BranchCode === bed.BranchCode &&
-                            room.BedTypeName === bed.Name + " - " + bed.ACType
+                            room.BedTypeName === bed.Name +" - "+ bed.ACType
                         );
                     })
                     .reduce(function (sum, room) {
-                        return sum + (parseInt(room.NoofPerson, 10) || 0);
+                        return sum + (parseInt("1") || 0);
                     }, 0);
 
                 // Only include bed types that haven't reached capacity
@@ -175,14 +175,14 @@ sap.ui.define([
                 var iCreatedCount = aRoomDetails
                     .filter(function (room) {
                         return room.BranchCode === sBranchCode &&
-                            room.BedTypeName === bed.Name + " - " + bed.ACType;
+                            room.BedTypeName === bed.Name +" - "+ bed.ACType;
                     })
                     .reduce(function (sum, room) {
-                        return sum + (room.NoofPerson || 0);
+                        return sum + parseInt(1)|| 0;
                     }, 0);
 
                 // Compare sum with bed capacity (NoOfPerson * 2)
-                return iCreatedCount < bed.NoOfPerson * 2;
+                return iCreatedCount <  bed.MaxBeds ;
             });
 
             // Set filtered data (for dropdown binding)
@@ -266,7 +266,7 @@ sap.ui.define([
                 ...oData,
                 _isEditing: true
             });
-          this.RoomNo=oData.RoomNo
+            this.RoomNo=oData.RoomNo
             var sBranchCode = oData.BranchCode;
 
             // --- Models ---
@@ -286,7 +286,7 @@ sap.ui.define([
                 }
 
                 // Bed capacity
-                var iBedNoOfPerson = bed.NoOfPerson * 2 || 0;
+                var iBedNoOfPerson =  bed.MaxBeds || 0;
 
                 // Sum NoofPerson for all matching rooms
                 var iRoomNoOfPerson = aRoomDetails
@@ -297,7 +297,7 @@ sap.ui.define([
                         );
                     })
                     .reduce(function (sum, room) {
-                        return sum + (parseInt(room.NoofPerson, 10) || 0);
+                        return sum + (parseInt("1") || 0);
                     }, 0);
 
                 // Check if this is the current room’s bed
@@ -382,8 +382,14 @@ sap.ui.define([
             var aRoomDetails = oRoomDetailsModel.getData();
             var aBedTypes = oBedTypeModel.getData();
 
-            Payload.Price = parseInt(Payload.Price) || 0;
             Payload.NoofPerson = parseInt(Payload.NoofPerson) || 0;
+
+              var Noofper = aBedTypes.find(function (bed) {
+                    return bed.BranchCode === Payload.BranchCode && bed.Name === Payload.BedTypeName.split("-")[0].trim()
+                     &&  bed.ACType === Payload.BedTypeName.split("-")[1].trim();
+                     
+                });
+            Payload.NoofPerson = parseInt(Noofper.NoOfPerson) || 0;
 
             // Field validations
             if (
@@ -391,7 +397,7 @@ sap.ui.define([
                 // utils._LCstrictValidationComboBox(oView.byId("idBedType"), "ID") &&
                 (utils._LCstrictValidationComboBox(oView.byId("idBedType"), "ID") || Payload.BedTypeName) &&
                 utils._LCvalidateMandatoryField(oView.byId("idRoomNumber"), "ID") &&
-                utils._LCvalidateMandatoryField(oView.byId("idRoomNumber13"), "ID") &&
+                // utils._LCvalidateMandatoryField(oView.byId("idRoomNumber13"), "ID") &&
                 utils._LCvalidateAmount(oView.byId("idPrice"), "ID")
             ) {
 
@@ -416,35 +422,35 @@ sap.ui.define([
                 }
 
                 // Find selected BedType
-                var oBedType = aBedTypes.find(function (bed) {
-                    return bed.BranchCode === Payload.BranchCode &&
-                        (bed.Name + " - " + bed.ACType === Payload.BedTypeName);
-                });
+                // var oBedType = aBedTypes.find(function (bed) {
+                //     return bed.BranchCode === Payload.BranchCode &&
+                //         (bed.Name + " - " + bed.ACType === Payload.BedTypeName);
+                // });
 
-                if (oBedType) {
-                    var iTotalAllowed = oBedType.NoOfPerson * 2 || 0;
+                // if (oBedType) {
+                //     var iTotalAllowed =  bed.MaxBeds  || 0;
 
-                    // Calculate total already created excluding current room in edit mode
-                    var iAlreadyCreated = aRoomDetails.reduce(function (sum, room) {
-                        if (Payload._isEditing && room.RoomNo === Payload.RoomNo) {
-                            return sum; // Skip current room in edit mode
-                        }
-                        if (room.BranchCode === Payload.BranchCode &&
-                            room.BedTypeName === Payload.BedTypeName) {
-                            return sum + (parseInt(room.NoofPerson) || 0);
-                        }
-                        return sum;
-                    }, 0);
+                //     // Calculate total already created excluding current room in edit mode
+                //     var iAlreadyCreated = aRoomDetails.reduce(function (sum, room) {
+                //         if (Payload._isEditing && room.RoomNo === Payload.RoomNo) {
+                //             return sum; // Skip current room in edit mode
+                //         }
+                //         if (room.BranchCode === Payload.BranchCode &&
+                //             room.BedTypeName === Payload.BedTypeName) {
+                //             return sum + (parseInt("1") || 0);
+                //         }
+                //         return sum;
+                //     }, 0);
 
-                    var iAvailable = iTotalAllowed - iAlreadyCreated;
+                //     var iAvailable = iTotalAllowed - iAlreadyCreated;
 
-                    if (Payload.NoofPerson > iAvailable) {
-                        sap.m.MessageToast.show(
-                            "Only " + iAvailable + " slot(s) are available for this bed type!"
-                        );
-                        return;
-                    }
-                }
+                //     if (iAlreadyCreated > iAvailable) {
+                //         sap.m.MessageToast.show(
+                //             "Only " + iAvailable + " slot(s) are available for this bed type!"
+                //         );
+                //         return;
+                //     }
+                // }
 
                 // Determine POST or PUT
                 var sUrl = "https://rest.kalpavrikshatechnologies.com/HM_Rooms";

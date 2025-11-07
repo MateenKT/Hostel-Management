@@ -94,7 +94,7 @@
                     liveChange="onRoomNoInputLiveChange"
                     valueStateText="Room No cannot be empty"
                 />
-                <Label
+                <!-- <Label
                     text="No Of person"
                     required="true"
                 />
@@ -105,7 +105,7 @@
                     type="Number"
                     liveChange="onRoomNoInputLiveChange"
                     valueStateText="No of person cannot be empty"
-                />
+                /> -->
 
                  <Label
                     text="Extra Bed"

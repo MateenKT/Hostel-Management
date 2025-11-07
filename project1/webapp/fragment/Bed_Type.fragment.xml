@@ -42,6 +42,7 @@
                         additionalText="{BranchModel>Name}"
                     />
                 </ComboBox>
+                
                 <Label
                     text="Bed Type"
                     required="true"
