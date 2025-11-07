@@ -391,7 +391,7 @@ _loadFilteredData: async function (sBranchCode, sACType) {
             //  Use first room for price display
             const firstRoom = matchingRooms[0];
             const price = firstRoom?.Price
-                ? " " + firstRoom.Price + " / month"
+                ? " " + firstRoom.Price 
                 : "";
 
             //  Calculate total booked and total capacity across all rooms
@@ -441,12 +441,29 @@ _loadFilteredData: async function (sBranchCode, sACType) {
     }
 },
 onBookNow: function (oEvent) {
-    // const oItem = oEvent.getSource().getBindingContext("VisibilityModel").getObject();
-    // sap.m.MessageToast.show(`Booking started for ${oItem.Name}`);
+    // Get selected bed type object
+    const oItem = oEvent.getSource().getBindingContext("VisibilityModel").getObject();
 
-     var oRouter = this.getOwnerComponent().getRouter();
-            oRouter.navTo("TilePage");
-    // You can open another fragment/dialog to proceed with booking
+    sap.m.MessageToast.show(`Booking started for ${oItem.Name}`);
+
+    //  Get or create the HostelModel
+    let oHostelModel = sap.ui.getCore().getModel("HostelModel");
+    if (!oHostelModel) {
+        oHostelModel = new sap.ui.model.json.JSONModel({});
+        sap.ui.getCore().setModel(oHostelModel, "HostelModel");
+    }
+
+    //  Set RoomType and Price in HostelModel
+    oHostelModel.setProperty("/RoomType", oItem.Name || "");
+    oHostelModel.setProperty("/Price", oItem.Price || 0);
+
+    // Optionally set other details
+    oHostelModel.setProperty("/Image", oItem.Image || "");
+    oHostelModel.setProperty("/Description", oItem.Description || "");
+
+    //  Navigate to the booking route (or open fragment)
+    const oRouter = this.getOwnerComponent().getRouter();
+    oRouter.navTo("RouteBookRoom");
 },
 // _loadFilteredData: async function (sBranchCode, sACType) {
 //     try {
@@ -862,7 +879,7 @@ onBookNow: function (oEvent) {
 
                     //  Optionally store in a global model for reuse
                     const oUserModel = new JSONModel(oMatchedUser);
-                    sap.ui.getCore().setModel(oUserModel, "HostelModel");
+                    sap.ui.getCore().setModel(oUserModel, "LoginModel");
 
                     //  Clear fields
                     sap.ui.getCore().byId("signInusername").setValue("");
@@ -883,47 +900,53 @@ onBookNow: function (oEvent) {
         },
 
 
- onPressAvatar: async function () {
+onPressAvatar: async function () {
     const oUser = this._oLoggedInUser || {};
     const sPhoto = "./image.jpg";
-
+ 
     try {
         const sUserID = oUser.UserID || "";
         if (!sUserID) {
             sap.m.MessageToast.show("User not logged in.");
             return;
         }
-
-        // ✅ Fetch only the logged-in user's data
-        const response = await this.ajaxReadWithJQuery("HM_Customer", {
-            $filter: `UserID eq '${sUserID}'`
-        });
-
+            const filter = {
+                    UserID: sUserID
+                };
+        //  Fetch only the logged-in user's data
+        const response = await this.ajaxReadWithJQuery("HM_Customer", filter);
+ 
         console.log("HM_Customer Response:", response);
-
-        // ✅ Handle correct structure
-        const aCustomers = response?.commentData || response?.Customers || response?.value || [];
-
-        if (!Array.isArray(aCustomers) || aCustomers.length === 0) {
-            sap.m.MessageToast.show("No customer data found for this user.");
-            return;
-        }
-
-        // ✅ Get first customer record
-        const oCustomer = aCustomers[0];
-        console.log("Customer Record:", oCustomer);
-
-        // ✅ Prepare booking data
-        const aBookingData = (Array.isArray(oCustomer.Booking) ? oCustomer.Booking : []).map(booking => ({
-            date: booking.StartDate ? new Date(booking.StartDate).toLocaleDateString("en-GB") : "N/A",
-            room: booking.BedType || "N/A",
-            amount: booking.RentPrice || "N/A",
-            status: booking.Status || "N/A"
-        }));
-
-        console.log("Booking Data:", aBookingData);
-
-        // ✅ Load fragment if not already loaded
+ 
+       // Handle correct structure
+const aCustomers = response?.commentData || response?.Customers || response?.value || [];
+ 
+if (!Array.isArray(aCustomers) || aCustomers.length === 0) {
+    sap.m.MessageToast.show("No customer data found for this user.");
+    return;
+}
+ 
+// Combine all bookings from all customers
+const aAllBookings = aCustomers.flatMap(customer =>
+    Array.isArray(customer.Bookings) ? customer.Bookings : []
+);
+ 
+if (aAllBookings.length === 0) {
+    sap.m.MessageToast.show("No booking history found.");
+}
+ 
+// Map booking data
+const aBookingData = aAllBookings.map(booking => ({
+    date: booking.StartDate ? new Date(booking.StartDate).toLocaleDateString("en-GB") : "N/A",
+    room: booking.BedType || "N/A",
+    amount: booking.RentPrice || "N/A",
+    status: booking.Status || "N/A"
+}));
+ 
+console.log("Booking Data:", aBookingData);
+ 
+ 
+        //  Load fragment if not already loaded
         if (!this._oProfileDialog) {
             const oDialog = await sap.ui.core.Fragment.load({
                 name: "sap.ui.com.project1.fragment.ManageProfile",
@@ -932,41 +955,36 @@ onBookNow: function (oEvent) {
             this._oProfileDialog = oDialog;
             this.getView().addDependent(oDialog);
         }
-
-        // ✅ Create and bind the Profile Model
-        const oProfileModel = new sap.ui.model.json.JSONModel({
+ 
+        //  Create and bind the Profile Model
+        const oProfileModel = new JSONModel({
             photo: sPhoto,
             initials: oUser.UserName ? oUser.UserName.charAt(0).toUpperCase() : "",
-            name: oCustomer.CustomerName || oUser.UserName || "",
-            email: oCustomer.CustomerEmail || oUser.EmailID || "",
-            phone: oCustomer.MobileNo || oUser.MobileNo || "",
-            dob: oCustomer.DateOfBirth
-                ? new Date(oCustomer.DateOfBirth).toLocaleDateString("en-GB")
-                : "",
-            gender: oCustomer.Gender || "",
-            nationality: oCustomer.Country || "",
+            name: oUser.UserName || "",
+            email: oUser.EmailID || "",
+            phone: oUser.MobileNo || "",
             bookings: aBookingData
         });
         this._oProfileDialog.setModel(oProfileModel, "profileData");
-
-        // ✅ Menu model (for tab switch)
-        const oMenuModel = new sap.ui.model.json.JSONModel({
+ 
+        //  Menu model (for tab switch)
+        const oMenuModel = new JSONModel({
             items: [
                 { title: "My Profile", icon: "sap-icon://employee", key: "profile" },
                 { title: "Booking History", icon: "sap-icon://history", key: "devices" }
             ]
         });
         this._oProfileDialog.setModel(oMenuModel, "profileMenuModel");
-
-        // ✅ Section model (default = booking if available)
-        const oSectionModel = new sap.ui.model.json.JSONModel({
+ 
+        //  Section model (default = booking if available)
+        const oSectionModel = new JSONModel({
             selectedSection: aBookingData.length ? "devices" : "profile"
         });
         this._oProfileDialog.setModel(oSectionModel, "profileSectionModel");
-
-        // ✅ Open the dialog
+ 
+        //  Open the dialog
         this._oProfileDialog.open();
-
+ 
     } catch (error) {
         console.error("Profile data load failed:", error);
         sap.m.MessageToast.show("Error fetching profile details.");
@@ -1222,6 +1240,7 @@ onExit: function () {
         clearInterval(this._autoSlideInterval);
     }
 }
+
 
 
     });

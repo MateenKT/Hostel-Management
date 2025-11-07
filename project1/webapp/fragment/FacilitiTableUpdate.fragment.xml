@@ -1,0 +1,35 @@
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core">
+
+    <Dialog
+        id="editFacilityDialog"
+        title="Edit Facility"
+        afterClose=".onEditDialogClose">
+
+        <content>
+            <VBox class="sapUiSmallMargin">
+
+                <Label text="Facility Name" />
+                <Input id="editFacilityName" value="{edit>/FacilityName}" editable="false" />
+
+                <Label text="Facility Price (₹)" />
+                <Input id="editPrice" value="{edit>/Price}" type="Number" editable="false" />
+
+                <Label text="Start Date" />
+                <DatePicker id="editStartDate" value="{edit>/StartDate}" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd" change="onEditDateChange" />
+
+                <Label text="End Date" />
+                <DatePicker id="editEndDate" value="{edit>/EndDate}" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd" change="onEditDateChange" />
+
+                <Label text="Days" />
+                <Input id="editDays" value="{edit>/TotalDays}" editable="false" />
+            </VBox>
+        </content>
+
+        <buttons>
+            <Button text="Save" press=".onEditFacilitySave" type="Emphasized" />
+            <Button text="Cancel" press="onEditDialogClose" />
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>

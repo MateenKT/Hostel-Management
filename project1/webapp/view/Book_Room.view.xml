@@ -75,11 +75,12 @@
                     <!-- Step 2: Service Selection -->
                     <WizardStep
         id="idStepPersonal1"
-        title="Personal Information"
+        title="Booking  Information"
         validated="true"
-        
     >
+
         <ScrollContainer width="100%" height="100%" vertical="true">
+      
             <VBox id="idPersonalContainer1" class="sapUiSmallMargin" width="100%"/>
         </ScrollContainer>
     </WizardStep>

@@ -48,45 +48,120 @@
                 
             </f:content>
         </f:SimpleForm>
-       <VBox
-    visible="{= ${HostelModel>Facilities/SelectedFacilities}.length > 0 }"
-    class="sapUiSmallMarginTop"
->
+    
     <Toolbar>
         <Title text="Selected Facilities" level="H4" />
     </Toolbar>
 
-    <!-- Display selected facilities as cards side by side -->
-    <FlexBox
-        wrap="Wrap"
-        alignItems="Start"
-        justifyContent="Start"
-        class="sapUiSmallMarginTop"
-        items="{
-            path: 'HostelModel>Facilities/SelectedFacilities'
-        }"
-    >
-        <VBox
-            width="200px"
-            height="200px"
-            class="sapUiSmallMargin serviceCard"
-            alignItems="Center"
-            justifyContent="Center"
-        >
-            <Image
-                src="{HostelModel>Image}"
-                width="180px"
-                height="140px"
-                class="serviceImage"
-                densityAware="false"
+ 
+<FlexBox alignItems="Start" justifyContent="Start" wrap="Wrap" class="sapUiSmallMarginTop"
+         items="{ path: 'HostelModel>/Persons' }">
+    <VBox width="260px" class="sapUiSmallMargin">
+        <Title text="{= 'Facilities for ' + (${HostelModel>FullName} || 'Person') }" level="H6" />
+
+        <FlexBox justifyContent="Start" wrap="Wrap"
+                 items="{ path: 'HostelModel>PersonFacilitiesSummary' }">
+            <VBox width="200px" height="200px" class="sapUiSmallMargin serviceCard"
+                  alignItems="Center" justifyContent="Center"
+                  visible="{= !!${HostelModel>FacilityName} }">
+                <Image src="{HostelModel>Image}" width="180px" height="140px" densityAware="false"/>
+                <Text text="{HostelModel>FacilityName}" />
+                <Text text="{= '₹ ' + ${HostelModel>Price}}" />
+            </VBox>
+        </FlexBox>
+    </VBox>
+</FlexBox>
+
+
+   <Table
+    id="idFacilityRoomTable"
+    class="sapUiSmallMarginTop"
+    items="{
+        path: 'HostelModel>/AllSelectedFacilities'
+    }"
+    mode="SingleSelectLeft"
+    inset="false"
+    selectionChange="onTableSelection"
+>
+    <headerToolbar>
+        <Toolbar>
+            <Title text="Booking Details" level="H5" />
+            <ToolbarSpacer />
+            <Button 
+                icon="sap-icon://edit"
+                text="Edit"
+                press="onEditFacilityDetails"
+                type="Emphasized"
+                
             />
-            <Text
-                text="{HostelModel>FacilityName}"
-                class="sapUiTinyMarginTop facilityNameText"
-            />
-        </VBox>
-    </FlexBox>
+        </Toolbar>
+    </headerToolbar>
+
+    <columns>
+        <Column>
+            <Text text="Facility Name" />
+        </Column>
+        <Column>
+            <Text text="Facility Price (₹)" />
+        </Column>
+        <Column>
+            <Text text="Start Date" />
+        </Column>
+        <Column>
+            <Text text="End Date" />
+        </Column>
+        <Column>
+            <Text text="Days" />
+        </Column>
+        <Column>
+            <Text text="Total (₹)" />
+        </Column>
+    </columns>
+
+    <items>
+        <ColumnListItem>
+            <cells>
+           
+                <Text text="{HostelModel>FacilityName}" />
+                <Text text="{HostelModel>Price}" />
+                <Text text="{
+                    path: 'HostelModel>StartDate',
+                    formatter: '.Formatter.formatDate'
+                }" />
+                <Text text="{
+                    path: 'HostelModel>EndDate',
+                    formatter: '.Formatter.formatDate'
+                }" />
+                <Text text="{HostelModel>TotalDays}" />
+               <Text text="{= '₹ ' + (${HostelModel>Price} * ${HostelModel>TotalDays}).toFixed(2) }" />
+
+            </cells>
+        </ColumnListItem>
+    </items>
+</Table>
+<VBox class="sapUiSmallMarginTop">
+    <HBox justifyContent="End" class="sapUiSmallMarginTop">
+        <Label text="Total Facility Cost:" design="Bold" class="sapUiSmallMarginEnd"/>
+        <Text text="{
+            path: 'HostelModel>/TotalFacilityPrice',
+            formatter: '.Formatter.formatCurrency'
+        }" class="sapUiSmallMarginEnd"/>
+    </HBox>
+    <HBox justifyContent="End" class="sapUiSmallMarginTop">
+        <Label text="Room Rent:" design="Bold" class="sapUiSmallMarginEnd"/>
+        <Text text="{HostelModel>/Price}" class="sapUiSmallMarginEnd"/>
+    </HBox>
+    <HBox justifyContent="End" class="sapUiSmallMarginTop">
+        <Label text="Grand Total:" design="Bold" class="sapUiSmallMarginEnd"/>
+        <Text text="{
+            path: 'HostelModel>/GrandTotal',
+            formatter: '.Formatter.formatCurrency'
+        }" class="sapUiSmallMarginEnd"/>
+    </HBox>
 </VBox>
+
+
+
 
 
     </Panel>
