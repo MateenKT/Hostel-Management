@@ -54,12 +54,12 @@
     </Toolbar>
 
  
-<FlexBox alignItems="Start" justifyContent="Start" wrap="Wrap" class="sapUiSmallMarginTop"
+<FlexBox alignItems="Start" justifyContent="Start"  class="sapUiSmallMarginTop"
          items="{ path: 'HostelModel>/Persons' }">
     <VBox width="260px" class="sapUiSmallMargin">
         <Title text="{= 'Facilities for ' + (${HostelModel>FullName} || 'Person') }" level="H6" />
 
-        <FlexBox justifyContent="Start" wrap="Wrap"
+        <FlexBox justifyContent="Start" 
                  items="{ path: 'HostelModel>PersonFacilitiesSummary' }">
             <VBox width="200px" height="200px" class="sapUiSmallMargin serviceCard"
                   alignItems="Center" justifyContent="Center"
@@ -134,7 +134,6 @@
                 }" />
                 <Text text="{HostelModel>TotalDays}" />
                <Text text="{= '₹ ' + (${HostelModel>Price} * ${HostelModel>TotalDays}).toFixed(2) }" />
-
             </cells>
         </ColumnListItem>
     </items>

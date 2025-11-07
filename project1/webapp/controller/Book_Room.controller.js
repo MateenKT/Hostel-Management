@@ -426,6 +426,7 @@ TC_onDialogNextButton: function () {
         const aPersons = oHostelModel.getProperty("/Persons") || [];
         const sStartDate = oHostelModel.getProperty("/StartDate");
         const sEndDate = oHostelModel.getProperty("/EndDate");
+        const roomRentPrice = oHostelModel.getProperty("/Price");
 
         const oStartDate = this._parseDate(sStartDate);
         const oEndDate = this._parseDate(sEndDate);
@@ -441,22 +442,18 @@ TC_onDialogNextButton: function () {
         let bAllValid = true;
         let bFacilityValid = true;
         let bDocumentValid = true;
-        let fTotalFacilityPrice = 0;
-        let aAllFacilities = []; 
-        //  Person-wise processing
+
+        // Validate per person mandatory fields and documents
         aPersons.forEach((oPerson, iIndex) => {
-            // ----  Validate mandatory fields ----
             aMandatoryFields.forEach((sField) => {
                 const sValue = oPerson[sField];
                 const sFieldPath = `/Persons/${iIndex}/${sField}`;
-
                 const aInputs = oView.findElements(true, (oControl) => {
                     return (
                         oControl.getBinding("value") &&
                         oControl.getBinding("value").getPath() === sFieldPath
                     );
                 });
-
                 const oInput = aInputs[0];
                 if (!sValue || sValue.trim() === "") {
                     bAllValid = false;
@@ -469,61 +466,46 @@ TC_onDialogNextButton: function () {
                 }
             });
 
-            // ----   PersonFacilitiesSummary ----
-            const aFacilities = oPerson.Facilities?.SelectedFacilities || [];
-            if (aFacilities.length === 0) {
-                bFacilityValid = false;
-            }
-
-            const aPersonFacilitiesSummary = [];
-
-            aFacilities.forEach((f) => {
-                const fPrice = parseFloat(f.Price || 0);
-                const fTotal = fPrice * iDays;
-                fTotalFacilityPrice += fPrice;
-
-                const oFacilityItem = {
-                    FacilityName: f.FacilityName,
-                    Price: fPrice,
-                    StartDate: sStartDate,
-                    EndDate: sEndDate,
-                    TotalDays: iDays,
-                    TotalAmount: fTotal,
-                    Image: f.Image
-                };
-                // Person-level array
-                aPersonFacilitiesSummary.push(oFacilityItem);
-
-                // Global flattened array (for table)
-                aAllFacilities.push({
-                    PersonName: oPerson.FullName || `Person ${iIndex + 1}`,
-                    ...oFacilityItem
-                });
-            });
-
-            //  Store per-person facility summary
-            oHostelModel.setProperty(`/Persons/${iIndex}/PersonFacilitiesSummary`, aPersonFacilitiesSummary);
-
-            // ----  Document validation ----
             if (!oPerson.Document || oPerson.Document === "") {
                 bDocumentValid = false;
             }
         });
 
-        // ----  Totals ----
-        const fGrandTotal = fTotalFacilityPrice * iDays;
+        // if (!bAllValid) {
+        //     sap.m.MessageToast.show("Please fill all mandatory fields.");
+        //     return;
+        // }
+        // if (!bDocumentValid) {
+        //     sap.m.MessageToast.show("Please upload all required documents.");
+        //     return;
+        // }
 
-        oHostelModel.setProperty("/AllSelectedFacilities", aAllFacilities);
-        oHostelModel.setProperty("/TotalFacilityPrice", fTotalFacilityPrice);
-        oHostelModel.setProperty("/GrandTotal", fGrandTotal);
-        oHostelModel.setProperty("/TotalDays", iDays);
+        // Compute totals and populate summary arrays
+        const totals = this.calculateTotals(aPersons, sStartDate, sEndDate, roomRentPrice);
+
+        if (!totals) {
+            return; 
+        }
+
+        // Assign per person their facility summary arrays
+        aPersons.forEach((oPerson, iIndex) => {
+            const aFacilities = oPerson.Facilities?.SelectedFacilities || [];
+            const aPersonFacilitiesSummary = totals.AllSelectedFacilities.filter(item => item.PersonName === (oPerson.FullName || `Person ${iIndex + 1}`));
+            oHostelModel.setProperty(`/Persons/${iIndex}/PersonFacilitiesSummary`, aPersonFacilitiesSummary);
+        });
+
+        // Set totals to model
+        oHostelModel.setProperty("/TotalDays", totals.TotalDays);
+        oHostelModel.setProperty("/TotalFacilityPrice", totals.TotalFacilityPrice);
+        oHostelModel.setProperty("/GrandTotal", totals.GrandTotal);
+        oHostelModel.setProperty("/AllSelectedFacilities", totals.AllSelectedFacilities);
         oHostelModel.refresh(true);
     }
 
-    // ---- Move to Next Step ----
+    // Move to next step
     oWizard.nextStep();
 
-    // ---- Update Buttons ----
+    // Update buttons visibility
     const oNextStep = oWizard.getCurrentStep();
     if (oNextStep === this.createId("id_Summary")) {
         oBtnModel.setProperty("/Submit", true);
@@ -535,7 +517,54 @@ TC_onDialogNextButton: function () {
         oBtnModel.setProperty("/Cancel", false);
         oBtnModel.setProperty("/NXTVis", true);
     }
+},
+
+// Separated calculation function
+calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
+    const oStartDate = this._parseDate(sStartDate);
+    const oEndDate = this._parseDate(sEndDate);
+    const diffTime = oEndDate - oStartDate;
+    const iDays = Math.ceil(diffTime / (1000 * 3600 * 24));
+    
+    if (iDays <= 0) {
+        sap.m.MessageToast.show("End Date must be after Start Date");
+        return null;
+    }
+
+    let totalFacilityPricePerDay = 0;
+    let aAllFacilities = [];
+
+    aPersons.forEach((oPerson, iIndex) => {
+        const aFacilities = oPerson.Facilities?.SelectedFacilities || [];
+        aFacilities.forEach((f) => {
+            const fPrice = parseFloat(f.Price || 0);
+            totalFacilityPricePerDay += fPrice;
+            const fTotal = fPrice * iDays;
+
+            aAllFacilities.push({
+                PersonName: oPerson.FullName || `Person ${iIndex + 1}`,
+                FacilityName: f.FacilityName,
+                Price: fPrice,
+                StartDate: sStartDate,
+                EndDate: sEndDate,
+                TotalDays: iDays,
+                TotalAmount: fTotal,
+                Image: f.Image
+            });
+        });
+    });
+
+    const totalFacilityPrice = totalFacilityPricePerDay * iDays;
+    const grandTotal = totalFacilityPrice + Number(roomRentPrice || 0);
+
+    return {
+        TotalDays: iDays,
+        TotalFacilityPrice: totalFacilityPrice,
+        GrandTotal: grandTotal,
+        AllSelectedFacilities: aAllFacilities
+    };
 }
+
 ,
 
 // Helper function to parse date
@@ -626,10 +655,11 @@ onSubmitPress: async function () {
         await this.ajaxCreateWithJQuery("HM_Customer", oPayload);
 
         // On success
-        sap.m.MessageToast.show("Booking successful!");
+       
+        
         var oroute = this.getOwnerComponent().getRouter();
         oroute.navTo("RouteHostel");
-
+ sap.m.MessageToast.show("Booking successful!");
         // Clear uploaded files
         oData.Persons.forEach((_, idx) => {
             const uploader = sap.ui.getCore().byId("idFileUploader_" + idx);

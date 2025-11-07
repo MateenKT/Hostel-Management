@@ -104,7 +104,7 @@
             <OverflowToolbar>
                 <ToolbarSpacer />
                 <Button
-                    text="Submit"
+                    text="proceed to pay"
                     visible="{OBTNModel>/Submit}"
                     type="Emphasized"
                     press="onSubmitPress"
