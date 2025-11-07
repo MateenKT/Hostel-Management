@@ -552,8 +552,8 @@ onBookNow: function (oEvent) {
                 this.ARD_Dialog = sap.ui.xmlfragment(oView.getId(), "sap.ui.com.project1.fragment.Filter_Branch", this);
                 oView.addDependent(this.ARD_Dialog);
             }
-                        this.ARD_Dialog.open();
-
+            this._clearFilterFields()
+            this.ARD_Dialog.open();
         },
 
 //        onpressFilter: function () {
@@ -691,24 +691,27 @@ onBookNow: function (oEvent) {
         },
 
         onSearchRooms: function () {
-             const oBranchCombo = this.getView().byId("id_Branch");
-    const oACTypeCombo =this.getView().byId("id_Roomtype");
+            const oBranchCombo = this.getView().byId("id_Branch");
+            const oACTypeCombo = this.getView().byId("id_Roomtype");
 
-    const sSelectedBranch = oBranchCombo?.getSelectedKey();
-    const sSelectedACType = oACTypeCombo?.getSelectedKey();
+            // Branch: use additionalText
+            const oSelectedBranchItem = oBranchCombo.getSelectedItem();
+            const sSelectedBranch = oSelectedBranchItem?.getAdditionalText();
+
+            // AC Type: use selected key
+            const sSelectedACType = oACTypeCombo?.getSelectedKey();
 
             if (!sSelectedBranch) {
                 sap.m.MessageToast.show("Please select a location first.");
                 return;
             }
 
-            //  Pass the selected BranchCode to your read call
-            this._loadFilteredData(sSelectedBranch,sSelectedACType);
+            // Pass selected values to filter function
+            this._loadFilteredData(sSelectedBranch, sSelectedACType);
 
             // Close popup after triggering data load
             this._oLocationDialog.close();
         },
-
 
         onpressLogin: function () {
             if (!this._oSignDialog) {
@@ -1213,6 +1216,12 @@ BR_onsavebuttonpress:function(){
 },
 BR_oncancelbuttonpress:function(){
      this.ARD_Dialog.close();
+},
+_clearFilterFields: function () {
+    const oBranchCombo = this.getView().byId("id_Branch");
+    const oRoomTypeCombo = this.getView().byId("id_Roomtype");
+    if (oBranchCombo) oBranchCombo.setSelectedKey("");
+    if (oRoomTypeCombo) oRoomTypeCombo.setSelectedKey("");
 },
 onAfterRendering: function () {
     var oCarousel = this.byId("customSlideCarousel");

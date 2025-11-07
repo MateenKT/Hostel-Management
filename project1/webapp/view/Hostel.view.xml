@@ -52,8 +52,11 @@
                          <Button text="Book Room" class="RoomBook sapUiLargeMarginBegin " press="onpressBookrooms" />
 					</ScrollContainer>
                     <Page id="idRooms" showHeader="false">
-
+					<HBox justifyContent="End">
+						<Button text="Filter" icon="sap-icon://map" press="onpressFilter" width="200px" class="sapUiTinyMargin"/>
+					</HBox>
 					<ScrollContainer  horizontal="false" vertical="true" height="80%" class="sapUiContentPadding HostelRooms sapUiTinyMargin">
+					
 						<l:Grid defaultSpan="XL12 L12 M12 S12" width="100%" class="position-welcome">
 							<VBox class="sapUiLargeMarginTop">
 								<Text class="Welcomeroomtext sapUiTinyMarginTopBottom" textAlign="Center" text="Book Your Room "/>
@@ -69,8 +72,7 @@
 						</l:Grid>
 					</ScrollContainer>
 
-					 <Button text="Search Location" icon="sap-icon://map" class="SearchBar"
-   press="onpressFilter"  width="200px" />
+					
                     <!-- <l:Grid defaultSpan="XL4 L4 M6 S12" width="100%"  hSpacing="2" vSpacing="2" class="HostelGrid"> -->
     <!-- Single Bed -->
 
