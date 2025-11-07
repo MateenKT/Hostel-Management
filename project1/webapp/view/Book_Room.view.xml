@@ -107,7 +107,7 @@
                     text="proceed to pay"
                     visible="{OBTNModel>/Submit}"
                     type="Emphasized"
-                    press="onSubmitPress"
+                    press="onOpenProceedtoPay"
                 />
                 <Button
                     text="Cancel"

@@ -427,7 +427,7 @@ _loadFilteredData: async function (sBranchCode, sACType) {
         });
 
         //  Only show available beds
-        const availableBeds = aBedTypes.filter(b => b.Visible);
+        const availableBeds = aBedTypes;
 
         //  Bind model for dynamic UI
         oView.setModel(

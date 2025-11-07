@@ -578,7 +578,48 @@ TC_onDialogBackButton: function () {
     oWizard.previousStep();
 },
 
-// Save function
+onOpenProceedtoPay: function () {
+    if (!this._oPaymentDialog) {
+        this._oPaymentDialog = sap.ui.xmlfragment(
+            "sap.ui.com.project1.fragment.PaymentPage",
+            this
+        );
+        this.getView().addDependent(this._oPaymentDialog);
+    }
+
+    // Reset fields every time dialog opens
+    const aFields = [
+        "idBankName", "idAmount", "idPaymentTypeField", "idTransactionID",
+        "idPaymentDate", "idCurrency", "idUPIID", "idCardNumber", "idCardExpiry", "idCardCVV"
+    ];
+    aFields.forEach(id => sap.ui.getCore().byId(id)?.setValue(""));
+    sap.ui.getCore().byId("idPaymentTypeGroup").setSelectedIndex(0);
+
+    sap.ui.getCore().byId("idUPISection").setVisible(true);
+    sap.ui.getCore().byId("idCardSection").setVisible(false);
+
+    this._oPaymentDialog.open();
+},
+
+onPaymentTypeSelect: function (oEvent) {
+    const selectedIndex = oEvent.getSource().getSelectedIndex();
+    sap.ui.getCore().byId("idUPISection").setVisible(selectedIndex === 0);
+    sap.ui.getCore().byId("idCardSection").setVisible(selectedIndex === 1);
+},
+
+onPaymentClose: function () {
+    if (this._oPaymentDialog) {
+        this._oPaymentDialog.close();
+    }
+
+    // Clear all field values on close
+    const aFields = [
+        "idBankName", "idAmount", "idPaymentTypeField", "idTransactionID",
+        "idPaymentDate", "idCurrency", "idUPIID", "idCardNumber", "idCardExpiry", "idCardCVV"
+    ];
+    aFields.forEach(id => sap.ui.getCore().byId(id)?.setValue(""));
+},
+
 onSubmitPress: async function () {
     const oModel = this.getView().getModel("HostelModel");
     const oData = oModel.getData();
@@ -603,6 +644,18 @@ onSubmitPress: async function () {
                     BedType: oData.RoomType  
                 });
             }
+
+               const paymentDetails = {
+                    BankName: sap.ui.getCore().byId("idBankName").getValue(),
+                    Amount: sap.ui.getCore().byId("idAmount").getValue(),
+                    PaymentType: sap.ui.getCore().byId("idPaymentTypeField").getValue(),
+                    BankTransactionID: sap.ui.getCore().byId("idTransactionID").getValue(),
+                    Date: sap.ui.getCore().byId("idPaymentDate").getValue(),
+                    Currency: sap.ui.getCore().byId("idCurrency").getValue()
+                };
+
+                // Store in model temporarily
+                oData.PaymentDetails = paymentDetails;
 
             //  Handle both object and string facility formats
             if (p.Facilities && p.Facilities.SelectedFacilities && p.Facilities.SelectedFacilities.length > 0) {
@@ -642,7 +695,8 @@ onSubmitPress: async function () {
                     ]
                     : [],
                 Booking: bookingData,
-                FacilityItems: facilityData 
+                FacilityItems: facilityData ,
+                PaymentDetails:[oData.PaymentDetails]  
             };
         });
 
@@ -676,6 +730,7 @@ onSubmitPress: async function () {
     }
 }
 ,
+
 onCancelPress:function(){
      var oRouter  = this.getOwnerComponent().getRouter()
      oRouter.navTo("RouteHostel")

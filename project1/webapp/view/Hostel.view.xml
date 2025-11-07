@@ -115,11 +115,13 @@
                         text="₹ {VisibilityModel>Price}"
                         class="bedCardPrice"
                     />
-                    <Button
-                        text="Book Now"
-                        type="Default"
-                        press=".onBookNow"
-	                    />
+                 <Button
+					text="{= ${VisibilityModel>Visible} ? 'Book Now' : 'Sold Out' }"
+					type="Default"
+					press=".onBookNow"
+					enabled="{VisibilityModel>Visible}"
+					class="{= ${VisibilityModel>Visible} ? '' : 'soldOutButton' }"
+				/>
                 </VBox>
             </VBox>
         </items>
