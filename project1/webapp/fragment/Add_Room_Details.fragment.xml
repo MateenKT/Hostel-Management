@@ -117,18 +117,19 @@
                     type="Number"
                 />
 
-                <Label
-                    text="Price"
-                    required="true"
-                />
-                <Input
-                    id="idPrice"
-                    value="{RoomModel>/Price}"
-                    placeholder="Enter Price"
-                    maxLength="7"
-                    liveChange="onPriceInputLiveChange"
-                    valueStateText="Please enter a valid amount"
-                />
+                <Label text="Price" required="true"  />
+				<HBox width="100%" justifyContent="Start" alignItems="Center">
+					<VBox width="50%">
+						<Input id="idPrice" value="{RoomModel>/Price}" placeholder="Enter Price" maxLength="7"
+                    liveChange="onPriceInputLiveChange" valueStateText="Please enter a valid amount"/>
+					</VBox>
+					<VBox width="50%">
+                    <ComboBox id="FO_id_PriceType"  selectedKey="Per Day" value="{RoomModel>/PriceType}">
+					<core:Item key="Per Day" text="Per Day"/>
+                    <core:Item key="Per Month" text="Per Month"/>
+				</ComboBox>
+					</VBox>
+				</HBox>
             </f:content>
         </f:SimpleForm>
         <footer>

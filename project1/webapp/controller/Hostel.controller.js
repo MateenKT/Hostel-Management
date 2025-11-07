@@ -862,37 +862,41 @@ onBookNow: function (oEvent) {
 
                 const aUsers = oResponse?.commentData || [];
 
-                //  Compare user-entered credentials with database records
                 const oMatchedUser = aUsers.find(user =>
-                   user.UserID === sUserid && user.UserName === sUsername && user.Password === btoa(sPassword)
+                user.UserID === sUserid &&
+                user.UserName === sUsername &&
+                (user.Password === sPassword || user.Password === btoa(sPassword))
                 );
 
-                if (oMatchedUser) {
+                if (!oMatchedUser) {
+                    sap.m.MessageToast.show("Invalid credentials. Please try again.");
+                    return;
+                }
+
+                if (oMatchedUser.Role === "Customer") {
                     sap.m.MessageToast.show("Login Successful! Welcome, " + sUsername);
-
-                    const oView = this.getView();
-                    const oLoginBtn = oView.byId("loginButton");
-                    const oAvatar = oView.byId("ProfileAvatar");
-
-                    if (oLoginBtn) oLoginBtn.setVisible(false);
-                    if (oAvatar) oAvatar.setVisible(true);
-   
-                    //  Store logged-in user info for later use (Profile, Dashboard, etc.)
                     this._oLoggedInUser = oMatchedUser;
-
-                    //  Optionally store in a global model for reuse
                     const oUserModel = new JSONModel(oMatchedUser);
                     sap.ui.getCore().setModel(oUserModel, "LoginModel");
 
-                    //  Clear fields
                     sap.ui.getCore().byId("signInusername").setValue("");
                     sap.ui.getCore().byId("signinPassword").setValue("");
 
-                    // Close dialog
-                    if (this._oSignDialog) {
-                        this._oSignDialog.close();
-                    }
-                } else {
+                    if (this._oSignDialog) this._oSignDialog.close();
+
+                    const oView = this.getView();
+                    oView.byId("loginButton")?.setVisible(false);
+                    oView.byId("ProfileAvatar")?.setVisible(true);
+
+                } else if (oMatchedUser.Role === "Admin" || oMatchedUser.Role === "Employee") {
+                    sap.m.MessageToast.show("Login Successful! Welcome, " + sUsername);
+                    sap.ui.getCore().byId("signInusername").setValue("");
+                    sap.ui.getCore().byId("signinPassword").setValue("");
+
+                    if (this._oSignDialog) this._oSignDialog.close();
+
+                    this.getOwnerComponent().getRouter().navTo("TilePage");
+                }else {
                     sap.m.MessageToast.show("Invalid credentials. Please try again.");
                 }
 

@@ -171,11 +171,8 @@
                             <Text text="{RoomDetailsModel>BedTypeName}" />
                             <Text text="{RoomDetailsModel>NoofPerson}" />
                             <Text text="{RoomDetailsModel>ExtraBed}" />
+                            <Text text="{= ${RoomDetailsModel>Price} ? ${RoomDetailsModel>Price} + ' ' + ${RoomDetailsModel>PriceType} : '' }" />
 
-
-
-                          
-                            <Text text="{RoomDetailsModel>Price}" />
                             <!-- <Text text="{HostelModel>RoomType}" /> -->
                            <Button
                             text="View"
