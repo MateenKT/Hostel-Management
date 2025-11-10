@@ -52,7 +52,7 @@
             <core:Item key="FEMALE" text="FEMALE"/>
           </Select>
           <Label text="Date of Birth"/>
-          <DatePicker value="{profileData>/dob}"/>
+          <DatePicker value="{profileData>/DateofBirth}"/>
           <Label text="Nationality"/>
           <Input value="{profileData>/nationality}"/>
         </f:SimpleForm>
@@ -61,10 +61,9 @@
       <VBox visible="{= ${profileSectionModel>/selectedSection} === 'devices' }">
     <Title text="Booking History" level="H3"/>
 
-    <Table items="{profileData>/bookings}" mode="SingleSelectLeft">
+    <Table items="{profileData>/bookings}" mode="SingleSelectLeft" id="IdProfileaTable">
         <headerToolbar>
             <Toolbar>
-                <Title text="Bookings" level="H4"/>
                 <ToolbarSpacer/>
                 <Button 
                     text="Edit"
@@ -84,7 +83,7 @@
         <items>
             <ColumnListItem>
                 <cells>
-                    <Text text="{profileData>date}"/>
+                    <Text text="{profileData>Startdate}"/>
                     <Text text="{profileData>room}"/>
                     <Text text="{profileData>amount}"/>
                     <Text text="{profileData>status}"/>

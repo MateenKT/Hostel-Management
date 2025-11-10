@@ -64,17 +64,10 @@
 								<Text text="Your New Home Away to me" class="Welcomeroomtext sapUiTinyMarginTop "/>
 							</VBox>
 								<HBox width="100%" justifyContent="End" alignItems="Center">
-
-  <!-- <Button text="Filter" icon="sap-icon://filter" class="customSearchBar"
-   press="onpressFilter"  width="200px" /> -->
-</HBox>
+                       </HBox>
 
 						</l:Grid>
 					</ScrollContainer>
-
-					
-                    <!-- <l:Grid defaultSpan="XL4 L4 M6 S12" width="100%"  hSpacing="2" vSpacing="2" class="HostelGrid"> -->
-    <!-- Single Bed -->
 
 <ScrollContainer
     height="100%"
@@ -128,8 +121,6 @@
     </FlexBox>
 </ScrollContainer>
 
-
-  
 <!-- </l:Grid> -->
 
                     </Page>

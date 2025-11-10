@@ -16,7 +16,6 @@
             fragmentName="sap.ui.com.project1.fragment.Header"
             type="XML"
         />
-        
         <content>
 
          <VBox class="sapUiSmallMargin">
@@ -33,7 +32,7 @@
                                 class="sapUiSmallMarginBottom"
                             />
                             <Text
-                                text="10,000"
+                                text="{}"
                                 class="largeTextBold"
                             />
                         </VBox>
@@ -43,7 +42,7 @@
                                 class="sapUiSmallMarginBottom"
                             />
                             <Text
-                                text="Single Bed"
+                                text="{}"
                                 class="sapUiTinyMarginEnd largeTextBold"
                             />
                         </VBox>
@@ -72,14 +71,14 @@
                             <Text id="idRoomType3" text="{HostelModel>/RoomType}"  />
 
                             <Label text="Price" required="true" />
-                            <Text id="idPrice4" text="{HostelModel>/Price}"   />
+                            <Text id="idPrice4" text="{HostelModel>/RoomPrice}"   />
                 
                  <Label text="Payment Method" required="true" />
                             <Text text="{HostelModel>/PaymentType}"/>
                 <!-- Project Address -->
                 <core:Title text="Select Person" />
                <Label text="No of Persons" required="true" />
-                           <Text text="{HostelModel>/Person}"/>
+                           <Text text="{HostelModel>/noofperson}"/>
 
                 <!-- Site Contact -->
                 <core:Title text="Dates" />
@@ -111,40 +110,36 @@
         >
             <f:content>
                 <core:Title text="" />
-
                 <Label text="Full Name" />
-                <Text text="{HostelModel>FullName}" />
+                <Text text="{HostelModel>/FullName}" />
 
                 <Label text="Date of Birth" />
-                <Text text="{HostelModel>DateOfBirth}" />
+                <Text text="{path:'HostelModel>/DateOfBirth',  formatter: '.Formatter.formatDate'}"  />
 
                 <Label text="Gender" />
-                <Text text="{HostelModel>Gender}" />
+                <Text text="{HostelModel>/Gender}" />
 
                 <Label text="Mobile Number" />
-                <Text text="{HostelModel>MobileNo}" />
+                <Text text="{HostelModel>/MobileNo}" />
 
                 <Label text="Email" />
-                <Text text="{HostelModel>CustomerEmail}" />
+                <Text text="{HostelModel>/CustomerEmail}" />
 
                 <Label text="Country" />
-                <Text text="{HostelModel>Country}" />
+                <Text text="{HostelModel>/Country}" />
 
                 <Label text="State" />
-                <Text text="{HostelModel>State}" />
+                <Text text="{HostelModel>/State}" />
 
                 <Label text="City" />
-                <Text text="{HostelModel>City}" />
+                <Text text="{HostelModel>/City}" />
                 
             </f:content>
         </f:SimpleForm>
     
-    <Toolbar>
-        <Title text="Selected Facilities" level="H4" />
-    </Toolbar>
 
  
-<FlexBox alignItems="Start" justifyContent="Start"  class="sapUiSmallMarginTop"
+<!-- <FlexBox alignItems="Start" justifyContent="Start"  class="sapUiSmallMarginTop"
          items="{ path: 'HostelModel>/Persons' }">
     <VBox width="260px" class="sapUiSmallMargin">
         <Title text="{= 'Facilities for ' + (${HostelModel>FullName} || 'Person') }" level="H6" />
@@ -160,8 +155,7 @@
             </VBox>
         </FlexBox>
     </VBox>
-</FlexBox>
-
+</FlexBox> -->
 
    <Table
     id="idFacilityRoomTableDetails"
@@ -220,7 +214,7 @@
                 }" />
                 <Text text="{
                     path: 'HostelModel>EndDate',
-                    formatter: '.Formatter.formatDate'
+                     formatter: '.Formatter.formatDate'
                 }" />
                 <Text text="{HostelModel>TotalDays}" />
                <Text text="{= '₹ ' + (${HostelModel>Price} * ${HostelModel>TotalDays}).toFixed(2) }" />
@@ -238,7 +232,7 @@
     </HBox>
     <HBox justifyContent="End" class="sapUiSmallMarginTop">
         <Label text="Room Rent:" design="Bold" class="sapUiSmallMarginEnd"/>
-        <Text text="{HostelModel>/Price}" class="sapUiSmallMarginEnd"/>
+        <Text text="{HostelModel>/RoomPrice}" class="sapUiSmallMarginEnd"/>
     </HBox>
     <HBox justifyContent="End" class="sapUiSmallMarginTop">
         <Label text="Grand Total:" design="Bold" class="sapUiSmallMarginEnd"/>

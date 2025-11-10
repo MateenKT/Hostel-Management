@@ -33,10 +33,10 @@ formatCurrency: function(fValue) {
     return "₹ " + parseFloat(fValue).toFixed(2);
 },
 
-formatDate: function(sDate) {
-    if (!sDate) return "";
-    return sDate; // Already in dd/MM/yyyy format
-},
+// formatDate: function(sDate) {
+//     if (!sDate) return "";
+//     return sDate; // Already in dd/MM/yyyy format
+// },
 
 calculateDays: function(sStartDate, sEndDate) {
     if (!sStartDate || !sEndDate) return 0;

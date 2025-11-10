@@ -116,8 +116,6 @@ onEditDateChange: function (oEvent) {
     const iDiffDays = Math.ceil((oEnd - oStart) / (1000 * 60 * 60 * 24));
     oEditModel.setProperty("/TotalDays", iDiffDays);
 }
-
-
 ,
 onEditFacilitySave: function () {
     const oView = this.getView();

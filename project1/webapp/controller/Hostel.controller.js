@@ -89,7 +89,7 @@ sap.ui.define([
         const oData = await this.ajaxReadWithJQuery("HM_Customer", {});
         const aCustomers = Array.isArray(oData.Customers) ? oData.Customers : [oData.Customers];
 
-        const oCustomerModel = new sap.ui.model.json.JSONModel(aCustomers);
+        const oCustomerModel = new JSONModel(aCustomers);
         this.getView().setModel(oCustomerModel, "CustomerModel");
 
         console.log("Customer details loaded successfully");
@@ -101,7 +101,6 @@ sap.ui.define([
          BedTypedetails: async function () {
     try {
         const oData = await this.ajaxReadWithJQuery("HM_BedType", {});
-
         const aBedTypes = Array.isArray(oData.data)
             ? oData.data
             : [oData.data];
@@ -127,7 +126,6 @@ sap.ui.define([
         const oRoomModel = new JSONModel({
             Rooms: aRooms
         });
-
         //  Bind model to the view
         oView.setModel(oRoomModel, "RoomCountModel");
 
@@ -933,9 +931,32 @@ if (!Array.isArray(aCustomers) || aCustomers.length === 0) {
     return;
 }
  
+      const aCustomerDetails = aCustomers.flatMap(response =>({
+            city:response.City,
+            country:response.Country,
+            customerID:response.CustomerID,
+            salutation: response.Salutation,
+            customerName :response.CustomerName ,
+            mobileno: response.MobileNo,
+            stdCode:response.STDCode,
+            state:response.State,
+            countryCode: response.CountryCode,
+            customerEmail: response.CustomerEmail,
+            DOB: response.DateOfBirth,
+            gender:response.Gender,
+            Address:response.PermanentAddress
+
+     })
+  
+
+  
+);
 // Combine all bookings from all customers
 const aAllBookings = aCustomers.flatMap(customer =>
     Array.isArray(customer.Bookings) ? customer.Bookings : []
+);
+const aAllFacilitis = aCustomers.flatMap(customer =>
+    Array.isArray(customer.FaciltyItems) ? customer.FaciltyItems : []
 );
  
 if (aAllBookings.length === 0) {
@@ -944,15 +965,34 @@ if (aAllBookings.length === 0) {
  
 // Map booking data
 const aBookingData = aAllBookings.map(booking => ({
-    date: booking.StartDate ? new Date(booking.StartDate).toLocaleDateString("en-GB") : "N/A",
+    Startdate: booking.StartDate
+ ? new Date(booking.StartDate
+).toLocaleDateString("en-GB") : "N/A",
+    EndDate: booking.EndDate
+ ? new Date(booking.EndDate
+).toLocaleDateString("en-GB") : "N/A",
     room: booking.BedType || "N/A",
     amount: booking.RentPrice || "N/A",
-    status: booking.Status || "N/A"
+    status: booking.Status || "N/A",
+    cutomerid:booking.CustomerID,
+    branchCode:booking.BranchCode,
+    noofperson:booking.NoOfPersons,
+    grandTotal:booking.RentPrice,
+    paymenytype:booking.PaymentType,
+    RoomPrice:booking.RoomPrice
+
 }));
- 
-console.log("Booking Data:", aBookingData);
- 
- 
+const aFacilitiData = aAllFacilitis.map(faciliti => ({
+    startdate: faciliti.StartDate ? new Date(faciliti.StartDate).toLocaleDateString("en-GB") : "N/A",
+    bookingid:faciliti.BookingID,
+    enddate:faciliti.EndDate,
+    customerid:faciliti.CustomerID || "N/A",
+    facilitiname: faciliti.FacilityName || "N/A",
+    facilitiId:faciliti.FacilityID,
+    facilitiPrice:faciliti.FacilitiPrice || "N/A",
+    status: faciliti.PaidStatus || "N/A"
+}));
+
         //  Load fragment if not already loaded
         if (!this._oProfileDialog) {
             const oDialog = await sap.ui.core.Fragment.load({
@@ -970,7 +1010,9 @@ console.log("Booking Data:", aBookingData);
             name: oUser.UserName || "",
             email: oUser.EmailID || "",
             phone: oUser.MobileNo || "",
-            bookings: aBookingData
+            bookings: aBookingData,
+            facility : aFacilitiData,
+            aCustomers:aCustomerDetails
         });
         this._oProfileDialog.setModel(oProfileModel, "profileData");
  
@@ -1168,17 +1210,7 @@ console.log("Booking Data:", aBookingData);
             // sap.ui.getCore().byId("idMobile").setValue(this._oLoggedInUser.MobileNo);
 
         },
-        // onpressBookrooms: function (oEvent) {
-        //          var oRouter = this.getOwnerComponent().getRouter();
-        //     oRouter.navTo("TilePage");
-        // //     this.Bookfragment();
-        // //     const oButton = oEvent.getSource();
-        // //                var price= this.getView().getModel("VisibilityModel").getData();
-
-        // //     const sRoomType = oButton.data("roomType");
-        // //     sap.ui.getCore().byId("idRoomType").setValue(sRoomType);
-        // //  sap.ui.getCore().byId("idPrice1").setValue(price.fourPrice);
-        // }        ,
+            
         SectionPress: function (oEvent) {
             var oSelectedItem = oEvent.getParameter("listItem");
             if (!oSelectedItem) return;
@@ -1253,10 +1285,164 @@ onExit: function () {
         clearInterval(this._autoSlideInterval);
     }
 },
-onEditBooking:function(){
-      var oRouter = this.getOwnerComponent().getRouter();
-      oRouter.navTo("EditBookingDetails")
+onEditBooking: function () {
+    var oTable = sap.ui.getCore().byId("IdProfileaTable");
+    var oSelectedItem = oTable.getSelectedItem();
+
+    if (!oSelectedItem) {
+        sap.m.MessageToast.show("Please select a booking to edit.");
+        return;
+    }
+
+    // Extract selected booking data
+    var oContext = oSelectedItem.getBindingContext("profileData");
+    var oBookingData = oContext.getObject();
+
+    // Retrieve customerID using the booking (from bookings array)
+    var oProfileModel = this._oProfileDialog.getModel("profileData");
+    var aCustomers = oProfileModel.getProperty("/aCustomers");
+    var aFacilities = oProfileModel.getProperty("/facility");
+
+    // Fix possible typo (cutomerid → customerid)
+    var sCustomerID = oBookingData.cutomerid || oBookingData.CustomerID || "";
+
+    if (!sCustomerID) {
+        sap.m.MessageToast.show("Customer ID not found for this booking.");
+        return;
+    }
+
+    // Find the full customer details for that CustomerID
+    var oCustomer = aCustomers.find(cust => cust.customerID === sCustomerID);
+    if (!oCustomer) {
+        sap.m.MessageToast.show("No customer details found for this booking.");
+        return;
+    }
+
+    // Filter all facilities belonging to that customer
+    var aCustomerFacilities = aFacilities.filter(fac => fac.customerid === sCustomerID);
+
+    // 🧮 Call the calculation function for totals
+    var oTotals = this.calculateTotals(
+        [{ FullName: oCustomer.customerName, Facilities: { SelectedFacilities: aCustomerFacilities } }],
+        oBookingData.Startdate,
+        oBookingData.EndDate,
+        oBookingData.RoomPrice
+    );
+    if (!oTotals) {
+        return; // calculation returned null (invalid dates)
+    }
+
+    // Prepare data for the next view (HostelModel)
+    var oFullCustomerData = {
+        salutation: oCustomer.salutation,
+        FullName: oCustomer.customerName,
+        Gender: oCustomer.gender,
+        stdcode: oCustomer.stdCode,
+        MobileNo: oCustomer.mobileno,
+        CustomerEmail: oCustomer.customerEmail,
+        Country: oCustomer.country,
+        State: oCustomer.state,
+        City: oCustomer.city,
+        DateOfBirth: oCustomer.DOB,
+        RoomType: oBookingData.room,
+        Price: oBookingData.amount,
+        noofperson: oBookingData.noofperson,
+        RoomPrice: oBookingData.RoomPrice,
+        PaymentType: oBookingData.paymenytype,
+        StartDate: oBookingData.Startdate,
+        EndDate: oBookingData.EndDate || "",
+        TotalDays: oTotals.TotalDays,
+        AllSelectedFacilities: oTotals.AllSelectedFacilities,
+        TotalFacilityPrice: oTotals.TotalFacilityPrice,
+        GrandTotal: oTotals.GrandTotal
+    };
+
+    // Create a model to pass to next view
+    var oHostelModel = new JSONModel(oFullCustomerData);
+    this.getOwnerComponent().setModel(oHostelModel, "HostelModel");
+
+    // Navigate to next view
+    var oRouter = this.getOwnerComponent().getRouter();
+    oRouter.navTo("EditBookingDetails");
+},
+
+// 🧮 Separated calculation function
+calculateTotals: function (aPersons, sStartDate, sEndDate, RoomPrice) {
+    const oStartDate = this._parseDate(sStartDate);
+    const oEndDate = this._parseDate(sEndDate);
+
+    if (!oStartDate || !oEndDate) {
+        sap.m.MessageToast.show("Invalid Start or End Date");
+        return null;
+    }
+
+    const diffTime = oEndDate - oStartDate;
+    const iDays = Math.ceil(diffTime / (1000 * 3600 * 24));
+
+    if (iDays <= 0) {
+        sap.m.MessageToast.show("End Date must be after Start Date");
+        return null;
+    }
+
+    let totalFacilityPricePerDay = 0;
+    let aAllFacilities = [];
+
+    aPersons.forEach((oPerson, iIndex) => {
+        const aFacilities = oPerson.Facilities?.SelectedFacilities || [];
+
+        aFacilities.forEach((f) => {
+            // Defensive coding to avoid undefined values
+            const sFacilityName = f.facilitiname || f.facilityname || "N/A";
+            const fPrice = parseFloat(f.facilitiPrice || f.facilitiPrice || 0);
+            const fTotal = (fPrice * iDays).toFixed(2);
+            const aEndDate = f.enddate
+
+            totalFacilityPricePerDay += fPrice;
+
+            aAllFacilities.push({
+                PersonName: oPerson.FullName || `Person ${iIndex + 1}`,
+                FacilityName: sFacilityName,
+                Price: fPrice,
+                StartDate: sStartDate,
+                EndDate: aEndDate,
+                TotalDays: iDays,
+                TotalAmount: fTotal,
+                Image: f.Image || f.image || ""
+            });
+        });
+    });
+
+    const totalFacilityPrice = totalFacilityPricePerDay * iDays;
+    const grandTotal = totalFacilityPrice + Number(RoomPrice || 0);
+
+    return {
+        TotalDays: iDays,
+        TotalFacilityPrice: totalFacilityPrice,
+        GrandTotal: grandTotal,
+        AllSelectedFacilities: aAllFacilities
+    };
 }
+,
+
+// 🗓️ Helper date parser
+_parseDate: function (sDate) {
+    if (!sDate) return null;
+
+    // If it's already a Date object
+    if (sDate instanceof Date) {
+        return sDate;
+    }
+
+    // Convert from DD/MM/YYYY or YYYY-MM-DD
+    if (sDate.includes("/")) {
+        const [d, m, y] = sDate.split("/");
+        return new Date(`${y}-${m}-${d}`);
+    } else {
+        return new Date(sDate);
+    }
+}
+
+
 
 
 

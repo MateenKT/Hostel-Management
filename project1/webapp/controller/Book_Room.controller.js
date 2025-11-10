@@ -471,15 +471,6 @@ TC_onDialogNextButton: function () {
             }
         });
 
-        // if (!bAllValid) {
-        //     sap.m.MessageToast.show("Please fill all mandatory fields.");
-        //     return;
-        // }
-        // if (!bDocumentValid) {
-        //     sap.m.MessageToast.show("Please upload all required documents.");
-        //     return;
-        // }
-
         // Compute totals and populate summary arrays
         const totals = this.calculateTotals(aPersons, sStartDate, sEndDate, roomRentPrice);
 
@@ -635,7 +626,7 @@ onSubmitPress: async function () {
                 bookingData.push({
                     BookingDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
                    RentPrice: oData.GrandTotal ? oData.GrandTotal.toString() : "0",
-
+                    RoomPrice:oData.Price,
                     NoOfPersons: oData.Person || oData.Persons.length,
                     StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
                     EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
@@ -663,10 +654,11 @@ onSubmitPress: async function () {
                     facilityData.push({
                         PaymentID: "",
                         FacilityName: typeof fac === 'string' ? fac : fac.FacilityName,
+                        FacilitiPrice:fac.Price,
                         StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
                         EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
                         PaidStatus: "Pending"
-                    });
+                    }); 
                 });
             }
 
@@ -709,8 +701,6 @@ onSubmitPress: async function () {
         await this.ajaxCreateWithJQuery("HM_Customer", oPayload);
 
         // On success
-       
-        
         var oroute = this.getOwnerComponent().getRouter();
         oroute.navTo("RouteHostel");
  sap.m.MessageToast.show("Booking successful!");
