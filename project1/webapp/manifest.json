@@ -158,6 +158,13 @@
           "target": [
             "TargetRoomImages"
           ]
+        },
+        {
+          "name": "RouteFacilitiesDetails",
+          "pattern": "FacilitiesDetails",
+          "target": [
+            "TargetFacilitiesDetails"
+          ]
         }
       ],
       "targets": {
@@ -237,6 +244,13 @@
           "clearControlAggregation": false,
           "viewId": "Bed_Images",
           "viewName": "Bed_Images"
+        },
+         "TargetFacilitiesDetails": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "FacilitiesDetails",
+          "viewName": "FacilitiesDetails"
         }
       }
     },

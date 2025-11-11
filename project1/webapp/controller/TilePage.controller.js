@@ -48,6 +48,10 @@ sap.ui.define([
           TileV_onpressBedImages:function(){
                 var oRouter = this.getOwnerComponent().getRouter();
                oRouter.navTo("RouteRoomImages");
-        }
+        },
+         TileV_onpressfacilities:function(){
+                var oRouter = this.getOwnerComponent().getRouter();
+               oRouter.navTo("RouteFacilitiesDetails");
+        },
     })
 })

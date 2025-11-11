@@ -111,6 +111,12 @@
                                                 />
                                             </TileContent>
                                         </GenericTile>
+
+										<GenericTile visible="true" class="sapUiMediumMargin" header="Manage Facilities" press="TileV_onpressfacilities">
+											<TileContent unit="Facilities">
+												<ImageContent src="sap-icon://activities" />
+											</TileContent>
+										</GenericTile>
                                     </layout:HorizontalLayout>
                                 </ux:blocks>
                             </ux:ObjectPageSubSection>
