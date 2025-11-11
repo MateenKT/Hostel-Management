@@ -57,12 +57,29 @@ sap.ui.define([
               this.Roomdetails();
             }, 100);
             },
-              Roomdetails: async function () {
+             Roomdetails: async function () {
     try {
         const oData = await this.ajaxReadWithJQuery("HM_Rooms", {});
-        const aBedTypes = Array.isArray(oData.data)
-            ? oData.data
-            : [oData.data];
+        let aBedTypes = Array.isArray(oData.commentData)
+            ? oData.commentData
+            : [oData.commentData];
+
+        // // Filter out blank or empty strings and remove duplicates based on PriceType
+        // aBedTypes = aBedTypes.filter(item => 
+        //     item && item.PriceType && item.PriceType.trim() !== ""
+        // );
+
+        // // Remove duplicates by PriceType (assuming 'PriceType' is key), keep first occurrence
+        // const seen = new Set();
+        // aBedTypes = aBedTypes.filter(item => {
+        //     const key = item.PriceType.trim();
+        //     if (seen.has(key)) {
+        //         return false; // duplicate
+        //     } else {
+        //         seen.add(key);
+        //         return true;
+        //     }
+        // });
 
         const oBedTypeModel = new JSONModel(aBedTypes);
         this.getView().setModel(oBedTypeModel, "RoomDetailModel");
@@ -70,7 +87,8 @@ sap.ui.define([
     } catch (err) {
         console.error("Error while fetching Bed Type details:", err);
     }
-},
+}
+,
           _LoadFacilities: async function () {
     const oView = this.getView();
     const Response = await this.ajaxReadWithJQuery("HM_ExtraFacilities", {});
@@ -386,108 +404,127 @@ onNoOfPersonSelect: function (oEvent) {
 },
 
 TC_onDialogNextButton: function () {
-    const oView = this.getView();
-    const oWizard = oView.byId("TC_id_wizard");
-    const oCurrentStep = oWizard.getCurrentStep();
-    const oHostelModel = oView.getModel("HostelModel");
-    const oBtnModel = oView.getModel("OBTNModel");
+  const oView = this.getView();
+  const oWizard = oView.byId("TC_id_wizard");
+  const oCurrentStep = oWizard.getCurrentStep();
+  const oHostelModel = oView.getModel("HostelModel");
+  const oBtnModel = oView.getModel("OBTNModel");
 
-    oBtnModel.setProperty("/PERVIOUSVIS", true);
+  // Always enable Previous button after first step
+  oBtnModel.setProperty("/PERVIOUSVIS", true);
 
-    if(oCurrentStep)
-
-      if (oCurrentStep === this.createId("TC_id_stepGeneralInfo")) {
-        oWizard.nextStep();
-        return;
-    }
-
-    if (oCurrentStep === this.createId("idStepPersonal1")) {
-        const aPersons = oHostelModel.getProperty("/Persons") || [];
-        const sStartDate = oHostelModel.getProperty("/StartDate");
-        const sEndDate = oHostelModel.getProperty("/EndDate");
-        const roomRentPrice = oHostelModel.getProperty("/Price");
-
-        const oStartDate = this._parseDate(sStartDate);
-        const oEndDate = this._parseDate(sEndDate);
-        const diffTime = oEndDate - oStartDate;
-        const iDays = Math.ceil(diffTime / (1000 * 3600 * 24));
-
-        if (iDays <= 0) {
-            sap.m.MessageToast.show("End Date must be after Start Date");
-            return;
-        }
-
-        const aMandatoryFields = ["FullName", "DateOfBirth"];
-        let bAllValid = true;
-        let bFacilityValid = true;
-        let bDocumentValid = true;
-
-        // Validate per person mandatory fields and documents
-        aPersons.forEach((oPerson, iIndex) => {
-            aMandatoryFields.forEach((sField) => {
-                const sValue = oPerson[sField];
-                const sFieldPath = `/Persons/${iIndex}/${sField}`;
-                const aInputs = oView.findElements(true, (oControl) => {
-                    return (
-                        oControl.getBinding("value") &&
-                        oControl.getBinding("value").getPath() === sFieldPath
-                    );
-                });
-                const oInput = aInputs[0];
-                if (!sValue || sValue.trim() === "") {
-                    bAllValid = false;
-                    if (oInput) {
-                        oInput.setValueState("Error");
-                        oInput.setValueStateText(`${sField} is required`);
-                    }
-                } else if (oInput) {
-                    oInput.setValueState("None");
-                }
-            });
-
-            if (!oPerson.Document || oPerson.Document === "") {
-                bDocumentValid = false;
-            }
-        });
-
-        // Compute totals and populate summary arrays
-        const totals = this.calculateTotals(aPersons, sStartDate, sEndDate, roomRentPrice);
-
-        if (!totals) {
-            return; 
-        }
-
-        // Assign per person their facility summary arrays
-        aPersons.forEach((oPerson, iIndex) => {
-            const aFacilities = oPerson.Facilities?.SelectedFacilities || [];
-            const aPersonFacilitiesSummary = totals.AllSelectedFacilities.filter(item => item.PersonName === (oPerson.FullName || `Person ${iIndex + 1}`));
-            oHostelModel.setProperty(`/Persons/${iIndex}/PersonFacilitiesSummary`, aPersonFacilitiesSummary);
-        });
-
-        // Set totals to model
-        oHostelModel.setProperty("/TotalDays", totals.TotalDays);
-        oHostelModel.setProperty("/TotalFacilityPrice", totals.TotalFacilityPrice);
-        oHostelModel.setProperty("/GrandTotal", totals.GrandTotal);
-        oHostelModel.setProperty("/AllSelectedFacilities", totals.AllSelectedFacilities);
-        oHostelModel.refresh(true);
-    }
-
-    // Move to next step
+  // ✅ If currently on FIRST STEP ("Booking Information"), just move to next step (Personal Info)
+  if (oCurrentStep === this.createId("TC_id_stepGeneralInfo")) {
     oWizard.nextStep();
 
-    // Update buttons visibility
-    const oNextStep = oWizard.getCurrentStep();
-    if (oNextStep === this.createId("id_Summary")) {
-        oBtnModel.setProperty("/Submit", true);
-        oBtnModel.setProperty("/Cancel", true);
-        oBtnModel.setProperty("/NXTVis", false);
-        oBtnModel.setProperty("/PERVIOUSVIS", false);
-    } else {
-        oBtnModel.setProperty("/Submit", false);
-        oBtnModel.setProperty("/Cancel", false);
-        oBtnModel.setProperty("/NXTVis", true);
+    // Update button visibility for next step
+    oBtnModel.setProperty("/Submit", false);
+    oBtnModel.setProperty("/Cancel", false);
+    oBtnModel.setProperty("/NXTVis", true);
+    oBtnModel.setProperty("/PERVIOUSVIS", true);
+    return; // exit function here
+  }
+
+  // ✅ If currently on SECOND STEP ("Personal Information")
+  if (oCurrentStep === this.createId("idStepPersonal1")) {
+    const aPersons = oHostelModel.getProperty("/Persons") || [];
+    const sStartDate = oHostelModel.getProperty("/StartDate");
+    const sEndDate = oHostelModel.getProperty("/EndDate");
+    const roomRentPrice = oHostelModel.getProperty("/Price");
+
+    const oStartDate = this._parseDate(sStartDate);
+    const oEndDate = this._parseDate(sEndDate);
+    const diffTime = oEndDate - oStartDate;
+    const iDays = Math.ceil(diffTime / (1000 * 3600 * 24));
+
+    if (iDays <= 0) {
+      sap.m.MessageToast.show("End Date must be after Start Date");
+      return;
     }
-},
+
+    const aMandatoryFields = ["FullName", "DateOfBirth"];
+    let bAllValid = true;
+    let bDocumentValid = true;
+
+    // Validate per person fields
+    aPersons.forEach((oPerson, iIndex) => {
+      aMandatoryFields.forEach((sField) => {
+        const sValue = oPerson[sField];
+        const sFieldPath = `/Persons/${iIndex}/${sField}`;
+        const aInputs = oView.findElements(true, (oControl) => {
+          return (
+            oControl.getBinding("value") &&
+            oControl.getBinding("value").getPath() === sFieldPath
+          );
+        });
+        const oInput = aInputs[0];
+        if (!sValue || sValue.trim() === "") {
+          bAllValid = false;
+          if (oInput) {
+            oInput.setValueState("Error");
+            oInput.setValueStateText(`${sField} is required`);
+          }
+        } else if (oInput) {
+          oInput.setValueState("None");
+        }
+      });
+
+      // Validate document
+      if (!oPerson.Documents || oPerson.Documents.length === 0) {
+        bDocumentValid = false;
+      }
+    });
+
+    // if (!bAllValid) {
+    //   sap.m.MessageToast.show("Please fill in all required personal details.");
+    //   return;
+    // }
+    // if (!bDocumentValid) {
+    //   sap.m.MessageToast.show("Please upload at least one document for each person.");
+    //   return;
+    // }
+
+    // Compute totals and populate summary arrays
+    const totals = this.calculateTotals(aPersons, sStartDate, sEndDate, roomRentPrice);
+    if (!totals) return;
+
+    // Assign per-person facility summary
+    aPersons.forEach((oPerson, iIndex) => {
+      const aPersonFacilitiesSummary = totals.AllSelectedFacilities.filter(
+        item => item.PersonName === (oPerson.FullName || `Person ${iIndex + 1}`)
+      );
+      oHostelModel.setProperty(`/Persons/${iIndex}/PersonFacilitiesSummary`, aPersonFacilitiesSummary);
+    });
+
+    // Set totals
+    oHostelModel.setProperty("/TotalDays", totals.TotalDays);
+    oHostelModel.setProperty("/TotalFacilityPrice", totals.TotalFacilityPrice);
+    oHostelModel.setProperty("/GrandTotal", totals.GrandTotal);
+    oHostelModel.setProperty("/AllSelectedFacilities", totals.AllSelectedFacilities);
+    oHostelModel.refresh(true);
+  }
+
+  // ✅ Move to next wizard step
+  oWizard.nextStep();
+
+  // ✅ Update footer button visibility based on next step
+  const oNextStep = oWizard.getCurrentStep();
+
+  if (oNextStep === this.createId("id_Summary")) {
+    // Summary step
+    oBtnModel.setProperty("/Submit", true);
+    oBtnModel.setProperty("/Cancel", true);
+    oBtnModel.setProperty("/NXTVis", false);
+    oBtnModel.setProperty("/PERVIOUSVIS", false);
+  } else {
+    // Any intermediate step
+    oBtnModel.setProperty("/Submit", false);
+    oBtnModel.setProperty("/Cancel", false);
+    oBtnModel.setProperty("/NXTVis", true);
+    oBtnModel.setProperty("/PERVIOUSVIS", true);
+  }
+}
+,
 
 // Separated calculation function
 calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
@@ -759,7 +796,43 @@ TC_handleNavigationChange: function (oEvent) {
 
   // Optional: enable next by default (if needed)
   oBtnModel.setProperty("/Next", true);
+},
+
+onRoomDurationChange: function (oEvent) {
+    const sSelectedDuration = oEvent.getParameter("selectedItem").getKey(); // E.g. "Daily", "Monthly", "Yearly" if any
+    const oHostelModel = this.getView().getModel("HostelModel");
+    const oRoomDetailModel = this.getView().getModel("RoomDetailModel");
+
+    // Get current RoomType value
+    const sRoomType = this.getView().byId("GI_Roomtype").getText();
+
+    // Get all RoomDetail entries
+    const aRoomDetails = oRoomDetailModel.getData(); // assumes array at root "/"
+
+    // Find matching room detail by BedTypeName == RoomType
+    const oMatchingRoom = aRoomDetails.find(item => item.BedTypeName === sRoomType);
+
+    if (oMatchingRoom) {
+        let sNewPrice = "";
+        if ( sSelectedDuration === "Per Day") {
+            sNewPrice = oMatchingRoom.Price;       // Daily price field
+        } else if (sSelectedDuration === "Monthly" || sSelectedDuration === "Per Month") {
+            sNewPrice = oMatchingRoom.MonthPrice;  // Monthly price field
+        } else if (sSelectedDuration === "Yearly" || sSelectedDuration === "Per Year") {
+            sNewPrice = oMatchingRoom.YearPrice;   // Optional yearly price if exists
+        } else {
+            sNewPrice = oMatchingRoom.Price;       // default fallback
+        }
+
+        // Update Price in HostelModel
+        oHostelModel.setProperty("/Price", sNewPrice);
+
+    } else {
+        // No matching room found - clear price or handle otherwise
+        oHostelModel.setProperty("/Price", "");
+    }
 }
+
 
      
 

@@ -49,7 +49,7 @@
                                 text="Single Bed"
                                 class="sapUiTinyMarginEnd largeTextBold"
                             />
-                        </VBox>
+                        </VBox> 
                     </HBox>
                 </VBox>
                 <!-- Wizard -->

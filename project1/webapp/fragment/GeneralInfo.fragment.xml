@@ -20,22 +20,27 @@
                 <!-- Booking Details -->
                 <core:Title text="" />
               <!-- <Input id="idUserID" value="{HostelModel>/UserID}" visible="true" /> -->
-               <Label text="Desired Room Type" />
-                            <Text  text="{HostelModel>/RoomType}"  width="100%" />
+               <Label text="Room Type" />
+                            <Text id="GI_Roomtype"  text="{=${HostelModel>/RoomType} + ' - '  + ${HostelModel>/ACType}}"  width="100%" />
+                           
              <Label text="Rent Price" />
                             <Text  text="{HostelModel>/Price}" width="100%" />
-                 <Label text="Booking Duration" required="true" />
-                            <ComboBox
-                                id="idPaymentMethod1"
-                                placeholder="Select Payment Method"
-                                selectedKey="{HostelModel>/PaymentType}"
-                                width="100%"
-                               selectionChange="onFieldValidation"
-                            >
-                                <core:ListItem key="Yearly" text="Yearly" />
-                                <core:ListItem key="Monthly" text="Monthly" />
-                                <core:ListItem key="Daily" text="Daily" />
-                            </ComboBox>
+                <Label text="Booking Duration" required="true" />
+<ComboBox
+    id="idPaymentMethod1"
+    placeholder="Select Payment Method"
+    selectedKey="{HostelModel>/PaymentType}"
+    width="100%"
+    selectionChange="onRoomDurationChange"
+    items="{RoomDetailModel>/}"
+>
+    <core:ListItem
+        key="{RoomDetailModel>PriceType}"
+        text="{RoomDetailModel>PriceType}"
+    />
+</ComboBox>
+                               
+                           
               
                 <core:Title text="" />
                <Label text="No of Persons" required="true" />
