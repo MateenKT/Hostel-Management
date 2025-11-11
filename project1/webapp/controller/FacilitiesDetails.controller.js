@@ -9,7 +9,7 @@ sap.ui.define([
             this.getOwnerComponent().getRouter().getRoute("RouteFacilitiesDetails").attachMatched(this._onRouteMatched, this);
         },
         _onRouteMatched: function() {
-              const omodel = new sap.ui.model.json.JSONModel({
+            const omodel = new sap.ui.model.json.JSONModel({
                 // for Database connection
                 url: "https://rest.kalpavrikshatechnologies.com/",
                 headers: {
@@ -39,7 +39,7 @@ sap.ui.define([
             this.Onsearch();
         },
 
-        FD_RoomDetails: function () {
+        FD_RoomDetails: function() {
             const oView = this.getView();
 
             if (!this.ARD_Dialog) {
@@ -63,7 +63,7 @@ sap.ui.define([
             this.ARD_Dialog.open();
         },
 
-        FD_EditDetails: function () {
+        FD_EditDetails: function() {
             const oTable = this.byId("FD_id_facilityTable");
             const oSelected = oTable.getSelectedItem();
 
@@ -82,18 +82,33 @@ sap.ui.define([
 
             // Prefill attachments if they exist in DB
             const aAttachments = [];
-            if (oData.Photo1) aAttachments.push({ filename: oData.Photo1Name, fileType: oData.Photo1Type, content: oData.Photo1 });
-            if (oData.Photo2) aAttachments.push({ filename: oData.Photo2Name, fileType: oData.Photo2Type, content: oData.Photo2 });
-            if (oData.Photo3) aAttachments.push({ filename: oData.Photo3Name, fileType: oData.Photo3Type, content: oData.Photo3 });
+            if (oData.Photo1) aAttachments.push({
+                filename: oData.Photo1Name,
+                fileType: oData.Photo1Type,
+                content: oData.Photo1
+            });
+            if (oData.Photo2) aAttachments.push({
+                filename: oData.Photo2Name,
+                fileType: oData.Photo2Type,
+                content: oData.Photo2
+            });
+            if (oData.Photo3) aAttachments.push({
+                filename: oData.Photo3Name,
+                fileType: oData.Photo3Type,
+                content: oData.Photo3
+            });
 
             oView.getModel("FacilitiesModel").setData(oData);
-            oView.getModel("UploaderData").setData({ attachments: aAttachments, isFileUploaded: aAttachments.length > 0 });
+            oView.getModel("UploaderData").setData({
+                attachments: aAttachments,
+                isFileUploaded: aAttachments.length > 0
+            });
 
             this._resetFacilityValueStates();
             this.ARD_Dialog.open();
         },
 
-        FD_onCancelButtonPress: function () {
+        FD_onCancelButtonPress: function() {
             const oView = this.getView();
 
             oView.getModel("FacilitiesModel").setData({
@@ -114,7 +129,7 @@ sap.ui.define([
         },
 
         // Handle File Upload
-        onFileSelected: function (oEvent) {
+        onFileSelected: function(oEvent) {
             const oFiles = oEvent.getParameter("files");
             const oUploaderModel = this.getView().getModel("UploaderData");
             const aAttachments = oUploaderModel.getProperty("/attachments");
@@ -144,7 +159,7 @@ sap.ui.define([
             });
         },
 
-        onAttachmentsTableDelete: function (oEvent) {
+        onAttachmentsTableDelete: function(oEvent) {
             const oContext = oEvent.getParameter("listItem").getBindingContext("UploaderData");
             const oUploaderModel = this.getView().getModel("UploaderData");
             const aAttachments = oUploaderModel.getProperty("/attachments");
@@ -153,7 +168,7 @@ sap.ui.define([
             oUploaderModel.refresh();
         },
 
-        FD_onsavebuttonpress: async function () {
+        FD_onsavebuttonpress: async function() {
             const oView = this.getView();
             const oFacilitiesModel = oView.getModel("FacilitiesModel");
             const oUploaderData = oView.getModel("UploaderData");
@@ -162,56 +177,60 @@ sap.ui.define([
             const attachments = oUploaderData.getProperty("/attachments") || [];
             const aFacilitiesData = oView.getModel("Facilities").getData();
 
+            // Mandatory field validation
             if (!Payload.BranchCode || !Payload.FacilityName || !Payload.Description) {
                 sap.m.MessageToast.show(this.i18nModel.getText("mandetoryFields") || "Please fill all mandatory fields.");
                 return;
             }
 
+            // Attachment validation
             if (attachments.length === 0) {
-                MessageBox.error("Please upload at least one attachment.");
+                sap.m.MessageBox.error("Please upload at least one attachment.");
                 return;
             }
 
-            const bDuplicate = aFacilitiesData.some(facility => {
-                if (Payload.ID && facility.ID === Payload.ID) return false;
-                return (
+            // 🔹 Check for duplicates only when creating new record
+            if (!Payload.ID) {
+                const bDuplicate = aFacilitiesData.some(facility => (
                     facility.BranchCode === Payload.BranchCode &&
                     facility.FacilityName.trim().toLowerCase() === Payload.FacilityName.trim().toLowerCase()
-                );
-            });
+                ));
 
-            if (bDuplicate) {
-                sap.m.MessageToast.show("Facility with same name already exists for this branch.");
-                return;
+                if (bDuplicate) {
+                    sap.m.MessageToast.show("Facility with same name already exists for this branch.");
+                    return;
+                }
             }
 
             // Map files to DB columns
-            const oData = {
+           const oData = {
                 BranchCode: Payload.BranchCode,
                 FacilityName: Payload.FacilityName,
-                Description: Payload.Description,
-                Photo1: attachments[0]?.content || null,
-                Photo1Name: attachments[0]?.filename || "",
-                Photo1Type: attachments[0]?.fileType || "",
-                Photo2: attachments[1]?.content || null,
-                Photo2Name: attachments[1]?.filename || "",
-                Photo2Type: attachments[1]?.fileType || "",
-                Photo3: attachments[2]?.content || null,
-                Photo3Name: attachments[2]?.filename || "",
-                Photo3Type: attachments[2]?.fileType || ""
+                Description: Payload.Description
             };
+            attachments.forEach((file, index) => {
+                const num = index + 1;
+                oData[`Photo${num}`] = file.content || null;
+                oData[`Photo${num}Name`] = file.filename || "";
+                oData[`Photo${num}Type`] = file.fileType || "";
+            });
 
             sap.ui.core.BusyIndicator.show(0);
-
             try {
                 if (Payload.ID) {
+                    // Update existing record
                     await this.ajaxUpdateWithJQuery("HM_Facilities", {
                         data: oData,
-                        filters: { ID: Payload.ID }
+                        filters: {
+                            ID: Payload.ID
+                        }
                     });
                     sap.m.MessageToast.show("Facility updated successfully!");
                 } else {
-                    await this.ajaxCreateWithJQuery("HM_Facilities", { data: oData });
+                    // Create new record
+                    await this.ajaxCreateWithJQuery("HM_Facilities", {
+                        data: oData
+                    });
                     sap.m.MessageToast.show("Facility added successfully!");
                 }
 
@@ -225,7 +244,8 @@ sap.ui.define([
             }
         },
 
-        _resetFacilityValueStates: function () {
+
+        _resetFacilityValueStates: function() {
             const oView = this.getView();
             ["FDD_id_RoomType123", "FDD_id_FacilityName", "FDD_id_Description"].forEach(id => {
                 const oField = sap.ui.getCore().byId(oView.createId(id));
@@ -233,7 +253,7 @@ sap.ui.define([
             });
         },
 
-        Onsearch: function () {
+        Onsearch: function() {
             sap.ui.core.BusyIndicator.show(0);
             this.ajaxReadWithJQuery("HM_Facilities", "")
                 .then(oData => {
@@ -246,7 +266,7 @@ sap.ui.define([
         },
 
         // View images in dialog
-        FC_viewroom: function (oEvent) {
+        FC_viewroom: function(oEvent) {
             const oData = oEvent.getSource().getBindingContext("Facilities").getObject();
             const aImages = [];
 
@@ -259,7 +279,10 @@ sap.ui.define([
                 return;
             }
 
-            const oVBox = new sap.m.VBox({ alignItems: "Center", justifyContent: "Center" });
+            const oVBox = new sap.m.VBox({
+                alignItems: "Center",
+                justifyContent: "Center"
+            });
             aImages.forEach(src => {
                 oVBox.addItem(new sap.m.Image({
                     src,
@@ -278,9 +301,13 @@ sap.ui.define([
                 content: [oVBox],
                 endButton: new sap.m.Button({
                     text: "Close",
-                    press: function () { oDialog.close(); }
+                    press: function() {
+                        oDialog.close();
+                    }
                 }),
-                afterClose: function () { oDialog.destroy(); }
+                afterClose: function() {
+                    oDialog.destroy();
+                }
             });
 
             oDialog.open();
@@ -308,7 +335,7 @@ sap.ui.define([
                     onClose: async function(sAction) {
                         if (sAction === sap.m.MessageBox.Action.YES) {
                             try {
-                               sap.ui.core.BusyIndicator.show(0);
+                                sap.ui.core.BusyIndicator.show(0);
                                 await that.ajaxDeleteWithJQuery("HM_Facilities", {
                                     filters: {
                                         ID: oData.ID
