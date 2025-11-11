@@ -1,0 +1,171 @@
+<mvc:View
+    controllerName="sap.ui.com.project1.controller.AdminDetails"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:layout="sap.ui.layout"
+	xmlns:f="sap.ui.layout.form"
+	xmlns:core="sap.ui.core">
+	<Page showHeader="false" class="sapUiResponsivePadding--footer sapUiResponsivePadding--floatingFooter"
+        enableScrolling="true">
+		<ScrollContainer >
+			<core:Fragment fragmentName="sap.ui.com.project1.fragment.Header" type="XML"/>
+			<content>
+				<VBox class="sapUiSmallMargin">
+					<Title text="Hostel Boking" class="boldBlackText"/>
+					<!-- Booking Status and Price -->
+					<HBox class="sapUiSmallMarginTop">
+						<VBox>
+							<Text text="Room Price" class="sapUiSmallMarginBottom"/>
+                            <Text text="{CustomerData>/RentPrice}" class="largeTextBold"/>
+						</VBox>
+						<VBox class="sapUiMediumMarginBegin">
+							<Text text="Bed Type" class="sapUiSmallMarginBottom"/>
+							<Text text="{CustomerData>/BedType}" class="sapUiTinyMarginEnd largeTextBold"/>
+						</VBox>
+					</HBox>
+				</VBox>
+			</content>
+			<VBox class="sapUiMediumMarginBottom">
+				<Panel headerText="General Information" expandable="false" class="customPanelHeader">
+					<f:SimpleForm
+                        editable="true"
+                        layout="ColumnLayout"
+                        columnsM="3"
+                        columnsL="4"
+                        columnsXL="6"
+                    >
+						<f:content>
+							<!-- Booking Details -->
+							<core:Title text="booking Details" />
+							<Label text="Desired Room Type" required="true" />
+							<Text id="Ad_id_RoomType3" text="{CustomerData>/BedType}"  />
+							<Label text="Price" required="true" />
+							<Text id="Ad_id_idPrice4" text="{CustomerData>/RentPrice}"   />
+							<Label text="Payment Method" required="true" />
+							<Text text="{CustomerData>/PaymentType}"/>
+							<!-- Project Address -->
+							<core:Title text="Select Person" />
+							<Label text="No of Persons" required="true" />
+							<Text text="{CustomerData>/Person}"/>
+							<!-- Site Contact -->
+							<core:Title text="Dates" />
+							<Label text="Start Date" required="true" />
+							<Text text="{CustomerData>/StartDate}"/>
+							<Label text="End Date" required="true" />
+							<Text text="{CustomerData>/EndDate}"/>
+						</f:content>
+					</f:SimpleForm>
+				</Panel>
+			</VBox>
+			<VBox>
+				<Panel headerText="{= 'Personal Information - ' + ${CustomerData>/CustomerName} }" expandable="false"
+                class="customPanelHeader">
+					<f:SimpleForm
+                        editable="false"
+                        layout="ColumnLayout"
+                        columnsM="1"
+                        columnsL="2"
+                        columnsXL="2"
+                        labelSpanXL="4"
+                        labelSpanL="3"
+                        labelSpanM="4"
+                        labelSpanS="12">
+						<!-- Personal Information -->
+						<f:content>
+							<core:Title text="" />
+							<Label text="Full Name" />
+							<Text text="{CustomerData>/CustomerName}" />
+							<Label text="Date of Birth" />
+							<Text text="{CustomerData>/DateOfBirth}" />
+							<Label text="Gender" />
+							<Text text="{CustomerData>/Gender}" />
+							<Label text="Mobile Number" />
+							<Text text="{CustomerData>/MobileNo}" />
+							<Label text="Email" />
+							<Text text="{CustomerData>/CustomerEmail}" />
+							<Label text="Country" />
+							<Text text="{CustomerData>/Country}" />
+							<Label text="State" />
+							<Text text="{CustomerData>/State}" />
+							<Label text="City" />
+							<Text text="{CustomerData>/City}" />
+						</f:content>
+					</f:SimpleForm>
+					<FlexBox alignItems="Start" justifyContent="Start"  class="sapUiSmallMarginTop" items="{ path: 'CustomerData>/Persons' }">
+						<VBox width="260px" class="sapUiSmallMargin">
+							<Title text="{= 'Facilities for ' + (${CustomerData>CustomerName} || 'Person') }" level="H6" />
+							<FlexBox justifyContent="Start" items="{ path: 'CustomerData>PersonFacilitiesSummary' }">
+								<VBox width="200px" height="200px" class="sapUiSmallMargin serviceCard" alignItems="Center" justifyContent="Center" visible="{= !!${CustomerData>FacilityName} }">
+									<Image src="{CustomerData>Image}" width="180px" height="140px" densityAware="false"/>
+									<Text text="{CustomerData>FacilityName}" />
+									<Text text="{= '₹ ' + ${CustomerData>Price}}" />
+								</VBox>
+							</FlexBox>
+						</VBox>
+					</FlexBox>
+					<Table
+                    id="Ad_id_idFacilityRoomTableDetails"
+                    class="sapUiSmallMarginTop"
+                    items="{path: 'CustomerData>/AllSelectedFacilities'}"
+                    mode="SingleSelectLeft"
+                    inset="false"
+                    selectionChange="onTableSelection">
+						<headerToolbar>
+							<Toolbar>
+								<Title text="Booking Details" level="H5" />
+								<ToolbarSpacer />
+								<Button icon="sap-icon://edit" text="Edit" press="onEditFacilityDetails" type="Emphasized"/>
+							</Toolbar>
+						</headerToolbar>
+						<columns>
+							<Column>
+								<Text text="Facility Name" />
+							</Column>
+							<Column>
+								<Text text="Facility Price (₹)" />
+							</Column>
+							<Column>
+								<Text text="Start Date" />
+							</Column>
+							<Column>
+								<Text text="End Date" />
+							</Column>
+							<Column>
+								<Text text="Days" />
+							</Column>
+							<Column>
+								<Text text="Total (₹)" />
+							</Column>
+						</columns>
+						<items>
+							<ColumnListItem>
+								<cells>
+									<Text text="{CustomerData>FacilityName}" />
+									<Text text="{CustomerData>Price}" />
+									<Text text="{CustomerData>StartDate}" />
+									<Text text="{CustomerData>EndDate}" />
+									<Text text="{CustomerData>TotalDays}" />
+									<Text text="{= '₹ ' + (${CustomerData>Price} * ${CustomerData>TotalDays}).toFixed(2) }" />
+								</cells>
+							</ColumnListItem>
+						</items>
+					</Table>
+					<VBox class="sapUiSmallMarginTop">
+						<HBox justifyContent="End" class="sapUiSmallMarginTop">
+							<Label text="Total Facility Cost:" design="Bold" class="sapUiSmallMarginEnd"/>
+							<Text text="{path: 'CustomerData>/TotalFacilityPrice', formatter: '.Formatter.formatCurrency'}" class="sapUiSmallMarginEnd"/>
+						</HBox>
+						<HBox justifyContent="End" class="sapUiSmallMarginTop">
+							<Label text="Room Rent:" design="Bold" class="sapUiSmallMarginEnd"/>
+							<Text text="{CustomerData>/Price}" class="sapUiSmallMarginEnd"/>
+						</HBox>
+						<HBox justifyContent="End" class="sapUiSmallMarginTop">
+							<Label text="Grand Total:" design="Bold" class="sapUiSmallMarginEnd"/>
+							<Text text="{path: 'CustomerData>/GrandTotal', formatter: '.Formatter.formatCurrency'}" class="sapUiSmallMarginEnd"/>
+						</HBox>
+					</VBox>
+				</Panel>
+			</VBox>
+		</ScrollContainer>
+	</Page>
+</mvc:View>

@@ -65,6 +65,14 @@ calculateDays: function(sStartDate, sEndDate) {
             }
         },
 
+        DateFormat: function (sDate) {
+            if (sDate) {
+                var oDateFormat = DateFormat.getDateInstance({ pattern: "dd/MM/yyyy" });
+                return oDateFormat.format(new Date(sDate));
+            }
+            return sDate;
+        }, 
+
         
    }
 });

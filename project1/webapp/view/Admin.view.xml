@@ -1,38 +1,37 @@
 <mvc:View
     controllerName="sap.ui.com.project1.controller.Admin"
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m"
-    xmlns:m="sap.m"
-    xmlns:c="sap.ui.core"
-    xmlns:fb="sap.ui.comp.filterbar"
-    xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:m="sap.m"
+	xmlns:c="sap.ui.core"
+	xmlns:fb="sap.ui.comp.filterbar"
+	xmlns:core="sap.ui.core"
     displayBlock="true"
     height="100%"
-    busyIndicatorDelay="0"
->
-    <Page showHeader="true">
-        <customHeader>
-            <Bar>
-                <contentLeft>
-                    <Button
+    busyIndicatorDelay="0">
+	<Page showHeader="true">
+		<customHeader>
+			<Bar>
+				<contentLeft>
+					<Button
                         icon="sap-icon://nav-back"
                         press=".onNavBack"
                     />
-                    <Title
+					<Title
                         text="Shah Hostel"
                         class="customPageTitle"
                     />
-                </contentLeft>
-                <contentRight>
-                    <Button
+				</contentLeft>
+				<contentRight>
+					<Button
                         icon="sap-icon://log"
                         press=".onHome"
                     />
-                </contentRight>
-            </Bar>
-        </customHeader>
-        <content>
-            <fb:FilterBar
+				</contentRight>
+			</Bar>
+		</customHeader>
+		<content>
+			<fb:FilterBar
                 id="PO_id_FilterbarEmployee"
                 persistencyKey="myPersKey"
                 useToolbar="false"
@@ -44,76 +43,71 @@
                 showFilterConfiguration="false"
                 filterContainerWidth="auto"
             >
-                <fb:filterGroupItems>
-                    <fb:FilterGroupItem
+				<fb:filterGroupItems>
+					<fb:FilterGroupItem
                         name="Customer Name"
                         label="Customer Name"
                         groupName="Group"
                         visibleInFilterBar="true"
                     >
-                        <fb:control>
-                            <ComboBox
+						<fb:control>
+							<ComboBox
                                 id="PO_id_CustomerName"
                                 items="{HostelModel>/}"
                                 showClearIcon="true"
                             >
-                                <core:Item
+								<core:Item
                                     key="{HostelModel>CustomerName}"
                                     text="{HostelModel>CustomerName}"
                                 />
-                            </ComboBox>
-                        </fb:control>
-                    </fb:FilterGroupItem>
-                </fb:filterGroupItems>
-
-                <fb:filterGroupItems>
-                    <fb:FilterGroupItem
+							</ComboBox>
+						</fb:control>
+					</fb:FilterGroupItem>
+				</fb:filterGroupItems>
+				<fb:filterGroupItems>
+					<fb:FilterGroupItem
                         name="Room No"
                         label="Room No"
                         groupName="Group"
                         visibleInFilterBar="true"
                     >
-                        <fb:control>
-                            <ComboBox
+						<fb:control>
+							<ComboBox
                                 id="PO_id_CompanyName"
                                 items="{HostelModel>/}"
                                 showClearIcon="true"
                             >
-                                <core:ListItem
+								<core:ListItem
                                     key="{HostelModel>Bookings/0/RoomNo}"
                                     text="{HostelModel>Bookings/0/RoomNo}"
                                 />
-                            </ComboBox>
-                        </fb:control>
-                    </fb:FilterGroupItem>
-
-                    
-                </fb:filterGroupItems>
-                  <fb:filterGroupItems>
-                    <fb:FilterGroupItem
+							</ComboBox>
+						</fb:control>
+					</fb:FilterGroupItem>
+				</fb:filterGroupItems>
+				<fb:filterGroupItems>
+					<fb:FilterGroupItem
                         name="Status"
                         label="Status"
                         groupName="Group"
                         visibleInFilterBar="true"
                     >
-                        <fb:control>
-                            <ComboBox
+						<fb:control>
+							<ComboBox
                                 id="PO_id_Status"
                                 items="{HostelModel>/}"
                                 showClearIcon="true"
                             >
-                                <core:ListItem
+								<core:ListItem
                                     key="{HostelModel>Bookings/0/Status}"
                                     text="{HostelModel>Bookings/0/Status}"
                                 />
-                            </ComboBox>
-                        </fb:control>
-                    </fb:FilterGroupItem>
-
-                    
-                </fb:filterGroupItems>
-            </fb:FilterBar>
-            <Table
+							</ComboBox>
+						</fb:control>
+					</fb:FilterGroupItem>
+				</fb:filterGroupItems>
+			</fb:FilterBar>
+			<Table
                 id="idPOTable"
                 sticky="ColumnHeaders,HeaderToolbar"
                 mode="SingleSelectLeft"
@@ -124,132 +118,115 @@
                     group: true
                 }]}"
             >
-                <headerToolbar>
-                    <OverflowToolbar>
-                        <Title
+				<headerToolbar>
+					<OverflowToolbar>
+						<Title
                             text="Booking List ({=${HostelModel>/}.length})"
                         />
-                        <ToolbarSpacer />
-                        <Button
+						<ToolbarSpacer />
+						<Button
                             text="Assign Room"
                             press="HM_AssignRoom"
                             type="Accept"
                         />
-                         <Button
+						<Button
                             text="Edit Room"
                             press="HM_ChangeRoom"
                             type="Default"
                         />
-                         <Button
+						<Button
                             text="Check Out"
                             press="HM_EditRoom"
                             type="Emphasized"
                         />
-                    </OverflowToolbar>
-                </headerToolbar>
-                <columns>
-                    <Column demandPopin="true">
-                        <Text text="Customer" />
-                    </Column>
-
-                    <!-- <Column demandPopin="true">
-                        <Text text="Customer Name" />
-                    </Column> -->
-                    <Column
+					</OverflowToolbar>
+				</headerToolbar>
+				<columns>
+					<Column demandPopin="true">
+						<Text text="Customer" />
+					</Column>
+					<!-- <Column demandPopin="true"><Text text="Customer Name" /></Column> -->
+					<Column
                         minScreenWidth="Tablet"
                         demandPopin="true"
                     >
-                        <Text text="Gender" />
-                    </Column>
-                    <!-- <Column
+						<Text text="Gender" />
+					</Column>
+					<!-- <Column
+                        minScreenWidth="Tablet"
+                        demandPopin="true"
+                    ><Text text="Date Of Birth" /></Column> -->
+					<Column
                         minScreenWidth="Tablet"
                         demandPopin="true"
                     >
-                        <Text text="Date Of Birth" />
-                    </Column> -->
-                    <Column
+						<Text text="Contact Information" />
+					</Column>
+					<!-- <Column
+                        minScreenWidth="Tablet"
+                        demandPopin="true"
+                    ><Text text="Mobile No" /></Column> -->
+					<Column
                         minScreenWidth="Tablet"
                         demandPopin="true"
                     >
-                        <Text text="Contact Information" />
-                    </Column>
-                    <!-- <Column
+						<Text text="Start/End Date" />
+					</Column>
+					<!-- <Column minScreenWidth="Tablet" demandPopin="true"><Text text="Room Type" /></Column> -->
+					<Column
                         minScreenWidth="Tablet"
                         demandPopin="true"
                     >
-                        <Text text="Mobile No" />
-                    </Column> -->
-                    <Column
+						<Text text="Room Number" />
+					</Column>
+					<Column
                         minScreenWidth="Tablet"
                         demandPopin="true"
                     >
-                        <Text text="Start/End Date" />
-                    </Column>
-                   
-                    <!-- <Column minScreenWidth="Tablet" demandPopin="true">
-                        <Text text="Room Type" />
-                    </Column> -->
-                    <Column
+						<Text text="Bed Type" />
+					</Column>
+					<Column
                         minScreenWidth="Tablet"
                         demandPopin="true"
                     >
-                        <Text text="Room Number" />
-                    </Column>
-                    <Column
+						<Text text="Status" />
+					</Column>
+					<Column
                         minScreenWidth="Tablet"
                         demandPopin="true"
                     >
-                        <Text text="Bed Type" />
-                    </Column>
-                     <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text text="Status" />
-                    </Column>
-                    <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text text="ID Proof" />
-                    </Column>
-                </columns>
-                <items>
-                    <ColumnListItem>
-                        <cells>
-                         <ObjectIdentifier
+						<Text text="ID Proof" />
+					</Column>
+				</columns>
+				<items>
+					<ColumnListItem type="Navigation" press="AD_onPressEditDetails">
+						<cells>
+							<ObjectIdentifier
                             title="{HostelModel>CustomerID}"
                             text="{HostelModel>CustomerName}"
                         />
-                            <!-- <Text text="{HostelModel>CustomerID}" />
-
-                            <Text text="{HostelModel>CustomerName}" /> -->
-
-                            <Text text="{HostelModel>Gender}" />
-                            <!-- <Text
+							<!-- <Text text="{HostelModel>CustomerID}" /><Text text="{HostelModel>CustomerName}" /> -->
+							<Text text="{HostelModel>Gender}" />
+							<!-- <Text
                                 text="{path:'HostelModel>DateOfBirth',formatter: '.Formatter.formatDate'}"
                             /> -->
-                             <ObjectIdentifier
+							<ObjectIdentifier
                             title="{HostelModel>MobileNo}"
                             text="{HostelModel>CustomerEmail}"
                         />
-                            <!-- <Text text="{HostelModel>CustomerEmail}" />
-
-                            <Text text="{HostelModel>MobileNo}" /> -->
-                            <!-- <Text
+							<!-- <Text text="{HostelModel>CustomerEmail}" /><Text text="{HostelModel>MobileNo}" /> -->
+							<!-- <Text
                                 text="{path:'HostelModel>StartDate',formatter: '.Formatter.formatDate'}"
                             /> -->
-                             <ObjectIdentifier
+							<ObjectIdentifier
                             title="{path:'HostelModel>StartDate',formatter: '.Formatter.formatDate'}"
                             text="{path:'HostelModel>EndDate',formatter: '.Formatter.formatDate'}"
                         />
-                            <!-- <Text text="{HostelModel>Bookings/0/Status}" /> -->
-                           
-
-                            <!-- <Text text="{HostelModel>RoomType}" /> -->
-                            <Text text="{HostelModel>Bookings/0/RoomNo}" />
-                            <Text text="{HostelModel>Bookings/0/BedType}" />
-                       <ObjectStatus
+							<!-- <Text text="{HostelModel>Bookings/0/Status}" /> -->
+							<!-- <Text text="{HostelModel>RoomType}" /> -->
+							<Text text="{HostelModel>Bookings/0/RoomNo}" />
+							<Text text="{HostelModel>Bookings/0/BedType}" />
+							<ObjectStatus
                                 inverted="false"
                                 text="{HostelModel>Bookings/0/Status}"
                                 state="{
@@ -258,15 +235,15 @@
                                    }"
                                 class="sapUiTinyMarginBottom"
                             />
-                            <Button
+							<Button
                                 text="View"
                                 press="HM_viewroom"
                                 type="Transparent"
                             />
-                        </cells>
-                    </ColumnListItem>
-                </items>
-            </Table>
-        </content>
-    </Page>
+						</cells>
+					</ColumnListItem>
+				</items>
+			</Table>
+		</content>
+	</Page>
 </mvc:View>
