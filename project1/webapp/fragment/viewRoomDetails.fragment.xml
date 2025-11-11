@@ -1,0 +1,85 @@
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core">
+	<Dialog id="roomDetailID" title="Room Details" type="Message" class="sapUiContentPadding sapUiMediumPadding">
+		<VBox width="100%" class="sapUiSmallMargin sapUiMediumPadding">
+			<!-- Header -->
+			<ObjectHeader title="{HostelModel>/BedType}" numberUnit="Per Day ({HostelModel>/ACType})">
+				<attributes>
+					<ObjectAttribute title="Address" text="{HostelModel>/Address}" />
+					<ObjectAttribute title="Capacity" text="{HostelModel>/Capacity}" />
+				</attributes>
+			</ObjectHeader>
+			<!-- Price Overview -->
+			<!-- Price Selection Section -->
+			<Panel headerText="Select Pricing Plan" class="sapUiSmallMarginTop">
+				<HBox justifyContent="SpaceBetween" alignItems="Stretch" class="sapUiSmallMarginTop">
+					<!-- Daily Plan -->
+					<GenericTile header="Per Day" subheader="₹{HostelModel>/Price}" press=".onSelectPricePlan">
+						<customData>
+							<core:CustomData key="type" value="daily" />
+						</customData>
+						<TileContent>
+							<content>
+								<VBox alignItems="Center">
+									<Text text="Per Day Plan" />
+								</VBox>
+							</content>
+						</TileContent>
+					</GenericTile>
+					<!-- Monthly Plan -->
+					<GenericTile header="Per Month" subheader="₹{HostelModel>/MonthPrice}" press=".onSelectPricePlan">
+						<customData>
+							<core:CustomData key="type" value="monthly" />
+						</customData>
+						<TileContent>
+							<content>
+								<VBox alignItems="Center">
+									<Text text="Per Month Plan" />
+								</VBox>
+							</content>
+						</TileContent>
+					</GenericTile>
+					<!-- Yearly Plan -->
+					<GenericTile header="Per Year" subheader="₹{HostelModel>/YearPrice}" press=".onSelectPricePlan">
+						<customData>
+							<core:CustomData key="type" value="yearly" />
+						</customData>
+						<TileContent>
+							<content>
+								<VBox alignItems="Center">
+									<Text text="Per Year Plan" />
+								</VBox>
+							</content>
+						</TileContent>
+					</GenericTile>
+				</HBox>
+			</Panel>
+			<!-- Image -->
+			<VBox alignItems="Center" class="sapUiSmallMarginTopBottom">
+				<Image src="{HostelModel>/Image}" width="90%" densityAware="false" decorative="false" alt="Room Image" class="sapUiMediumMarginBottom sapUiResponsiveMargin" />
+			</VBox>
+			<!-- Description -->
+			<Text text="{HostelModel>/Description}" wrapping="true" class="sapUiSmallMarginTop sapUiSmallMarginBottom" />
+			<!-- Facilities -->
+			<Panel expandable="true" expanded="true" headerText="Available Facilities" class="sapUiMediumMarginTop">
+				<List items="{FacilityModel>/Facilities}" noDataText="No extra facilities available">
+					<CustomListItem>
+						<HBox alignItems="Center" class="sapUiSmallMarginBottom">
+							<Image src="{FacilityModel>Image}" width="40px" height="40px" densityAware="false" decorative="false" class="sapUiTinyMarginEnd" />
+							<VBox>
+								<Text text="{FacilityModel>FacilityName}"  />
+								<Text text="Price: ₹{FacilityModel>Price}" visible="{= ${FacilityModel>Price} > 0 }" />
+							</VBox>
+						</HBox>
+					</CustomListItem>
+				</List>
+			</Panel>
+			<!-- Buttons -->
+			<HBox justifyContent="End" class="sapUiMediumMarginTop">
+				<Button text="Close" type="Transparent" press=".onCloseRoomDetail" />
+				<Button text="Book Now" type="Emphasized" press=".onConfirmBooking" />
+			</HBox>
+		</VBox>
+	</Dialog>
+</core:FragmentDefinition>
