@@ -97,7 +97,6 @@ sap.ui.define([
         console.error("Error while fetching Customer details:", err);
     }
 },
-
          BedTypedetails: async function () {
     try {
         const oData = await this.ajaxReadWithJQuery("HM_BedType", {});
@@ -105,7 +104,7 @@ sap.ui.define([
             ? oData.data
             : [oData.data];
 
-        const oBedTypeModel = new sap.ui.model.json.JSONModel(aBedTypes);
+        const oBedTypeModel = new JSONModel(aBedTypes);
         this.getView().setModel(oBedTypeModel, "BedTypeModel");
 
     } catch (err) {
@@ -1293,11 +1292,16 @@ onEditBooking: function () {
         sap.m.MessageToast.show("Please select a booking to edit.");
         return;
     }
-
     // Extract selected booking data
     var oContext = oSelectedItem.getBindingContext("profileData");
     var oBookingData = oContext.getObject();
 
+
+      var sStatus = (oBookingData.status || "").trim().toLowerCase();
+    if (sStatus !== "new") {
+        sap.m.MessageToast.show("Only bookings with status 'New' can be edited.");
+        return;
+    }
     // Retrieve customerID using the booking (from bookings array)
     var oProfileModel = this._oProfileDialog.getModel("profileData");
     var aCustomers = oProfileModel.getProperty("/aCustomers");

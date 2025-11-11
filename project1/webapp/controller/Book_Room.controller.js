@@ -257,7 +257,8 @@ const oForm = new sap.ui.layout.form.SimpleForm({
         new sap.m.Label({ text: "State", required: true }),
         new sap.m.Input({
             value: "{HostelModel>/Persons/" + i + "/State}",
-            placeholder: "Enter State"
+            placeholder: "Enter State",
+            
         }),
 
         new sap.m.Label({ text: "City", required: true }),
@@ -720,7 +721,6 @@ onSubmitPress: async function () {
     }
 }
 ,
-
 onCancelPress:function(){
      var oRouter  = this.getOwnerComponent().getRouter()
      oRouter.navTo("RouteHostel")
