@@ -318,46 +318,42 @@ _loadFilteredData: async function (sBranchCode, sACType) {
     try {
         const oView = this.getView();
 
-        // Fetch all bed type data for selected branch
+        // 🔹 Fetch all bed type data for the selected branch
         const response = await this.ajaxReadWithJQuery("HM_BedType", {
             BranchCode: sBranchCode
         });
 
         const allRooms = response?.data || [];
 
-        // Filter based on BranchCode + ACType
-        const matchedRooms = allRooms.filter(room => {
-            const branchMatch =
-                room.BranchCode &&
-                room.BranchCode.toLowerCase() === sBranchCode.toLowerCase();
+        // 🔹 If AC type is not provided → show all bed types for the branch
+        let matchedRooms = [];
 
-            const acTypeMatch = sACType
-                ? room.ACType &&
-                  room.ACType.toLowerCase() === sACType.toLowerCase()
-                : true;
+        if (!sACType) {
+            // No ACType → all bed types for the branch
+            matchedRooms = allRooms.filter(
+                room =>
+                    room.BranchCode &&
+                    room.BranchCode.toLowerCase() === sBranchCode.toLowerCase()
+            );
+        } else {
+            // ACType is provided → filter by branch + ACType
+            matchedRooms = allRooms.filter(
+                room =>
+                    room.BranchCode &&
+                    room.BranchCode.toLowerCase() === sBranchCode.toLowerCase() &&
+                    room.ACType &&
+                    room.ACType.toLowerCase() === sACType.toLowerCase()
+            );
+        }
 
-            return branchMatch && acTypeMatch;
-        });
-
-        //  Extract unique bed types (avoid duplicates)
-        const uniqueRooms = [];
-        const seenNames = new Set();
-        matchedRooms.forEach(room => {
-            const key = room.Name?.trim().toLowerCase();
-            if (key && !seenNames.has(key)) {
-                seenNames.add(key);
-                uniqueRooms.push(room);
-            }
-        });
-
-        //  Models
+        // 🔹 Models
         const oRoomDetailsModel = oView.getModel("RoomCountModel");
         const oCustomerModel = oView.getModel("CustomerModel");
 
         const roomDetails = oRoomDetailsModel.getData()?.Rooms || [];
         const customerData = oCustomerModel.getData() || [];
 
-        //  Safe Base64 image converter
+        // 🔹 Safe Base64 image converter
         const convertBase64ToImage = (base64String, fileType) => {
             if (!base64String) return "./image/Fallback.png";
             let sBase64 = base64String.replace(/\s/g, "");
@@ -374,31 +370,23 @@ _loadFilteredData: async function (sBranchCode, sACType) {
             return `data:${mimeType};base64,${sBase64}`;
         };
 
-        //  Prepare array for cards
-        const aBedTypes = uniqueRooms.map(room => {
-            //  Get all matching rooms with the same bed type
+        // 🔹 Prepare array for cards (no unique filtering now)
+        const aBedTypes = matchedRooms.map(room => {
             const matchingRooms = roomDetails.filter(
                 rd =>
                     rd.BranchCode?.toLowerCase() === sBranchCode.toLowerCase() &&
                     rd.BedTypeName?.trim().toLowerCase() ===
-                      (room.Name?.trim().toLowerCase() + " - " + room.ACType?.trim().toLowerCase())
-                       
+                        (room.Name?.trim().toLowerCase() + " - " + room.ACType?.trim().toLowerCase())
             );
 
-            //  Use first room for price display
             const firstRoom = matchingRooms[0];
-            const price = firstRoom?.Price
-                ? " " + firstRoom.Price 
-                : "";
+            const price = firstRoom?.Price ? " " + firstRoom.Price : "";
 
-            //  Calculate total booked and total capacity across all rooms
             let totalBooked = 0;
-            let totalCapacity = 0;
+            let totalCapacity = 0;  
 
             matchingRooms.forEach(rm => {
                 totalCapacity += rm.NoofPerson || 0;
-
-                // Count customers for each matching room
                 const bookedCount = customerData.filter(cust =>
                     cust.Bookings?.some(bk =>
                         bk.BranchCode?.toLowerCase() === sBranchCode.toLowerCase() &&
@@ -407,28 +395,28 @@ _loadFilteredData: async function (sBranchCode, sACType) {
                             rm.BedTypeName?.trim().toLowerCase()
                     )
                 ).length;
-
                 totalBooked += bookedCount;
             });
 
-            //  If all rooms full (totalBooked >= totalCapacity), hide this bed type
             const isFull = totalBooked >= totalCapacity && totalCapacity > 0;
+
+                const isVisible = !isFull && price.trim() !== "";
 
             return {
                 Name: room.Name,
+                ACType: room.ACType,
                 Description: room.Description || "",
                 Price: price,
+                BranchCode:room.BranchCode,
+
                 Image: convertBase64ToImage(room.RoomPhotos, room.MimeType || room.FileType),
-                Visible: !isFull
+                Visible: isVisible
             };
         });
 
-        //  Only show available beds
-        const availableBeds = aBedTypes;
-
-        //  Bind model for dynamic UI
+        // 🔹 Bind model for dynamic UI
         oView.setModel(
-            new sap.ui.model.json.JSONModel({ BedTypes: availableBeds }),
+            new sap.ui.model.json.JSONModel({ BedTypes: aBedTypes }),
             "VisibilityModel"
         );
 
@@ -542,7 +530,7 @@ onBookNow: function (oEvent) {
 
         },
 
-        onpressFilter:function(){
+         onpressFilter:function(){
                 var oView = this.getView();
                 if (!this.ARD_Dialog) {
 
@@ -550,6 +538,12 @@ onBookNow: function (oEvent) {
                 oView.addDependent(this.ARD_Dialog);
             }
             this._clearFilterFields()
+                var oBedTypeCombo = this.byId("id_Area");
+                this.byId("id_Roomtype").setSelectedKey("");
+
+                 this.byId("id_Branch").setSelectedKey("");
+
+            oBedTypeCombo.setSelectedKey("").setVisible(false);
             this.ARD_Dialog.open();
         },
 
@@ -687,8 +681,8 @@ onBookNow: function (oEvent) {
             // this._oLocationDialog.open();
         },
 
-        onSearchRooms: function () {
-            const oBranchCombo = this.getView().byId("id_Branch");
+       onSearchRooms: function () {
+            const oBranchCombo = this.getView().byId("id_Area")
             const oACTypeCombo = this.getView().byId("id_Roomtype");
 
             // Branch: use additionalText
@@ -1253,7 +1247,7 @@ BR_oncancelbuttonpress:function(){
      this.ARD_Dialog.close();
 },
 _clearFilterFields: function () {
-    const oBranchCombo = this.getView().byId("id_Branch");
+    const oBranchCombo = this.getView().byId("id_Area");
     const oRoomTypeCombo = this.getView().byId("id_Roomtype");
     if (oBranchCombo) oBranchCombo.setSelectedKey("");
     if (oRoomTypeCombo) oRoomTypeCombo.setSelectedKey("");
@@ -1444,6 +1438,31 @@ _parseDate: function (sDate) {
     } else {
         return new Date(sDate);
     }
+},
+onBranchSelectionChange: function (oEvent) {
+     var oBedTypeCombo = this.byId("id_Area");
+     oBedTypeCombo.setSelectedKey("").setVisible(true)
+
+    var oSelectedItem = oEvent.getParameter("selectedItem");
+    if (!oSelectedItem) return;
+
+    var sSelectedBranch = oSelectedItem.getKey();
+    var oModelData = this.getView().getModel("sBRModel").getData();
+
+    // Filter address list based on selected branch
+    var aFiltered = oModelData.filter(function (item) {
+        return item.Name === sSelectedBranch; // Compare with branch name
+    });
+
+    // In case branch has multiple addresses
+    // var aAreas = aFiltered.map(function (b) {
+    //     return { Address: b.Address };
+    // });
+
+    // Set filtered data to AreaModel
+    var oAreaModel = new sap.ui.model.json.JSONModel(aFiltered);
+    this.getView().setModel(oAreaModel, "AreaModel");
+    
 }
 
 

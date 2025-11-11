@@ -13,7 +13,7 @@ sap.ui.define([
         onInit: function () {
             this.getOwnerComponent().getRouter().getRoute("RouteRoomDetails").attachMatched(this._onRouteMatched, this);
         },
-        _onRouteMatched: function () {
+        _onRouteMatched:async function () {
             var model = new JSONModel({
                 BranchCode: "",
                 RoomNo: "",
@@ -24,7 +24,11 @@ sap.ui.define([
 
             this.Onsearch()
             this.BedTypedetails()
-
+ await  this.ajaxReadWithJQuery("Currency", "").then((oData) => {
+                var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
+                var model = new JSONModel(oFCIAerData);
+                this.getView().setModel(model, "CurrencyModel");
+            })
 
         },
         BedTypedetails: function () {
@@ -344,7 +348,10 @@ sap.ui.define([
                 "idBedType",
                 "idRoomNumber",
                 "idRoomNumber13",
-                "idPrice"
+                "idPrice",
+                "id_MonthlyPrice",
+                "id_YearlyPrice",
+                "FO_id_Currency"
             ];
             aInputIds.forEach(function (sId) {
                 var oInput = oView.byId(sId);
@@ -382,14 +389,13 @@ sap.ui.define([
             var aRoomDetails = oRoomDetailsModel.getData();
             var aBedTypes = oBedTypeModel.getData();
 
-            Payload.NoofPerson = parseInt(Payload.NoofPerson) || 0;
 
               var Noofper = aBedTypes.find(function (bed) {
                     return bed.BranchCode === Payload.BranchCode && bed.Name === Payload.BedTypeName.split("-")[0].trim()
-                     &&  bed.ACType === Payload.BedTypeName.split("-")[1].trim();
+                     &&  bed.ACType === Payload.BedTypeName.split("-").slice(1).join("-").trim();
                      
                 });
-            Payload.NoofPerson = parseInt(Noofper.NoOfPerson) || 0;
+          
 
             // Field validations
             if (
@@ -398,9 +404,17 @@ sap.ui.define([
                 (utils._LCstrictValidationComboBox(oView.byId("idBedType"), "ID") || Payload.BedTypeName) &&
                 utils._LCvalidateMandatoryField(oView.byId("idRoomNumber"), "ID") &&
                 // utils._LCvalidateMandatoryField(oView.byId("idRoomNumber13"), "ID") &&
-                utils._LCvalidateAmount(oView.byId("idPrice"), "ID")
-            ) {
+                utils._LCvalidateAmount(oView.byId("idPrice"), "ID") &&
+                utils._LCvalidateAmount(oView.byId("id_MonthlyPrice"), "ID") &&
 
+                utils._LCvalidateAmount(oView.byId("id_YearlyPrice"), "ID") &&
+
+                utils._LCstrictValidationComboBox(oView.byId("FO_id_Currency"), "ID")
+
+            ) {
+ 
+                 Payload.NoofPerson = parseInt(Noofper.NoOfPerson) || 0;
+                 Payload.ExtraBed = parseInt(Payload.ExtraBed) || 0;
 
                 // Check if RoomNo already exists
                 var oExistingRoom = aRoomDetails.find(function (room) {

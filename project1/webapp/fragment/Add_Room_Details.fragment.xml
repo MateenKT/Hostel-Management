@@ -72,7 +72,6 @@
                     width="100%"
                     visible="false"
                     selectedKey="{RoomModel>/ACType}"
-
                     items="{BedTypeModel>/}"
                     valueStateText="Please select a valid AC Type"
                     change="onACtypeChange"
@@ -94,22 +93,10 @@
                     liveChange="onRoomNoInputLiveChange"
                     valueStateText="Room No cannot be empty"
                 />
-                <!-- <Label
-                    text="No Of person"
-                    required="true"
-                />
-                <Input
-                    id="idRoomNumber13"
-                    value="{RoomModel>/NoofPerson}"
-                    placeholder="Enter No of person"
-                    type="Number"
-                    liveChange="onRoomNoInputLiveChange"
-                    valueStateText="No of person cannot be empty"
-                /> -->
+                <!-- <Label text="No Of person" required="true" />
+                <Input id="idRoomNumber13" value="{RoomModel>/NoofPerson}" placeholder="Enter No of person" type="Number" liveChange="onRoomNoInputLiveChange" valueStateText="No of person cannot be empty" /> -->
 
-                 <Label
-                    text="Extra Bed"
-                />
+                <Label text="Extra Bed" />
                 <Input
                     id="idExtrabed"
                     value="{RoomModel>/ExtraBed}"
@@ -117,19 +104,89 @@
                     type="Number"
                 />
 
-                <Label text="Price" required="true"  />
-				<HBox width="100%" justifyContent="Start" alignItems="Center">
-					<VBox width="50%">
-						<Input id="idPrice" value="{RoomModel>/Price}" placeholder="Enter Price" maxLength="7"
-                    liveChange="onPriceInputLiveChange" valueStateText="Please enter a valid amount"/>
-					</VBox>
-					<VBox width="50%">
-                    <ComboBox id="FO_id_PriceType"  selectedKey="Per Day" value="{RoomModel>/PriceType}">
-					<core:Item key="Per Day" text="Per Day"/>
-                    <core:Item key="Per Month" text="Per Month"/>
-				</ComboBox>
-					</VBox>
-				</HBox>
+                <Label
+                    text="Daily Price"
+                    required="true"
+                />
+                  <Input
+                            id="idPrice"
+                            value="{RoomModel>/Price}"
+                            placeholder="Enter Price"
+                            maxLength="7"
+                            liveChange="onPriceInputLiveChange"
+                            valueStateText="Please enter a valid amount"
+                        />
+                <!-- <HBox
+                    width="100%"
+                    justifyContent="Start"
+                    alignItems="Center"
+                >
+                    <VBox width="50%">
+                        <Input
+                            id="idPrice"
+                            value="{RoomModel>/Price}"
+                            placeholder="Enter Price"
+                            maxLength="7"
+                            liveChange="onPriceInputLiveChange"
+                            valueStateText="Please enter a valid amount"
+                        />
+                    </VBox>
+                    <VBox width="50%">
+                        <ComboBox
+                            id="FO_id_PriceType"
+                            selectedKey="Per Day"
+                            value="{RoomModel>/PriceType}"
+                        >
+                            <core:Item
+                                key="Per Day"
+                                text="Per Day"
+                            />
+                            <core:Item
+                                key="Per Month"
+                                text="Per Month"
+                            />
+                        </ComboBox>
+                    </VBox>
+                </HBox> -->
+                  <Label
+                    text="Monthly Price"
+                    required="true"
+                />
+                  <Input
+                            id="id_MonthlyPrice"
+                            value="{RoomModel>/MonthPrice}"
+                            placeholder="Enter Month Price"
+                            maxLength="7"
+                            liveChange="onPriceInputLiveChange"
+                            valueStateText="Please enter a valid amount"
+                        />
+                          <Label
+                    text="Yearly Price"
+                    required="true"
+                />
+                  <Input
+                            id="id_YearlyPrice"
+                            value="{RoomModel>/YearPrice}"  
+                            placeholder="Enter Year Price"
+                            maxLength="7"
+                            liveChange="onPriceInputLiveChange"
+                            valueStateText="Please enter a valid amount"
+                        />
+                <Label text="Currency" required="true"/>
+                <ComboBox
+                    id="FO_id_Currency"
+                    selectedKey="{RoomModel>/Currency}"
+                    items="{CurrencyModel>/}"
+                    valueStateText="Select Currency"
+                    width="100%"
+                    change="onACtypeChange"
+                    placeholder="Select Currency"
+                >
+                    <c:Item
+                        key="{CurrencyModel>currency}"
+                        text="{CurrencyModel>currency}"
+                    />
+                </ComboBox>
             </f:content>
         </f:SimpleForm>
         <footer>

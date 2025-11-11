@@ -151,6 +151,13 @@
           "target": [
             "TargetEditBooking"
           ]
+        },
+         {
+          "name": "RouteRoomImages",
+          "pattern": "RoomImages",
+          "target": [
+            "TargetRoomImages"
+          ]
         }
       ],
       "targets": {
@@ -223,6 +230,13 @@
           "clearControlAggregation": false,
           "viewId": "EditBookingDetails",
           "viewName": "EditBookingDetails"
+        },
+          "TargetRoomImages": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "Bed_Images",
+          "viewName": "Bed_Images"
         }
       }
     },

@@ -2,7 +2,13 @@ sap.ui.define([
     "./BaseController",
     "sap/m/MessageBox",
     "../utils/validation",
-], function(BaseController, MessageBox, utils) {
+      "sap/ui/model/json/JSONModel",
+	"sap/ui/model/odata/type/Currency",
+], function(BaseController,
+	MessageBox,
+    utils,
+    JSONModel,
+	Currency) {
     "use strict";
     return BaseController.extend("sap.ui.com.project1.controller.Facilitis", {
         onInit: function() {
@@ -43,6 +49,11 @@ sap.ui.define([
             this.getView().setModel(oTokenModel, "tokenModel");
 
             this.Onsearch()
+               this.ajaxReadWithJQuery("Currency", "").then((oData) => {
+                var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
+                var model = new JSONModel(oFCIAerData);
+                this.getView().setModel(model, "CurrencyModel");
+            })
         },
         FD_RoomDetails: function(oEvent) {
             this.byId("id_facilityTable").removeSelections();
@@ -167,6 +178,8 @@ sap.ui.define([
                 utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("idFacilityName")), "ID") &&
                 utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("idFacilityName1")), "ID") &&
                 utils._LCvalidateAmount(sap.ui.getCore().byId(oView.createId("FO_id_Price")), "ID") &&
+                utils._LCstrictValidationComboBox(sap.ui.getCore().byId(oView.createId("FL_id_Currency")), "ID") &&
+
                 utils._LCstrictValidationComboBox(sap.ui.getCore().byId(oView.createId("FO_id_Rate")), "ID")
             );
 
@@ -221,6 +234,7 @@ sap.ui.define([
                 FacilityName: Payload.FacilityName,
                 Type: Payload.Type,
                 Price: Payload.Price,
+                Currency:Payload.Currency,
                 UnitText: Payload.UnitText,
                 FicilityImage: Payload.FicilityImage,
                 FileName: Payload.FileName,
@@ -271,6 +285,7 @@ sap.ui.define([
                 "idFacilityName",
                 "idFacilityName1",
                 "FO_id_Price",
+                "FL_id_Currency",
                 "FO_id_Rate"
             ];
 
@@ -530,6 +545,7 @@ sap.ui.define([
                     }
                 }
             );
-        }
+        },
+        
     });
 });

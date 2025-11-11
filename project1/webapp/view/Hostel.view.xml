@@ -52,9 +52,9 @@
                          <Button text="Book Room" class="RoomBook sapUiLargeMarginBegin " press="onpressBookrooms" />
 					</ScrollContainer>
                     <Page id="idRooms" showHeader="false">
-					<HBox justifyContent="End">
+					<!-- <HBox justifyContent="End">
 						<Button text="Filter" icon="sap-icon://map" press="onpressFilter" width="200px" class="sapUiTinyMargin"/>
-					</HBox>
+					</HBox> -->
 					<ScrollContainer  horizontal="false" vertical="true" height="80%" class="sapUiContentPadding HostelRooms sapUiTinyMargin">
 					
 						<l:Grid defaultSpan="XL12 L12 M12 S12" width="100%" class="position-welcome">
@@ -68,7 +68,7 @@
 
 						</l:Grid>
 					</ScrollContainer>
-
+	<Button text="Filter" icon="sap-icon://map" press="onpressFilter" width="200px" class="sapUiLargeMarginBegin sapUiSmallMarginTop"/>
 <ScrollContainer
     height="100%"
     horizontal="true"
@@ -86,8 +86,8 @@
             path: 'VisibilityModel>/BedTypes'
         }"
     >
-        <items >
-            <VBox class="bedCard sapUiMediumMargin">
+         <items >
+            <VBox class="bedCard sapUiMediumMargin"   visible="{VisibilityModel>Visible}">
                 <Image
                     src="{VisibilityModel>Image}"
                     width="100%"
@@ -96,7 +96,7 @@
                 />
                 <VBox class="bedCardContent sapUiSmallMargin">
                     <Text
-                        text="{VisibilityModel>Name}"
+                        text="{= ${VisibilityModel>Name} + ' (' + ${VisibilityModel>ACType} + ')' }" 
                         class="bedCardTitle"
                     />
                     <Text
@@ -108,13 +108,11 @@
                         text="₹ {VisibilityModel>Price}"
                         class="bedCardPrice"
                     />
-                 <Button
-					text="{= ${VisibilityModel>Visible} ? 'Book Now' : 'Sold Out' }"
-					type="Default"
-					press=".onBookNow"
-					enabled="{VisibilityModel>Visible}"
-					class="{= ${VisibilityModel>Visible} ? '' : 'soldOutButton' }"
-				/>
+                   <Button
+                    text="{= ${VisibilityModel>Visible} ? 'Book Now' : 'Sold Out' }"
+                    press=".onBookNow"
+                    enabled="{VisibilityModel>Visible}"
+                />
                 </VBox>
             </VBox>
         </items>

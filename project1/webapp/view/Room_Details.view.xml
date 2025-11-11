@@ -135,14 +135,14 @@
                             text="Bed Type"
                         />
                     </Column>
-                   <Column
+                   <!-- <Column
                         minScreenWidth="Tablet"
                         demandPopin="true"
                     >
                         <Text
                             text="No Of persons"
                         />
-                    </Column>
+                    </Column> -->
                       <Column
                         minScreenWidth="Tablet"
                         demandPopin="true"
@@ -169,9 +169,26 @@
                             <Text text="{RoomDetailsModel>RoomNo}" />
                         
                             <Text text="{RoomDetailsModel>BedTypeName}" />
-                            <Text text="{RoomDetailsModel>NoofPerson}" />
+                            <!-- <Text text="{RoomDetailsModel>NoofPerson}" /> -->
                             <Text text="{RoomDetailsModel>ExtraBed}" />
-                            <Text text="{= ${RoomDetailsModel>Price} ? ${RoomDetailsModel>Price} + ' ' + ${RoomDetailsModel>PriceType} : '' }" />
+                            <!-- <Text text="{= ${RoomDetailsModel>Price} ? ${RoomDetailsModel>Price} + ' ' + ${RoomDetailsModel>PriceType} : '' }" /> -->
+
+
+
+                         <VBox>
+    <Text
+        text="{= ${RoomDetailsModel>Price} ? 'Daily: ' + ${RoomDetailsModel>Price} + ' ' + ${RoomDetailsModel>Currency} : '' }"
+        class="sapUiTinyMarginBottom"
+    />
+    <Text
+        text="{= ${RoomDetailsModel>MonthPrice} ? 'Month: ' + ${RoomDetailsModel>MonthPrice} + ' ' + ${RoomDetailsModel>Currency} : '' }"
+        class="sapUiTinyMarginBottom"
+    />
+    <Text
+        text="{= ${RoomDetailsModel>YearPrice} ? 'Year: ' + ${RoomDetailsModel>YearPrice} + ' ' + ${RoomDetailsModel>Currency} : '' }"
+        class="sapUiTinyMarginBottom"
+    />
+</VBox>
 
                             <!-- <Text text="{HostelModel>RoomType}" /> -->
                            <Button

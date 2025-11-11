@@ -1,11 +1,16 @@
-<c:FragmentDefinition xmlns="sap.m" xmlns:c="sap.ui.core" xmlns:f="sap.ui.layout.form"
-	xmlns:core="sap.ui.core">
-	<Dialog
+<c:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:c="sap.ui.core"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+>
+    <Dialog
         id="Filter_sds"
         title="Select Location"
         type="Message"
-        class="sapUiContentPadding">
-		<f:SimpleForm
+        class="sapUiContentPadding"
+    >
+        <f:SimpleForm
             editable="true"
             layout="ResponsiveGridLayout"
             labelSpanXL="4"
@@ -14,27 +19,80 @@
             labelSpanS="12"
             columnsXL="2"
             columnsL="2"
-            columnsM="1">
-			<f:content>
-				<Label text="Branch Name" required="true"/>
-				<ComboBox
-                id="id_Branch" placeholder="Select Room Number" selectedKey="{Branchmodel>/RoomNumber}"
-                items="{sBRModel>/}"  selectionChange="onBranchSelectionChange">
-				<core:ListItem key="{sBRModel>Name}"  text="{sBRModel>Name}" additionalText="{sBRModel>BranchID}" />
-				</ComboBox>
-				<Label text="Room Type" />
-				<ComboBox id="id_Roomtype" placeholder="Select Room Type" selectedKey="{Branchmodel>/Roomtype}">
-					<core:Item key="AC" text="AC"/>
-                    <core:Item key="Non-AC" text="Non-AC"/>
-				</ComboBox>
-			</f:content>
-		</f:SimpleForm>
-		<footer>
-			<Toolbar>
-				<ToolbarSpacer />
-				<Button text="Search" press="BR_onsavebuttonpress" type="Accept" id="BR_id_saveButton" class="marginRight"/>
-				<Button text="Cancel" press="BR_oncancelbuttonpress" type="Reject" id="BR_id_cancelButton" class="marginRight"/>
-			</Toolbar>
-		</footer>
-	</Dialog>
+            columnsM="1"
+        >
+            <f:content>
+                <Label
+                    text="Branch Name"
+                    required="true"
+                />
+                <ComboBox
+                    id="id_Branch"
+                    placeholder="Select Room Number"
+                    selectedKey="{Branchmodel>/RoomNumber}"
+                    items="{sBRModel>/}"
+                    selectionChange="onBranchSelectionChange"
+                >
+                    <core:ListItem
+                        key="{sBRModel>Name}"
+                        text="{sBRModel>Name}"
+                        additionalText="{sBRModel>BranchID}"
+                    />
+                </ComboBox>
+
+                <Label
+                    text="Area"
+                    required="true"
+                />
+                <ComboBox
+                    id="id_Area"
+                    placeholder="Select Area"
+                    selectedKey="{Branchmodel>/Address}"
+                    items="{AreaModel>/}"
+					visible="false"
+                >
+                    <core:ListItem
+                        key="{AreaModel>Address}"
+                        text="{AreaModel>Address}"
+                        additionalText="{AreaModel>BranchID}"
+                    />
+                </ComboBox>
+
+                <Label text="Room Type" />
+                <ComboBox
+                    id="id_Roomtype"
+                    placeholder="Select Room Type"
+                    selectedKey="{Branchmodel>/Roomtype}"
+                >
+                    <core:Item
+                        key="AC"
+                        text="AC"
+                    />
+                    <core:Item
+                        key="Non-AC"
+                        text="Non-AC"
+                    />
+                </ComboBox>
+            </f:content>
+        </f:SimpleForm>
+        <footer>
+            <Toolbar>
+                <ToolbarSpacer />
+                <Button
+                    text="Search"
+                    press="BR_onsavebuttonpress"
+                    type="Accept"
+                    id="BR_id_saveButton"
+                    class="marginRight"
+                />
+                <Button
+                    text="Cancel"
+                    press="BR_oncancelbuttonpress"
+                    type="Reject"
+                    id="BR_id_cancelButton"
+                    class="marginRight"
+                />
+            </Toolbar>
+        </footer>
+    </Dialog>
 </c:FragmentDefinition>

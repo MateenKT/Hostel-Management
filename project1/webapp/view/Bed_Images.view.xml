@@ -1,5 +1,5 @@
 <mvc:View
-    controllerName="sap.ui.com.project1.controller.Facilitis"
+    controllerName="sap.ui.com.project1.controller.Bed_Images"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:m="sap.m"
@@ -46,14 +46,14 @@
             >
                 <fb:filterGroupItems>
                     <fb:FilterGroupItem
-                        name="Facility Name"
-                        label="Facility Name"
+                        name="Bed Type"
+                        label="Bed Type"
                         groupName="Group"
                         visibleInFilterBar="true"
                     >
                         <fb:control>
                             <ComboBox
-                                id="FN_id_FacilityName"
+                                id="FN_id_BedType"
                                 items="{Facilities>/}"
                                 showClearIcon="true"
                             >
@@ -101,7 +101,7 @@
                         <Title text="facilities ({=${Facilities>/}.length})" />
                         <ToolbarSpacer />
                         <Button
-                            text="Add Facility"
+                            text="Add Bed Images"
                             press="FD_RoomDetails"
                             type="Accept"
                         />
@@ -110,11 +110,6 @@
                             press="FD_EditDetails"
                             type="Transparent"
                         />
-                        <Button
-                            text="Delete"
-                            press="HM_DeleteDetails"
-                            type="Reject"
-                        />
                     </OverflowToolbar>
                 </headerToolbar>
                 <columns>
@@ -122,22 +117,10 @@
                         <Text text="Branch Code" />
                     </Column>
                     <Column demandPopin="true">
-                        <Text text="Facility Name" />
+                        <Text text="Bed Type" />
                     </Column>
                     <Column demandPopin="true">
-                        <Text text="Type" />
-                    </Column>
-                    <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text text="Price" />
-                    </Column>
-                    <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text text="Facility Image" />
+                        <Text text="Room Type" />
                     </Column>
                 </columns>
                 <items>
