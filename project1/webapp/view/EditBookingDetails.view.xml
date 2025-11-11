@@ -127,7 +127,7 @@
     </VBox>
     <VBox>
      <Panel
-        headerText="{= 'Personal Information - ' + ${HostelModel>FullName} }"
+        headerText="Personal Information "
         expandable="false"
         class="customPanelHeader"
     >
@@ -272,15 +272,21 @@
     </HBox>
 </VBox>
 
-
-
-
-
     </Panel>
     
     </VBox>
     </ScrollContainer>
-    
+    <footer>
+            <OverflowToolbar>
+                <ToolbarSpacer />
+                <Button
+                    text="proceed to pay"
+                    visible="false"
+                    type="Emphasized"
+                    press="onOpenProceedtoPay"
+                />
+            </OverflowToolbar>
+        </footer>
     </Page>
 
 </mvc:View>

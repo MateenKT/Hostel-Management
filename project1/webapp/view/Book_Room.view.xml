@@ -64,8 +64,9 @@
                     <!-- Step 1: General Information -->
                     <WizardStep
                         id="TC_id_stepGeneralInfo"
-                        title="General Information"
+                        title="Booking Information"
                         validated="true"
+                        class="customPanelHeader"
                     >
                         <core:Fragment
                             fragmentName="sap.ui.com.project1.fragment.GeneralInfo"
@@ -75,8 +76,9 @@
                     <!-- Step 2: Service Selection -->
                     <WizardStep
         id="idStepPersonal1"
-        title="Booking  Information"
+        title="Personal  Information"
         validated="true"
+        
     >
 
         <ScrollContainer width="100%" height="100%" vertical="true">

@@ -53,10 +53,24 @@ sap.ui.define([
             })
             this.getView().setModel(oBTn,"OBTNModel")
                  
-            //       setTimeout(() => {
-            //   this.onReadcallforRoom();
-            // }, 100);
+                  setTimeout(() => {
+              this.Roomdetails();
+            }, 100);
             },
+              Roomdetails: async function () {
+    try {
+        const oData = await this.ajaxReadWithJQuery("HM_Rooms", {});
+        const aBedTypes = Array.isArray(oData.data)
+            ? oData.data
+            : [oData.data];
+
+        const oBedTypeModel = new JSONModel(aBedTypes);
+        this.getView().setModel(oBedTypeModel, "RoomDetailModel");
+
+    } catch (err) {
+        console.error("Error while fetching Bed Type details:", err);
+    }
+},
           _LoadFacilities: async function () {
     const oView = this.getView();
     const Response = await this.ajaxReadWithJQuery("HM_ExtraFacilities", {});
@@ -94,55 +108,49 @@ sap.ui.define([
     oView.setModel(oFacilityModel, "FacilityModel");
 },
 
-onNoOfPersonSelect: async function (oEvent) {
-    var that =this;
-    const iPersons = parseInt(oEvent.getSource().getSelectedKey());
-    const oVBox = this.getView().byId("idPersonalContainer1");
-    const oModel = this.getView().getModel("HostelModel");
-    const oFacilityModel = this.getView().getModel("FacilityModel");
-    const oData = oModel.getData();
+onNoOfPersonSelect: function (oEvent) {
+  var that = this
+  const iPersons = parseInt(oEvent.getSource().getSelectedKey());
+  const oVBox = this.getView().byId("idPersonalContainer1");
+  const oModel = this.getView().getModel("HostelModel");
+  const oFacilityModel = this.getView().getModel("FacilityModel");
+  const oLoginModel = sap.ui.getCore().getModel("LoginModel");
+  const sUserID = oLoginModel?.getData().UserID || "";
+  const oData = oModel.getData();
+ 
+  oData.Persons = [];
+  oVBox.removeAllItems();
+  oData.ForBothSelected = iPersons > 1;
 
+  for (let i = 0; i < iPersons; i++) {
+    oData.Persons.push({
+      UserID: sUserID,
+      FullName: "",
+      DateOfBirth: "",
+      Gender: "",
+      MobileNo: "",
+      CustomerEmail: "",
+      Country: "",
+      State: "",
+      City: "",
+      Address: "",
+      Facilities: { SelectedFacilities: [] },
+      Documents: []
+    });
 
-     const oLoginModel = sap.ui.getCore().getModel("LoginModel");
-    const sUserID = oLoginModel ? oLoginModel.getData().UserID : (oData.UserID || "");
-    // Reset previous data and UI
-    oData.Persons = [];
-    oVBox.removeAllItems();
-
-    for (let i = 0; i < iPersons; i++) {
-        oData.Persons.push({
-            UserID: sUserID,
-            FullName: "",
-            DateOfBirth: "",
-            Gender: "",
-            MobileNo: "",
-            CustomerEmail: "",
-            Country: "",
-            State: "",
-            City: "",
-            Facilities: {
-       SelectedFacilities: [] },
-            Document: "",
-            FileName: "",
-            FileType: "",
-             TotalRent: parseFloat(oData.Price) || 0,
-
-        });
-
-       // ---- Person Information Form ----
-const oForm = new sap.ui.layout.form.SimpleForm({
-    editable: true,
-    title: "Person " + (i + 1) + " Details",
-    layout: "ColumnLayout",
-    labelSpanXL: 4,
-    labelSpanL: 3,
-    labelSpanM: 4,
-    labelSpanS: 12,
-    columnsXL: 2,
-    columnsL: 2,
-    columnsM: 1,
-    content: [
-        //  Only show the checkbox for the first person
+    /** ---- PERSON FORM ---- **/
+    const oForm = new sap.ui.layout.form.SimpleForm({
+      editable: true,
+      title: "Person " + (i + 1) + " Details",
+      layout: "ColumnLayout",
+      labelSpanXL: 4,
+      labelSpanL: 3,
+      labelSpanM: 4,
+      columnsXL: 2,
+      columnsL: 2,
+      columnsM: 1,
+      content: [
+          //  Only show the checkbox for the first person
         ...(i === 0
             ? [
                 new sap.m.Label({ text: "Fill Yourself" }),
@@ -188,193 +196,54 @@ const oForm = new sap.ui.layout.form.SimpleForm({
                 })
             ]
             : []),
-
-        // Person Info Fields
-        new sap.m.Label({ text: "Full Name", required: true }),
-        new sap.m.ComboBox({
-            selectedKey: "{HostelModel>/Persons/" + i + "/Salutation}",
-            items: [
-                new sap.ui.core.ListItem({ key: "Mr", text: "Mr" }),
-                new sap.ui.core.ListItem({ key: "Mrs", text: "Mrs" })
-            ]
-        }),
-        new sap.m.Input({
-            value: "{HostelModel>/Persons/" + i + "/FullName}",
-            placeholder: "Enter full name"
-        }),
-
-        new sap.m.Label({ text: "UserID", required: true }),
+        new sap.m.Label({ text: "Full Name" }),
+        new sap.m.Input({ value: "{HostelModel>/Persons/" + i + "/FullName}" }),
+         new sap.m.Label({ text: "UserID", required: true }),
         new sap.m.Input({
             value: "{HostelModel>/Persons/" + i + "/UserID}",
-            editable: false
+            editable: false,
+            // visible:false
         }),
 
-        new sap.m.Label({ text: "Date of Birth", required: true }),
+        new sap.m.Label({ text: "Date of Birth" }),
         new sap.m.DatePicker({
-            value: "{HostelModel>/Persons/" + i + "/DateOfBirth}",
-            valueFormat: "dd/MM/yyyy",
-            displayFormat: "dd/MM/yyyy"
+          value: "{HostelModel>/Persons/" + i + "/DateOfBirth}",
+          valueFormat: "dd/MM/yyyy",
+          displayFormat: "dd/MM/yyyy"
         }),
 
-        new sap.m.Label({ text: "Gender", required: true }),
+        new sap.m.Label({ text: "Gender" }),
         new sap.m.ComboBox({
-            selectedKey: "{HostelModel>/Persons/" + i + "/Gender}",
-            items: [
-                new sap.ui.core.ListItem({ key: "Male", text: "Male" }),
-                new sap.ui.core.ListItem({ key: "Female", text: "Female" }),
-                new sap.ui.core.ListItem({ key: "Other", text: "Other" })
-            ]
+          selectedKey: "{HostelModel>/Persons/" + i + "/Gender}",
+          items: [
+            new sap.ui.core.ListItem({ key: "Male", text: "Male" }),
+            new sap.ui.core.ListItem({ key: "Female", text: "Female" }),
+            new sap.ui.core.ListItem({ key: "Other", text: "Other" })
+          ]
         }),
 
-        new sap.m.Label({ text: "Mobile Number", required: true }),
-        new sap.m.ComboBox({
-            selectedKey: "{HostelModel>/Persons/" + i + "/StdCode}",
-            items: [new sap.ui.core.ListItem({ key: "+91", text: "+91" })]
-        }),
-        new sap.m.Input({
-            value: "{HostelModel>/Persons/" + i + "/MobileNo}",
-            placeholder: "Enter 10-digit mobile number",
-            maxLength: 10
-        }),
+        new sap.m.Label({ text: "Mobile" }),
+        new sap.m.Input({ value: "{HostelModel>/Persons/" + i + "/MobileNo}" }),
 
-        new sap.m.Label({ text: "Email", required: true }),
-        new sap.m.Input({
-            value: "{HostelModel>/Persons/" + i + "/CustomerEmail}",
-            placeholder: "Enter email"
-        }),
+        new sap.m.Label({ text: "Email" }),
+        new sap.m.Input({ value: "{HostelModel>/Persons/" + i + "/CustomerEmail}" }),
 
-        new sap.m.Label({ text: "Country", required: true }),
-        new sap.m.ComboBox({
-            selectedKey: "{HostelModel>/Persons/" + i + "/Country}",
-            placeholder: "Select Country",
-            items: [
-                new sap.ui.core.ListItem({ key: "India", text: "India" }),
-                new sap.ui.core.ListItem({ key: "USA", text: "USA" }),
-                new sap.ui.core.ListItem({ key: "Other", text: "Other" })
-            ]
-        }),
+        new sap.m.Label({ text: "Country" }),
+        new sap.m.Input({ value: "{HostelModel>/Persons/" + i + "/Country}" }),
 
-        new sap.m.Label({ text: "State", required: true }),
-        new sap.m.Input({
-            value: "{HostelModel>/Persons/" + i + "/State}",
-            placeholder: "Enter State",
-            
-        }),
-
-        new sap.m.Label({ text: "City", required: true }),
-        new sap.m.Input({
-            value: "{HostelModel>/Persons/" + i + "/City}",
-            placeholder: "Enter City"
-        }),
+        new sap.m.Label({ text: "City" }),
+        new sap.m.Input({ value: "{HostelModel>/Persons/" + i + "/City}" }),
 
         new sap.m.Label({ text: "Address", required: true }),
         new sap.m.TextArea({
-            value: "{HostelModel>/Persons/" + i + "/Address}",
-            placeholder: "Enter Permanent Address",
-            rows: 3
+          value: "{HostelModel>/Persons/" + i + "/Address}",
+          placeholder: "Enter Permanent Address",
+          rows: 3
         })
-    ]
-});
-
-
-
-       // ---- Facilities Section ----
-const oFacilitiesBox = new sap.m.VBox({
-    width: "100%",
-    style: "margin-top: 2rem;", // Adds spacing from top
-    visible: "{= ${FacilityModel>/Facilities}.length > 0 }", // Hide section if no facilities
-    items: [
-        // Header
-        new sap.m.Toolbar({
-            content: [
-                new sap.m.Title({
-                    text: "Select the Facilities",
-                    level: "H4",
-                    design: "Bold",
-                })
-            ],
-            design: "Solid",
-            styleClass: "facilityHeader"
-        }),
-
-        // Facility cards container
-        new sap.m.FlexBox({
-            wrap: "Wrap",
-            alignItems: "Start",
-            justifyContent: "SpaceAround",
-            items: {
-                path: "FacilityModel>/Facilities",
-               template: new sap.m.VBox({
-    width: "264px",
-    height: "230px",
-    alignItems: "Center",
-    justifyContent: "Center",
-    styleClass: "serviceCard",
-    items: [
-        new sap.m.VBox({
-            width: "264px",
-            height: "178px",
-            styleClass: "imageContainer",
-            items: [
-                // Facility image
-                new sap.m.Image({
-                    src: "{FacilityModel>Image}",
-                    width: "264px",
-                    height: "178px",
-                    class: "serviceImage",
-                    densityAware: false,
-                    press: function (oEvent) {
-                        const oCtx = oEvent.getSource().getBindingContext("FacilityModel");
-                        const oFacilityObj = oCtx.getObject();
-                        const aPersons = oModel.getProperty("/Persons");
-                        const aSelected = aPersons[i].Facilities.SelectedFacilities;
-                        const oCard = oEvent.getSource().getParent().getParent();
-                        let bAlreadySelected = aSelected.find(f => f.FacilityName === oFacilityObj.FacilityName);
-
-                        if (bAlreadySelected) {
-                            const idx = aSelected.findIndex(f => f.FacilityName === oFacilityObj.FacilityName);
-                            aSelected.splice(idx, 1);
-                            oCard.removeStyleClass("serviceCardSelected");
-                        } else {
-                            aSelected.push({
-                                FacilityName: oFacilityObj.FacilityName,
-                                Price: oFacilityObj.Price,
-                                Image: oFacilityObj.Image
-                            });
-                            oCard.addStyleClass("serviceCardSelected");
-                        }
-
-                        oModel.refresh(true);
-                    }
-                }),
-
-                // Facility name overlay
-                (() => {
-                    const oHTML = new sap.ui.core.HTML({
-                        content: `
-                            <div class="facility-overlay">
-                                <a href="#" class="facility-overlay-link">{FacilityModel>FacilityName}</a>
-                            </div>
-                        `
-                    }).bindElement("FacilityModel>");
-                    return oHTML;
-                })()
-            ]   
-        }),
-
-        //  Facility Price (below the image)
-        new sap.m.Text({
-            text: "{= '₹ ' + ${FacilityModel>Price}}",
-            class: "facilityPriceText"
-        })
-    ]
-})
- }
-  })
-    ]
-});
-
-        // ---- Document Upload Section ----
+      ]
+    });
+  
+ // ---- Document Upload Section ----
         const oDocument = new sap.ui.layout.form.SimpleForm({
             editable: true,
             title: "Document Upload",
@@ -404,14 +273,116 @@ const oFacilitiesBox = new sap.m.VBox({
             ]
         });
 
-        // Append everything
-        oVBox.addItem(oForm);
-        oVBox.addItem(oFacilitiesBox);
-        oVBox.addItem(oDocument);
-    }
 
-    oModel.refresh(true);
-    //  Do NOT move to next step here.
+    /** ---- FACILITIES SECTION (card layout) ---- **/
+    const oFacilities = new sap.m.Panel({
+      headerText: "Facilities",
+      expandable: true,
+      expanded: true,
+      content: [
+        ...(i === 0 && iPersons > 1
+          ? [
+              new sap.m.CheckBox({
+                text: "For Both",
+                selected: true,
+                select: (e) => {
+                  oData.ForBothSelected = e.getParameter("selected");
+                  oModel.refresh(true);
+                }
+              })
+            ]
+          : []),
+
+        new sap.m.FlexBox({
+          wrap: "Wrap",
+          alignItems: "Start",
+          justifyContent: "SpaceAround",
+          items: {
+            path: "FacilityModel>/Facilities",
+            template: new sap.m.VBox({
+              width: "264px",
+              height: "230px",
+              alignItems: "Center",
+              justifyContent: "Center",
+              styleClass: "serviceCard",
+              items: [
+                // Facility Image + Overlay Name
+                new sap.m.VBox({
+                  width: "264px",
+                  height: "178px",
+                  styleClass: "imageContainer",
+                  items: [
+                    new sap.m.Image({
+                      src: "{FacilityModel>Image}",
+                      width: "264px",
+                      height: "178px",
+                      class: "serviceImage",
+                      densityAware: false,
+                      press: function (oEvent) {
+                        const oCtx = oEvent.getSource().getBindingContext("FacilityModel");
+                        const oFacilityObj = oCtx.getObject();
+                        const aPersons = oModel.getProperty("/Persons");
+                        const aSelected = aPersons[i].Facilities.SelectedFacilities;
+                        const oCard = oEvent.getSource().getParent().getParent();
+                        const bAlreadySelected = aSelected.find(f => f.FacilityName === oFacilityObj.FacilityName);
+
+                        if (bAlreadySelected) {
+                          const idx = aSelected.findIndex(f => f.FacilityName === oFacilityObj.FacilityName);
+                          aSelected.splice(idx, 1);
+                          oCard.removeStyleClass("serviceCardSelected");
+                        } else {
+                          aSelected.push({
+                            FacilityName: oFacilityObj.FacilityName,
+                            Price: oFacilityObj.Price,
+                            Image: oFacilityObj.Image
+                          });
+                          oCard.addStyleClass("serviceCardSelected");
+                        }
+
+                        oModel.refresh(true);
+                      }
+                    }),
+
+                    // Facility name overlay (hover effect)
+                    (() => {
+                      const oHTML = new sap.ui.core.HTML({
+                        content: `
+                          <div class="facility-overlay">
+                            <a href="#" class="facility-overlay-link">{FacilityModel>FacilityName}</a>
+                          </div>
+                        `
+                      }).bindElement("FacilityModel");
+                      return oHTML;
+                    })()
+                  ]
+                }),
+
+                // Facility Price (below the image)
+                new sap.m.Text({
+                  text: "{= '₹ ' + ${FacilityModel>Price}}",
+                  class: "facilityPriceText"
+                })
+              ]
+            })
+          }
+        })
+      ],
+      visible: {
+        path: "HostelModel>/ForBothSelected",
+        formatter: function (bSel) {
+          if (bSel && i > 0) return false;
+          return true;
+        }
+      }
+    });
+
+    // Add sections for each person
+    oVBox.addItem(oForm);
+    oVBox.addItem(oDocument);
+    oVBox.addItem(oFacilities);
+  }
+
+  oModel.refresh(true);
 },
 
 TC_onDialogNextButton: function () {
@@ -422,6 +393,13 @@ TC_onDialogNextButton: function () {
     const oBtnModel = oView.getModel("OBTNModel");
 
     oBtnModel.setProperty("/PERVIOUSVIS", true);
+
+    if(oCurrentStep)
+
+      if (oCurrentStep === this.createId("TC_id_stepGeneralInfo")) {
+        oWizard.nextStep();
+        return;
+    }
 
     if (oCurrentStep === this.createId("idStepPersonal1")) {
         const aPersons = oHostelModel.getProperty("/Persons") || [];
@@ -731,14 +709,13 @@ onFieldValidation: function () {
     var oHostelModel = oView.getModel("HostelModel").getData();
     var oBtnModel = oView.getModel("OBTNModel");
 
-    var sRoomType = oView.byId("idRoomType1")?.getValue() || "";
+    // var sRoomType = oView.byId("idRoomType1")?.getValue() || "";
     // var sPrice = oView.byId("idPrice2")?.getValue() || "";
     var sPayment = oHostelModel.PaymentType || oView.byId("idPaymentMethod1")?.getSelectedKey() || "";
     var sPerson = oHostelModel.Person || oView.byId("id_Noofperson1")?.getSelectedKey() || "";
     var sStartDate = oHostelModel.StartDate || oView.byId("idStartDate1")?.getValue() || "";
     var sEndDate = oHostelModel.EndDate || oView.byId("idEndDate1")?.getValue() || "";
-
-    var bAllFilled = sRoomType  && sPayment && sPerson && sStartDate && sEndDate;
+    var bAllFilled = sPayment && sPerson && sStartDate && sEndDate;
 
     //  Force Boolean (true/false) type — critical fix
     oBtnModel.setProperty("/Next", !!bAllFilled);
@@ -748,6 +725,41 @@ onFieldValidation: function () {
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("RouteHostel");
         },
+
+TC_handleNavigationChange: function (oEvent) {
+  const oWizard = oEvent.getSource();
+  const oCurrentStep = oEvent.getParameter("step");
+  const oView = this.getView();
+  const oBtnModel = oView.getModel("OBTNModel");
+
+  // Get step IDs
+  const sStepId = oCurrentStep.getId();
+
+  // Reset all button visibilities
+  oBtnModel.setProperty("/Submit", false);
+  oBtnModel.setProperty("/Cancel", false);
+  oBtnModel.setProperty("/PERVIOUSVIS", false);
+  oBtnModel.setProperty("/NXTVis", false);
+
+  // Identify current step
+  if (sStepId.includes("TC_id_stepGeneralInfo")) {
+    // Step 1 → Show only Next
+    oBtnModel.setProperty("/NXTVis", true);
+  } 
+  else if (sStepId.includes("idStepPersonal1")) {
+    // Step 2 → Show Previous and Next
+    oBtnModel.setProperty("/PERVIOUSVIS", true);
+    oBtnModel.setProperty("/NXTVis", true);
+  } 
+  else if (sStepId.includes("id_Summary")) {
+    // Step 3 → Show Proceed to Pay and Cancel
+    oBtnModel.setProperty("/Submit", true);
+    oBtnModel.setProperty("/Cancel", true);
+  }
+
+  // Optional: enable next by default (if needed)
+  oBtnModel.setProperty("/Next", true);
+}
 
      
 

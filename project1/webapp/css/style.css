@@ -496,6 +496,14 @@
 .customPanelHeader {
     border-radius: 0 !important;
 }
+.sapMWizardStep .sapMWizardStepTitle {
+    background-color:#1bb2bf  !important;
+    color: white !important;
+    font-weight: bold !important;
+    border-radius: 0 !important;
+    padding: 5px !important;
+    
+}
 
 /* Image + Label container */
 .imageContainer {

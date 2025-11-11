@@ -78,7 +78,7 @@ sap.ui.define([
         await this.CustomerDetails();
         await this._loadBranchCode();
         await this.onReadcallforRoom();
-        await this._loadFilteredData("KLB01","AC"); 
+        await this._loadFilteredData("KLB01",""); 
     } catch (error) {
         console.error("Error during initialization:", error);
     }

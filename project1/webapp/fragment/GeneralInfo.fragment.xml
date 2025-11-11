@@ -5,25 +5,26 @@
     xmlns:smartField="sap.ui.comp.smartfield"
 >
     <Panel
-        headerText="General Information"
+        headerText=""
         expandable="false"
         class="customPanelHeader"
     >
         <f:SimpleForm
             editable="true"
             layout="ColumnLayout"
-            columnsM="3"
-            columnsL="3"
+            columnsM="2"
+            columnsL="2"
             columnsXL="6"
         >
             <f:content>
                 <!-- Booking Details -->
-                <core:Title text="Room Booking Details" />
+                <core:Title text="" />
               <!-- <Input id="idUserID" value="{HostelModel>/UserID}" visible="true" /> -->
-               <Label text="Desired Room Type" required="true" />
-                            <Input id="idRoomType1" value="{HostelModel>/RoomType}" editable="false" width="100%" />
-                            <Input id="idRentPrice" value="{HostelModel>/Price}" editable="false" width="100%" />
-                 <Label text="Payment Method" required="true" />
+               <Label text="Desired Room Type" />
+                            <Text  text="{HostelModel>/RoomType}"  width="100%" />
+             <Label text="Rent Price" />
+                            <Text  text="{HostelModel>/Price}" width="100%" />
+                 <Label text="Booking Duration" required="true" />
                             <ComboBox
                                 id="idPaymentMethod1"
                                 placeholder="Select Payment Method"
@@ -36,7 +37,7 @@
                                 <core:ListItem key="Daily" text="Daily" />
                             </ComboBox>
               
-                <core:Title text="Select Person" />
+                <core:Title text="" />
                <Label text="No of Persons" required="true" />
                             <ComboBox
                                 id="id_Noofperson1"
@@ -51,7 +52,7 @@
                             </ComboBox>
 
                 <!-- Site Contact -->
-                <core:Title text="Dates" />
+              
                 <Label text="Start Date" required="true" />
                             <DatePicker
                                 id="idStartDate1"

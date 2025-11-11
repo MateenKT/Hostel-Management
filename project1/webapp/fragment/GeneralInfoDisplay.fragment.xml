@@ -5,9 +5,7 @@
     xmlns:smartField="sap.ui.comp.smartfield"
 >
     <Panel
-        headerText="General Information"
         expandable="false"
-        class="customPanelHeader"
     >
         <f:SimpleForm
             editable="true"
