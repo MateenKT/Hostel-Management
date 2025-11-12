@@ -815,3 +815,205 @@
   background-position: center;
 }
 
+
+
+
+
+
+
+
+
+.myCustomButton {
+  height: 60px !important;
+  width: 345px !important;
+  font-size: 20px !important;
+  padding: 0 !important;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Inner styling */
+.myCustomButton .sapMBtnInner {
+  background-color: white !important;
+  height: 100% !important;
+  line-height: normal !important;
+  padding: 16px !important;
+  font-size: 24px !important;
+  border-radius: 8px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.myCustomButton .sapMBtnContent {
+  color: #00acc1 !important; 
+  font-size: 20px !important;
+  transition: font-size 0.2s ease-in-out;
+}
+
+/* Hover effect */
+.myCustomButton:hover .sapMBtnInner {
+  background-color: white !important;
+  box-shadow: 0 0 0.5rem #17191884 !important;
+}
+
+.myCustomButton:hover .sapMBtnContent {
+  font-size: 20px !important;
+  font-weight: bold !important;
+}
+
+/* 📱 Responsive rule: Resize button to 50% on small screens */
+@media only screen and (max-width: 600px) {
+  .myCustomButton {
+    width: 50% !important;
+    min-width: 160px !important; /* safety net */
+    font-size: 18px !important;
+  }
+
+  .myCustomButton .sapMBtnInner {
+    font-size: 18px !important;
+    padding: 12px !important;
+  }
+
+  .myCustomButton .sapMBtnContent {
+    font-size: 18px !important;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* Apply a uniform blue background to the entire dialog */
+.customHeaderColor .sapMDialogScrollCont,
+.customHeaderColor .sapMDialogSection,
+.customHeaderColor,
+.customHeaderColor .sapMBar,
+.customHeaderColor .sapMPanelHdr,
+.customHeaderColor .sapMPanelContent,
+.customHeaderColor .sapMList,
+.customHeaderColor .sapMListBgTransparent,
+.customHeaderColor .sapMPanel,
+.customHeaderColor .sapMPanelExpandablePart {
+    background-color: #00a9b9 !important;  /* Bright teal-blue shade */
+    color: white !important;
+}
+
+/* Force text elements to appear white for readability */
+.customHeaderColor .sapMText,
+.customHeaderColor .sapMTitle,
+.customHeaderColor .sapMLabel,
+.customHeaderColor .sapMBarText,
+.customHeaderColor .sapMObjectAttributeTitle,
+.customHeaderColor .sapMObjectAttributeText {
+    color: white !important;
+}
+
+/* Button styling to match blue theme */
+.customHeaderColor .sapMBtnInner {
+    background-color: white !important;
+    color: #008C9E !important;
+    border: none !important;
+    font-weight: bold;
+}
+
+.customHeaderColor .sapMBtn:hover .sapMBtnInner {
+    background-color: #b2f0ff !important;
+}
+
+/* Optional: Remove white edges or dialog shadow if visible */
+.customHeaderColor .sapMDialog {
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* Tile consistency */
+.customHeaderColor .sapMGT {
+    background-color: #00b7c7 !important;
+    color: white !important;
+    border-radius: 12px;
+}
+
+/* Facilities list alignment */
+.customHeaderColor .sapMCustomListItem {
+    background-color: transparent !important;
+}
+/* Base tile style (for consistency) */
+.customHeaderColor .sapMGT {
+    background-color: #00b7c7 !important; /* normal blue */
+    color: white !important;
+    border-radius: 12px;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Add hover effect for better UX */
+.customHeaderColor .sapMGT:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+/* Selected tile state */
+.tileSelected {
+    background-color: #ffffff !important;       /* white tile */
+    color: #00a9b9 !important;                  /* blue text */
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
+    transform: scale(1.05);
+    border: 2px solid #ffffff !important;
+}
+
+/* Ensure inner header/subheader texts flip color too */
+.tileSelected .sapMGTTitle,
+.tileSelected .sapMGTSubHdrTxt {
+    color: #00a9b9 !important;
+}
+
+
+
+.sapMGT {
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.selectedTile {
+    transform: scale(1.10); /* 10% bigger */
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
+    border: 2px solid #ffffff !important;
+    background: linear-gradient(145deg, #00b7c7, #007c8a) !important;
+    color: #ffffff !important;
+}
+
+/* Ensure text remains white and clean */
+.selectedTile .sapMGTTitle,
+.selectedTile .sapMGTSubHdrTxt {
+    color: #322c2c !important;
+}
+.sapMGT:hover {
+    transform: scale(1.10);
+}
+
+
+.noImagePlaceholder {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 250px;
+  width: 100%;
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.2rem;
+  background: url("../image/no-image.png") center center / contain no-repeat,
+              rgba(0, 0, 0, 0.25);
+  background-blend-mode: overlay;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

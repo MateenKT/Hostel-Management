@@ -1,78 +1,78 @@
-/**
- * eslint-disable @sap/ui5-jsdocs/no-jsdoc
- */
+    /**
+     * eslint-disable @sap/ui5-jsdocs/no-jsdoc
+     */
 
-sap.ui.define([
-        "sap/ui/core/UIComponent",
-        "sap/ui/Device",
-        "sap/ui/com/project1/model/models",
-         "sap/ui/model/json/JSONModel",
-    ],
-    function (UIComponent, Device, models,JSONModel) {
-        "use strict";
+    sap.ui.define([
+            "sap/ui/core/UIComponent",
+            "sap/ui/Device",
+            "sap/ui/com/project1/model/models",
+            "sap/ui/model/json/JSONModel",
+        ],
+        function (UIComponent, Device, models,JSONModel) {
+            "use strict";
 
-        return UIComponent.extend("sap.ui.com.project1.Component", {
-            metadata: {
-                manifest: "json"
-            },
+            return UIComponent.extend("sap.ui.com.project1.Component", {
+                metadata: {
+                    manifest: "json"
+                },
 
-            /**
-             * The component is initialized by UI5 automatically during the startup of the app and calls the init method once.
-             * @public
-             * @override
-             */
-            init: function () {
-                // call the base component's init function
-                UIComponent.prototype.init.apply(this, arguments);
+                /**
+                 * The component is initialized by UI5 automatically during the startup of the app and calls the init method once.
+                 * @public
+                 * @override
+                 */
+                init: function () {
+                    // call the base component's init function
+                    UIComponent.prototype.init.apply(this, arguments);
 
-                // enable routing
-                this.getRouter().initialize();
+                    // enable routing
+                    this.getRouter().initialize();
 
-                // set the device model
-                this.setModel(models.createDeviceModel(), "device");
+                    // set the device model
+                    this.setModel(models.createDeviceModel(), "device");
 
-                this._fetchCommonData("HM_Branch", "BranchModel","");
+                    this._fetchCommonData("HM_Branch", "BranchModel","");
 
-                
+                    
 
-                
-            },
-              _fetchCommonData: async function (entityName, modelName, filter = "") {
-            // If already loaded, skip
-            if (this.getModel(modelName)) return;
+                    
+                },
+                _fetchCommonData: async function (entityName, modelName, filter = "") {
+                // If already loaded, skip
+                if (this.getModel(modelName)) return;
 
-            const url =  "https://rest.kalpavrikshatechnologies.com/" + entityName;
-            const headers = {
-              name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-              password:
-                "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
-              "Content-Type": "application/json",
-            } ;
+                const url =  "https://rest.kalpavrikshatechnologies.com/" + entityName;
+                const headers = {
+                name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                password:
+                    "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
+                "Content-Type": "application/json",
+                } ;
 
-            try {
-                const result = await new Promise((resolve, reject) => {
-                    $.ajax({
-                        url: url,
-                        method: "GET",
-                        headers: headers,
-                        data: filter,
-                        success: function (data) {
-                            resolve(data);
-                        },
-                        error: function (err) {
-                            reject(err);
-                        }
+                try {
+                    const result = await new Promise((resolve, reject) => {
+                        $.ajax({
+                            url: url,
+                            method: "GET",
+                            headers: headers,
+                            data: filter,
+                            success: function (data) {
+                                resolve(data);
+                            },
+                            error: function (err) {
+                                reject(err);
+                            }
+                        });
                     });
-                });
 
-                if (result && result.data) {
-                    const oModel = new JSONModel(result.data);
-                    this.setModel(oModel, modelName);
+                    if (result && result.data) {
+                        const oModel = new JSONModel(result.data);
+                        this.setModel(oModel, modelName);
+                    }
+                } catch (error) {
+                    MessageToast.show(error?.responseJSON?.message || "Error loading " + entityName);
                 }
-            } catch (error) {
-                MessageToast.show(error?.responseJSON?.message || "Error loading " + entityName);
             }
+            });
         }
-        });
-    }
-);
+    );
