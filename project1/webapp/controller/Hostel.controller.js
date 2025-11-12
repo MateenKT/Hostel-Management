@@ -774,47 +774,7 @@ sap.ui.define([
         },
 
 
-        // onBookNow: function (oEvent) {
-
-        //     // Get selected bed type object
-        //     const oItem = oEvent.getSource().getBindingContext("VisibilityModel").getObject();
-        //     sap.m.MessageToast.show(`Booking started for ${oItem.Name}`);
-
-        //     // 2. Access global HostelModel
-        //     let oHostelModel = sap.ui.getCore().getModel("HostelModel");
-        //     if (!oHostelModel) {
-        //         oHostelModel = new sap.ui.model.json.JSONModel({});
-        //         sap.ui.getCore().setModel(oHostelModel, "HostelModel");
-        //     }
-
-        //     // 3. Set basic room info
-        //     oHostelModel.setProperty("/RoomType", oItem.Name || "");
-        //     oHostelModel.setProperty("/Image", oItem.Image || "");
-        //     oHostelModel.setProperty("/Description", oItem.Description || "");
-        //     oHostelModel.setProperty("/Price", oItem.Price || 0);
-        //     oHostelModel.setProperty("/MonthPrice", oItem.MonthPrice || 0);
-        //     oHostelModel.setProperty("/YearPrice", oItem.YearPrice || 0);
-
-        //     // 4. Check if a pricing plan was selected earlier (from fragment)
-        //     const sSelectedType = oHostelModel.getProperty("/SelectedPriceType");
-        //     const sSelectedValue = oHostelModel.getProperty("/SelectedPriceValue");
-
-        //     // 5. Validate selection
-        //     if (!sSelectedType || !sSelectedValue) {
-        //         sap.m.MessageToast.show("Please select a pricing plan before booking.");
-        //         return;
-        //     }
-
-        //     // 6. Store final booking data
-        //     oHostelModel.setProperty("/FinalBookingType", sSelectedType);
-        //     oHostelModel.setProperty("/FinalBookingPrice", sSelectedValue);
-
-        //     console.log("onBookNow → Booking data being sent:", oHostelModel.getData());
-
-        //     // 7. Navigate to booking page
-        //     const oRouter = this.getOwnerComponent().getRouter();
-        //     oRouter.navTo("RouteBookRoom");
-        // },
+        
        onConfirmBooking: function(oEvent) {
 
     // const oItem = oEvent.getSource().getBindingContext("HostelModel").getObject();
@@ -1858,6 +1818,37 @@ sap.ui.define([
             this._loadFilteredData(sSelectedBranch, sSelectedACType);
         },
 
+
+        onBookNow: function (oEvent) {
+
+            // Get selected bed type object
+            const oItem = oEvent.getSource().getBindingContext("VisibilityModel").getObject();
+
+            // sap.m.MessageToast.show(`Booking started for ${oItem.Name}`);
+
+            //  Get or create the HostelModel
+            let oHostelModel = sap.ui.getCore().getModel("HostelModel");
+            if (!oHostelModel) {
+                oHostelModel = new sap.ui.model.json.JSONModel({});
+                sap.ui.getCore().setModel(oHostelModel, "HostelModel");
+            }
+
+            //  Set RoomType and Price in HostelModel
+            oHostelModel.setProperty("/RoomType", oItem.Name || "");
+            oHostelModel.setProperty("/Price", oItem.Price || 0);
+            oHostelModel.setProperty("/ACType", oItem.ACType || 0);
+            oHostelModel.setProperty("/BranchCode", oItem.BranchCode || 0);
+           
+
+            // Optionally set other details
+            oHostelModel.setProperty("/Image", oItem.Image || "");
+            oHostelModel.setProperty("/Description", oItem.Description || "");
+          
+
+            //  Navigate to the booking route (or open fragment)
+            const oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("RouteBookRoom");
+        },
 
 
 
