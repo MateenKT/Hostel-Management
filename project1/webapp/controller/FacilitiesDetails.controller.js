@@ -80,24 +80,19 @@ sap.ui.define([
                 oView.addDependent(this.ARD_Dialog);
             }
 
-            // Prefill attachments if they exist in DB
             const aAttachments = [];
-            if (oData.Photo1) aAttachments.push({
-                filename: oData.Photo1Name,
-                fileType: oData.Photo1Type,
-                content: oData.Photo1
-            });
-            if (oData.Photo2) aAttachments.push({
-                filename: oData.Photo2Name,
-                fileType: oData.Photo2Type,
-                content: oData.Photo2
-            });
-            if (oData.Photo3) aAttachments.push({
-                filename: oData.Photo3Name,
-                fileType: oData.Photo3Type,
-                content: oData.Photo3
+            Object.keys(oData).forEach((key) => {
+                if (key.startsWith("Photo") && !key.endsWith("Name") && !key.endsWith("Type") && oData[key]) {
+                    const index = key.replace("Photo", ""); // e.g., "1", "2", "3"
+                    aAttachments.push({
+                        filename: oData[`Photo${index}Name`] || `Photo${index}`,
+                        fileType: oData[`Photo${index}Type`] || "",
+                        content: oData[key]
+                    });
+                }
             });
 
+            // Set models
             oView.getModel("FacilitiesModel").setData(oData);
             oView.getModel("UploaderData").setData({
                 attachments: aAttachments,

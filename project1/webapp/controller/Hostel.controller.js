@@ -1185,6 +1185,7 @@ sap.ui.define([
             // var ofrag = sap.ui.getCore();
             var oModel = this.getView().getModel("LoginMode");
             var oData = oModel.getData();
+            const oLoginModel = this.getView().getModel("LoginModel"); 
 
             // Get input values
             var sUserid = sap.ui.getCore().byId("signInuserid").getValue();
@@ -1193,7 +1194,7 @@ sap.ui.define([
 
             // Basic validation example
             if (
-                !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInuserid"), "ID") || !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID") ||
+               !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInuserid"), "ID")|| !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID") ||
                 !utils._LCvalidatePassword(sap.ui.getCore().byId("signinPassword"), "ID")
             ) {
                 sap.m.MessageToast.show("Make sure all the mandatory fields are filled/validate the entered value");
@@ -1207,15 +1208,22 @@ sap.ui.define([
                 const aUsers = oResponse?.commentData || [];
 
                 const oMatchedUser = aUsers.find(user =>
-                    user.UserID === sUserid &&
-                    user.UserName === sUsername &&
-                    (user.Password === sPassword || user.Password === btoa(sPassword))
+                user.UserID === sUserid &&
+                user.UserName === sUsername &&
+                (user.Password === sPassword || user.Password === btoa(sPassword))
                 );
 
                 if (!oMatchedUser) {
                     sap.m.MessageToast.show("Invalid credentials. Please try again.");
                     return;
                 }
+
+                oLoginModel.setProperty("/EmployeeID", oMatchedUser.UserID);
+                oLoginModel.setProperty("/EmployeeName", oMatchedUser.UserName);
+                oLoginModel.setProperty("/EmailID", oMatchedUser.EmailID);
+                oLoginModel.setProperty("/Role", oMatchedUser.Role);
+                oLoginModel.setProperty("/BranchCode", oMatchedUser.BranchCode || "");
+                oLoginModel.setProperty("/MobileNo", oMatchedUser.MobileNo || "");
 
                 if (oMatchedUser.Role === "Customer") {
                     sap.m.MessageToast.show("Login Successful! Welcome, " + sUsername);
@@ -1240,7 +1248,7 @@ sap.ui.define([
                     if (this._oSignDialog) this._oSignDialog.close();
 
                     this.getOwnerComponent().getRouter().navTo("TilePage");
-                } else {
+                }else {
                     sap.m.MessageToast.show("Invalid credentials. Please try again.");
                 }
 
