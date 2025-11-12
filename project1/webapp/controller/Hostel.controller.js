@@ -566,7 +566,6 @@ sap.ui.define([
             // Update model
             oModel.setProperty("/SelectedPriceType", sType);
             oModel.setProperty("/SelectedPriceValue", sPrice);
-
             // --- FIX: Handle layout container gracefully ---
             const oParent = oTile.getParent();
 
@@ -594,7 +593,6 @@ sap.ui.define([
             );
         },
   
-
 
         viewDetails: async function (oEvent) {
             const oView = this.getView();
@@ -780,114 +778,113 @@ sap.ui.define([
 
         //     // Get selected bed type object
         //     const oItem = oEvent.getSource().getBindingContext("VisibilityModel").getObject();
-
         //     sap.m.MessageToast.show(`Booking started for ${oItem.Name}`);
 
-        //     //  Get or create the HostelModel
+        //     // 2. Access global HostelModel
         //     let oHostelModel = sap.ui.getCore().getModel("HostelModel");
         //     if (!oHostelModel) {
         //         oHostelModel = new sap.ui.model.json.JSONModel({});
         //         sap.ui.getCore().setModel(oHostelModel, "HostelModel");
         //     }
 
-        //     //  Set RoomType and Price in HostelModel
+        //     // 3. Set basic room info
         //     oHostelModel.setProperty("/RoomType", oItem.Name || "");
-        //     oHostelModel.setProperty("/Price", oItem.Price || 0);
-
-        //     // Optionally set other details
         //     oHostelModel.setProperty("/Image", oItem.Image || "");
         //     oHostelModel.setProperty("/Description", oItem.Description || "");
-        //     console.log("onBookNow: Passing data to next page:", oItem);
+        //     oHostelModel.setProperty("/Price", oItem.Price || 0);
+        //     oHostelModel.setProperty("/MonthPrice", oItem.MonthPrice || 0);
+        //     oHostelModel.setProperty("/YearPrice", oItem.YearPrice || 0);
 
-        //     //  Navigate to the booking route (or open fragment)
+        //     // 4. Check if a pricing plan was selected earlier (from fragment)
+        //     const sSelectedType = oHostelModel.getProperty("/SelectedPriceType");
+        //     const sSelectedValue = oHostelModel.getProperty("/SelectedPriceValue");
+
+        //     // 5. Validate selection
+        //     if (!sSelectedType || !sSelectedValue) {
+        //         sap.m.MessageToast.show("Please select a pricing plan before booking.");
+        //         return;
+        //     }
+
+        //     // 6. Store final booking data
+        //     oHostelModel.setProperty("/FinalBookingType", sSelectedType);
+        //     oHostelModel.setProperty("/FinalBookingPrice", sSelectedValue);
+
+        //     console.log("onBookNow → Booking data being sent:", oHostelModel.getData());
+
+        //     // 7. Navigate to booking page
         //     const oRouter = this.getOwnerComponent().getRouter();
         //     oRouter.navTo("RouteBookRoom");
         // },
+       onConfirmBooking: function(oEvent) {
 
-        onBookNow: function (oEvent) {
-            // 1. Get selected bed type object
-            const oItem = oEvent.getSource().getBindingContext("VisibilityModel").getObject();
-            sap.m.MessageToast.show(`Booking started for ${oItem.Name}`);
+    // const oItem = oEvent.getSource().getBindingContext("HostelModel").getObject();
 
-            // 2. Access global HostelModel
-            let oHostelModel = sap.ui.getCore().getModel("HostelModel");
-            if (!oHostelModel) {
-                oHostelModel = new sap.ui.model.json.JSONModel({});
-                sap.ui.getCore().setModel(oHostelModel, "HostelModel");
-            }
+    // Get existing model or create if not exists
+    let oHostelModel = sap.ui.getCore().getModel("HostelModel");
+    if (!oHostelModel) {
+        oHostelModel = new sap.ui.model.json.JSONModel({});
+        sap.ui.getCore().setModel(oHostelModel, "HostelModel");
+    }
 
-            // 3. Set basic room info
-            oHostelModel.setProperty("/RoomType", oItem.Name || "");
-            oHostelModel.setProperty("/Image", oItem.Image || "");
-            oHostelModel.setProperty("/Description", oItem.Description || "");
-            oHostelModel.setProperty("/Price", oItem.Price || 0);
-            oHostelModel.setProperty("/MonthPrice", oItem.MonthPrice || 0);
-            oHostelModel.setProperty("/YearPrice", oItem.YearPrice || 0);
+     oHostelModel.setProperty("/SelectedPriceType", sSelectedType);
+            oHostelModel.setProperty("/SelectedPriceValue", sSelectedPrice);
 
-            // 4. Check if a pricing plan was selected earlier (from fragment)
-            const sSelectedType = oHostelModel.getProperty("/SelectedPriceType");
-            const sSelectedValue = oHostelModel.getProperty("/SelectedPriceValue");
+    // Set selected tile data into model root properties (for easy binding)
+    oHostelModel.setProperty("/RoomType", oItem.Name || "");
+    oHostelModel.setProperty("/Price",sSelectedPrice || 0);
+    oHostelModel.setProperty("/ACType", oItem.ACType || "");
+    oHostelModel.setProperty("/Currency", "₹"); // Or your currency symbol
 
-            // 5. Validate selection
-            if (!sSelectedType || !sSelectedValue) {
-                sap.m.MessageToast.show("Please select a pricing plan before booking.");
-                return;
-            }
+    // Optionally set other properties
+    oHostelModel.setProperty("/Image", oItem.Image || "");
+    oHostelModel.setProperty("/Description", oItem.Description || "");
 
-            // 6. Store final booking data
-            oHostelModel.setProperty("/FinalBookingType", sSelectedType);
-            oHostelModel.setProperty("/FinalBookingPrice", sSelectedValue);
+    // Close dialog
+    this._oRoomDetailFragment.close();
 
-            console.log("onBookNow → Booking data being sent:", oHostelModel.getData());
-
-            // 7. Navigate to booking page
-            const oRouter = this.getOwnerComponent().getRouter();
-            oRouter.navTo("RouteBookRoom");
-        },
-
-
-
-        onConfirmBooking: function () {
-            const oView = this.getView();
-            const oHostelModel = oView.getModel("HostelModel");
-            const oData = oHostelModel?.getData?.() || {};
-
-            console.log("onConfirmBooking: HostelModel data:", oData);
+    // Navigate to booking page
+    this.getOwnerComponent().getRouter().navTo("RouteBookRoom");
+},
+        // onConfirmBooking: function () {
+        //     const oView = this.getView();
+        //     const oHostelModel = oView.getModel("HostelModel");
+        //     console.log("onConfirmBooking: HostelModel data:", oHostelModel?.getData?.());
+        //     const oData = oHostelModel?.getData?.() || {};
 
             // 1️⃣ Validate selection
-            if (!oData.SelectedPriceType || !oData.SelectedPriceValue) {
-                sap.m.MessageToast.show("Please select a pricing plan before booking.");
-                return;
-            }
+        //     if (!oData.SelectedPriceType || !oData.SelectedPriceValue) {
+        //         sap.m.MessageToast.show("Please select a pricing plan before booking.");
+        //         return;
+        //     }
 
-            // 2️⃣ Construct payload
-            const oPayload = {
-                BookingDate: new Date().toISOString(),
-                RoomNo: oData.RoomNo || "",
-                BedType: oData.BedType || "",
-                ACType: oData.ACType || "",
-                Capacity: oData.Capacity || "",
-                Address: oData.Address || "",
-                Description: oData.Description || "",
-                SelectedPriceType: oData.SelectedPriceType,
-                FinalPrice: oData.SelectedPriceValue,
-                Source: "UI5_HostelApp",
-                Status: "Pending"
-            };
+        //     // 2️⃣ Construct payload
+        //     const oPayload = {
+        //         BookingDate: new Date().toISOString(),
+        //         RoomNo: oData.RoomNo || "",
+        //         BedType: oData.BedType || "",
+        //         ACType: oData.ACType || "",
+        //         Capacity: oData.Capacity || "",
+        //         Address: oData.Address || "",
+        //         Description: oData.Description || "",
+        //         SelectedPriceType: oData.SelectedPriceType,
+        //         FinalPrice: oData.SelectedPriceValue,
+        //         Source: "UI5_HostelApp",
+        //         Status: "Pending"
+        //     };
 
-            // (Optional) Only keep if you actually need this extra property in model
-            oHostelModel.setProperty("/roomtype", oData.BedType);
+        //     // (Optional) Only keep if you actually need this extra property in model
+        //     oHostelModel.setProperty("/roomtype", oData.BedType);
 
-            console.log("Full Payload JSON:", JSON.stringify(oPayload, null, 4));
+        //     console.log("Full Payload JSON:", JSON.stringify(oPayload, null, 4));
 
-            // 3️⃣ User feedback
-            sap.m.MessageToast.show(
-                `Booking confirmed for ${oData.BedType || "Room"} (${oData.SelectedPriceType} plan)`
-            );
+        //     // 3️⃣ User feedback
+        //     sap.m.MessageToast.show(
+        //         `Booking confirmed for ${oData.BedType || "Room"} (${oData.SelectedPriceType} plan)`
+        //     );
 
-            // 4️⃣ Close the dialog
-            if (this._oRoomDetailFragment) this._oRoomDetailFragment.close();
-        },
+        //     // 4️⃣ Close the dialog
+        //     if (this._oRoomDetailFragment) this._oRoomDetailFragment.close();
+        // },
 
 
 
@@ -1154,7 +1151,6 @@ sap.ui.define([
             try {
                 // Use your reusable helper
                 await this.ajaxCreateWithJQuery("HM_Login", oPayload);
-
                 // Handle success
                 sap.m.MessageToast.show("Sign Up successful!");
 
@@ -1224,7 +1220,6 @@ sap.ui.define([
                 oLoginModel.setProperty("/MobileNo", oMatchedUser.MobileNo || "");
 
                 if (oMatchedUser.Role === "Customer") {
-                    sap.m.MessageToast.show("Login Successful! Welcome, " + sUsername);
                     this._oLoggedInUser = oMatchedUser;
                     const oUserModel = new JSONModel(oMatchedUser);
                     sap.ui.getCore().setModel(oUserModel, "LoginModel");

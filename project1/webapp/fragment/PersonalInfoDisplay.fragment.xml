@@ -52,25 +52,43 @@
     <Toolbar>
         <Title text="Selected Facilities" level="H4" />
     </Toolbar>
+    
+<FlexBox
+    alignItems="Start"
+    justifyContent="Start"
+    class="sapUiSmallMarginTop"
+    items="{
+        path: 'HostelModel>/Persons'
+    }">
 
- 
-<FlexBox alignItems="Start" justifyContent="Start"  class="sapUiSmallMarginTop"
-         items="{ path: 'HostelModel>/Persons' }">
     <VBox width="260px" class="sapUiSmallMargin">
+        <!-- Person Name -->
         <Title text="{= 'Facilities for ' + (${HostelModel>FullName} || 'Person') }" level="H6" />
 
-        <FlexBox justifyContent="Start" 
-                 items="{ path: 'HostelModel>PersonFacilitiesSummary' }">
-            <VBox width="200px" height="200px" class="sapUiSmallMargin serviceCard"
-                  alignItems="Center" justifyContent="Center"
-                  visible="{= !!${HostelModel>FacilityName} }">
-                <Image src="{HostelModel>Image}" width="180px" height="140px" densityAware="false"/>
+        <!-- Facilities for this person -->
+        <FlexBox
+            wrap="Wrap"
+            justifyContent="Start"
+            items="{
+                path: 'HostelModel>PersonFacilitiesSummary'
+            }">
+
+            <VBox
+                width="200px"
+                height="200px"
+                class="sapUiSmallMargin serviceCard"
+                alignItems="Center"
+                justifyContent="Center"
+                visible="{= !!${HostelModel>FacilityName} }">
+
+                <Image src="{HostelModel>Image}" width="180px" height="140px" densityAware="false" />
                 <Text text="{HostelModel>FacilityName}" />
                 <Text text="{= '₹ ' + ${HostelModel>Price}}" />
             </VBox>
         </FlexBox>
     </VBox>
 </FlexBox>
+
 
 
    <Table

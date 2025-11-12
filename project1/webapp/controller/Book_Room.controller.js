@@ -63,24 +63,6 @@ sap.ui.define([
 				let aBedTypes = Array.isArray(oData.commentData) ?
 					oData.commentData :
 					[oData.commentData];
-
-				// // Filter out blank or empty strings and remove duplicates based on PriceType
-				// aBedTypes = aBedTypes.filter(item => 
-				//     item && item.PriceType && item.PriceType.trim() !== ""
-				// );
-
-				// // Remove duplicates by PriceType (assuming 'PriceType' is key), keep first occurrence
-				// const seen = new Set();
-				// aBedTypes = aBedTypes.filter(item => {
-				//     const key = item.PriceType.trim();
-				//     if (seen.has(key)) {
-				//         return false; // duplicate
-				//     } else {
-				//         seen.add(key);
-				//         return true;
-				//     }
-				// });
-
 				const oBedTypeModel = new JSONModel(aBedTypes);
 				this.getView().setModel(oBedTypeModel, "RoomDetailModel");
 				this._oWizard = this.byId("TC_id_wizard");
@@ -94,7 +76,12 @@ sap.ui.define([
 		},
 		_LoadFacilities: async function() {
 			const oView = this.getView();
-			const Response = await this.ajaxReadWithJQuery("HM_ExtraFacilities", {});
+      let oHostelModel = sap.ui.getCore().getModel("HostelModel").getData();
+      let oBranch = oHostelModel.BranchCode
+       const filter = {
+                    Brach: oBranch
+                };
+			const Response = await this.ajaxReadWithJQuery("HM_Facilities", filter);
 
 			// Extract array safely
 			const aFacilities = Response?.data || [];
@@ -118,10 +105,10 @@ sap.ui.define([
 
 			// Convert images and prepare data
 			const aFinalFacilities = aFacilities.map(f => ({
-				FacilityID: f.FacilityID,
+				FacilityID: f.ID,
 				FacilityName: f.FacilityName,
-				Image: convertBase64ToImage(f.FicilityImage, f.FileType),
-				Price: Number(f.Price)
+				Image: convertBase64ToImage(f.Photo1, f.Photo1Type),
+        Price:f.Price
 			}));
 
 			//  Wrap in object for proper binding
@@ -130,6 +117,7 @@ sap.ui.define([
 			});
 			oView.setModel(oFacilityModel, "FacilityModel");
 		},
+    
 
 		onNoOfPersonSelect: function(oEvent) {
 			var that = this
@@ -142,7 +130,7 @@ sap.ui.define([
 			const oData = oModel.getData();
 
 			oData.Persons = [];
-			oVBox.removeAllItems();
+			oVBox.destroyItems();
 			oData.ForBothSelected = iPersons > 1;
 
 			for (let i = 0; i < iPersons; i++) {
@@ -182,7 +170,7 @@ sap.ui.define([
 									text: "Fill Yourself"
 								}),
 								new sap.m.CheckBox({
-									id: "IDSelfCheck",
+									 id:that.createId("IDSelfCheck_" + i),
 									select: function(oEvent) {
 										const oView = sap.ui.getCore().byId("idBookRoomView") || that.getView();
 										const oModel = oView.getModel("HostelModel");
@@ -220,6 +208,7 @@ sap.ui.define([
 										}
 									}
 
+
 								})
 							] :
 							[]),
@@ -236,7 +225,7 @@ sap.ui.define([
 						new sap.m.Input({
 							value: "{HostelModel>/Persons/" + i + "/UserID}",
 							editable: false,
-							// visible:false
+							visible:false
 						}),
 
 						new sap.m.Label({
@@ -273,7 +262,8 @@ sap.ui.define([
 							text: "Mobile"
 						}),
 						new sap.m.Input({
-							value: "{HostelModel>/Persons/" + i + "/MobileNo}"
+							value: "{HostelModel>/Persons/" + i + "/MobileNo}",
+             
 						}),
 
 						new sap.m.Label({
@@ -455,6 +445,104 @@ sap.ui.define([
 
 			oModel.refresh(true);
 		},
+    _checkMandatoryFields: function() {
+    const oModel = this.getView().getModel("HostelModel");
+    const aPersons = oModel.getProperty("/Persons") || [];
+    let bAllValid = true;
+
+    aPersons.forEach((oPerson, iIndex) => {
+        // List all your required fields here
+        const aFields = [
+            { key: "FullName", label: "Full Name" },
+            { key: "DateOfBirth", label: "Date of Birth" },
+            { key: "Gender", label: "Gender" },
+            { key: "MobileNo", label: "Mobile" },
+            { key: "CustomerEmail", label: "Email" },
+            { key: "Country", label: "Country" },
+            { key: "City", label: "City" },
+            { key: "Address", label: "Address" }
+        ];
+        aFields.forEach(field => {
+            const sValue = oPerson[field.key];
+            if (!sValue || sValue.trim() === "") {
+                bAllValid = false;
+            }
+        });
+    });
+
+    return bAllValid;
+},
+
+    // onDialogClose: function () {
+    //         this._oLoginAlertDialog.close()
+    //     },
+    //       onSignIn: async function () {
+    //         // var ofrag = sap.ui.getCore();
+    //         var oModel = this.getOwnerComponent().getModel("LoginMode");
+    //         var oData = oModel.getData();
+    //         const oLoginModel = this.getView().getModel("LoginModel"); 
+
+    //         // Get input values
+    //         var sUserid = sap.ui.getCore().byId("signInuserid").getValue();
+    //         var sUsername = sap.ui.getCore().byId("signInusername").getValue();
+    //         var sPassword = sap.ui.getCore().byId("signinPassword").getValue();
+
+    //         // Basic validation example
+    //         if (
+    //            !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInuserid"), "ID")|| !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID") ||
+    //             !utils._LCvalidatePassword(sap.ui.getCore().byId("signinPassword"), "ID")
+    //         ) {
+    //             sap.m.MessageToast.show("Make sure all the mandatory fields are filled/validate the entered value");
+    //             return;
+    //         }
+
+    //         try {
+    //             //  Fetch all registered users (no payload — server ignores it anyway)
+    //             const oResponse = await this.ajaxReadWithJQuery("HM_Login", "");
+
+    //             const aUsers = oResponse?.commentData || [];
+
+    //             const oMatchedUser = aUsers.find(user =>
+    //             user.UserID === sUserid &&
+    //             user.UserName === sUsername &&
+    //             (user.Password === sPassword || user.Password === btoa(sPassword))
+    //             );
+
+    //             if (!oMatchedUser) {
+    //                 sap.m.MessageToast.show("Invalid credentials. Please try again.");
+    //                 return;
+    //             }
+
+    //             oLoginModel.setProperty("/EmployeeID", oMatchedUser.UserID);
+    //             oLoginModel.setProperty("/EmployeeName", oMatchedUser.UserName);
+    //             oLoginModel.setProperty("/EmailID", oMatchedUser.EmailID);
+    //             oLoginModel.setProperty("/Role", oMatchedUser.Role);
+    //             oLoginModel.setProperty("/BranchCode", oMatchedUser.BranchCode || "");
+    //             oLoginModel.setProperty("/MobileNo", oMatchedUser.MobileNo || "");
+
+    //             if (oMatchedUser.Role === "Customer") {
+    //                 this._oLoggedInUser = oMatchedUser;
+    //                 const oUserModel = new JSONModel(oMatchedUser);
+    //                 sap.ui.getCore().setModel(oUserModel, "LoginModel");
+
+    //                 sap.ui.getCore().byId("signInusername").setValue("");
+    //                 sap.ui.getCore().byId("signinPassword").setValue("");
+
+    //                 if (this._oSignDialog) this._oSignDialog.close();
+
+    //                 const oView = this.getView();
+    //                 oView.byId("loginButton")?.setVisible(false);
+    //                 oView.byId("ProfileAvatar")?.setVisible(true);
+
+    //             }else {
+    //                 sap.m.MessageToast.show("Invalid credentials. Please try again.");
+    //             }
+
+    //         } catch (err) {
+    //             console.error("Login Error:", err);
+    //             sap.m.MessageToast.show("Failed to fetch login data: " + err);
+    //         }
+    //     },
 		onDialogNextButton: async function() {
 			this._iSelectedStepIndex = this._oWizard.getSteps().indexOf(this._oSelectedStep);
 			this.oNextStep = this._oWizard.getSteps()[this._iSelectedStepIndex + 1];
@@ -463,10 +551,9 @@ sap.ui.define([
 			} else {
 				this._oWizard.nextStep();
 			}
-
 			this._iSelectedStepIndex++;
 			this._oSelectedStep = this.oNextStep;
-
+      
 			this.handleButtonsVisibility();
 		},
 
@@ -490,8 +577,10 @@ sap.ui.define([
 			this._iSelectedStepIndex = this._oWizard.getSteps().indexOf(this._oSelectedStep);
 			this.handleButtonsVisibility();
 		},
+
 		handleButtonsVisibility: function() {
 			var oModel = this.getView().getModel("OBTNModel");
+      const oHostelModel =  this.getView().getModel("HostelModel")
 			oModel.setProperty("/Submit", false);
 			oModel.setProperty("/Cancel", false);
 			switch (this._iSelectedStepIndex) {
@@ -502,140 +591,73 @@ sap.ui.define([
 				case 1:
 					oModel.setProperty("/PERVIOUSVIS", true);
 					oModel.setProperty("/NXTVis", true);
+            // if (!this._checkMandatoryFields()) {
+            //     sap.m.MessageToast.show("Please fill all mandatory personal details before proceeding.");
+            //     // Move wizard back to previous valid step
+            //     // If using goToStep/goBack, implement as needed to stay on current step
+            //     this._iSelectedStepIndex--;
+            //     this._oSelectedStep = this._oWizard.getSteps()[this._iSelectedStepIndex];
+            //     oModel.setProperty("/NXTVis", true);
+            //     return; // Exit without proceeding
+            // }
+           
+            this._LoadFacilities()
+          
 					break;
 				case 2:
+         
 					oModel.setProperty("/Submit", true);
 					oModel.setProperty("/Cancel", true);
 					oModel.setProperty("/NXTVis", false);
 					oModel.setProperty("/PERVIOUSVIS", false);
+            this.TC_onDialogNextButton()
 					break;
 				default:
 					break;
 			}
 		},
 
+		TC_onDialogNextButton: function () {
+    const oView = this.getView();
+    const oHostelModel = oView.getModel("HostelModel");
+    const aPersons = oHostelModel.getProperty("/Persons") || [];
+    const sStartDate = oHostelModel.getProperty("/StartDate");
+    const sEndDate = oHostelModel.getProperty("/EndDate");
+    const roomRentPrice = oHostelModel.getProperty("/Price");
 
-		TC_onDialogNextButton: function() {
-			const oView = this.getView();
-			const oWizard = oView.byId("TC_id_wizard");
-			const oCurrentStep = oWizard.getCurrentStep();
-			const oHostelModel = oView.getModel("HostelModel");
-			const oBtnModel = oView.getModel("OBTNModel");
+    const oStartDate = this._parseDate(sStartDate);
+    const oEndDate = this._parseDate(sEndDate);
+    const diffTime = oEndDate - oStartDate;
+    const iDays = Math.ceil(diffTime / (1000 * 3600 * 24));
 
-			// Always enable Previous button after first step
-			oBtnModel.setProperty("/PERVIOUSVIS", true);
+    if (iDays <= 0) {
+        sap.m.MessageToast.show("End Date must be after Start Date");
+        return;
+    }
 
-			// ✅ If currently on FIRST STEP ("Booking Information"), just move to next step (Personal Info)
-			if (oCurrentStep === this.createId("TC_id_stepGeneralInfo")) {
-				oWizard.nextStep();
+    // Calculate totals (assuming returns structure with AllSelectedFacilities)
+    const totals = this.calculateTotals(aPersons, sStartDate, sEndDate, roomRentPrice);
+    if (!totals) return;  
 
-				// Update button visibility for next step
-				oBtnModel.setProperty("/Submit", false);
-				oBtnModel.setProperty("/Cancel", false);
-				oBtnModel.setProperty("/NXTVis", true);
-				oBtnModel.setProperty("/PERVIOUSVIS", true);
-				return; // exit function here
-			}
+    // Deep copy and attach unique facilities
+    const aUpdatedPersons = aPersons.map((oPerson, iIndex) => {
+        const personName = oPerson.FullName || `Person ${iIndex + 1}`;
+        const aFacilities = totals.AllSelectedFacilities.filter(f => f.PersonName === personName);
 
-			// ✅ If currently on SECOND STEP ("Personal Information")
-			if (oCurrentStep === this.createId("idStepPersonal1")) {
-				const aPersons = oHostelModel.getProperty("/Persons") || [];
-				const sStartDate = oHostelModel.getProperty("/StartDate");
-				const sEndDate = oHostelModel.getProperty("/EndDate");
-				const roomRentPrice = oHostelModel.getProperty("/Price");
+        return Object.assign({}, oPerson, {
+            PersonFacilitiesSummary: JSON.parse(JSON.stringify(aFacilities))
+        });
+    });
 
-				const oStartDate = this._parseDate(sStartDate);
-				const oEndDate = this._parseDate(sEndDate);
-				const diffTime = oEndDate - oStartDate;
-				const iDays = Math.ceil(diffTime / (1000 * 3600 * 24));
+    oHostelModel.setProperty("/Persons", aUpdatedPersons);
+    oHostelModel.setProperty("/TotalDays", totals.TotalDays);
+    oHostelModel.setProperty("/TotalFacilityPrice", totals.TotalFacilityPrice);
+    oHostelModel.setProperty("/GrandTotal", totals.GrandTotal);
+    oHostelModel.setProperty("/AllSelectedFacilities", totals.AllSelectedFacilities);
+    oHostelModel.refresh(true);
+}
+,
 
-				if (iDays <= 0) {
-					sap.m.MessageToast.show("End Date must be after Start Date");
-					return;
-				}
-
-				const aMandatoryFields = ["FullName", "DateOfBirth"];
-				let bAllValid = true;
-				let bDocumentValid = true;
-
-				// Validate per person fields
-				aPersons.forEach((oPerson, iIndex) => {
-					aMandatoryFields.forEach((sField) => {
-						const sValue = oPerson[sField];
-						const sFieldPath = `/Persons/${iIndex}/${sField}`;
-						const aInputs = oView.findElements(true, (oControl) => {
-							return (
-								oControl.getBinding("value") &&
-								oControl.getBinding("value").getPath() === sFieldPath
-							);
-						});
-						const oInput = aInputs[0];
-						if (!sValue || sValue.trim() === "") {
-							bAllValid = false;
-							if (oInput) {
-								oInput.setValueState("Error");
-								oInput.setValueStateText(`${sField} is required`);
-							}
-						} else if (oInput) {
-							oInput.setValueState("None");
-						}
-					});
-
-					// Validate document
-					if (!oPerson.Documents || oPerson.Documents.length === 0) {
-						bDocumentValid = false;
-					}
-				});
-
-				// if (!bAllValid) {
-				//   sap.m.MessageToast.show("Please fill in all required personal details.");
-				//   return;
-				// }
-				// if (!bDocumentValid) {
-				//   sap.m.MessageToast.show("Please upload at least one document for each person.");
-				//   return;
-				// }
-
-				// Compute totals and populate summary arrays
-				const totals = this.calculateTotals(aPersons, sStartDate, sEndDate, roomRentPrice);
-				if (!totals) return;
-
-				// Assign per-person facility summary
-				aPersons.forEach((oPerson, iIndex) => {
-					const aPersonFacilitiesSummary = totals.AllSelectedFacilities.filter(
-						item => item.PersonName === (oPerson.FullName || `Person ${iIndex + 1}`)
-					);
-					oHostelModel.setProperty(`/Persons/${iIndex}/PersonFacilitiesSummary`, aPersonFacilitiesSummary);
-				});
-
-				// Set totals
-				oHostelModel.setProperty("/TotalDays", totals.TotalDays);
-				oHostelModel.setProperty("/TotalFacilityPrice", totals.TotalFacilityPrice);
-				oHostelModel.setProperty("/GrandTotal", totals.GrandTotal);
-				oHostelModel.setProperty("/AllSelectedFacilities", totals.AllSelectedFacilities);
-				oHostelModel.refresh(true);
-			}
-
-			// ✅ Move to next wizard step
-			oWizard.nextStep();
-
-			// ✅ Update footer button visibility based on next step
-			const oNextStep = oWizard.getCurrentStep();
-
-			if (oNextStep === this.createId("id_Summary")) {
-				// Summary step
-				oBtnModel.setProperty("/Submit", true);
-				oBtnModel.setProperty("/Cancel", true);
-				oBtnModel.setProperty("/NXTVis", false);
-				oBtnModel.setProperty("/PERVIOUSVIS", false);
-			} else {
-				// Any intermediate step
-				oBtnModel.setProperty("/Submit", false);
-				oBtnModel.setProperty("/Cancel", false);
-				oBtnModel.setProperty("/NXTVis", true);
-				oBtnModel.setProperty("/PERVIOUSVIS", true);
-			}
-		},
 
 		// Separated calculation function
 		calculateTotals: function(aPersons, sStartDate, sEndDate, roomRentPrice) {

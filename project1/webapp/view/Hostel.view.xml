@@ -153,8 +153,7 @@
                             horizontal="true"
                             vertical="true"
                             focusable="true"
-                            class="sapUiContentPadding"
-                        >
+                            class="sapUiContentPadding"                        >
                             <fb:FilterBar
                                 id="filterbar"
                                 persistencyKey="myPersKey"
