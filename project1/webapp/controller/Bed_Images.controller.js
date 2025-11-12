@@ -20,7 +20,7 @@ sap.ui.define([
             this.getOwnerComponent().getRouter().getRoute("RouteRoomImages").attachMatched(this._onRouteMatched, this);
 
         },
-        _onRouteMatched: function (oEvent) {
+        _onRouteMatched:async function (oEvent) {
 
                var model = new sap.ui.model.json.JSONModel({
                 Edit: false,
@@ -38,7 +38,7 @@ sap.ui.define([
             this.getView().setModel(BedImageModel, "BedImageModel")
 
          this.BedID = oEvent.getParameter("arguments").sPath;
-    this.ajaxReadWithJQuery("HM_BedType", {
+  await  this.ajaxReadWithJQuery("HM_BedType", {
     ID: this.BedID,
 }).then((oData) => {
     var oFCIAerData = Array.isArray(oData.data.data) ? oData.data.data : [oData.data.data];
@@ -70,7 +70,19 @@ sap.ui.define([
     this.getView().setModel(oDisplayModel, "DisplayImagesModel");
 });
 
+ this.Onsearch()
+        },
+          Onsearch: function() {
+            sap.ui.core.BusyIndicator.show(0);
 
+            this.ajaxReadWithJQuery("HM_BedType", "").then((oData) => {
+                var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
+                var model = new sap.ui.model.json.JSONModel(oFCIAerData);
+                this.getView().setModel(model, "BedDetails")
+
+                sap.ui.core.BusyIndicator.hide();
+
+            })
         },
         onAddItemButtonPress: function () {
     var oTable = this.byId("idTable");
@@ -126,6 +138,8 @@ POO_onPOTableDelete: function (oEvent) {
   BT_onsavebuttonpress: async function () {
     var oView = this.getView();
     var Payload = oView.getModel("BedImageModel").getData();
+    // var DisplayImagesModel = oView.getModel("DisplayImagesModel").getData();
+
 
     // var oFileUploader = this.byId("idFileUploader");
     // var aFiles = oFileUploader.oFileUpload.files;
@@ -140,10 +154,10 @@ POO_onPOTableDelete: function (oEvent) {
         utils._LCvalidateMandatoryField(oView.byId("id_Description"), "ID") 
 
     ) {
-        if (aFiles.length === 0 && !Payload.RoomPhotos) {
-            sap.m.MessageToast.show("Please select a file before saving.");
-            return;
-        }
+        // if (aFiles.length === 0 && !Payload.RoomPhotos) {
+        //     sap.m.MessageToast.show("Please select a file before saving.");
+        //     return;
+        // }
 
         var aBedDetails = oView.getModel("BedDetails").getData();
 
@@ -166,25 +180,10 @@ POO_onPOTableDelete: function (oEvent) {
             return;
         }
 
-        var oFile = aFiles[0];
+        // var oFile = aFiles[0];
         var payloadWithoutID = { ...Payload };
-        delete payloadWithoutID.ID;
 
-        try {
-            if (oFile) {
-                const sBase64 = await this._readFileAsBase64(oFile);
-                payloadWithoutID.RoomPhotos = sBase64;
-                payloadWithoutID.FileType = oFile.type;
-                payloadWithoutID.FileName = oFile.name;
-            }else if (Payload.ID) {
-                // Edit mode, no new file uploaded – keep original from BedDetails
-                var originalRecord = aBedDetails.find(b => b.ID === Payload.ID);
-                if (originalRecord) {
-                    payloadWithoutID.RoomPhotos = originalRecord.RoomPhotos;
-                    payloadWithoutID.FileType = originalRecord.FileType;
-                    payloadWithoutID.FileName = originalRecord.FileName;
-                }
-            }
+        delete payloadWithoutID.ID;
 
             if (Payload.ID) {
                 await this.ajaxUpdateWithJQuery("HM_BedType", {
@@ -199,10 +198,6 @@ POO_onPOTableDelete: function (oEvent) {
             sap.m.MessageToast.show("Bed saved successfully.");
             this.ARD_Dialog.close();
 
-        } catch (error) {
-            console.error("Save failed:", error);
-            sap.m.MessageBox.error("Error while saving Bed Details.");
-        }
 
     } else {
         sap.m.MessageToast.show("Please fill all mandatory fields correctly.");

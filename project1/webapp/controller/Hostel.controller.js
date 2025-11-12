@@ -37,7 +37,7 @@ sap.ui.define([
                 DateOfBirth: "",
                 CustomerEmail: "",
                 RoomType: "",
-                
+
             });
             oView.setModel(oHostelModel, "HostelModel");
 
@@ -84,9 +84,24 @@ sap.ui.define([
                 await this._loadBranchCode();
                 await this.onReadcallforRoom();
                 await this._loadFilteredData("KLB01", "");
+                
             } catch (error) {
                 console.error("Error during initialization:", error);
             }
+            this.byId("id_Branch").setSelectedKey("KLB01")
+                 const oModelData = oView.getModel("sBRModel").getData();
+
+            // 🔹 Filter the data for the selected branch name
+            const aFiltered = oModelData.filter(function (item) {
+                return item.Name === "Kalaburagi";
+            });
+
+            // 🔹 Update Area model dynamically
+            const oAreaModel = new sap.ui.model.json.JSONModel(aFiltered);
+            oView.setModel(oAreaModel, "AreaModel");
+
+            // 🔹 Enable the Area dropdown now that data is ready
+           oView.byId("id_Area").setEnabled(true);
         },
 
         CustomerDetails: async function () {
@@ -321,6 +336,9 @@ sap.ui.define([
         //     }
         // },
         _loadFilteredData: async function (sBranchCode, sACType) {
+            if(sACType==="All"){
+                sACType=""
+            }
             try {
                 const oView = this.getView();
 
@@ -331,30 +349,30 @@ sap.ui.define([
 
                 const allRooms = response?.data.data || [];
 
-        // 🔹 If AC type is not provided → show all bed types for the branch
-        let matchedRooms = [];
+                // 🔹 If AC type is not provided → show all bed types for the branch
+                let matchedRooms = [];
 
-        if (!sACType) {
-            // No ACType → all bed types for the branch
-            matchedRooms = allRooms.filter(
-                room =>
-                    room.BranchCode &&
-                    room.BranchCode.toLowerCase() === sBranchCode.toLowerCase()
-            );
-        } else {
-            // ACType is provided → filter by branch + ACType
-            matchedRooms = allRooms.filter(
-                room =>
-                    room.BranchCode &&
-                    room.BranchCode.toLowerCase() === sBranchCode.toLowerCase() &&
-                    room.ACType &&
-                    room.ACType.toLowerCase() === sACType.toLowerCase()
-            );
-        }
+                if (!sACType) {
+                    // No ACType → all bed types for the branch
+                    matchedRooms = allRooms.filter(
+                        room =>
+                            room.BranchCode &&
+                            room.BranchCode.toLowerCase() === sBranchCode.toLowerCase()
+                    );
+                } else {
+                    // ACType is provided → filter by branch + ACType
+                    matchedRooms = allRooms.filter(
+                        room =>
+                            room.BranchCode &&
+                            room.BranchCode.toLowerCase() === sBranchCode.toLowerCase() &&
+                            room.ACType &&
+                            room.ACType.toLowerCase() === sACType.toLowerCase()
+                    );
+                }
 
-        // 🔹 Models
-        const oRoomDetailsModel = oView.getModel("RoomCountModel");
-        const oCustomerModel = oView.getModel("CustomerModel");
+                // 🔹 Models
+                const oRoomDetailsModel = oView.getModel("RoomCountModel");
+                const oCustomerModel = oView.getModel("CustomerModel");
 
                 const roomDetails = oRoomDetailsModel.getData()?.Rooms || [];
                 const customerData = oCustomerModel.getData() || [];
@@ -376,20 +394,20 @@ sap.ui.define([
                     return `data:${mimeType};base64,${sBase64}`;
                 };
 
-        // 🔹 Prepare array for cards (no unique filtering now)
-        const aBedTypes = matchedRooms.map(room => {
-            const matchingRooms = roomDetails.filter(
-                rd =>
-                    rd.BranchCode?.toLowerCase() === sBranchCode.toLowerCase() &&
-                    rd.BedTypeName?.trim().toLowerCase() ===
-                        (room.Name?.trim().toLowerCase() + " - " + room.ACType?.trim().toLowerCase())
-            );
+                // 🔹 Prepare array for cards (no unique filtering now)
+                const aBedTypes = matchedRooms.map(room => {
+                    const matchingRooms = roomDetails.filter(
+                        rd =>
+                            rd.BranchCode?.toLowerCase() === sBranchCode.toLowerCase() &&
+                            rd.BedTypeName?.trim().toLowerCase() ===
+                            (room.Name?.trim().toLowerCase() + " - " + room.ACType?.trim().toLowerCase())
+                    );
 
-            const firstRoom = matchingRooms[0];
-            const price = firstRoom?.Price ? " " + firstRoom.Price : "";
+                    const firstRoom = matchingRooms[0];
+                    const price = firstRoom?.Price ? " " + firstRoom.Price : "";
 
-                            let totalBooked = 0;
-                    let totalCapacity = 0;  
+                    let totalBooked = 0;
+                    let totalCapacity = 0;
 
                     matchingRooms.forEach(rm => {
                         totalCapacity += rm.NoofPerson || 0;
@@ -407,18 +425,19 @@ sap.ui.define([
                         totalBooked += bookedCount;
                     });
 
-                            const isFull = totalBooked >= totalCapacity && totalCapacity > 0;
+                    const isFull = totalBooked >= totalCapacity && totalCapacity > 0;
 
-                const isVisible = !isFull && price.trim() !== "";
+                    const isVisible = !isFull && price.trim() !== "";
 
                     return {
                         Name: room.Name,
-                ACType: room.ACType,
+                        ACType: room.ACType,
                         Description: room.Description || "",
                         Price: price,
-                BranchCode:room.BranchCode,
+                        BranchCode: room.BranchCode,
+                        ID: room.ID,
 
-                        Image: convertBase64ToImage(room.RoomPhotos, room.MimeType || room.FileType),
+                        Image: convertBase64ToImage(room.Photo1 || room.Photo1Type),
                         Visible: isVisible
                     };
                 });
@@ -653,37 +672,37 @@ sap.ui.define([
         },
 
 
- 
 
 
 
-            // onBookNow: function (oEvent) {
-            
-            //     // Get selected bed type object
-            //     const oItem = oEvent.getSource().getBindingContext("VisibilityModel").getObject();
 
-            //     sap.m.MessageToast.show(`Booking started for ${oItem.Name}`);
+        // onBookNow: function (oEvent) {
 
-            //     //  Get or create the HostelModel
-            //     let oHostelModel = sap.ui.getCore().getModel("HostelModel");
-            //     if (!oHostelModel) {
-            //         oHostelModel = new sap.ui.model.json.JSONModel({});
-            //         sap.ui.getCore().setModel(oHostelModel, "HostelModel");
-            //     }
+        //     // Get selected bed type object
+        //     const oItem = oEvent.getSource().getBindingContext("VisibilityModel").getObject();
 
-            //     //  Set RoomType and Price in HostelModel
-            //     oHostelModel.setProperty("/RoomType", oItem.Name || "");
-            //     oHostelModel.setProperty("/Price", oItem.Price || 0);
+        //     sap.m.MessageToast.show(`Booking started for ${oItem.Name}`);
 
-            //     // Optionally set other details
-            //     oHostelModel.setProperty("/Image", oItem.Image || "");
-            //     oHostelModel.setProperty("/Description", oItem.Description || "");
-            //     console.log("onBookNow: Passing data to next page:", oItem);
+        //     //  Get or create the HostelModel
+        //     let oHostelModel = sap.ui.getCore().getModel("HostelModel");
+        //     if (!oHostelModel) {
+        //         oHostelModel = new sap.ui.model.json.JSONModel({});
+        //         sap.ui.getCore().setModel(oHostelModel, "HostelModel");
+        //     }
 
-            //     //  Navigate to the booking route (or open fragment)
-            //     const oRouter = this.getOwnerComponent().getRouter();
-            //     oRouter.navTo("RouteBookRoom");
-            // },
+        //     //  Set RoomType and Price in HostelModel
+        //     oHostelModel.setProperty("/RoomType", oItem.Name || "");
+        //     oHostelModel.setProperty("/Price", oItem.Price || 0);
+
+        //     // Optionally set other details
+        //     oHostelModel.setProperty("/Image", oItem.Image || "");
+        //     oHostelModel.setProperty("/Description", oItem.Description || "");
+        //     console.log("onBookNow: Passing data to next page:", oItem);
+
+        //     //  Navigate to the booking route (or open fragment)
+        //     const oRouter = this.getOwnerComponent().getRouter();
+        //     oRouter.navTo("RouteBookRoom");
+        // },
 
         onBookNow: function (oEvent) {
             // 1. Get selected bed type object
@@ -791,7 +810,7 @@ sap.ui.define([
         //     // console.log("onBookNow: Passing data to next page:", oItem);
 
         //     // //  Navigate to the booking route (or open fragment)
-           
+
         //     console.log("Full Payload JSON:", JSON.stringify(oPayload, null, 4));
 
         //     // 4️⃣ User feedback
@@ -895,10 +914,10 @@ sap.ui.define([
                 oView.addDependent(this.ARD_Dialog);
             }
             this._clearFilterFields()
-                var oBedTypeCombo = this.byId("id_Area");
-                this.byId("id_Roomtype").setSelectedKey("");
+            var oBedTypeCombo = this.byId("id_Area");
+            this.byId("id_Roomtype").setSelectedKey("");
 
-                 this.byId("id_Branch").setSelectedKey("");
+            this.byId("id_Branch").setSelectedKey("");
 
             oBedTypeCombo.setSelectedKey("").setVisible(false);
             this.ARD_Dialog.open();
@@ -1166,7 +1185,7 @@ sap.ui.define([
             // var ofrag = sap.ui.getCore();
             var oModel = this.getView().getModel("LoginMode");
             var oData = oModel.getData();
-            const oLoginModel = this.getView().getModel("LoginModel"); 
+            const oLoginModel = this.getView().getModel("LoginModel");
 
             // Get input values
             var sUserid = sap.ui.getCore().byId("signInuserid").getValue();
@@ -1175,7 +1194,7 @@ sap.ui.define([
 
             // Basic validation example
             if (
-               !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInuserid"), "ID")|| !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID") ||
+                !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInuserid"), "ID") || !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID") ||
                 !utils._LCvalidatePassword(sap.ui.getCore().byId("signinPassword"), "ID")
             ) {
                 sap.m.MessageToast.show("Make sure all the mandatory fields are filled/validate the entered value");
@@ -1189,9 +1208,9 @@ sap.ui.define([
                 const aUsers = oResponse?.commentData || [];
 
                 const oMatchedUser = aUsers.find(user =>
-                user.UserID === sUserid &&
-                user.UserName === sUsername &&
-                (user.Password === sPassword || user.Password === btoa(sPassword))
+                    user.UserID === sUserid &&
+                    user.UserName === sUsername &&
+                    (user.Password === sPassword || user.Password === btoa(sPassword))
                 );
 
                 if (!oMatchedUser) {
@@ -1229,7 +1248,7 @@ sap.ui.define([
                     if (this._oSignDialog) this._oSignDialog.close();
 
                     this.getOwnerComponent().getRouter().navTo("TilePage");
-                }else {
+                } else {
                     sap.m.MessageToast.show("Invalid credentials. Please try again.");
                 }
 
@@ -1580,21 +1599,21 @@ sap.ui.define([
             // Call your function with new search value
             this._loadFilteredData(sBranchCode);
         },
-       FC_onPressClear: function () {
-    const oView = this.getView();
-    const oBranchCombo = oView.byId("id_Branch");
-    const oAreaTypeCombo = oView.byId("id_Area");
-    const oRoomTypeCombo = oView.byId("id_Roomtype");
+        FC_onPressClear: function () {
+            const oView = this.getView();
+            const oBranchCombo = oView.byId("id_Branch");
+            const oAreaTypeCombo = oView.byId("id_Area");
+            const oRoomTypeCombo = oView.byId("id_Roomtype");
 
-    // 🔹 Reset all selected keys
-    if (oBranchCombo) oBranchCombo.setSelectedKey("");
-    if (oAreaTypeCombo) oAreaTypeCombo.setSelectedKey("");
-    if (oRoomTypeCombo) oRoomTypeCombo.setSelectedKey("");
+            // 🔹 Reset all selected keys
+            if (oBranchCombo) oBranchCombo.setSelectedKey("");
+            if (oAreaTypeCombo) oAreaTypeCombo.setSelectedKey("");
+            if (oRoomTypeCombo) oRoomTypeCombo.setSelectedKey("");
 
-    // 🔹 Make Area and Room Type non-editable
-    if (oAreaTypeCombo) oAreaTypeCombo.setEnabled(false);
-    if (oRoomTypeCombo) oRoomTypeCombo.setEnabled(false);
-},
+            // 🔹 Make Area and Room Type non-editable
+            if (oAreaTypeCombo) oAreaTypeCombo.setEnabled(false);
+            if (oRoomTypeCombo) oRoomTypeCombo.setEnabled(false);
+        },
 
         onAfterRendering: function () {
             var oCarousel = this.byId("customSlideCarousel");
@@ -1782,69 +1801,69 @@ sap.ui.define([
             } else {
                 return new Date(sDate);
             }
-},
+        },
 
-onBranchSelectionChange: function (oEvent) {
-    const oView = this.getView();
-    const oAreaCombo = oView.byId("id_Area");
-    const oRoomType = oView.byId("id_Roomtype");
+        onBranchSelectionChange: function (oEvent) {
+            const oView = this.getView();
+            const oAreaCombo = oView.byId("id_Area");
+            const oRoomType = oView.byId("id_Roomtype");
 
-    // Reset previous selections
-    oAreaCombo.setSelectedKey("").setEnabled(false);
-    oRoomType.setSelectedKey("").setEnabled(false);
+            // Reset previous selections
+            oAreaCombo.setSelectedKey("").setEnabled(false);
+            oRoomType.setSelectedKey("").setEnabled(false);
 
-    const oSelectedItem = oEvent.getParameter("selectedItem");
-    if (!oSelectedItem) return;
+            const oSelectedItem = oEvent.getParameter("selectedItem");
+            if (!oSelectedItem) return;
 
-    // 🔹 Selected Branch Name
-    const sSelectedBranch = oSelectedItem.getText();
+            // 🔹 Selected Branch Name
+            const sSelectedBranch = oSelectedItem.getText();
 
-    // 🔹 Fetch existing Branch model data
-    const oModelData = oView.getModel("sBRModel").getData();
+            // 🔹 Fetch existing Branch model data
+            const oModelData = oView.getModel("sBRModel").getData();
 
-    // 🔹 Filter the data for the selected branch name
-    const aFiltered = oModelData.filter(function (item) {
-        return item.Name === sSelectedBranch;
-    });
+            // 🔹 Filter the data for the selected branch name
+            const aFiltered = oModelData.filter(function (item) {
+                return item.Name === sSelectedBranch;
+            });
 
-    // 🔹 Update Area model dynamically
-    const oAreaModel = new sap.ui.model.json.JSONModel(aFiltered);
-    oView.setModel(oAreaModel, "AreaModel");
+            // 🔹 Update Area model dynamically
+            const oAreaModel = new sap.ui.model.json.JSONModel(aFiltered);
+            oView.setModel(oAreaModel, "AreaModel");
 
-    // 🔹 Enable the Area dropdown now that data is ready
-    oAreaCombo.setEnabled(true);
-},
+            // 🔹 Enable the Area dropdown now that data is ready
+            oAreaCombo.setEnabled(true);
+        },
 
 
-// 🔹 When Area is selected, enable Room Type combo
-onAreaSelectionChange: function (oEvent) {
-    const oRoomType = this.byId("id_Roomtype");
-    const oSelectedItem = oEvent.getSource().getSelectedItem();
+        // 🔹 When Area is selected, enable Room Type combo
+        onAreaSelectionChange: function (oEvent) {
+            const oRoomType = this.byId("id_Roomtype");
+            const oSelectedItem = oEvent.getSource().getSelectedItem();
 
-    if (oSelectedItem) {
-        oRoomType.setEnabled(true);
-    } else {
-        oRoomType.setEnabled(false);
-    }
-},
+            if (oSelectedItem) {
+                oRoomType.setEnabled(true);
+            } else {
+                oRoomType.setEnabled(false);
+            }
+        },
 
-// 🔹 Search logic remains same
-onSearchRooms: function () {
-    const oBranchCombo = this.byId("id_Area");   // Area Combo
-    const oACTypeCombo = this.byId("id_Roomtype");
+        // 🔹 Search logic remains same
+        onSearchRooms: function () {
+            const oBranchCombo = this.byId("id_Area");   // Area Combo
+            const oACTypeCombo = this.byId("id_Roomtype");
 
-    const oSelectedBranchItem = oBranchCombo.getSelectedItem();
-    const sSelectedBranch = oSelectedBranchItem?.getKey(); // BranchID from AreaModel
+            const oSelectedBranchItem = oBranchCombo.getSelectedItem();
+            const sSelectedBranch = oSelectedBranchItem?.getKey(); // BranchID from AreaModel
 
-    const sSelectedACType = oACTypeCombo?.getSelectedKey();
+            const sSelectedACType = oACTypeCombo?.getSelectedKey();
 
-    if (!sSelectedBranch) {
-        sap.m.MessageToast.show("Please select a location first.");
-        return;
-    }
+            if (!sSelectedBranch) {
+                sap.m.MessageToast.show("Please select a location first.");
+                return;
+            }
 
-    this._loadFilteredData(sSelectedBranch, sSelectedACType);
-},
+            this._loadFilteredData(sSelectedBranch, sSelectedACType);
+        },
 
 
 

@@ -146,6 +146,7 @@ sap.ui.define([
                     oData.Attachment[`Photo${i}Name`] = "";
                     oData.Attachment[`Photo${i}Type`] = "";
                 }
+                oData.Attachment.BranchCode=Payload.BranchCode
 
                 try {
                     sap.ui.core.BusyIndicator.show(0);
