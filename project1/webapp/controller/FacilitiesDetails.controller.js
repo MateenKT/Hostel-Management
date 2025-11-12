@@ -184,7 +184,12 @@ sap.ui.define([
                 return;
             }
 
-            // 🔹 Check for duplicates only when creating new record
+            if (attachments.length > 3) {
+                sap.m.MessageBox.warning("You can upload a maximum of 3 attachments only.");
+                return;
+            }
+
+            // Check for duplicates only when creating new record
             if (!Payload.ID) {
                 const bDuplicate = aFacilitiesData.some(facility => (
                     facility.BranchCode === Payload.BranchCode &&
@@ -198,12 +203,13 @@ sap.ui.define([
             }
 
             // Map files to DB columns
-           const oData = {
+            const oData = {
                 BranchCode: Payload.BranchCode,
                 FacilityName: Payload.FacilityName,
                 Description: Payload.Description
             };
-            attachments.forEach((file, index) => {
+
+            attachments.slice(0, 3).forEach((file, index) => {
                 const num = index + 1;
                 oData[`Photo${num}`] = file.content || null;
                 oData[`Photo${num}Name`] = file.filename || "";
@@ -211,6 +217,7 @@ sap.ui.define([
             });
 
             sap.ui.core.BusyIndicator.show(0);
+
             try {
                 if (Payload.ID) {
                     // Update existing record
@@ -306,6 +313,15 @@ sap.ui.define([
             });
 
             oDialog.open();
+        },
+
+        onNavBack: function() {
+            var oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("TilePage");
+        },
+        onHome: function() {
+            var oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("RouteHostel");
         },
 
         HM_DeleteDetails: async function() {

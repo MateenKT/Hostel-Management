@@ -63,7 +63,7 @@
                 items="{path: 'Facilities>/'}">
 				<headerToolbar>
 					<OverflowToolbar>
-						<Title  text="facilities ({=${Facilities>/}.length})" />
+						<Title  text="Facilities ({=${Facilities>/}.length})" />
 						<ToolbarSpacer />
 						<Button text="Add Facility" press="FD_RoomDetails" type="Accept"/>
 						<Button text="Edit" press="FD_EditDetails" type="Transparent"/>
