@@ -56,7 +56,7 @@
                 <Wizard
                     class="sapUiResponsivePadding--header sapUiResponsivePadding--content"
                     showNextButton="false"
-                    navigationChange="TC_handleNavigationChange"
+                    navigationChange="handleNavigationChange"
                     renderMode="Page"
                     id="TC_id_wizard"
                     finishButtonText="Step 4"
@@ -120,7 +120,7 @@
                 <Button
                     text="Previous"
                     visible="{OBTNModel>/PERVIOUSVIS}"
-                    press="TC_onDialogBackButton"
+                    press="onDialogBackButton"
                 />
                 <Button
                 id="IdNextBtn"
@@ -128,7 +128,7 @@
                     type="Emphasized"
                     enabled="{OBTNModel>/Next}"
                     visible="{OBTNModel>/NXTVis}"
-                    press="TC_onDialogNextButton"
+                    press="onDialogNextButton"
                 />
             </OverflowToolbar>
         </footer>
