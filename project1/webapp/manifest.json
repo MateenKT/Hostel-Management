@@ -154,7 +154,7 @@
         },
          {
           "name": "RouteRoomImages",
-          "pattern": "RoomImages",
+          "pattern": "RoomImages/{sPath}",
           "target": [
             "TargetRoomImages"
           ]

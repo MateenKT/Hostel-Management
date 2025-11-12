@@ -156,9 +156,25 @@
                         demandPopin="true"
                     >
                         <Text
-                            text="Price"
+                            text="Daily Price"
                         />
-                    </Column>                  
+                    </Column>   
+                     <Column
+                        minScreenWidth="Tablet"
+                        demandPopin="true"
+                    >
+                        <Text
+                            text="Month Price"
+                        />
+                    </Column> 
+                     <Column
+                        minScreenWidth="Tablet"
+                        demandPopin="true"
+                    >
+                        <Text
+                            text="Year Price"
+                        />
+                    </Column>                
                 </columns>
                 <items>
                     <ColumnListItem
@@ -175,20 +191,15 @@
 
 
 
-                         <VBox>
     <Text
-        text="{= ${RoomDetailsModel>Price} ? 'Daily: ' + ${RoomDetailsModel>Price} + ' ' + ${RoomDetailsModel>Currency} : '' }"
-        class="sapUiTinyMarginBottom"
+        text="{= ${RoomDetailsModel>Price} ?  + ${RoomDetailsModel>Price} + ' ' + ${RoomDetailsModel>Currency} : '' }"
     />
     <Text
-        text="{= ${RoomDetailsModel>MonthPrice} ? 'Month: ' + ${RoomDetailsModel>MonthPrice} + ' ' + ${RoomDetailsModel>Currency} : '' }"
-        class="sapUiTinyMarginBottom"
+        text="{= ${RoomDetailsModel>MonthPrice} ?  + ${RoomDetailsModel>MonthPrice} + ' ' + ${RoomDetailsModel>Currency} : '' }"
     />
     <Text
-        text="{= ${RoomDetailsModel>YearPrice} ? 'Year: ' + ${RoomDetailsModel>YearPrice} + ' ' + ${RoomDetailsModel>Currency} : '' }"
-        class="sapUiTinyMarginBottom"
+        text="{= ${RoomDetailsModel>YearPrice} ? + ${RoomDetailsModel>YearPrice} + ' ' + ${RoomDetailsModel>Currency} : '' }"
     />
-</VBox>
 
                             <!-- <Text text="{HostelModel>RoomType}" /> -->
                            <Button

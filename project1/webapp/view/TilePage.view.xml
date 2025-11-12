@@ -97,26 +97,9 @@
                                             </TileContent>
                                         </GenericTile>
 
-										   <GenericTile
-                                            visible="true"
-                                            class="sapUiMediumMargin"
-                                            header="Manage Bed Images"
-                                            press="TileV_onpressBedImages"
-                                        >
-                                            <TileContent
-                                                unit="Manage Bed Images"
-                                            >
-                                                <ImageContent
-                                                    src="sap-icon://card"
-                                                />
-                                            </TileContent>
-                                        </GenericTile>
+    
 
-										<GenericTile visible="true" class="sapUiMediumMargin" header="Manage Facilities" press="TileV_onpressfacilities">
-											<TileContent unit="Facilities">
-												<ImageContent src="sap-icon://activities" />
-											</TileContent>
-										</GenericTile>
+									
                                     </layout:HorizontalLayout>
                                 </ux:blocks>
                             </ux:ObjectPageSubSection>

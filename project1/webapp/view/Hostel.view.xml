@@ -66,6 +66,7 @@
 						</l:Grid>
 					</ScrollContainer>
 	<Button text="Filter" icon="sap-icon://map" press="onpressFilter" width="200px" class="sapUiLargeMarginBegin sapUiSmallMarginTop"/>
+	
 <ScrollContainer
     height="100%"
     horizontal="true"
