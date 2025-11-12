@@ -2,13 +2,9 @@ sap.ui.define([
     "./BaseController",
     "sap/m/MessageBox",
     "../utils/validation",
-      "sap/ui/model/json/JSONModel",
-	"sap/ui/model/odata/type/Currency",
-], function(BaseController,
-	MessageBox,
-    utils,
-    JSONModel,
-	Currency) {
+    "sap/ui/model/json/JSONModel",
+    "sap/ui/model/odata/type/Currency",
+], function(BaseController,MessageBox,utils,JSONModel,Currency) {
     "use strict";
     return BaseController.extend("sap.ui.com.project1.controller.Facilitis", {
         onInit: function() {
@@ -36,20 +32,18 @@ sap.ui.define([
             });
             this.getView().setModel(model, "FacilitiesModel")
 
-            var oUploadModel = new sap.ui.model.json.JSONModel({
-                File: "",
-                FileName: "",
-                FileType: ""
-            });
-            this.getView().setModel(oUploadModel, "UploadModel");
-
-            var oTokenModel = new sap.ui.model.json.JSONModel({
+            const oTokenModel = new sap.ui.model.json.JSONModel({
                 tokens: []
             });
+            const oUploaderData = new sap.ui.model.json.JSONModel({
+                attachments: []
+            });
+
             this.getView().setModel(oTokenModel, "tokenModel");
+            this.getView().setModel(oUploaderData, "UploaderData");
 
             this.Onsearch()
-               this.ajaxReadWithJQuery("Currency", "").then((oData) => {
+            this.ajaxReadWithJQuery("Currency", "").then((oData) => {
                 var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
                 var model = new JSONModel(oFCIAerData);
                 this.getView().setModel(model, "CurrencyModel");
@@ -74,10 +68,6 @@ sap.ui.define([
                     Type: "",
                     Price: "",
                     UnitText: "Per Day",
-                    File: "",
-                    FileType: "",
-                    FileName: "",
-                    FicilityImage: ""
                 });
             }
 
@@ -85,63 +75,15 @@ sap.ui.define([
             oView.getModel("tokenModel").setData({
                 tokens: []
             });
-            oView.getModel("UploadModel").setData({
-                File: "",
-                FileName: "",
-                FileType: ""
+            oView.getModel("UploaderData").setData({
+                attachments: [],
+                isFileUploaded: false
             });
 
             // Reset input value states
             this._resetFacilityValueStates();
-
             this.ARD_Dialog.open();
         },
-
-        FD_EditDetails: function() {
-            var oView = this.getView();
-            var oTable = this.byId("id_facilityTable");
-            var oSelected = oTable.getSelectedItem();
-            if (!oSelected) {
-                sap.m.MessageToast.show("Please select a record to edit.");
-                return;
-            }
-
-            var oContext = oSelected.getBindingContext("Facilities");
-            var oData = oContext.getObject();
-
-            if (!this.ARD_Dialog) {
-                this.ARD_Dialog = sap.ui.xmlfragment(oView.getId(), "sap.ui.com.project1.fragment.Facilities", this);
-                oView.addDependent(this.ARD_Dialog);
-            }
-
-            // Bind data to Facilities model
-            oView.getModel("FacilitiesModel").setData(oData);
-
-            // Prepopulate token if file exists
-            var aTokens = [];
-            if (oData.FileName && oData.FicilityImage) {
-                aTokens.push({
-                    key: oData.FileName,
-                    text: oData.FileName
-                });
-            } else {
-                // No file in existing record
-                oView.getModel("UploadModel").setData({
-                    File: "",
-                    FileName: "",
-                    FileType: ""
-                });
-            }
-
-            // Update token model
-            oView.getModel("tokenModel").setProperty("/tokens", aTokens);
-
-            // Reset input value states
-            this._resetFacilityValueStates();
-
-            this.ARD_Dialog.open();
-        },
-
         FD_onCancelButtonPress: function() {
             var oView = this.getView();
 
@@ -154,9 +96,6 @@ sap.ui.define([
                     Type: "",
                     Price: "",
                     UnitText: "Per Day",
-                    File: "",
-                    FileType: "",
-                    FileName: ""
                 });
             }
 
@@ -167,9 +106,11 @@ sap.ui.define([
             this.ARD_Dialog.close();
         },
         FD_onsavebuttonpress: async function() {
-            var oView = this.getView();
-            var oFacilitiesModel = oView.getModel("FacilitiesModel");
-            var Payload = oFacilitiesModel.getData();
+            const oView = this.getView();
+            const oFacilitiesModel = oView.getModel("FacilitiesModel");
+            const oUploaderData = oView.getModel("UploaderData");
+            const attachments = oUploaderData.getProperty("/attachments") || [];
+            const Payload = oFacilitiesModel.getData();
             var aFacilitiesData = oView.getModel("Facilities").getData();
 
             //  Mandatory field validation
@@ -179,7 +120,6 @@ sap.ui.define([
                 utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("idFacilityName1")), "ID") &&
                 utils._LCvalidateAmount(sap.ui.getCore().byId(oView.createId("FO_id_Price")), "ID") &&
                 utils._LCstrictValidationComboBox(sap.ui.getCore().byId(oView.createId("FL_id_Currency")), "ID") &&
-
                 utils._LCstrictValidationComboBox(sap.ui.getCore().byId(oView.createId("FO_id_Rate")), "ID")
             );
 
@@ -209,86 +149,68 @@ sap.ui.define([
                 return;
             }
 
-            // Prepare payload and handle file logic
-            var that = this;
-            var oUploadModel = oView.getModel("UploadModel").getData();
-
-            // Handle file data
-            if (oUploadModel && oUploadModel.File && oUploadModel.FileName) {
-                Payload.FicilityImage = oUploadModel.File;
-                Payload.FileName = oUploadModel.FileName;
-                Payload.FileType = oUploadModel.FileType;
-            } else if (Payload.ID) {
-                // Use old file if editing
-                var foundItem = this.getView().getModel("Testing").getData().find(item => item.ID === Payload.ID);
-                if (foundItem) {
-                    Payload.FicilityImage = foundItem.FicilityImage;
-                    Payload.FileName = foundItem.FileName;
-                    Payload.FileType = foundItem.FileType;
-                }
+            if (attachments.length === 0) {
+                sap.m.MessageBox.error("Please upload at least one image.");
+                return;
+            }
+            if (attachments.length > 3) {
+                sap.m.MessageBox.error("You can upload a maximum of 3 images only.");
+                return;
             }
 
-            // Final payload format for both Create and Update
-            var oData = {
-                BranchCode: Payload.BranchCode,
-                FacilityName: Payload.FacilityName,
-                Type: Payload.Type,
-                Price: Payload.Price,
-                Currency:Payload.Currency,
-                UnitText: Payload.UnitText,
-                FicilityImage: Payload.FicilityImage,
-                FileName: Payload.FileName,
-                FileType: Payload.FileType
-            };
-            sap.ui.core.BusyIndicator.show(0);
-            try {
-                if (Payload.ID) {
-                    // Update record
-                    await that.ajaxUpdateWithJQuery("HM_ExtraFacilities", {
-                        data: oData,
-                        filters: {
-                            ID: Payload.ID
-                        }
-                    });
-                    sap.m.MessageToast.show("Facility updated successfully!");
-                } else {
-                    //  Create record
-                    await that.ajaxCreateWithJQuery("HM_ExtraFacilities", {
-                        data: oData
-                    });
-                    sap.m.MessageToast.show("Facility added successfully!");
+            const oData = {
+                    data: {
+                        BranchCode: Payload.BranchCode,
+                        FacilityName: Payload.FacilityName,
+                        Type: Payload.Type,
+                        Price: Payload.Price,
+                        Currency: Payload.Currency,
+                        UnitText: Payload.UnitText
+                   },
+                     Attachment: {}
+                };
+
+                oData.Attachment.FacilityName = Payload.FacilityName;
+                oData.Attachment.BranchCode = Payload.BranchCode;
+                
+                attachments.slice(0, 3).forEach((file, index) => {
+                    const num = index + 1;
+                    oData.Attachment[`Photo${num}`] = file.content || null;
+                    oData.Attachment[`Photo${num}Name`] = file.filename || "";
+                    oData.Attachment[`Photo${num}Type`] = file.fileType || "";
+                });
+
+                for (let i = attachments.length + 1; i <= 3; i++) {
+                    oData.Attachment[`Photo${i}`] = null;
+                    oData.Attachment[`Photo${i}Name`] = "";
+                    oData.Attachment[`Photo${i}Type`] = "";
                 }
 
-                // Clear upload and token models
-                oView.getModel("UploadModel")?.setData({
-                    File: "",
-                    FileName: "",
-                    FileType: ""
+            sap.ui.core.BusyIndicator.show(0);
+            try {
+                await this.ajaxCreateWithJQuery("HM_ExtraFacilities", {
+                    data: oData
                 });
-                oView.getModel("tokenModel")?.setData({
+                sap.m.MessageToast.show("Facility added successfully!");
+                oView.getModel("UploaderData").setData({
+                    attachments: []
+                });
+                oView.getModel("tokenModel").setData({
                     tokens: []
                 });
-
-                sap.ui.core.BusyIndicator.hide();
-                await that.Onsearch();
-                that.ARD_Dialog.close();
+                await this.Onsearch();
+                this.ARD_Dialog.close();
             } catch (err) {
                 sap.ui.core.BusyIndicator.hide();
                 sap.m.MessageToast.show(err.message || err.responseText);
+            } finally {
+                sap.ui.core.BusyIndicator.hide();
             }
         },
-
         _resetFacilityValueStates: function() {
             var oView = this.getView();
-            var aFields = [
-                "idRoomType123",
-                "idFacilityName",
-                "idFacilityName1",
-                "FO_id_Price",
-                "FL_id_Currency",
-                "FO_id_Rate"
-            ];
-
+            var aFields = ["idRoomType123","idFacilityName","idFacilityName1",
+                           "FO_id_Price", "FL_id_Currency", "FO_id_Rate"];
             aFields.forEach(function(sId) {
                 var oField = sap.ui.getCore().byId(oView.createId(sId));
                 if (oField && oField.setValueState) {
@@ -325,55 +247,75 @@ sap.ui.define([
             sap.m.MessageToast.show(this.i18nModel.getText("fileSizeExceeds"));
         },
         onTokenDelete: function(oEvent) {
-            // Get the model
-            var oModel = this.getView().getModel("tokenModel");
-            var aTokens = oModel.getProperty("/tokens") || [];
+            const oView = this.getView();
+            const oModel = oView.getModel("tokenModel");
+            const oUploaderData = oView.getModel("UploaderData");
 
-            // Get deleted tokens from event
-            var aTokensToDelete = oEvent.getParameter("tokens");
+            let aTokens = oModel.getProperty("/tokens") || [];
+            let aAttachments = oUploaderData.getProperty("/attachments") || [];
 
-            // Filter out deleted tokens
-            aTokensToDelete.forEach(function(oDeletedToken) {
-                var sKey = oDeletedToken.getKey();
-                aTokens = aTokens.filter(function(token) {
-                    return token.key !== sKey;
-                });
+            const aDeletedTokens = oEvent.getParameter("tokens");
+
+            aDeletedTokens.forEach((oDeletedToken) => {
+                const sKey = oDeletedToken.getKey();
+                aTokens = aTokens.filter(token => token.key !== sKey);
+                aAttachments = aAttachments.filter(file => file.filename !== sKey);
             });
 
-            // Update model
             oModel.setProperty("/tokens", aTokens);
-
-            // Clear upload model if all tokens are deleted
-            if (aTokens.length === 0) {
-                var oUploadModel = this.getView().getModel("UploadModel");
-                oUploadModel.setProperty("/File", "");
-                oUploadModel.setProperty("/FileName", "");
-                oUploadModel.setProperty("/FileType", "");
-            }
+            oUploaderData.setProperty("/attachments", aAttachments);
         },
         onFacilityFileChange: function(oEvent) {
-            const oFile = oEvent.getParameter("files")[0];
-            if (!oFile) return;
+            const oFiles = oEvent.getParameter("files");
+            if (!oFiles || oFiles.length === 0) return;
 
-            const oReader = new FileReader();
-            oReader.onload = (e) => {
-                const sBase64 = e.target.result.split(",")[1]; // remove prefix
-                const oUploadModel = this.getView().getModel("UploadModel");
-                oUploadModel.setData({
-                    File: sBase64,
-                    FileType: oFile.type,
-                    FileName: oFile.name
-                });
+            const oView = this.getView();
+            const oUploaderData = oView.getModel("UploaderData");
+            const oTokenModel = oView.getModel("tokenModel");
 
-                // Update tokenModel
-                const oTokenModel = this.getView().getModel("tokenModel");
-                oTokenModel.setProperty("/tokens", [{
-                    key: oFile.name,
-                    text: oFile.name
-                }]);
-            };
-            oReader.readAsDataURL(oFile);
+            let aAttachments = oUploaderData.getProperty("/attachments") || [];
+            let aTokens = oTokenModel.getProperty("/tokens") || [];
+
+            //  Block if already 3 files uploaded
+            if (aAttachments.length >= 3) {
+                sap.m.MessageToast.show("You can upload a maximum of 3 images only.");
+                return;
+            }
+
+            // Only allow remaining slots
+            const iAvailableSlots = 3 - aAttachments.length;
+            const aSelectedFiles = Array.from(oFiles).slice(0, iAvailableSlots);
+
+            aSelectedFiles.forEach((oFile) => {
+                // Validate file type
+                if (!oFile.type.match(/^image\/(jpeg|jpg|png)$/)) {
+                    sap.m.MessageToast.show("Only image files (jpg, jpeg, png) are allowed.");
+                    return;
+                }
+
+                const oReader = new FileReader();
+                oReader.onload = (e) => {
+                    const sBase64 = e.target.result.split(",")[1];
+
+                    aAttachments.push({
+                        content: sBase64,
+                        fileType: oFile.type,
+                        filename: oFile.name
+                    });
+
+                    aTokens.push({
+                        key: oFile.name,
+                        text: oFile.name
+                    });
+
+                    oUploaderData.setProperty("/attachments", aAttachments);
+                    oTokenModel.setProperty("/tokens", aTokens);
+                };
+
+                oReader.readAsDataURL(oFile);
+            });
         },
+
         Onsearch: function() {
             sap.ui.core.BusyIndicator.show(0);
             this.ajaxReadWithJQuery("HM_ExtraFacilities", "").then((oData) => {
@@ -386,6 +328,7 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide();
             })
         },
+
         _populateUniqueFilterValues: function(data) {
             let uniqueValues = {
                 FN_id_FacilityName: new Set(),
@@ -444,64 +387,6 @@ sap.ui.define([
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("RouteHostel");
         },
-        FC_viewroom: function(oEvent) {
-            var oContext = oEvent.getSource().getBindingContext("Facilities");
-            var oData = oContext.getObject();
-
-            if (!oData.FicilityImage || !oData.FicilityImage.length) {
-                sap.m.MessageBox.error("No document found for this room!");
-                return;
-            }
-
-            var sBase64 = oData.FicilityImage;
-
-            if (!sBase64) {
-                sap.m.MessageBox.error("No document found for this room!");
-                return;
-            }
-
-            sBase64 = sBase64.replace(/\s/g, "");
-
-            try {
-                if (!sBase64.startsWith("iVB") && !sBase64.startsWith("data:image")) {
-                    var decoded = atob(sBase64);
-                    if (decoded.startsWith("iVB")) {
-                        sBase64 = decoded;
-                    }
-                }
-            } catch (e) {
-                console.error("Base64 decode failed:", e);
-            }
-
-            if (!sBase64.startsWith("data:image")) {
-                sBase64 = "data:image/jpeg;base64," + sBase64;
-            }
-
-            var oImage = new sap.m.Image({
-                src: sBase64,
-                width: "100%",
-                height: "auto"
-            });
-
-            var oDialog = new sap.m.Dialog({
-                title: "View Document",
-                contentWidth: "400px",
-                contentHeight: "500px",
-                verticalScrolling: true,
-                content: [oImage],
-                endButton: new sap.m.Button({
-                    text: "Close",
-                    press: function() {
-                        oDialog.close();
-                    }
-                }),
-                afterClose: function() {
-                    oDialog.destroy();
-                }
-            });
-
-            oDialog.open();
-        },
         HM_DeleteDetails: async function() {
             var oTable = this.byId("id_facilityTable");
             var oSelectedItem = oTable.getSelectedItem();
@@ -546,6 +431,5 @@ sap.ui.define([
                 }
             );
         },
-        
     });
 });

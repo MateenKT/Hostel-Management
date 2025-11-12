@@ -1,29 +1,28 @@
 <mvc:View
     controllerName="sap.ui.com.project1.controller.Bed_Details"
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m"
-    xmlns:m="sap.m"
-    xmlns:c="sap.ui.core"
-    xmlns:fb="sap.ui.comp.filterbar"
-    xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:m="sap.m"
+	xmlns:c="sap.ui.core"
+	xmlns:fb="sap.ui.comp.filterbar"
+	xmlns:core="sap.ui.core"
     displayBlock="true"
     height="100%"
-    busyIndicatorDelay="0"
->
-    <Page  showHeader="true" >
-       <customHeader>
-        <Bar>
-            <contentLeft>
-                <Button icon="sap-icon://nav-back" press=".onNavBack" />
-                <Title text="Shah Hostel" class="customPageTitle"/>
-            </contentLeft>
-              <contentRight>
-                <Button icon="sap-icon://log" press=".onHome" />
-            </contentRight>
-        </Bar>
-    </customHeader>
-        <content>
-            <fb:FilterBar
+    busyIndicatorDelay="0">
+	<Page  showHeader="true" >
+		<customHeader>
+			<Bar>
+				<contentLeft>
+					<Button icon="sap-icon://nav-back" press=".onNavBack" />
+					<Title text="Shah Hostel" class="customPageTitle"/>
+				</contentLeft>
+				<contentRight>
+					<Button icon="sap-icon://log" press=".onHome" />
+				</contentRight>
+			</Bar>
+		</customHeader>
+		<content>
+			<fb:FilterBar
                 id="PO_id_FilterbarEmployee"
                 persistencyKey="myPersKey"
                 useToolbar="false"
@@ -34,177 +33,84 @@
                 afterVariantLoad="IA_.onAfterVariantLoad"
                 showFilterConfiguration="false"
                 filterContainerWidth="auto"
-				
             >
-                <fb:filterGroupItems>
-                    <fb:FilterGroupItem
+				<fb:filterGroupItems>
+					<fb:FilterGroupItem
                         name="Bed Type"
                         label="Bed Type"
                         groupName="Group"
                         visibleInFilterBar="true"
                     >
-                        <fb:control>
-                            <ComboBox
-                                id="PO_id_CustomerName"
-                                items="{BedDetails>/}"
-                                showClearIcon="true"
-                            >
-                                <core:Item
-                                    key="{BedDetails>Name}"
-                                    text="{BedDetails>Name}"
-                                />
-                            </ComboBox>
-                        </fb:control>
-                    </fb:FilterGroupItem>
-                </fb:filterGroupItems>
-
-                <fb:filterGroupItems>
-                    <fb:FilterGroupItem
+						<fb:control>
+							<ComboBox id="PO_id_CustomerName" items="{BedDetails>/}" showClearIcon="true">
+								<core:Item key="{BedDetails>Name}" text="{BedDetails>Name}" />
+							</ComboBox>
+						</fb:control>
+					</fb:FilterGroupItem>
+				</fb:filterGroupItems>
+				<fb:filterGroupItems>
+					<fb:FilterGroupItem
                         name="Branch Code"
                         label="Branch Code"
                         groupName="Group"
-                        visibleInFilterBar="true"	
-                    >
-                        <fb:control>
-                            <ComboBox
-                                id="PO_id_CompanyName"
-                                items="{BedDetails>/}"
-                                showClearIcon="true"
-                            >
-                                <core:ListItem
-                                    key="{BedDetails>BranchCode}"
-                                    text="{BedDetails>BranchCode}"
-                                />
-                            </ComboBox>
-                        </fb:control>
-                    </fb:FilterGroupItem>
-                </fb:filterGroupItems>
-
-             
-            </fb:FilterBar>
-            <Table
+                        visibleInFilterBar="true">
+						<fb:control>
+							<ComboBox id="PO_id_CompanyName" items="{BedDetails>/}" showClearIcon="true">
+								<core:ListItem  key="{BedDetails>BranchCode}"  text="{BedDetails>BranchCode}"/>
+							</ComboBox>
+						</fb:control>
+					</fb:FilterGroupItem>
+				</fb:filterGroupItems>
+			</fb:FilterBar>
+			<Table
                 id="id_BedTable"
                 sticky="ColumnHeaders,HeaderToolbar"
                 mode="SingleSelectLeft"
                 width="auto"
+                busyIndicatorDelay="0"
                 class="sapUiResponsiveMargin"
-                items="{path: 'BedDetails>/'}"
-            >
-                <headerToolbar>
-                    <OverflowToolbar>
-                        <Title
-                            text="Bed List ({=${BedDetails>/}.length})"
-                        />
-                        <ToolbarSpacer />
-                         <Button
-                            text="Add Bed"
-                            press="HM_RoomDetails"
-                            type="Accept"
-                        />
-                          <Button
-                            text="Edit"
-                            press="HM_EditDetails"
-                            type="Transparent"
-                        />
-                         <Button
-                            text="Delete"
-                            press="HM_DeleteDetails"
-                            type="Reject"
-                        />
-                     
-                    </OverflowToolbar>
-                </headerToolbar>
-                <columns>
-                
-					
-                    <Column demandPopin="true">
-                        <Text
-                            text="Branch Code"
-                        />
-                    </Column>
-                      <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text
-                            text="Bed Type"
-                        />
-                    </Column>
-                    <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text
-                            text="Room Type"
-                        />
-                    </Column>
-                      <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text
-                            text="Max No. of Rooms"
-                        />
-                    </Column>
-
-                     <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text
-                            text="No Of Person"
-                        />
-                    </Column>
-                     <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text
-                            text="Description"
-                        />
-                    </Column>
-                    <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text
-                            text="Room Image"
-                        />
-                    </Column>
-                  
-                  
-                </columns>
-                <items>
-                    <ColumnListItem
-                    >
-                        <cells>
+                items="{path: 'BedDetails>/'}">
+				<headerToolbar>
+					<OverflowToolbar>
+						<Title text="Bed List ({=${BedDetails>/}.length})"/>
+						<ToolbarSpacer />
+						<Button text="Add Bed" press="HM_RoomDetails" type="Accept"/>
+						<Button text="Delete" press="HM_DeleteDetails" type="Reject"/>
+					</OverflowToolbar>
+				</headerToolbar>
+				<columns>
+					<Column demandPopin="true">
+						<Text  text="Branch Code"/>
+					</Column>
+					<Column demandPopin="true">
+						<Text text="Bed Type"/>
+					</Column>
+					<Column demandPopin="true">
+						<Text text="Room Type"/>
+					</Column>
+						<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="No Of Rooms"/>
+					</Column>
+						<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="No Of Person"/>
+					</Column>
+						<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="Description"/>
+					</Column>
+				</columns>
+				<items>
+					<ColumnListItem type="Navigation" press="onColumnListItemPress">
+						<cells>
 							<Text text="{BedDetails>BranchCode}" />
-							
-                            <Text text="{BedDetails>Name}" />
-                         
-                            <Text text="{BedDetails>ACType}" />
-                            <Text text="{BedDetails>MaxBeds}" />
-
-
-                            <Text text="{BedDetails>NoOfPerson}" />
-                         <ExpandableText 
-                          text="{BedDetails>Description}"
-                          maxCharacters="20"
-                          />
-                           
-                            <Button
-                            text="View"
-                            press="BD_viewroom"
-                            type="Transparent"
-                        />
-                        
-                           
-                           
-                        </cells>
-                    </ColumnListItem>
-                </items>
-            </Table>
-        </content>
-    
-    </Page>
+							<Text text="{BedDetails>Name}" />
+							<Text text="{BedDetails>ACType}" />
+							<Text text="{BedDetails>MaxBeds}" />
+							<Text text="{BedDetails>NoOfPerson}" />
+							<ExpandableText text="{BedDetails>Description}" maxCharacters="20"/>
+						</cells>
+					</ColumnListItem>
+				</items>
+			</Table>
+		</content>
+	</Page>
 </mvc:View>

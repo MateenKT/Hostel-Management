@@ -23,6 +23,10 @@ sap.ui.define([
             });
             this.getOwnerComponent().setModel(omodel, "LoginModel");
 
+            this.byId("id_Branch").setEnabled(true);
+            this.byId("id_Area").setEnabled(false);
+            this.byId("id_Roomtype").setEnabled(false);
+
             const oAvatar = oView.byId("ProfileAvatar");
             if (oAvatar) oAvatar.setVisible(false);
 
@@ -325,7 +329,7 @@ sap.ui.define([
                     BranchCode: sBranchCode
                 });
 
-                const allRooms = response?.data || [];
+                const allRooms = response?.data.data || [];
 
         // 🔹 If AC type is not provided → show all bed types for the branch
         let matchedRooms = [];
@@ -1034,29 +1038,6 @@ sap.ui.define([
             // this._oLocationDialog.open();
         },
 
-       onSearchRooms: function () {
-            const oBranchCombo = this.getView().byId("id_Area")
-            const oACTypeCombo = this.getView().byId("id_Roomtype");
-
-            // Branch: use additionalText
-            const oSelectedBranchItem = oBranchCombo.getSelectedItem();
-            const sSelectedBranch = oSelectedBranchItem?.getAdditionalText();
-
-            // AC Type: use selected key
-            const sSelectedACType = oACTypeCombo?.getSelectedKey();
-
-            if (!sSelectedBranch) {
-                sap.m.MessageToast.show("Please select a location first.");
-                return;
-            }
-
-            // Pass selected values to filter function
-            this._loadFilteredData(sSelectedBranch, sSelectedACType);
-
-            // Close popup after triggering data load
-            this._oLocationDialog.close();
-        },
-
         onpressLogin: function () {
             if (!this._oSignDialog) {
                 this._oSignDialog = sap.ui.xmlfragment("sap.ui.com.project1.fragment.SignInSignup", this);
@@ -1599,20 +1580,22 @@ sap.ui.define([
             // Call your function with new search value
             this._loadFilteredData(sBranchCode);
         },
+       FC_onPressClear: function () {
+    const oView = this.getView();
+    const oBranchCombo = oView.byId("id_Branch");
+    const oAreaTypeCombo = oView.byId("id_Area");
+    const oRoomTypeCombo = oView.byId("id_Roomtype");
 
-        BR_onsavebuttonpress: function () {
-            this.ARD_Dialog.close();
-            this.onSearchRooms()
-        },
-        BR_oncancelbuttonpress: function () {
-            this.ARD_Dialog.close();
-        },
-        _clearFilterFields: function () {
-            const oBranchCombo = this.getView().byId("id_Branch");
-            const oRoomTypeCombo = this.getView().byId("id_Roomtype");
-            if (oBranchCombo) oBranchCombo.setSelectedKey("");
-            if (oRoomTypeCombo) oRoomTypeCombo.setSelectedKey("");
-        },
+    // 🔹 Reset all selected keys
+    if (oBranchCombo) oBranchCombo.setSelectedKey("");
+    if (oAreaTypeCombo) oAreaTypeCombo.setSelectedKey("");
+    if (oRoomTypeCombo) oRoomTypeCombo.setSelectedKey("");
+
+    // 🔹 Make Area and Room Type non-editable
+    if (oAreaTypeCombo) oAreaTypeCombo.setEnabled(false);
+    if (oRoomTypeCombo) oRoomTypeCombo.setEnabled(false);
+},
+
         onAfterRendering: function () {
             var oCarousel = this.byId("customSlideCarousel");
             var iIndex = 0;
@@ -1800,31 +1783,69 @@ sap.ui.define([
                 return new Date(sDate);
             }
 },
-onBranchSelectionChange: function (oEvent) {
-     var oBedTypeCombo = this.byId("id_Area");
-     oBedTypeCombo.setSelectedKey("").setVisible(true)
 
-    var oSelectedItem = oEvent.getParameter("selectedItem");
+onBranchSelectionChange: function (oEvent) {
+    const oView = this.getView();
+    const oAreaCombo = oView.byId("id_Area");
+    const oRoomType = oView.byId("id_Roomtype");
+
+    // Reset previous selections
+    oAreaCombo.setSelectedKey("").setEnabled(false);
+    oRoomType.setSelectedKey("").setEnabled(false);
+
+    const oSelectedItem = oEvent.getParameter("selectedItem");
     if (!oSelectedItem) return;
 
-    var sSelectedBranch = oSelectedItem.getKey();
-    var oModelData = this.getView().getModel("sBRModel").getData();
+    // 🔹 Selected Branch Name
+    const sSelectedBranch = oSelectedItem.getText();
 
-    // Filter address list based on selected branch
-    var aFiltered = oModelData.filter(function (item) {
-        return item.Name === sSelectedBranch; // Compare with branch name
+    // 🔹 Fetch existing Branch model data
+    const oModelData = oView.getModel("sBRModel").getData();
+
+    // 🔹 Filter the data for the selected branch name
+    const aFiltered = oModelData.filter(function (item) {
+        return item.Name === sSelectedBranch;
     });
 
-    // In case branch has multiple addresses
-    // var aAreas = aFiltered.map(function (b) {
-    //     return { Address: b.Address };
-    // });
+    // 🔹 Update Area model dynamically
+    const oAreaModel = new sap.ui.model.json.JSONModel(aFiltered);
+    oView.setModel(oAreaModel, "AreaModel");
 
-    // Set filtered data to AreaModel
-    var oAreaModel = new sap.ui.model.json.JSONModel(aFiltered);
-    this.getView().setModel(oAreaModel, "AreaModel");
-    
-        }
+    // 🔹 Enable the Area dropdown now that data is ready
+    oAreaCombo.setEnabled(true);
+},
+
+
+// 🔹 When Area is selected, enable Room Type combo
+onAreaSelectionChange: function (oEvent) {
+    const oRoomType = this.byId("id_Roomtype");
+    const oSelectedItem = oEvent.getSource().getSelectedItem();
+
+    if (oSelectedItem) {
+        oRoomType.setEnabled(true);
+    } else {
+        oRoomType.setEnabled(false);
+    }
+},
+
+// 🔹 Search logic remains same
+onSearchRooms: function () {
+    const oBranchCombo = this.byId("id_Area");   // Area Combo
+    const oACTypeCombo = this.byId("id_Roomtype");
+
+    const oSelectedBranchItem = oBranchCombo.getSelectedItem();
+    const sSelectedBranch = oSelectedBranchItem?.getKey(); // BranchID from AreaModel
+
+    const sSelectedACType = oACTypeCombo?.getSelectedKey();
+
+    if (!sSelectedBranch) {
+        sap.m.MessageToast.show("Please select a location first.");
+        return;
+    }
+
+    this._loadFilteredData(sSelectedBranch, sSelectedACType);
+},
+
 
 
 

@@ -10,7 +10,7 @@
         id="FacilitiesDialog"
         title="Add facilities"
         type="Message"
-        class="sapUiContentPadding"
+        class="sapUiContentPadding"  resizable="true" draggable="true" contentHeight="auto" contentWidth="40%"
     >
         <f:SimpleForm
             editable="true"
@@ -24,10 +24,8 @@
             columnsM="1"
         >
             <f:content>
-                <Label
-                    text="Branch Code"
-                    required="true"
-                />
+                <!-- Branch Code -->
+                <Label text="Branch Code" required="true" />
                 <ComboBox
                     id="idRoomType123"
                     placeholder="Select branch Code"
@@ -43,10 +41,9 @@
                         additionalText="{BranchModel>Name}"
                     />
                 </ComboBox>
-                <Label
-                    text="Facility Name"
-                    required="true"
-                />
+
+                <!-- Facility Name -->
+                <Label text="Facility Name" required="true" />
                 <Input
                     id="idFacilityName"
                     value="{FacilitiesModel>/FacilityName}"
@@ -55,27 +52,27 @@
                     liveChange=".onFacilityNameChange"
                     valueStateText="{i18n>enterFacilityName}"
                 />
-                <Label
-                    text="Type"
-                    required="true"
-                />
-                <Input
+
+                <!-- Type -->
+                <Label text="Type" required="true" />
+                <ComboBox
                     id="idFacilityName1"
-                    value="{FacilitiesModel>/Type}"
+                    items="{FacilityType>/}"
                     placeholder="Enter Type"
-                    maxLength="60"
-                    liveChange=".onFacilityTypeChange"
-                    valueStateText="{i18n>enterFacilityType}"
-                />
-                <Label
-                    text="Price"
-                    required="true"
-                />
-                <HBox
+                    value="{FacilitiesModel>/Type}"
+                    change=".onFacilityTypeChange"
                     width="100%"
-                    justifyContent="Start"
-                    alignItems="Center"
+                    valueStateText="{i18n>enterFacilityType}"
                 >
+                    <core:Item
+                        key="{FacilityType>ID}"
+                        text="{FacilityType>FacilityName}"
+                    />
+                </ComboBox>
+
+                <!-- Price + Unit -->
+                <Label text="Price" required="true" />
+                <HBox width="100%" justifyContent="Start" alignItems="Center">
                     <VBox width="50%">
                         <Input
                             id="FO_id_Price"
@@ -103,10 +100,9 @@
                         </ComboBox>
                     </VBox>
                 </HBox>
-                <Label
-                    text="Currency"
-                    required="true"
-                />
+
+                <!-- Currency -->
+                <Label text="Currency" required="true" />
                 <ComboBox
                     id="FL_id_Currency"
                     selectedKey="{FacilitiesModel>/Currency}"
@@ -121,45 +117,50 @@
                         text="{CurrencyModel>currency}"
                     />
                 </ComboBox>
-                <Label
-                    text="Add image"
-                    required="true"
-                />
-                <HBox
-                    alignItems="Center"
-                    width="100%"
-                    renderType="Bare"
-                >
-                    <VBox width="20%">
+
+                <!-- Upload -->
+                <Label text="Add Image" required="true" />
+                <HBox alignItems="Center" width="100%" renderType="Bare">
+                    <VBox width="25%">
                         <u:FileUploader
                             id="fileUploader"
                             fileSizeExceed="onFileSizeExceeds"
                             maximumFileSize="5MB"
                             typeMissmatch="onFileTypeMissmatch"
-                            fileType="pdf,jpg,jpeg,png,doc,docx"
+                            fileType="jpg,jpeg,png"
                             change="onFacilityFileChange"
                             buttonOnly="true"
                             sameFilenameAllowed="true"
                             iconFirst="true"
-                            buttonText="Attachment"
+                            buttonText="Upload Images"
+                            multiple="true"
+                            uploadOnChange="false"
+                            tooltip="Only JPG, PNG, or PDF files under 5MB allowed"
                         />
                     </VBox>
-                    <VBox width="80%">
-                        <Tokenizer
-                            id="idTokenList"
+
+                    <!-- Tokenizer -->
+                    <VBox width="75%">
+                        <ScrollContainer
+                            height="70px"
                             width="100%"
-                            tokenDelete="onTokenDelete"
-                            tokens="{tokenModel>/tokens}"
+                            horizontal="false"
+                            vertical="true"
                         >
-                            <Token
-                                key="{tokenModel>key}"
-                                text="{tokenModel>text}"
-                            />
-                        </Tokenizer>
+                            <Tokenizer
+                                id="idTokenList"
+                                width="100%"
+                                tokenDelete="onTokenDelete"
+                                tokens="{tokenModel>/tokens}"
+                            >
+                                <Token key="{tokenModel>key}" text="{tokenModel>text}" />
+                            </Tokenizer>
+                        </ScrollContainer>
                     </VBox>
                 </HBox>
             </f:content>
         </f:SimpleForm>
+        <!-- Footer -->
         <footer>
             <Toolbar>
                 <ToolbarSpacer />

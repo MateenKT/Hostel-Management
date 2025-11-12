@@ -798,9 +798,6 @@
   margin-right: 1vw;
 }
 
-
-
-
 .selectedTile {
     border: 2px solid #0070f2 !important;
     box-shadow: 0 0 10px rgba(0, 112, 242, 0.3);
@@ -812,4 +809,9 @@
     border-radius: 10px;
 }
 
+.sapUiCompFilterBar{
+  background-image: url("../image/filterbackground.png"); 
+  background-size: cover; 
+  background-position: center;
+}
 

@@ -1,38 +1,28 @@
 <mvc:View
     controllerName="sap.ui.com.project1.controller.Facilitis"
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m"
-    xmlns:m="sap.m"
-    xmlns:c="sap.ui.core"
-    xmlns:fb="sap.ui.comp.filterbar"
-    xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:m="sap.m"
+	xmlns:c="sap.ui.core"
+	xmlns:fb="sap.ui.comp.filterbar"
+	xmlns:core="sap.ui.core"
     displayBlock="true"
     height="100%"
-    busyIndicatorDelay="0"
->
-    <Page showHeader="true">
-        <customHeader>
-            <Bar>
-                <contentLeft>
-                    <Button
-                        icon="sap-icon://nav-back"
-                        press=".onNavBack"
-                    />
-                    <Title
-                        text="Shah Hostel"
-                        class="customPageTitle"
-                    />
-                </contentLeft>
-                <contentRight>
-                    <Button
-                        icon="sap-icon://log"
-                        press=".onHome"
-                    />
-                </contentRight>
-            </Bar>
-        </customHeader>
-        <content>
-            <fb:FilterBar
+    busyIndicatorDelay="0">
+	<Page showHeader="true">
+		<customHeader>
+			<Bar>
+				<contentLeft>
+					<Button icon="sap-icon://nav-back"  press=".onNavBack"/>
+					<Title text="Shah Hostel" class="customPageTitle"/>
+				</contentLeft>
+				<contentRight>
+					<Button  icon="sap-icon://log" press=".onHome"/>
+				</contentRight>
+			</Bar>
+		</customHeader>
+		<content>
+			<fb:FilterBar
                 id="FO_id_FilterbarEmployee"
                 persistencyKey="myPersKey"
                 useToolbar="false"
@@ -44,120 +34,93 @@
                 showFilterConfiguration="false"
                 filterContainerWidth="auto"
             >
-                <fb:filterGroupItems>
-                    <fb:FilterGroupItem
+				<fb:filterGroupItems>
+					<fb:FilterGroupItem
                         name="Facility Name"
                         label="Facility Name"
                         groupName="Group"
                         visibleInFilterBar="true"
                     >
-                        <fb:control>
-                            <ComboBox
+						<fb:control>
+							<ComboBox
                                 id="FN_id_FacilityName"
                                 items="{Facilities>/}"
                                 showClearIcon="true"
                             >
-                                <core:Item
+								<core:Item
                                     key="{Facilities>FacilityName}"
                                     text="{Facilities>FacilityName}"
                                 />
-                            </ComboBox>
-                        </fb:control>
-                    </fb:FilterGroupItem>
-                </fb:filterGroupItems>
-                <fb:filterGroupItems>
-                    <fb:FilterGroupItem
+							</ComboBox>
+						</fb:control>
+					</fb:FilterGroupItem>
+				</fb:filterGroupItems>
+				<fb:filterGroupItems>
+					<fb:FilterGroupItem
                         name="Branch Code"
                         label="Branch Code"
                         groupName="Group"
                         visibleInFilterBar="true"
                     >
-                        <fb:control>
-                            <ComboBox
+						<fb:control>
+							<ComboBox
                                 id="FN_id_BranchCode"
                                 items="{Facilities>/}"
                                 showClearIcon="true"
                             >
-                                <core:ListItem
+								<core:ListItem
                                     key="{Facilities>BranchCode}"
                                     text="{Facilities>BranchCode}"
                                 />
-                            </ComboBox>
-                        </fb:control>
-                    </fb:FilterGroupItem>
-                </fb:filterGroupItems>
-            </fb:FilterBar>
-            <Table
+							</ComboBox>
+						</fb:control>
+					</fb:FilterGroupItem>
+				</fb:filterGroupItems>
+			</fb:FilterBar>
+			<Table
                 id="id_facilityTable"
                 sticky="ColumnHeaders,HeaderToolbar"
                 mode="SingleSelectLeft"
                 width="auto"
                 busyIndicatorDelay="0"
                 class="sapUiResponsiveMargin"
-                items="{path: 'Facilities>/'}"
-            >
-                <headerToolbar>
-                    <OverflowToolbar>
-                        <Title text="facilities ({=${Facilities>/}.length})" />
-                        <ToolbarSpacer />
-                        <Button
-                            text="Add Facility"
-                            press="FD_RoomDetails"
-                            type="Accept"
-                        />
-                        <Button
-                            text="Edit"
-                            press="FD_EditDetails"
-                            type="Transparent"
-                        />
-                        <Button
-                            text="Delete"
-                            press="HM_DeleteDetails"
-                            type="Reject"
-                        />
-                    </OverflowToolbar>
-                </headerToolbar>
-                <columns>
-                    <Column demandPopin="true">
-                        <Text text="Branch Code" />
-                    </Column>
-                    <Column demandPopin="true">
-                        <Text text="Facility Name" />
-                    </Column>
-                    <Column demandPopin="true">
-                        <Text text="Type" />
-                    </Column>
-                    <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text text="Price" />
-                    </Column>
-                    <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text text="Facility Image" />
-                    </Column>
-                </columns>
-                <items>
-                    <ColumnListItem>
-                        <cells>
-                            <Text text="{Facilities>BranchCode}" />
-                            <Text text="{Facilities>FacilityName}" />
-                            <Text text="{Facilities>Type}" />
-                            <Text
-                                text="{= ${Facilities>Price} ? ${Facilities>Price}+ ' ' + ${Facilities>Currency} + ' ' + ${Facilities>UnitText} : '' }"
-                            />
-                            <Button
-                                text="View"
-                                press="FC_viewroom"
-                                type="Transparent"
-                            />
-                        </cells>
-                    </ColumnListItem>
-                </items>
-            </Table>
-        </content>
-    </Page>
+                items="{path: 'Facilities>/'}">
+				<headerToolbar>
+					<OverflowToolbar>
+						<Title text="facilities ({=${Facilities>/}.length})" />
+						<ToolbarSpacer />
+						<Button text="Add Facility" press="FD_RoomDetails" type="Accept"/>
+						<Button text="Delete" press="HM_DeleteDetails" type="Reject" />
+					</OverflowToolbar>
+				</headerToolbar>
+				<columns>
+					<Column demandPopin="true">
+						<Text text="Branch Code" />
+					</Column>
+					<Column demandPopin="true">
+						<Text text="Facility Name" />
+					</Column>
+					<Column demandPopin="true">
+						<Text text="Type" />
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="Price" />
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="Facility Image" />
+					</Column>
+				</columns>
+				<items>
+					<ColumnListItem>
+						<cells>
+							<Text text="{Facilities>BranchCode}" />
+							<Text text="{Facilities>FacilityName}" />
+							<Text text="{Facilities>Type}" />
+							<Text text="{= ${Facilities>Price} ? ${Facilities>Price}+ ' ' + ${Facilities>Currency} + ' ' + ${Facilities>UnitText} : '' }"/>
+						</cells>
+					</ColumnListItem>
+				</items>
+			</Table>
+		</content>
+	</Page>
 </mvc:View>
