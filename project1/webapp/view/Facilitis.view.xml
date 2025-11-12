@@ -106,12 +106,9 @@
 					<Column minScreenWidth="Tablet" demandPopin="true">
 						<Text text="Price" />
 					</Column>
-					<Column minScreenWidth="Tablet" demandPopin="true">
-						<Text text="Facility Image" />
-					</Column>
 				</columns>
 				<items>
-					<ColumnListItem>
+					<ColumnListItem type="Navigation" press="FD_onFacilityRowPress"> 
 						<cells>
 							<Text text="{Facilities>BranchCode}" />
 							<Text text="{Facilities>FacilityName}" />

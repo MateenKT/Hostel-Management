@@ -8,8 +8,8 @@ sap.ui.define([
         onInit: function() {
             this.getOwnerComponent().getRouter().getRoute("RouteFacilitiesDetails").attachMatched(this._onRouteMatched, this);
         },
-        _onRouteMatched: function() {
-            const omodel = new sap.ui.model.json.JSONModel({
+        _onRouteMatched: async function(oEvent) {
+             const omodel = new sap.ui.model.json.JSONModel({
                 // for Database connection
                 url: "https://rest.kalpavrikshatechnologies.com/",
                 headers: {
@@ -20,353 +20,237 @@ sap.ui.define([
                 isRadioVisible: false,
             });
             this.getOwnerComponent().setModel(omodel, "LoginModel");
-            this.i18nModel = this.getView().getModel("i18n").getResourceBundle();
 
+            this.i18nModel = this.getView().getModel("i18n").getResourceBundle();
+            // Editable control model
+            const oEditableModel = new sap.ui.model.json.JSONModel({
+                Edit: false,
+                Save: false
+            });
+            this.getView().setModel(oEditableModel, "editable");
+
+            // Reset facility model
             const oFacilityModel = new sap.ui.model.json.JSONModel({
-                ID: "",
                 BranchCode: "",
+                Type: "",
+                Price: "",
                 FacilityName: "",
-                Description: ""
+                Currency: "",
+                UnitText: ""
             });
             this.getView().setModel(oFacilityModel, "FacilitiesModel");
 
-            const oUploaderDataModel = new sap.ui.model.json.JSONModel({
-                attachments: [],
-                isFileUploaded: false
-            });
-            this.getView().setModel(oUploaderDataModel, "UploaderData");
+             sap.ui.core.BusyIndicator.show(0);
 
-            this.Onsearch();
-        },
-
-        FD_RoomDetails: function() {
-            const oView = this.getView();
-
-            if (!this.ARD_Dialog) {
-                this.ARD_Dialog = sap.ui.xmlfragment(oView.getId(), "sap.ui.com.project1.fragment.FacilitiesDetails", this);
-                oView.addDependent(this.ARD_Dialog);
-            }
-
-            oView.getModel("FacilitiesModel").setData({
-                ID: "",
-                BranchCode: "",
-                FacilityName: "",
-                Description: ""
+            await this.ajaxReadWithJQuery("Currency", "").then((oData) => {
+                var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
+                var model = new sap.ui.model.json.JSONModel(oFCIAerData);
+                this.getView().setModel(model, "CurrencyModel");
             });
 
-            oView.getModel("UploaderData").setData({
-                attachments: [],
-                isFileUploaded: false
-            });
+            // Get facility ID from route parameter
+            this.BedID = oEvent.getParameter("arguments").sPath;
 
-            this._resetFacilityValueStates();
-            this.ARD_Dialog.open();
-        },
-
-        FD_EditDetails: function() {
-            const oTable = this.byId("FD_id_facilityTable");
-            const oSelected = oTable.getSelectedItem();
-
-            if (!oSelected) {
-                sap.m.MessageToast.show("Please select a record to edit.");
-                return;
-            }
-
-            const oData = oSelected.getBindingContext("Facilities").getObject();
-            const oView = this.getView();
-
-            if (!this.ARD_Dialog) {
-                this.ARD_Dialog = sap.ui.xmlfragment(oView.getId(), "sap.ui.com.project1.fragment.FacilitiesDetails", this);
-                oView.addDependent(this.ARD_Dialog);
-            }
-
-            const aAttachments = [];
-            Object.keys(oData).forEach((key) => {
-                if (key.startsWith("Photo") && !key.endsWith("Name") && !key.endsWith("Type") && oData[key]) {
-                    const index = key.replace("Photo", ""); // e.g., "1", "2", "3"
-                    aAttachments.push({
-                        filename: oData[`Photo${index}Name`] || `Photo${index}`,
-                        fileType: oData[`Photo${index}Type`] || "",
-                        content: oData[key]
-                    });
+           
+            // Fetch data from backend
+            await this.ajaxReadWithJQuery("HM_ExtraFacilities", {
+                ID: this.BedID
+            }).then((oData) => {
+                const oFacilityDetails = oData.data.data[0];
+                const oImageDetails = oData.data.FactDeta[0] || {};
+                this.getView().getModel("FacilitiesModel").setData(oFacilityDetails);
+                const aDisplayImages = [];
+                for (let i = 1; i <= 3; i++) {
+                    const sPhoto = oImageDetails[`Photo${i}`];
+                    const sName = oImageDetails[`Photo${i}Name`];
+                    const sType = oImageDetails[`Photo${i}Type`];
+                    if (sPhoto) {
+                        aDisplayImages.push({
+                            src: `data:${sType || "image/jpeg"};base64,${sPhoto}`,
+                            fileName: sName || `Photo${i}`,
+                            fileType: sType || "image/jpeg"
+                        });
+                    }
                 }
-            });
-
-            // Set models
-            oView.getModel("FacilitiesModel").setData(oData);
-            oView.getModel("UploaderData").setData({
-                attachments: aAttachments,
-                isFileUploaded: aAttachments.length > 0
-            });
-
-            this._resetFacilityValueStates();
-            this.ARD_Dialog.open();
-        },
-
-        FD_onCancelButtonPress: function() {
-            const oView = this.getView();
-
-            oView.getModel("FacilitiesModel").setData({
-                ID: "",
-                BranchCode: "",
-                FacilityName: "",
-                Description: ""
-            });
-
-            oView.getModel("UploaderData").setData({
-                attachments: [],
-                isFileUploaded: false
-            });
-
-            this._resetFacilityValueStates();
-            this.byId("FD_id_facilityTable").removeSelections();
-            this.ARD_Dialog.close();
-        },
-
-        // Handle File Upload
-        onFileSelected: function(oEvent) {
-            const oFiles = oEvent.getParameter("files");
-            const oUploaderModel = this.getView().getModel("UploaderData");
-            const aAttachments = oUploaderModel.getProperty("/attachments");
-
-            if (aAttachments.length >= 3) {
-                sap.m.MessageToast.show("You can upload a maximum of 3 images only.");
-                return;
-            }
-
-            Array.from(oFiles).forEach(file => {
-                if (file.size > 1048576) { // 1MB
-                    sap.m.MessageToast.show("File size exceeds 1 MB: " + file.name);
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    aAttachments.push({
-                        filename: file.name,
-                        fileType: file.type,
-                        size: file.size,
-                        content: e.target.result.split(",")[1]
-                    });
-                    oUploaderModel.refresh();
-                };
-                reader.readAsDataURL(file);
+                const oDisplayModel = new sap.ui.model.json.JSONModel({
+                    DisplayImages: aDisplayImages
+                });
+                this.getView().setModel(oDisplayModel, "DisplayImagesModel");
+                 sap.ui.core.BusyIndicator.hide();
             });
         },
 
-        onAttachmentsTableDelete: function(oEvent) {
-            const oContext = oEvent.getParameter("listItem").getBindingContext("UploaderData");
-            const oUploaderModel = this.getView().getModel("UploaderData");
-            const aAttachments = oUploaderModel.getProperty("/attachments");
-            const index = oContext.getPath().split("/").pop();
-            aAttachments.splice(index, 1);
-            oUploaderModel.refresh();
+        onAddItemButtonPress: function() {
+            var oTable = this.byId("idTable");
+            var oModel = oTable.getModel("FacilitiesModel");
+            var aData = oModel.getData();
+
+            // Add new empty record for upload
+            aData.push({
+                FileName: "",
+                FileContent: ""
+            });
+
+            oModel.setData(aData);
         },
 
-        FD_onsavebuttonpress: async function() {
-            const oView = this.getView();
-            const oFacilitiesModel = oView.getModel("FacilitiesModel");
-            const oUploaderData = oView.getModel("UploaderData");
+        BI_onEditButtonPress: function() {
+            this.getView().getModel("editable").setProperty("/Edit", true)
+        },
+        BI_onSaveButtonPress: function() {
+            this.getView().getModel("editable").setProperty("/Edit", false)
+        },
+        BI_onButtonPress: function() {
+            var oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("RouteFacilitis");
+        },
+        POO_onPOTableDelete: function(oEvent) {
+            var oTable = this.byId("idTable");
+            var oModel = oTable.getModel("FacilitiesModel");
+            var aData = oModel.getData();
 
-            const Payload = oFacilitiesModel.getData();
-            const attachments = oUploaderData.getProperty("/attachments") || [];
-            const aFacilitiesData = oView.getModel("Facilities").getData();
+            // 🔹 Get deleted item index
+            var oItem = oEvent.getParameter("listItem");
+            var sPath = oItem.getBindingContext("FacilitiesModel").getPath(); // e.g. "/2"
+            var iIndex = parseInt(sPath.split("/")[1]);
 
-            // Mandatory field validation
-            if (!Payload.BranchCode || !Payload.FacilityName || !Payload.Description) {
-                sap.m.MessageToast.show(this.i18nModel.getText("mandetoryFields") || "Please fill all mandatory fields.");
-                return;
-            }
+            // 🔹 Remove the selected item from the data
+            aData.splice(iIndex, 1);
 
-            // Attachment validation
-            if (attachments.length === 0) {
-                sap.m.MessageBox.error("Please upload at least one attachment.");
-                return;
-            }
+            // 🔹 Update model
+            oModel.setData(aData);
 
-            if (attachments.length > 3) {
-                sap.m.MessageBox.warning("You can upload a maximum of 3 attachments only.");
-                return;
-            }
+            // 🔹 Optional feedback
+            sap.m.MessageToast.show("Image removed.");
+        },
+        onbranchChange: function(oEvent) {
+            utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
+        },
+        onNameInputLiveChange: function(oEvent) {
+            utils._LCvalidateMandatoryField(oEvent.getSource(), "ID");
+        },
+        onPressImageDelete: function(oEvent) {
+            const oContext = oEvent.getSource().getBindingContext("DisplayImagesModel");
+            if (!oContext) return;
+            const sFileName = oContext.getProperty("fileName");
+            const oDisplayModel = this.getView().getModel("DisplayImagesModel");
+            const aImages = oDisplayModel.getProperty("/DisplayImages") || [];
+            const aUpdatedImages = aImages.filter(oImg => oImg.fileName !== sFileName);
+            oDisplayModel.setProperty("/DisplayImages", aUpdatedImages);
+            this._deleteImageFromBackend(sFileName);
+        },
 
-            // Check for duplicates only when creating new record
-            if (!Payload.ID) {
-                const bDuplicate = aFacilitiesData.some(facility => (
-                    facility.BranchCode === Payload.BranchCode &&
-                    facility.FacilityName.trim().toLowerCase() === Payload.FacilityName.trim().toLowerCase()
-                ));
-
-                if (bDuplicate) {
-                    sap.m.MessageToast.show("Facility with same name already exists for this branch.");
-                    return;
-                }
-            }
-
-            // Map files to DB columns
-            const oData = {
-                BranchCode: Payload.BranchCode,
-                FacilityName: Payload.FacilityName,
-                Description: Payload.Description
+        _deleteImageFromBackend: function(sFileName) {
+            const oPayload = {
+                ID: this.BedID, // Facility ID from route
+                FileName: sFileName // File name to delete
             };
 
-            attachments.slice(0, 3).forEach((file, index) => {
-                const num = index + 1;
-                oData[`Photo${num}`] = file.content || null;
-                oData[`Photo${num}Name`] = file.filename || "";
-                oData[`Photo${num}Type`] = file.fileType || "";
-            });
+            this.ajaxDeleteWithJQuery("HM_ExtraFacilitiesImage", oPayload)
+                .then(() => sap.m.MessageToast.show(`${sFileName} deleted successfully`))
+                .catch(() => sap.m.MessageBox.error("Failed to delete image"));
+        },
+        BT_onsavebuttonpress: async function() {
+            var oView = this.getView();
+            var Payload = oView.getModel("FacilitiesModel").getData();
 
-            sap.ui.core.BusyIndicator.show(0);
+            // Field validations
+            if (
+                utils._LCstrictValidationComboBox(oView.byId("FD_id_RoomType123"), "ID") &&
+                utils._LCvalidateMandatoryField(oView.byId("FD_id_FacilityName"), "ID") &&
+                utils._LCvalidateMandatoryField(oView.byId("FD_id_FacilityName1"), "ID") &&
+                utils._LCvalidateMandatoryField(oView.byId("FD_id_Price"), "ID") &&
+                utils._LCstrictValidationComboBox(oView.byId("FD_id_Rate"), "ID") &&
+                utils._LCstrictValidationComboBox(oView.byId("FD_id_Currency"), "ID")
+            ) {
+                var aFacilitiesData = oView.getModel("FacilitiesModel").getData(); // ✅ added missing variable reference
+                var attachments = oView.getModel("UploaderData").getData().attachments || []; // ✅ added to ensure attachments is defined
 
-            try {
-                if (Payload.ID) {
-                    // Update existing record
-                    await this.ajaxUpdateWithJQuery("HM_Facilities", {
+                // Duplicate check
+                var bDuplicate = aFacilitiesData.some(function(facility) {
+                    if (Payload.ID && facility.ID === Payload.ID) return false; // Skip same record during update
+                    return (
+                        facility.BranchCode === Payload.BranchCode &&
+                        facility.FacilityName.trim().toLowerCase() === Payload.FacilityName.trim().toLowerCase() &&
+                        facility.UnitText === Payload.UnitText
+                    );
+                });
+
+                if (bDuplicate) {
+                    sap.m.MessageToast.show("Facility with the same rate type already exists for this branch.");
+                    return;
+                }
+
+                // Image validations
+                if (attachments.length === 0) {
+                    sap.m.MessageBox.error("Please upload at least one image.");
+                    return;
+                }
+
+                if (attachments.length > 3) {
+                    sap.m.MessageBox.error("You can upload a maximum of 3 images only.");
+                    return;
+                }
+
+                // Payload preparation
+                const oData = {
+                    data: {
+                        BranchCode: Payload.BranchCode,
+                        FacilityName: Payload.FacilityName,
+                        Type: Payload.Type,
+                        Price: Payload.Price,
+                        Currency: Payload.Currency,
+                        UnitText: Payload.UnitText,
+                    },
+                    Attachment: {}
+                };
+
+                // Add facility and branch info to attachment
+                oData.Attachment.FacilityName = Payload.FacilityName;
+                oData.Attachment.BranchCode = Payload.BranchCode;
+
+                // Add images (up to 3)
+                attachments.slice(0, 3).forEach((file, index) => {
+                    const num = index + 1;
+                    oData.Attachment[`Photo${num}`] = file.content || null;
+                    oData.Attachment[`Photo${num}Name`] = file.filename || "";
+                    oData.Attachment[`Photo${num}Type`] = file.fileType || "";
+                });
+
+                // Fill empty placeholders if less than 3 images
+                for (let i = attachments.length + 1; i <= 3; i++) {
+                    oData.Attachment[`Photo${i}`] = null;
+                    oData.Attachment[`Photo${i}Name`] = "";
+                    oData.Attachment[`Photo${i}Type`] = "";
+                }
+
+                sap.ui.core.BusyIndicator.show(0);
+                try {
+                    await this.ajaxUpdateWithJQuery("HM_ExtraFacilities", {
                         data: oData,
                         filters: {
                             ID: Payload.ID
-                        }
+                        } // ✅ fixed: oData.ID → Payload.ID (oData has no ID)
                     });
-                    sap.m.MessageToast.show("Facility updated successfully!");
-                } else {
-                    // Create new record
-                    await this.ajaxCreateWithJQuery("HM_Facilities", {
-                        data: oData
-                    });
+
                     sap.m.MessageToast.show("Facility added successfully!");
-                }
 
-                sap.ui.core.BusyIndicator.hide();
-                await this.Onsearch();
-                this.ARD_Dialog.close();
+                    // Reset models after success
+                    oView.getModel("UploaderData").setData({
+                        attachments: []
+                    });
+                    oView.getModel("tokenModel").setData({
+                        tokens: []
+                    });
 
-            } catch (err) {
-                sap.ui.core.BusyIndicator.hide();
-                sap.m.MessageToast.show(err.message || err.responseText || "Error while saving data.");
-            }
-        },
-
-
-        _resetFacilityValueStates: function() {
-            const oView = this.getView();
-            ["FDD_id_RoomType123", "FDD_id_FacilityName", "FDD_id_Description"].forEach(id => {
-                const oField = sap.ui.getCore().byId(oView.createId(id));
-                if (oField?.setValueState) oField.setValueState("None");
-            });
-        },
-
-        Onsearch: function() {
-            sap.ui.core.BusyIndicator.show(0);
-            this.ajaxReadWithJQuery("HM_Facilities", "")
-                .then(oData => {
-                    const aData = Array.isArray(oData.data) ? oData.data : [oData.data];
-                    const oModel = new sap.ui.model.json.JSONModel(aData);
-                    this.getView().setModel(oModel, "Facilities");
+                    await this.Onsearch();
+                    this.ARD_Dialog.close();
+                } catch (err) {
+                    sap.m.MessageToast.show(err.message || err.responseText);
+                } finally {
                     sap.ui.core.BusyIndicator.hide();
-                })
-                .catch(() => sap.ui.core.BusyIndicator.hide());
-        },
-
-        // View images in dialog
-        FC_viewroom: function(oEvent) {
-            const oData = oEvent.getSource().getBindingContext("Facilities").getObject();
-            const aImages = [];
-
-            if (oData.Photo1) aImages.push("data:" + (oData.Photo1Type || "image/jpeg") + ";base64," + oData.Photo1);
-            if (oData.Photo2) aImages.push("data:" + (oData.Photo2Type || "image/jpeg") + ";base64," + oData.Photo2);
-            if (oData.Photo3) aImages.push("data:" + (oData.Photo3Type || "image/jpeg") + ";base64," + oData.Photo3);
-
-            if (aImages.length === 0) {
-                MessageBox.error("No photos available for this facility.");
-                return;
-            }
-
-            const oVBox = new sap.m.VBox({
-                alignItems: "Center",
-                justifyContent: "Center"
-            });
-            aImages.forEach(src => {
-                oVBox.addItem(new sap.m.Image({
-                    src,
-                    width: "100%",
-                    height: "auto",
-                    densityAware: false,
-                    class: "sapUiMediumMarginBottom"
-                }));
-            });
-
-            const oDialog = new sap.m.Dialog({
-                title: "Facility Images",
-                contentWidth: "400px",
-                contentHeight: "500px",
-                verticalScrolling: true,
-                content: [oVBox],
-                endButton: new sap.m.Button({
-                    text: "Close",
-                    press: function() {
-                        oDialog.close();
-                    }
-                }),
-                afterClose: function() {
-                    oDialog.destroy();
                 }
-            });
-
-            oDialog.open();
-        },
-
-        onNavBack: function() {
-            var oRouter = this.getOwnerComponent().getRouter();
-            oRouter.navTo("TilePage");
-        },
-        onHome: function() {
-            var oRouter = this.getOwnerComponent().getRouter();
-            oRouter.navTo("RouteHostel");
-        },
-
-        HM_DeleteDetails: async function() {
-            var oTable = this.byId("FD_id_facilityTable");
-            var oSelectedItem = oTable.getSelectedItem();
-
-            if (!oSelectedItem) {
-                sap.m.MessageToast.show("Please select a record to delete.");
-                return;
             }
-
-            var oContext = oSelectedItem.getBindingContext("Facilities");
-            var oData = oContext.getObject();
-            var that = this;
-
-            sap.m.MessageBox.confirm(
-                `Are you sure you want to delete the facility ${oData.FacilityName}?`, {
-                    icon: sap.m.MessageBox.Icon.WARNING,
-                    title: "Confirm Deletion",
-                    actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO],
-                    emphasizedAction: sap.m.MessageBox.Action.NO,
-                    onClose: async function(sAction) {
-                        if (sAction === sap.m.MessageBox.Action.YES) {
-                            try {
-                                sap.ui.core.BusyIndicator.show(0);
-                                await that.ajaxDeleteWithJQuery("HM_Facilities", {
-                                    filters: {
-                                        ID: oData.ID
-                                    }
-                                });
-                                sap.m.MessageToast.show("Facility deleted successfully!");
-                                await that.Onsearch(); // refresh table data
-                            } catch (err) {
-                                console.error("Delete failed:", err);
-                                sap.m.MessageBox.error("Error while deleting Facility. Please try again.");
-                            } finally {
-                                sap.ui.core.BusyIndicator.hide();
-                                oTable.removeSelections(true);
-                            }
-                        } else if (sAction === sap.m.MessageBox.Action.NO) {
-                            oTable.removeSelections(true);
-                        }
-                    }
-                }
-            );
         }
     });
 });

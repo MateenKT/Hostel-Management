@@ -166,7 +166,7 @@
         },
         {
           "name": "RouteFacilitiesDetails",
-          "pattern": "FacilitiesDetails",
+          "pattern": "FacilitiesDetails/{sPath}",
           "target": [
             "TargetFacilitiesDetails"
           ]

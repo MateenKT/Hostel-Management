@@ -387,6 +387,13 @@ sap.ui.define([
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("RouteHostel");
         },
+        FD_onFacilityRowPress: function(oEvent) {
+            var ofacilityID = oEvent.getSource().getBindingContext("Facilities").getObject().ID;
+            var onav = this.getOwnerComponent().getRouter()
+            onav.navTo("RouteFacilitiesDetails", {
+                sPath: ofacilityID
+            });
+        },
         HM_DeleteDetails: async function() {
             var oTable = this.byId("id_facilityTable");
             var oSelectedItem = oTable.getSelectedItem();
