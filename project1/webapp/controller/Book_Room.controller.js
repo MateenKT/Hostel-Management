@@ -95,6 +95,14 @@ sap.ui.define([
                 comfirmpass: ""
             });
             this.getView().setModel(oLoginModeModel, "LoginMode")
+
+			this.ajaxReadWithJQuery("Currency", "").then((oData) => {
+                var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
+                var model = new JSONModel(oFCIAerData);
+                this.getView().setModel(model, "CurrencyModel");
+            }).catch((err) => {
+                console.error("Error fetching currency data:", err);
+            });
 		},
 		Roomdetails: async function() {
 			try {
@@ -684,15 +692,15 @@ sap.ui.define([
 				case 1:
 					oModel.setProperty("/PERVIOUSVIS", true);
 					oModel.setProperty("/NXTVis", true);
-          //  if (!this._checkMandatoryFields()) {
-          //       sap.m.MessageToast.show("Please fill all mandatory personal details before proceeding.");
-          //       // Move wizard back to previous valid step
-          //       // If using goToStep/goBack, implement as needed to stay on current step
-          //       this._iSelectedStepIndex--;
-          //       this._oSelectedStep = this._oWizard.getSteps()[this._iSelectedStepIndex];
-          //       oModel.setProperty("/NXTVis", true);
-          //       return; // Exit without proceeding
-          //   }
+           if (!this._checkMandatoryFields()) {
+                sap.m.MessageToast.show("Please fill all mandatory personal details before proceeding.");
+                // Move wizard back to previous valid step
+                // If using goToStep/goBack, implement as needed to stay on current step
+                this._iSelectedStepIndex--;
+                this._oSelectedStep = this._oWizard.getSteps()[this._iSelectedStepIndex];
+                oModel.setProperty("/NXTVis", true);
+                return; // Exit without proceeding
+            }
             this._LoadFacilities()
 					break;
 				case 2:

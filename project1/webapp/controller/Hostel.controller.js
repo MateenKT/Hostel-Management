@@ -1328,7 +1328,6 @@ sap.ui.define([
                     oView.byId("ProfileAvatar")?.setVisible(true);
 
                 } else if (oMatchedUser.Role === "Admin" || oMatchedUser.Role === "Employee") {
-                    sap.m.MessageToast.show("Login Successful! Welcome, " + sUsername);
                     sap.ui.getCore().byId("signInusername").setValue("");
                     sap.ui.getCore().byId("signinPassword").setValue("");
 

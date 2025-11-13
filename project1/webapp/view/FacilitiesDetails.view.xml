@@ -12,28 +12,17 @@
     height="100%"
 	xmlns:core="sap.ui.core"
     busyIndicatorDelay="0"
-	xmlns:u="sap.ui.unified"
->
+	xmlns:u="sap.ui.unified">
 	<m:Page
         navButtonPress="BI_onButtonPress"
         showNavButton="true"
-        title="Facility Details"
-    >
-		<m:headerContent>
-			<m:Button
-                press="onLogout"
-                icon="sap-icon://log"
-                tooltip="{i18n>logoutTooltip}"
-                type="Transparent"
-            />
-		</m:headerContent>
+        title="Facility Details">
 		<ObjectPageLayout id="FD_id_ObjectPageLayout">
 			<sections>
 				<ObjectPageSection
                     titleUppercase="false"
                     id="FD_id_OrderHeaderSection1"
-                    title="Facility Information"
-                >
+                    title="Facility Information">
 					<subSections>
 						<ObjectPageSubSection id="FD_id_dsd1">
 							<blocks>
@@ -54,8 +43,7 @@
                                     columnsXL="3"
                                     columnsL="2"
                                     columnsM="2"
-                                    singleContainerFullSize="false"
-                                >
+                                    singleContainerFullSize="false">
 									<f:content>
 										<!-- Branch Code -->
 										<m:Label text="Branch Code" required="true" />
@@ -66,8 +54,7 @@
                     items="{BranchModel>/}"
                     showSecondaryValues="true"
                     change=".onFacilitybranchChange"
-                    valueStateText="{i18n>selectBranchCode}" editable="{editable>/Edit}"
-                >
+                    valueStateText="{i18n>selectBranchCode}" editable="{editable>/Edit}">
 											<core:ListItem
                         key="{BranchModel>BranchID}"
                         text="{BranchModel>BranchID}"
@@ -149,39 +136,65 @@
 				<ObjectPageSection
                     titleUppercase="false"
                     id="FD_id_rderSection"
-                    title="Facility Images"
-                >
+                    title="Facility Images">
 					<subSections>
 						<ObjectPageSubSection id="FD_id_ordersection">
 							<blocks>
 								<m:HBox
-                                    id="FD_id_ImagesContainer"
-                                    justifyContent="Start"
-                                    alignItems="Start"
-                                    class="sapUiSmallMargin"
-                                    items="{DisplayImagesModel>/DisplayImages}"
-                                >
-									<m:VBox class="sapUiSmallMarginEnd" width="150px" alignItems="Center">
-										<m:Image
-        src="{DisplayImagesModel>src}"
-        width="120px"
-        height="120px"
-    />
-										<m:Text
-        text="{DisplayImagesModel>fileName}"
-        textAlign="Center"
-        wrapping="true"
-    />
-										<!-- Delete button visible only in edit mode -->
-										<m:Button
-    icon="sap-icon://delete"
-    type="Reject"
-    text="Delete"
-    visible="{editable>/Edit}"
-    press=".onPressImageDelete"
-/>
-									</m:VBox>
-								</m:HBox>
+    id="FD_id_ImagesContainer"
+    justifyContent="Start"
+    alignItems="Start"
+    class="sapUiSmallMargin"
+    items="{DisplayImagesModel>/DisplayImages}"
+>
+    <m:VBox
+        class="sapUiSmallMarginEnd"
+        width="150px"
+        alignItems="Center"
+    >
+ 
+        <!-- Normal Image Display -->
+        <m:Image
+            src="{DisplayImagesModel>src}"
+            width="120px"
+            height="120px"
+            press="onImagePress"
+            visible="{= ${DisplayImagesModel>isPlaceholder} === false }"
+        />
+ 
+        <u:FileUploader
+            id="FD_id_fileUploader"
+            icon="sap-icon://add"
+            width="120px"
+            style="Transparent"
+            tooltip="Add Image"
+            placeholder=" "
+            buttonOnly="true"
+            sameFilenameAllowed="true"
+             visible="{= ${editable>/Edit} === true  &amp;&amp; ${DisplayImagesModel>/CanAddMore} === true  &amp;&amp; ${DisplayImagesModel>isPlaceholder} === true }"
+            change=".onFileSelected"
+
+        />
+ 
+        <!-- File name -->
+        <m:Text
+            text="{DisplayImagesModel>fileName}"
+            textAlign="Center"
+            wrapping="true"
+            visible="{= ${DisplayImagesModel>isPlaceholder} === false }"
+        />
+ 
+        <!-- Delete icon (visible only in Edit mode and not for placeholder) -->
+        <m:Button
+            icon="sap-icon://delete"
+            type="Reject"
+            visible="{= ${editable>/Edit} === true &amp;&amp; ${DisplayImagesModel>isPlaceholder} === false }"
+            press=".onDeleteImage"
+            tooltip="Delete Image"
+            width="100%"
+        />
+    </m:VBox>
+</m:HBox>
 							</blocks>
 						</ObjectPageSubSection>
 					</subSections>

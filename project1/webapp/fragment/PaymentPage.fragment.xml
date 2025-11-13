@@ -44,15 +44,23 @@
 			<Label text="Bank Name" required="true"/>
 			<Input id="idBankName" placeholder="Enter Bank Name" />
 			<Label text="Amount" required="true"/>
-			<Input id="idAmount" type="Number" placeholder="Enter Amount" />
+			<HBox width="100%" justifyContent="Start" alignItems="Center">
+				<VBox width="50%">
+					<Input id="idAmount" type="Number" placeholder="Enter Amount" />
+				</VBox>
+				<VBox width="50%">
+					<ComboBox id="idCurrency" items="{CurrencyModel>/}"  valueStateText="Select Currency"
+              width="100%" change=".onFacilitybranchChange" placeholder="Select Currency">
+						<core:Item  key="{CurrencyModel>currency}" text="{CurrencyModel>currency}"/>
+					</ComboBox>
+				</VBox>
+			</HBox>
 			<Label text="Payment Type" required="true"/>
 			<Input id="idPaymentTypeField" placeholder="Enter Payment Type (e.g., Yearly)" />
 			<Label text="Bank Transaction ID" required="true"/>
 			<Input id="idTransactionID" placeholder="Enter Transaction ID" />
 			<Label text="Date" required="true"/>
 			<DatePicker id="idPaymentDate" displayFormat="yyyy-MM-dd" valueFormat="yyyy-MM-dd" />
-			<Label text="Currency" required="true"/>
-			<Input id="idCurrency" placeholder="Enter Currency" />
 		</l:VerticalLayout>
 		<beginButton>
 			<Button text="Submit Payment" type="Emphasized" press=".onSubmitPress" />
