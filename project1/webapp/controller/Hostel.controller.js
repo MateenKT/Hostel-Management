@@ -12,6 +12,7 @@ sap.ui.define([
         onInit: async function () {
             const oView = this.getView();
 
+            // 1️⃣ Login model setup
             const omodel = new sap.ui.model.json.JSONModel({
                 url: "https://rest.kalpavrikshatechnologies.com/",
                 headers: {
@@ -23,90 +24,72 @@ sap.ui.define([
             });
             this.getOwnerComponent().setModel(omodel, "LoginModel");
 
+            // 2️⃣ Disable controls initially
             this.byId("id_Branch").setEnabled(true);
             this.byId("id_Area").setEnabled(false);
             this.byId("id_Roomtype").setEnabled(false);
 
+            // 3️⃣ Hide avatar initially
             const oAvatar = oView.byId("ProfileAvatar");
             if (oAvatar) oAvatar.setVisible(false);
 
-            const oHostelModel = new sap.ui.model.json.JSONModel({
+            // 4️⃣ Create all static local models
+            oView.setModel(new sap.ui.model.json.JSONModel({
                 CustomerName: "",
                 MobileNo: "",
                 Gender: "",
                 DateOfBirth: "",
                 CustomerEmail: "",
-                RoomType: "",
+                RoomType: ""
+            }), "HostelModel");
 
-            });
-            oView.setModel(oHostelModel, "HostelModel");
-
-            const oProfileMenuModel = new sap.ui.model.json.JSONModel({
+            oView.setModel(new sap.ui.model.json.JSONModel({
                 items: [
                     { title: "My Profile", icon: "sap-icon://person-placeholder", key: "profile" },
                     { title: "Booking History", icon: "sap-icon://connected", key: "devices" },
                     { title: "Logout", icon: "sap-icon://log", key: "logout" }
                 ]
-            });
-            oView.setModel(oProfileMenuModel, "profileMenuModel");
+            }), "profileMenuModel");
 
-            var oModels = new sap.ui.model.json.JSONModel({
-                isEditMode: false
-            });
-            this.getView().setModel(oModels, "saveModel");
+            oView.setModel(new sap.ui.model.json.JSONModel({ isEditMode: false }), "saveModel");
+            oView.setModel(new sap.ui.model.json.JSONModel({ isOtpSelected: false, isPasswordSelected: true }), "LoginViewModel");
+            oView.setModel(new sap.ui.model.json.JSONModel({ fullname: "", Email: "", Mobileno: "", password: "", comfirmpass: "" }), "LoginMode");
+            oView.setModel(new sap.ui.model.json.JSONModel({ selectedSection: "profile" }), "profileSectionModel");
 
-            const oLoginViewModel = new sap.ui.model.json.JSONModel({
-                isOtpSelected: false,
-                isPasswordSelected: true
-            });
-            oView.setModel(oLoginViewModel, "LoginViewModel");
-
-            const oLoginModeModel = new sap.ui.model.json.JSONModel({
-                fullname: "",
-                Email: "",
-                Mobileno: "",
-                password: "",
-                comfirmpass: ""
-            });
-            oView.setModel(oLoginModeModel, "LoginMode");
-
-            const oProfileSectionModel = new sap.ui.model.json.JSONModel({
-                selectedSection: "profile"
-            });
-            oView.setModel(oProfileSectionModel, "profileSectionModel");
-
+            // 5️⃣ Hardcoded branches (initial fallback)
             const aBranches = [
-                { BranchCode: "KLB01", BranchName: "Kalaburgi" },
+                { BranchCode: "KLB01", BranchName: "Kalaburagi" },
                 { BranchCode: "BR002", BranchName: "Mumbai" },
                 { BranchCode: "BR003", BranchName: "Nagpur" },
                 { BranchCode: "BR004", BranchName: "Nashik" }
             ];
             oView.setModel(new sap.ui.model.json.JSONModel({ Branches: aBranches }), "BranchModel");
 
+            // 6️⃣ Async data loading sequence
             try {
-                await this.BedTypedetails();
+                await this.BedTypedetails();          // ✅ loads BedTypeModel
                 await this.CustomerDetails();
-                await this._loadBranchCode();
-                await this.onReadcallforRoom();
+                await this._loadBranchCode();         // ✅ loads sBRModel
+                await this.onReadcallforRoom();       // ✅ loads RoomCountModel etc.
                 await this._loadFilteredData("KLB01", "");
-                
+
+                // ✅ only proceed once sBRModel is ready
+                const oBRModel = oView.getModel("sBRModel");
+                if (oBRModel && oBRModel.getData) {
+                    const oModelData = oBRModel.getData();
+                    const aFiltered = oModelData.filter(item => item.Name === "Kalaburagi");
+                    oView.setModel(new sap.ui.model.json.JSONModel(aFiltered), "AreaModel");
+                    oView.byId("id_Area").setEnabled(true);
+                } else {
+                    console.warn("⚠️ sBRModel not available yet — skipping area filter setup");
+                }
+
+                // ✅ Preselect default branch only after data loaded
+                this.byId("id_Branch").setSelectedKey("KLB01");
+
             } catch (error) {
-                console.error("Error during initialization:", error);
+                console.error("❌ Error during initialization:", error);
             }
-            this.byId("id_Branch").setSelectedKey("KLB01")
-                 const oModelData = oView.getModel("sBRModel").getData();
-
-            // 🔹 Filter the data for the selected branch name
-            const aFiltered = oModelData.filter(function (item) {
-                return item.Name === "Kalaburagi";
-            });
-
-            // 🔹 Update Area model dynamically
-            const oAreaModel = new sap.ui.model.json.JSONModel(aFiltered);
-            oView.setModel(oAreaModel, "AreaModel");
-
-            // 🔹 Enable the Area dropdown now that data is ready
-           oView.byId("id_Area").setEnabled(true);
         },
 
         CustomerDetails: async function () {
@@ -122,20 +105,9 @@ sap.ui.define([
                 console.error("Error while fetching Customer details:", err);
             }
         },
-        BedTypedetails: async function () {
-            try {
-                const oData = await this.ajaxReadWithJQuery("HM_BedType", {});
-                const aBedTypes = Array.isArray(oData.data)
-                    ? oData.data
-                    : [oData.data];
 
-                const oBedTypeModel = new JSONModel(aBedTypes);
-                this.getView().setModel(oBedTypeModel, "BedTypeModel");
 
-            } catch (err) {
-                console.error("Error while fetching Bed Type details:", err);
-            }
-        },
+
 
         onUserlivechange: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
@@ -341,8 +313,8 @@ sap.ui.define([
         //     }
         // },
         _loadFilteredData: async function (sBranchCode, sACType) {
-            if(sACType==="All"){
-                sACType=""
+            if (sACType === "All") {
+                sACType = ""
             }
             try {
                 const oView = this.getView();
@@ -462,42 +434,6 @@ sap.ui.define([
             }
         },
 
-        // _LoadFacilities: async function () {
-        //     const oView = this.getView();
-        //     const Response = await this.ajaxReadWithJQuery("HM_ExtraFacilities", {});
-
-        //     // Extract array safely
-        //     const aFacilities = Response?.data || [];
-
-        //     // Helper function to convert Base64 → data:image URL
-        //     const convertBase64ToImage = (base64String, fileType) => {
-        //         if (!base64String) return "./image/Fallback.png";
-        //         let sBase64 = base64String.replace(/\s/g, "");
-        //         try {
-        //             if (!sBase64.startsWith("iVB") && !sBase64.startsWith("data:image")) {
-        //                 const decoded = atob(sBase64);
-        //                 if (decoded.startsWith("iVB")) sBase64 = decoded;
-        //             }
-        //         } catch (e) {
-        //             console.warn("Base64 decode error:", e);
-        //         }
-        //         const mimeType = fileType || "image/jpeg";
-        //         if (sBase64.startsWith("data:image")) return sBase64;
-        //         return `data:${mimeType};base64,${sBase64}`;
-        //     };
-
-        //     // Convert images and prepare data
-        //     const aFinalFacilities = aFacilities.map(f => ({
-        //         FacilityID: f.FacilityID,
-        //         FacilityName: f.FacilityName,
-        //         Image: convertBase64ToImage(f.FicilityImage, f.FileType),
-        //         Price: Number(f.Price)
-        //     }));
-
-        //     //  Wrap in object for proper binding
-        //     const oFacilityModel = new JSONModel({ Facilities: aFinalFacilities });
-        //     oView.setModel(oFacilityModel, "FacilityModel");
-        // },
         _LoadFacilities: async function (sBranchID) {
             try {
                 const oView = this.getView();
@@ -597,166 +533,352 @@ sap.ui.define([
                 `Selected ${sType.charAt(0).toUpperCase() + sType.slice(1)} plan — ₹${sPrice}`
             );
         },
-  
+
+
+
+
+
+
+
+        BedTypedetails: async function () {
+            try {
+                const oResponse = await this.ajaxReadWithJQuery("HM_BedType", "");
+                const aData = Array.isArray(oResponse?.data) ? oResponse.data : [];
+                const oBedTypeModel = new sap.ui.model.json.JSONModel(aData);
+                this.getView().setModel(oBedTypeModel, "BedTypeModel");
+                console.log("Bed Type details loaded successfully", aData);
+            } catch (err) {
+                console.error("❌ Failed to load BedType details:", err);
+            }
+        },
+
+
+
+        _getBedTypeImages: async function (sBedTypeID) {
+            try {
+                if (!sBedTypeID) {
+                    console.warn("⚠️ No BedType ID provided for image lookup");
+                    return [sap.ui.require.toUrl("sap/ui/com/project1/image/no-image.png")];
+                }
+
+                // 🔹 Initialize cache store (first-time)
+                this._imageCache = this._imageCache || {};
+
+                // 🔹 Serve from cache if available
+                if (this._imageCache[sBedTypeID]) {
+                    console.log(`🧠 Cached images returned for BedType ID: ${sBedTypeID}`);
+                    return this._imageCache[sBedTypeID];
+                }
+
+                // 🔹 Fetch from backend
+                const oResponse = await this.ajaxReadWithJQuery("HM_BedTypeDetails", {
+                    filters: { ID: sBedTypeID }
+                });
+                console.log("🧾 HM_BedTypeDetails raw response:", oResponse);
+
+                const oData = Array.isArray(oResponse?.data)
+                    ? oResponse.data.find(item => item.ID === sBedTypeID)
+                    : oResponse?.data;
+
+                if (!oData) {
+                    console.warn("⚠️ No image data returned for BedType ID:", sBedTypeID);
+                    return [sap.ui.require.toUrl("sap/ui/com/project1/image/no-image.png")];
+                }
+
+                // 🔹 Extract Photo1–Photo5 safely
+                const aImages = [];
+                for (let i = 1; i <= 5; i++) {
+                    const sPhoto = oData[`Photo${i}`];
+                    const sType = oData[`Photo${i}Type`] || "image/jpeg";
+                    if (sPhoto && sPhoto.trim() !== "") {
+                        const sDataUrl = sPhoto.startsWith("data:image")
+                            ? sPhoto
+                            : `data:${sType};base64,${sPhoto.trim()}`;
+                        aImages.push(sDataUrl);
+                    }
+                }
+
+                // 🔹 If empty, use fallback
+                const aFinal = aImages.length
+                    ? aImages
+                    : [sap.ui.require.toUrl("sap/ui/com/project1/image/no-image.png")];
+
+                console.log(`📸 Extracted ${aFinal.length} images for BedType ID: ${sBedTypeID}`);
+
+                // 🔹 Cache it
+                this._imageCache[sBedTypeID] = aFinal;
+
+                return aFinal;
+            } catch (err) {
+                console.error("❌ Error fetching bed type images:", err);
+                return [sap.ui.require.toUrl("sap/ui/com/project1/image/no-image.png")];
+            }
+        },
+
+
+
+
 
         viewDetails: async function (oEvent) {
             const oView = this.getView();
+            const normalize = v => (v ? String(v).trim().toLowerCase() : "");
 
-            // 1. Get selected card object from the UI model
-            const oSelected = oEvent.getSource().getBindingContext("VisibilityModel").getObject();
+            try {
+                // 1️⃣ Extract selected object
+                const oSelected = oEvent.getSource().getBindingContext("VisibilityModel").getObject();
 
-            // 2. Get reference models
-            const oRoomsModel = oView.getModel("RoomCountModel");
-            const oBedTypeModel = oView.getModel("BedTypeModel");
-            const oBranchModel = oView.getModel("sBRModel");
+                // 2️⃣ Reference models
+                const oRoomsModel = oView.getModel("RoomCountModel");
+                const oBedTypeModel = oView.getModel("BedTypeModel");
+                const oBranchModel = oView.getModel("sBRModel");
 
-            const aRooms = oRoomsModel?.getData()?.Rooms || [];
-            const aBedTypes = oBedTypeModel?.getData() || [];
-            const aBranches = oBranchModel?.getData() || [];
+                const aRooms = oRoomsModel?.getData()?.Rooms || [];
+                const aBedTypes = oBedTypeModel?.getData() || [];
+                const aBranches = oBranchModel?.getData() || [];
 
-            // 3. Identify selected bed and AC type
-            const sSelectedBedType = oSelected.Name?.trim().toLowerCase();
-            const sSelectedAC = (oSelected.ACType || "AC").trim().toLowerCase();
+                // 3️⃣ Identify selected bed and AC type
+                const sSelectedBedType = oSelected.Name?.trim().toLowerCase();
+                const sSelectedAC = (oSelected.ACType || "AC").trim().toLowerCase();
 
-            // Match corresponding records
-            const oBedTypeDetails = aBedTypes.find(bt =>
-                bt.Name?.trim().toLowerCase() === sSelectedBedType &&
-                bt.ACType?.trim().toLowerCase() === sSelectedAC
-            ) || {};
+                // Match BedType and Room
+                const oBedTypeDetails = aBedTypes.find(bt =>
+                    normalize(bt.Name) === sSelectedBedType &&
+                    normalize(bt.ACType) === sSelectedAC
+                ) || {};
 
-            const oRoomDetails = aRooms.find(r =>
-                r.BedTypeName?.trim().toLowerCase() === `${sSelectedBedType} - ${sSelectedAC}`
-            ) || {};
+                const oRoomDetails = aRooms.find(r =>
+                    normalize(r.BedTypeName) === `${sSelectedBedType} - ${sSelectedAC}`
+                ) || {};
 
-            // 4. Resolve address based on branch data
-            let sAddress = "Not specified";
-            const sRoomBranchRaw = (oRoomDetails.BranchID ?? oRoomDetails.BranchCode ?? "").toString().trim();
-            if (sRoomBranchRaw) {
-                const normalize = v => (v ? String(v).trim().toLowerCase() : "");
-                const oBranch = aBranches.find(b =>
-                    normalize(b.BranchID) === normalize(sRoomBranchRaw) ||
-                    normalize(b.BranchCode) === normalize(sRoomBranchRaw)
-                ) || aBranches.find(b => normalize(b.Name) === normalize(sRoomBranchRaw)) ||
-                    aBranches.find(b =>
+                // 4️⃣ Resolve address based on branch
+                let sAddress = "Not specified";
+                const sRoomBranchRaw = (oRoomDetails.BranchID ?? oRoomDetails.BranchCode ?? "").toString().trim();
+
+                if (sRoomBranchRaw) {
+                    const oBranch = aBranches.find(b =>
+                        normalize(b.BranchID) === normalize(sRoomBranchRaw) ||
+                        normalize(b.BranchCode) === normalize(sRoomBranchRaw)
+                    ) || aBranches.find(b =>
                         normalize(b.Name).includes(normalize(sRoomBranchRaw)) ||
                         normalize(b.Address).includes(normalize(sRoomBranchRaw))
                     );
-                if (oBranch) sAddress = oBranch.Address || oBranch.Name || "Not specified";
-            }
-            // 
-            console.log("   Room Branch:", sRoomBranchRaw, "Address:", sAddress);
 
-            let aImageList = [];
+                    if (oBranch) sAddress = oBranch.Address || oBranch.Name || "Not specified";
+                }
 
-            // If backend provides multiple images as array
-            if (Array.isArray(oBedTypeDetails.RoomPhotosList) && oBedTypeDetails.RoomPhotosList.length > 0) {
-                aImageList = oBedTypeDetails.RoomPhotosList.map(img =>
-                    `data:${oBedTypeDetails.MimeType || "image/jpeg"};base64,${img}`
+                // 5️⃣ Create model
+                // 5️⃣ Prepare HostelModel before fetching images
+                const oFullDetails = {
+                    RoomNo: oRoomDetails.RoomNo || "",
+                    BedType: oBedTypeDetails.Name || oSelected.Name || "",
+                    ACType: oBedTypeDetails.ACType || sSelectedAC.toUpperCase(),
+                    Description: oBedTypeDetails.Description || "No description available",
+                    Price: oRoomDetails.Price || "N/A",
+                    MonthPrice: oRoomDetails.MonthPrice || "N/A",
+                    YearPrice: oRoomDetails.YearPrice || "N/A",
+                    Address: sAddress,
+                    BranchCode: oRoomDetails.BranchCode || sRoomBranchRaw || "",
+                    Capacity: oBedTypeDetails.NoOfPerson || "",
+                    ImageList: [],
+                    SelectedPriceType: "",
+                    SelectedPriceValue: ""
+                };
+
+
+                const oHostelModel = new sap.ui.model.json.JSONModel(oFullDetails);
+                oView.setModel(oHostelModel, "HostelModel");
+
+                // 6️⃣ Match correct BedType (Branch + Bed + AC)
+                const sBranchCode =
+                    oRoomDetails?.BranchCode ||
+                    oRoomDetails?.BranchID ||
+                    oBedTypeDetails?.BranchCode ||
+                    oSelected?.BranchCode ||
+                    oFullDetails?.BranchCode ||
+                    "";
+
+                const sBedType =
+                    oSelected?.Name ||
+                    oBedTypeDetails?.Name ||
+                    oRoomDetails?.BedTypeName ||
+                    "";
+
+                const sACType =
+                    oSelected?.ACType ||
+                    oBedTypeDetails?.ACType ||
+                    oRoomDetails?.RoomType ||
+                    "";
+
+                console.log("🔍 Matching BedType using:", { sBranchCode, sBedType, sACType });
+
+                const oMatch = aBedTypes.find(bt =>
+                    normalize(bt.BranchCode) === normalize(sBranchCode) &&
+                    normalize(bt.Name) === normalize(sBedType) &&
+                    normalize(bt.ACType) === normalize(sACType)
                 );
-            }
-            // If a single image exists
-            else if (oBedTypeDetails.RoomPhotos && oBedTypeDetails.RoomPhotos.trim() !== "") {
-                aImageList = [
-                    `data:${oBedTypeDetails.MimeType || "image/jpeg"};base64,${oBedTypeDetails.RoomPhotos}`
-                ];
-            }
-            // Fallback to oSelected.Image
-            else if (oSelected.Image && oSelected.Image.trim() !== "") {
-                aImageList = [oSelected.Image];
-            }
-            // Final fallback — local default image
-            else {
-                aImageList = [sap.ui.require.toUrl("sap/ui/com/project1/image/no-image.png")];
-            }
-            // 5. Build the full detail object
-            const oFullDetails = {
-                RoomNo: oRoomDetails.RoomNo || "",
-                BedType: oBedTypeDetails.Name || oSelected.Name || "",
-                ACType: oBedTypeDetails.ACType || sSelectedAC.toUpperCase(),
-                Description: oBedTypeDetails.Description || "No description available",
-                Price: oRoomDetails.Price || "N/A",
-                MonthPrice: oRoomDetails.MonthPrice || "N/A",
-                YearPrice: oRoomDetails.YearPrice || "N/A",
-                Address: sAddress,
-                Capacity: oRoomDetails.NoofPerson || "",
-                ImageList: aImageList,
-                // 👇 Newly added properties for price selection
-                SelectedPriceType: "",
-                SelectedPriceValue: ""
-            };
-            // 6. Bind model (HostelModel) and filter facilities
-            const oHostelModel = new sap.ui.model.json.JSONModel(oFullDetails);
-            oView.setModel(oHostelModel, "HostelModel");
 
-            await this._LoadFacilities(oRoomDetails.BranchID || oRoomDetails.BranchCode || oFullDetails.Address);
+                let aImageList = [];
+                if (oMatch && oMatch.ID) {
+                    console.log("✅ Correct BedType match found:", oMatch);
+                    aImageList = await this._getBedTypeImages(oMatch.ID);
+                    console.log(`📸 Loaded ${aImageList.length} images for BedType ID: ${oMatch.ID}`);
+                } else {
+                    console.warn("⚠️ No BedType match found for filters:", { sBranchCode, sBedType, sACType });
+                    aImageList = [sap.ui.require.toUrl("sap/ui/com/project1/image/no-image.png")];
+                }
 
-            // 7. Open the details fragment
-            if (!this._oRoomDetailFragment) {
-                // Note: The fragment ID should be the first argument if you want to use sap.ui.core.Fragment.byId later
-                // Best practice is to use the controller reference (this) to open fragments
-                this._oRoomDetailFragment = await sap.ui.core.Fragment.load({
-                    name: "sap.ui.com.project1.fragment.viewRoomDetails",
-                    controller: this // Pass controller reference
-                });
-                oView.addDependent(this._oRoomDetailFragment);
+                if (!Array.isArray(aImageList) || aImageList.length === 0) {
+                    console.warn("⚠️ No valid images found, applying fallback");
+                    aImageList = [sap.ui.require.toUrl("sap/ui/com/project1/image/no-image.png")];
+                }
+
+                oHostelModel.setProperty("/ImageList", aImageList);
+                sap.ui.getCore().applyChanges();
+
+                console.log("🖼️ Final ImageList bound to HostelModel:", aImageList.length, "images");
+
+                // 7️⃣ Load facilities
+                await this._LoadFacilities(oRoomDetails.BranchID || oRoomDetails.BranchCode || oFullDetails.Address);
+
+                // 8️⃣ Load fragment
+                if (!this._oRoomDetailFragment) {
+                    this._oRoomDetailFragment = await sap.ui.core.Fragment.load({
+                        name: "sap.ui.com.project1.fragment.viewRoomDetails",
+                        controller: this
+                    });
+                    this.getView().addDependent(this._oRoomDetailFragment);
+                }
+
+                this._oRoomDetailFragment.setModel(oHostelModel, "HostelModel");
+                this._oRoomDetailFragment.setModel(oView.getModel("FacilityModel"), "FacilityModel");
+                this._oRoomDetailFragment.open();
+
+                sap.ui.getCore().applyChanges();
+
+                // 9️⃣ Bind Carousel
+                const oCarousel = this._oRoomDetailFragment.findAggregatedObjects(true, obj => obj.isA("sap.m.Carousel"))[0];
+
+                if (oCarousel) {
+                    oCarousel.setModel(oHostelModel, "HostelModel");
+                    oCarousel.unbindAggregation("pages");
+                    oCarousel.bindAggregation("pages", {
+                        path: "HostelModel>/ImageList",
+                        template: new sap.m.Image({
+                            src: "{HostelModel>}",
+                            width: "100%",
+                            height: "250px",
+                            densityAware: false,
+                            decorative: false
+                        }).addStyleClass("roomCarouselImage")
+                    });
+
+                    console.log("🎠 Carousel bound successfully:", oCarousel.getId());
+                    console.log("Carousel pages count:", oCarousel.getPages().length);
+                }
+            } catch (err) {
+                console.error("❌ Error in viewDetails:", err);
             }
-
-            // Model binding is necessary before opening
-            this._oRoomDetailFragment.setModel(oHostelModel, "HostelModel");
-            this._oRoomDetailFragment.setModel(oView.getModel("FacilityModel"), "FacilityModel");
-
-            // Open the dialog
-            this._oRoomDetailFragment.open();
-            const oCarousel = sap.ui.core.Fragment.byId("sap.ui.com.project1.fragment.viewRoomDetails", "roomImageCarousel");
-
-            if (oCarousel) {
-                oCarousel.unbindAggregation("pages"); // This is now a clean reset
-                oCarousel.bindAggregation("pages", {
-                    path: "HostelModel>/ImageList",
-                    template: new sap.m.Image({
-                        src: "{HostelModel>}",
-                        // ... other properties
-                        error: this.onImageLoadError.bind(this)
-                    })
-                });
-            }
-            this._oRoomDetailFragment.open();
         },
-        // // 6. Bind model and filter facilities
-        // const oHostelModel = new sap.ui.model.json.JSONModel(oFullDetails);
-        // oView.setModel(oHostelModel, "HostelModel");
 
-        // await this._LoadFacilities(oRoomDetails.BranchID || oRoomDetails.BranchCode || oFullDetails.Address);
 
-        // // 7. Open the details fragment
-        // if (!this._oRoomDetailFragment) {
-        //     this._oRoomDetailFragment = await sap.ui.xmlfragment(
-        //         "sap.ui.com.project1.fragment.viewRoomDetails",
-        //         this
-        //     );
-        //     oView.addDependent(this._oRoomDetailFragment);
-        // }
 
-        // this._oRoomDetailFragment.setModel(oHostelModel, "HostelModel");
-        // this._oRoomDetailFragment.setModel(oView.getModel("FacilityModel"), "FacilityModel");
-        // this._oRoomDetailFragment.open();
-        // // 🧩 Bind carousel dynamically
-        // // 🧩 Correct carousel binding
-        // const oCarousel = sap.ui.core.Fragment.byId("sap.ui.com.project1.fragment.viewRoomDetails", "roomImageCarousel");
-        // if (oCarousel) {
-        //     oCarousel.unbindAggregation("pages"); // reset previous binding safely
-        //     oCarousel.bindAggregation("pages", {
-        //         path: "HostelModel>/ImageList",
-        //         template: new sap.m.Image({
-        //             src: "{HostelModel>}", // the string URL itself
-        //             width: "100%",
-        //             densityAware: false,
-        //             decorative: false,
-        //             alt: "Room Image",
-        //             error: this.onImageLoadError.bind(this)
-        //         })
-        //     });
-        // }
+        onConfirmBooking: function () {
+            const oView = this.getView();
+            const oLocalModel = oView.getModel("HostelModel"); // Local model bound to dialog
+            const oData = oLocalModel?.getData?.() || {};
+
+            console.log("onConfirmBooking: HostelModel data:", oData);
+
+            // 1️⃣ Validate selection
+            if (!oData.SelectedPriceType || !oData.SelectedPriceValue) {
+                sap.m.MessageToast.show("Please select a pricing plan before booking.");
+                return;
+            }
+
+            // 2️⃣ Retrieve or create global HostelModel
+            let oGlobalModel = sap.ui.getCore().getModel("HostelModel");
+            if (!oGlobalModel) {
+                oGlobalModel = new sap.ui.model.json.JSONModel({});
+                sap.ui.getCore().setModel(oGlobalModel, "HostelModel");
+            }
+
+            // 3️⃣ Merge the booking details into the global model
+            const oBookingData = {
+                BookingDate: new Date().toISOString(),
+                RoomNo: oData.RoomNo || "",
+                BedType: oData.BedType || "",
+                ACType: oData.ACType || "",
+                Capacity: oData.Capacity || "",
+                Address: oData.Address || "",
+                Description: oData.Description || "",
+                SelectedPriceType: oData.SelectedPriceType,
+                FinalPrice: oData.SelectedPriceValue,
+                Source: "UI5_HostelApp",
+                Status: "Pending"
+            };
+
+            // 🧠 Optional: keep existing properties like BranchCode, ImageList, etc.
+            const oMergedData = {
+                ...oGlobalModel.getData(),
+                ...oData,         // from local dialog
+                ...oBookingData   // new booking info
+            };
+
+            oGlobalModel.setData(oMergedData, true); // true = merge instead of overwrite
+
+            // 4️⃣ Feedback for user
+            sap.m.MessageToast.show(
+                `Booking prepared for ${oData.BedType || "Room"} (${oData.SelectedPriceType} plan)`
+            );
+
+            console.log("✅ Global HostelModel updated:", oGlobalModel.getData());
+            // ✅ Clear dialog and model after confirming
+            this._clearRoomDetailDialog();
+
+            // 5️⃣ Close the dialog
+            if (this._oRoomDetailFragment) this._oRoomDetailFragment.close();
+
+            // 6️⃣ Navigate to next route (optional)
+            const oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("RouteBookRoom");
+        },
+        _clearRoomDetailDialog: function () {
+            // If fragment not loaded yet, skip
+            if (!this._oRoomDetailFragment) return;
+
+            const oView = this.getView();
+            const oLocalModel = this._oRoomDetailFragment.getModel("HostelModel");
+
+            // Reset model data
+            if (oLocalModel) {
+                oLocalModel.setData({
+                    RoomNo: "",
+                    BedType: "",
+                    ACType: "",
+                    Description: "",
+                    Price: "",
+                    MonthPrice: "",
+                    YearPrice: "",
+                    Address: "",
+                    Capacity: "",
+                    ImageList: [],
+                    SelectedPriceType: "",
+                    SelectedPriceValue: ""
+                });
+            }
+
+            // Close and destroy bindings (to avoid leftover bindings)
+            this._oRoomDetailFragment.close();
+            sap.ui.getCore().applyChanges();
+
+            // Optional: if you want to completely rebuild next time
+            // this._oRoomDetailFragment.destroy(true);
+            // this._oRoomDetailFragment = null;
+
+            console.log("🧹 Room Detail dialog cleared and model reset");
+        },
+
+
         onImageLoadError: function (oEvent) {
             const oImage = oEvent.getSource();
             const sFallback = sap.ui.require.toUrl("sap/ui/com/project1/image/no-image.png");
@@ -775,81 +897,20 @@ sap.ui.define([
 
 
         onCloseRoomDetail: function () {
+            this._clearRoomDetailDialog();
             this._oRoomDetailFragment.close();
         },
-
-
-        
-//        onConfirmBooking: function(oEvent) {
-
-//     // const oItem = oEvent.getSource().getBindingContext("HostelModel").getObject();
-
-//     // Get existing model or create if not exists
-//     let oHostelModel = sap.ui.getCore().getModel("HostelModel");
-//     if (!oHostelModel) {
-//         oHostelModel = new sap.ui.model.json.JSONModel({});
-//         sap.ui.getCore().setModel(oHostelModel, "HostelModel");
-//     }
-
-//      oHostelModel.setProperty("/SelectedPriceType", sSelectedType);
-//             oHostelModel.setProperty("/SelectedPriceValue", sSelectedPrice);
-
-//     // Set selected tile data into model root properties (for easy binding)
-//     oHostelModel.setProperty("/RoomType", oItem.Name || "");
-//     oHostelModel.setProperty("/Price",sSelectedPrice || 0);
-//     oHostelModel.setProperty("/ACType", oItem.ACType || "");
-//     oHostelModel.setProperty("/Currency", "₹"); // Or your currency symbol
-
-//     // Optionally set other properties
-//     oHostelModel.setProperty("/Image", oItem.Image || "");
-//     oHostelModel.setProperty("/Description", oItem.Description || "");
-
-//     // Close dialog
-//     this._oRoomDetailFragment.close();
-
-//     // Navigate to booking page
-//     this.getOwnerComponent().getRouter().navTo("RouteBookRoom");
-// },
-        onConfirmBooking: function () {
-            const oView = this.getView();
-            const oHostelModel = oView.getModel("HostelModel");
-            console.log("onConfirmBooking: HostelModel data:", oHostelModel?.getData?.());
-            const oData = oHostelModel?.getData?.() || {};
-
-            // 1️⃣ Validate selection
-            if (!oData.SelectedPriceType || !oData.SelectedPriceValue) {
-                sap.m.MessageToast.show("Please select a pricing plan before booking.");
-                return;
-            }
-
-            // 2️⃣ Construct payload
-            const oPayload = {
-                BookingDate: new Date().toISOString(),
-                RoomNo: oData.RoomNo || "",
-                BedType: oData.BedType || "",
-                ACType: oData.ACType || "",
-                Capacity: oData.Capacity || "",
-                Address: oData.Address || "",
-                Description: oData.Description || "",
-                SelectedPriceType: oData.SelectedPriceType,
-                FinalPrice: oData.SelectedPriceValue,
-                Source: "UI5_HostelApp",
-                Status: "Pending"
-            };
-
-            // (Optional) Only keep if you actually need this extra property in model
-            oHostelModel.setProperty("/roomtype", oData.BedType);
-
-            console.log("Full Payload JSON:", JSON.stringify(oPayload, null, 4));
-
-            // 3️⃣ User feedback
-            sap.m.MessageToast.show(
-                `Booking confirmed for ${oData.BedType || "Room"} (${oData.SelectedPriceType} plan)`
-            );
-
-            // 4️⃣ Close the dialog
-            if (this._oRoomDetailFragment) this._oRoomDetailFragment.close();
+        onDialogAfterClose: function () {
+            this._clearRoomDetailDialog();
         },
+
+
+
+
+
+
+
+
 
         onTabSelect: function (oEvent) {
             var oItem = oEvent.getParameter("item");
@@ -1838,12 +1899,12 @@ sap.ui.define([
             oHostelModel.setProperty("/Price", oItem.Price || 0);
             oHostelModel.setProperty("/ACType", oItem.ACType || 0);
             oHostelModel.setProperty("/BranchCode", oItem.BranchCode || 0);
-           
+
 
             // Optionally set other details
             oHostelModel.setProperty("/Image", oItem.Image || "");
             oHostelModel.setProperty("/Description", oItem.Description || "");
-          
+
 
             //  Navigate to the booking route (or open fragment)
             const oRouter = this.getOwnerComponent().getRouter();
@@ -1858,17 +1919,17 @@ sap.ui.define([
                 oSaveModel.setProperty("/isEditMode", true);
                 return;
             }
-            var oPayload ={
-                  UserName: oEdit.name
+            var oPayload = {
+                UserName: oEdit.name
             }
 
             const oId = this._oLoggedInUser || {};
             const ID = oId.UserID || "";
-             const filter = {
-                    UserID: ID
-                };
+            const filter = {
+                UserID: ID
+            };
             try {
-                await this.ajaxUpdateWithJQuery("HM_Login", { data: oPayload, filters:filter});
+                await this.ajaxUpdateWithJQuery("HM_Login", { data: oPayload, filters: filter });
                 sap.m.MessageToast.show("Data Saved successfully ");
                 oSaveModel.setProperty("/isEditMode", false);
             }
@@ -1878,3 +1939,7 @@ sap.ui.define([
         }
     });
 });
+
+
+
+
