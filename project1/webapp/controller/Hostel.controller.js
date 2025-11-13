@@ -489,52 +489,120 @@ sap.ui.define([
 
         onSelectPricePlan: function (oEvent) {
             const oTile = oEvent.getSource();
-            const sType = oTile.data("type");
+            const sType = oTile.data("type"); // "daily", "monthly", or "yearly"
             const oView = this.getView();
             const oModel = oView.getModel("HostelModel");
             const oData = oModel.getData();
 
-            // Price mapping
+            // Define mapping between tile type → model property
             const mPriceMap = {
                 daily: "Price",
                 monthly: "MonthPrice",
                 yearly: "YearPrice"
             };
 
+            // Safely pick the right price
             const sPriceKey = mPriceMap[sType];
-            const sPrice = sPriceKey ? oData[sPriceKey] : "N/A";
+            const sPriceValue = sPriceKey ? oData[sPriceKey] : "N/A";
 
-            // Update model
+            // Clear any previously selected plan (for visual and logical consistency)
+            oModel.setProperty("/SelectedPriceType", "");
+            oModel.setProperty("/SelectedPriceValue", "");
+
+            // Update the model with only the chosen plan
             oModel.setProperty("/SelectedPriceType", sType);
-            oModel.setProperty("/SelectedPriceValue", sPrice);
-            // --- FIX: Handle layout container gracefully ---
-            const oParent = oTile.getParent();
+            oModel.setProperty("/SelectedPriceValue", sPriceValue);
 
-            // Try to get tile siblings whether in Grid, VBox, or HBox
+            // --- VISUAL FEEDBACK SECTION ---
+            const oParent = oTile.getParent();
             let aSiblings = [];
+
             if (oParent.getItems) {
-                aSiblings = oParent.getItems(); // For HBox/VBox/List
+                aSiblings = oParent.getItems(); // HBox/VBox/List/Grid
             } else if (oParent.getContent) {
-                aSiblings = oParent.getContent(); // For Grid or layout containers
+                aSiblings = oParent.getContent(); // layout controls
             }
 
-            // Clear selection from all sibling tiles
+            // Remove highlight from all other tiles
             aSiblings.forEach(oItem => {
                 if (oItem.removeStyleClass) {
                     oItem.removeStyleClass("selectedTile");
                 }
             });
 
-            // Add selection highlight to clicked tile
+            // Add selection highlight to current one
             oTile.addStyleClass("selectedTile");
 
-            // Feedback
+            // User feedback
             sap.m.MessageToast.show(
-                `Selected ${sType.charAt(0).toUpperCase() + sType.slice(1)} plan — ₹${sPrice}`
+                `Selected ${sType.charAt(0).toUpperCase() + sType.slice(1)} plan — ₹${sPriceValue}`
             );
         },
 
+        onConfirmBooking: function () {
+            const oView = this.getView();
+            const oLocalModel = oView.getModel("HostelModel"); // Local model bound to dialog
+            const oData = oLocalModel?.getData?.() || {};
 
+            console.log("onConfirmBooking: HostelModel data:", oData);
+
+            // 1️⃣ Validate selection
+            if (!oData.SelectedPriceType || !oData.SelectedPriceValue) {
+                sap.m.MessageToast.show("Please select a pricing plan before booking.");
+                return;
+            }
+
+            // 2️⃣ Retrieve or create global HostelModel
+            let oGlobalModel = sap.ui.getCore().getModel("HostelModel");
+            if (!oGlobalModel) {
+                oGlobalModel = new sap.ui.model.json.JSONModel({});
+                sap.ui.getCore().setModel(oGlobalModel, "HostelModel");
+            }
+
+            // 3️⃣ Construct clean booking payload
+            const oBookingData = {
+                BookingDate: new Date().toISOString(),
+                RoomNo: oData.RoomNo || "",
+                BedType: oData.BedType || "",
+                ACType: oData.ACType || "",
+                Capacity: oData.Capacity || "",
+                Address: oData.Address || "",
+                Description: oData.Description || "",
+                BranchCode: oData.BranchCode || "",
+                SelectedPriceType: oData.SelectedPriceType,
+                FinalPrice: oData.SelectedPriceValue,
+                Source: "UI5_HostelApp",
+                Status: "Pending"
+            };
+
+            // 4️⃣ Merge data (only necessary info)
+            const oMergedData = {
+                ...oGlobalModel.getData(), // Keep global info like user details
+                ...oBookingData            // Overwrite with current booking info
+            };
+
+            // 5️⃣ Remove unnecessary pricing keys
+            delete oMergedData.Price;
+            delete oMergedData.MonthPrice;
+            delete oMergedData.YearPrice;
+
+            oGlobalModel.setData(oMergedData, true);
+
+            // 6️⃣ Feedback for user
+            sap.m.MessageToast.show(
+                `Booking prepared for ${oData.BedType || "Room"} (${oData.SelectedPriceType} plan)`
+            );
+
+            console.log("✅ Cleaned Global HostelModel:", oGlobalModel.getData());
+
+            // 7️⃣ Clear dialog + close
+            this._clearRoomDetailDialog();
+            if (this._oRoomDetailFragment) this._oRoomDetailFragment.close();
+
+            // 8️⃣ Navigate to booking route
+            const oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("RouteBookRoom");
+        },
 
 
 
@@ -782,66 +850,66 @@ sap.ui.define([
 
 
 
-        onConfirmBooking: function () {
-            const oView = this.getView();
-            const oLocalModel = oView.getModel("HostelModel"); // Local model bound to dialog
-            const oData = oLocalModel?.getData?.() || {};
+   
+        //     const oView = this.getView();
+        //     const oLocalModel = oView.getModel("HostelModel"); // Local model bound to dialog
+        //     const oData = oLocalModel?.getData?.() || {};
 
-            console.log("onConfirmBooking: HostelModel data:", oData);
+        //     console.log("onConfirmBooking: HostelModel data:", oData);
 
-            // 1️⃣ Validate selection
-            if (!oData.SelectedPriceType || !oData.SelectedPriceValue) {
-                sap.m.MessageToast.show("Please select a pricing plan before booking.");
-                return;
-            }
+        //     // 1️⃣ Validate selection
+        //     if (!oData.SelectedPriceType || !oData.SelectedPriceValue) {
+        //         sap.m.MessageToast.show("Please select a pricing plan before booking.");
+        //         return;
+        //     }
 
-            // 2️⃣ Retrieve or create global HostelModel
-            let oGlobalModel = sap.ui.getCore().getModel("HostelModel");
-            if (!oGlobalModel) {
-                oGlobalModel = new sap.ui.model.json.JSONModel({});
-                sap.ui.getCore().setModel(oGlobalModel, "HostelModel");
-            }
+        //     // 2️⃣ Retrieve or create global HostelModel
+        //     let oGlobalModel = sap.ui.getCore().getModel("HostelModel");
+        //     if (!oGlobalModel) {
+        //         oGlobalModel = new sap.ui.model.json.JSONModel({});
+        //         sap.ui.getCore().setModel(oGlobalModel, "HostelModel");
+        //     }
 
-            // 3️⃣ Merge the booking details into the global model
-            const oBookingData = {
-                BookingDate: new Date().toISOString(),
-                RoomNo: oData.RoomNo || "",
-                BedType: oData.BedType || "",
-                ACType: oData.ACType || "",
-                Capacity: oData.Capacity || "",
-                Address: oData.Address || "",
-                Description: oData.Description || "",
-                SelectedPriceType: oData.SelectedPriceType,
-                FinalPrice: oData.SelectedPriceValue,
-                Source: "UI5_HostelApp",
-                Status: "Pending"
-            };
+        //     // 3️⃣ Merge the booking details into the global model
+        //     const oBookingData = {
+        //         BookingDate: new Date().toISOString(),
+        //         RoomNo: oData.RoomNo || "",
+        //         BedType: oData.BedType || "",
+        //         ACType: oData.ACType || "",
+        //         Capacity: oData.Capacity || "",
+        //         Address: oData.Address || "",
+        //         Description: oData.Description || "",
+        //         SelectedPriceType: oData.SelectedPriceType,
+        //         FinalPrice: oData.SelectedPriceValue,
+        //         Source: "UI5_HostelApp",
+        //         Status: "Pending"
+        //     };
 
-            // 🧠 Optional: keep existing properties like BranchCode, ImageList, etc.
-            const oMergedData = {
-                ...oGlobalModel.getData(),
-                ...oData,         // from local dialog
-                ...oBookingData   // new booking info
-            };
+        //     // 🧠 Optional: keep existing properties like BranchCode, ImageList, etc.
+        //     const oMergedData = {
+        //         ...oGlobalModel.getData(),
+        //         ...oData,         // from local dialog
+        //         ...oBookingData   // new booking info
+        //     };
 
-            oGlobalModel.setData(oMergedData, true); // true = merge instead of overwrite
+        //     oGlobalModel.setData(oMergedData, true); // true = merge instead of overwrite
 
-            // 4️⃣ Feedback for user
-            sap.m.MessageToast.show(
-                `Booking prepared for ${oData.BedType || "Room"} (${oData.SelectedPriceType} plan)`
-            );
+        //     // 4️⃣ Feedback for user
+        //     sap.m.MessageToast.show(
+        //         `Booking prepared for ${oData.BedType || "Room"} (${oData.SelectedPriceType} plan)`
+        //     );
 
-            console.log("✅ Global HostelModel updated:", oGlobalModel.getData());
-            // ✅ Clear dialog and model after confirming
-            this._clearRoomDetailDialog();
+        //     console.log("✅ Global HostelModel updated:", oGlobalModel.getData());
+        //     // ✅ Clear dialog and model after confirming
+        //     this._clearRoomDetailDialog();
 
-            // 5️⃣ Close the dialog
-            if (this._oRoomDetailFragment) this._oRoomDetailFragment.close();
+        //     // 5️⃣ Close the dialog
+        //     if (this._oRoomDetailFragment) this._oRoomDetailFragment.close();
 
-            // 6️⃣ Navigate to next route (optional)
-            const oRouter = this.getOwnerComponent().getRouter();
-            oRouter.navTo("RouteBookRoom");
-        },
+        //     // 6️⃣ Navigate to next route (optional)
+        //     const oRouter = this.getOwnerComponent().getRouter();
+        //     oRouter.navTo("RouteBookRoom");
+        // },
         _clearRoomDetailDialog: function () {
             // If fragment not loaded yet, skip
             if (!this._oRoomDetailFragment) return;

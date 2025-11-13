@@ -11,23 +11,19 @@ sap.ui.define([
 
 	return BaseController.extend("sap.ui.com.project1.controller.Book_Room", {
 		Formatter: Formatter,
-		onInit: function() {
-
+		onInit: function () {
 			const oUserModel = sap.ui.getCore().getModel("LoginModel");
-			if (oUserModel) {
-				this._oLoggedInUser = oUserModel.getData();
-			} else {
-				this._oLoggedInUser = {}; // fallback
-			}
+			this._oLoggedInUser = oUserModel ? oUserModel.getData() : {};
+
 			let oHostelModel = sap.ui.getCore().getModel("HostelModel");
 
 			if (!oHostelModel) {
-				// If not found, create a fallback model
+				// Create fallback if model missing
 				oHostelModel = new JSONModel({
-					UserID: "",
-					RoomType: "",
-					Price: "",
-					PaymentType: "",
+					BedType: "",
+					ACType: "",
+					FinalPrice: "",
+					SelectedPriceType: "",
 					Person: "",
 					StartDate: "",
 					EndDate: ""
@@ -35,36 +31,62 @@ sap.ui.define([
 				sap.ui.getCore().setModel(oHostelModel, "HostelModel");
 			}
 
-			// Set it on the view
+			// 🔥 Ensure defaults come from previous step (HostelModel)
+			const oData = oHostelModel.getData();
+
+			// If older fields exist, normalize them to new ones
+			if (oData.RoomType && !oData.BedType && oData.RoomType.includes("-")) {
+				const parts = oData.RoomType.split("-");
+				oData.BedType = parts[0]?.trim();
+				oData.ACType = parts[1]?.trim();
+			}
+
+			// Assign FinalPrice and SelectedPriceType
+			if (oData.SelectedPriceValue) {
+				oData.FinalPrice = oData.SelectedPriceValue;
+			}
+
+			if (oData.SelectedPriceType && !["daily", "monthly", "yearly"].includes(oData.SelectedPriceType)) {
+				// Convert older values like "Per Month" to "monthly"
+				const map = {
+					"Per Day": "daily",
+					"Per Month": "monthly",
+					"Per Year": "yearly"
+				};
+				oData.SelectedPriceType = map[oData.SelectedPriceType] || "monthly";
+			}
+
+			oHostelModel.refresh(true);
 			this.getView().setModel(oHostelModel, "HostelModel");
 
+			// Load data asynchronously after model ready
 			setTimeout(() => {
-				this._LoadFacilities()
+				this._LoadFacilities();
+				this.Roomdetails();
 			}, 100);
-			var oBTn = new JSONModel({
+
+			// Footer buttons
+			const oBTn = new JSONModel({
 				Next: false,
 				Previous: false,
 				Submit: false,
 				Cancel: false,
 				NXTVis: true,
 				PERVIOUSVIS: false,
+			});
+			this.getView().setModel(oBTn, "OBTNModel");
 
-
-			})
-			this.getView().setModel(oBTn, "OBTNModel")
-
-			setTimeout(() => {
-				this.Roomdetails();
-			}, 100);
-      const oLoginModeModel = new sap.ui.model.json.JSONModel({
-                fullname: "",
-                Email: "",
-                Mobileno: "",
-                password: "",
-                comfirmpass: ""
-            });
-            this.getView().setModel(oLoginModeModel, "LoginMode")
+			// Login mode model
+			const oLoginModeModel = new JSONModel({
+				fullname: "",
+				Email: "",
+				Mobileno: "",
+				password: "",
+				comfirmpass: ""
+			});
+			this.getView().setModel(oLoginModeModel, "LoginMode");
 		},
+
 		Roomdetails: async function() {
 			try {
 				const oData = await this.ajaxReadWithJQuery("HM_Rooms", {});
@@ -978,39 +1000,97 @@ sap.ui.define([
 			oBtnModel.setProperty("/Next", true);
 		},
 
-		onRoomDurationChange: function(oEvent) {
-			const sSelectedDuration = oEvent.getParameter("selectedItem").getKey(); // E.g. "Daily", "Monthly", "Yearly" if any
+		// onRoomDurationChange: function(oEvent) {
+		// 	const sSelectedDuration = oEvent.getParameter("selectedItem").getKey(); // E.g. "Daily", "Monthly", "Yearly" if any
+		// 	const oHostelModel = this.getView().getModel("HostelModel");
+		// 	const oRoomDetailModel = this.getView().getModel("RoomDetailModel");
+
+		// 	// Get current RoomType value
+		// 	const sRoomType = this.getView().byId("GI_Roomtype").getText();
+
+		// 	// Get all RoomDetail entries
+		// 	const aRoomDetails = oRoomDetailModel.getData(); // assumes array at root "/"
+
+		// 	// Find matching room detail by BedTypeName == RoomType
+		// 	const oMatchingRoom = aRoomDetails.find(item => item.BedTypeName === sRoomType);
+
+		// 	if (oMatchingRoom) {
+		// 		let sNewPrice = "";
+		// 		if (sSelectedDuration === "Per Day") {
+		// 			sNewPrice = oMatchingRoom.Price; // Daily price field
+		// 		} else if (sSelectedDuration === "Monthly" || sSelectedDuration === "Per Month") {
+		// 			sNewPrice = oMatchingRoom.MonthPrice; // Monthly price field
+		// 		} else if (sSelectedDuration === "Yearly" || sSelectedDuration === "Per Year") {
+		// 			sNewPrice = oMatchingRoom.YearPrice; // Optional yearly price if exists
+		// 		} else {
+		// 			sNewPrice = oMatchingRoom.Price; // default fallback
+		// 		}
+
+		// 		// Update Price in HostelModel
+		// 		oHostelModel.setProperty("/FinalPrice", sNewPrice);
+
+		// 	} else {
+		// 		// No matching room found - clear price or handle otherwise
+		// 		oHostelModel.setProperty("/FinalPrice", "");
+		// 	}
+		// }
+		onRoomDurationChange: function (oEvent) {
+			const sSelectedKey = oEvent.getParameter("selectedItem").getKey(); // e.g. "daily", "monthly", "yearly"
 			const oHostelModel = this.getView().getModel("HostelModel");
 			const oRoomDetailModel = this.getView().getModel("RoomDetailModel");
 
-			// Get current RoomType value
-			const sRoomType = this.getView().byId("GI_Roomtype").getText();
-
-			// Get all RoomDetail entries
-			const aRoomDetails = oRoomDetailModel.getData(); // assumes array at root "/"
-
-			// Find matching room detail by BedTypeName == RoomType
-			const oMatchingRoom = aRoomDetails.find(item => item.BedTypeName === sRoomType);
-
-			if (oMatchingRoom) {
-				let sNewPrice = "";
-				if (sSelectedDuration === "Per Day") {
-					sNewPrice = oMatchingRoom.Price; // Daily price field
-				} else if (sSelectedDuration === "Monthly" || sSelectedDuration === "Per Month") {
-					sNewPrice = oMatchingRoom.MonthPrice; // Monthly price field
-				} else if (sSelectedDuration === "Yearly" || sSelectedDuration === "Per Year") {
-					sNewPrice = oMatchingRoom.YearPrice; // Optional yearly price if exists
-				} else {
-					sNewPrice = oMatchingRoom.Price; // default fallback
-				}
-
-				// Update Price in HostelModel
-				oHostelModel.setProperty("/Price", sNewPrice);
-
-			} else {
-				// No matching room found - clear price or handle otherwise
-				oHostelModel.setProperty("/Price", "");
+			// Defensive guards
+			if (!oHostelModel || !oRoomDetailModel) {
+				console.warn("⚠️ Missing models in onRoomDurationChange");
+				return;
 			}
+
+			const sRoomType = this.getView().byId("GI_Roomtype")?.getText()?.trim() || "";
+			const aRoomDetails = oRoomDetailModel.getData();
+
+			// Normalize helper
+			const normalize = v => (v ? String(v).trim().toLowerCase() : "");
+
+			// Find the matching room by BedTypeName (case-insensitive)
+			const oMatchingRoom = aRoomDetails.find(item =>
+				normalize(item.BedTypeName) === normalize(sRoomType)
+			);
+
+			if (!oMatchingRoom) {
+				console.warn("⚠️ No matching room found for type:", sRoomType);
+				oHostelModel.setProperty("/FinalPrice", "");
+				return;
+			}
+
+			// 🔄 Determine correct price based on selected duration
+			let sNewPrice = "";
+			switch (sSelectedKey.toLowerCase()) {
+				case "daily":
+					sNewPrice = oMatchingRoom.Price || "";
+					break;
+				case "monthly":
+					sNewPrice = oMatchingRoom.MonthPrice || "";
+					break;
+				case "yearly":
+					sNewPrice = oMatchingRoom.YearPrice || "";
+					break;
+				default:
+					sNewPrice = oMatchingRoom.Price || "";
+			}
+
+			// ✅ Update price and duration in model
+			oHostelModel.setProperty("/FinalPrice", sNewPrice);
+			oHostelModel.setProperty("/SelectedPriceType", sSelectedKey);
+
+			// 🧠 For backward compatibility (if other logic depends on these)
+			oHostelModel.setProperty("/Price", sNewPrice);
+			oHostelModel.setProperty("/PaymentType", sSelectedKey);
+
+			// 💥 Apply model refresh so UI text updates instantly
+			oHostelModel.refresh(true);
+
+			console.log(`💰 Duration changed → ${sSelectedKey}, Price updated to ₹${sNewPrice}`);
+			sap.m.MessageToast.show(`Updated to ${sSelectedKey} plan — ₹${sNewPrice}`);
 		}
 
 

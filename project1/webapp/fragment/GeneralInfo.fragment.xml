@@ -1,81 +1,48 @@
-<core:FragmentDefinition
-    xmlns="sap.m"
-    xmlns:f="sap.ui.layout.form"
-    xmlns:core="sap.ui.core"
-    xmlns:smartField="sap.ui.comp.smartfield"
->
-    <Panel
-        headerText=""
-        expandable="false"
-        class="customPanelHeader"
-    >
-        <f:SimpleForm
-            editable="true"
-            layout="ColumnLayout"
-            columnsM="2"
-            columnsL="2"
-            columnsXL="6"
-        >
-            <f:content>
-                <!-- Booking Details -->
-                <core:Title text="" />
-              <!-- <Input id="idUserID" value="{HostelModel>/UserID}" visible="true" /> -->
-               <Label text="Room Type" />
-                            <Text id="GI_Roomtype"  text="{=${HostelModel>/RoomType} + ' - '  + ${HostelModel>/ACType}}"  width="100%" />
-                            <!-- <Text text="{HostelModel>/BranchCode}"/> -->
-                           
-             <Label text="Rent Price" />
-                            <Text  text="{HostelModel>/Price} {HostelModel>/Currency}" width="100%" />
-                <Label text="Booking Duration" required="true" />
-<ComboBox
-    id="idPaymentMethod1"
-    placeholder="Select Payment Method"
-    selectedKey="{HostelModel>/PaymentType}"
-    width="100%"
-    selectionChange="onRoomDurationChange"
->
-    <core:ListItem key="Per Day" text="Per Day"/>
-    <core:ListItem key="Per Month" text="Per Month"/>
-    <core:ListItem key="Per Year" text="Per Year"/>
+<core:FragmentDefinition 
+	xmlns="sap.m" 
+	xmlns:f="sap.ui.layout.form" 
+	xmlns:core="sap.ui.core" 
+	xmlns:smartField="sap.ui.comp.smartfield">
+	<Panel headerText="" expandable="false" class="customPanelHeader">
+		<f:SimpleForm editable="true" layout="ColumnLayout" columnsM="2" columnsL="2" columnsXL="6">
+			<f:content>
+				<!-- Booking Details -->
+				<core:Title text="" />
+				<!-- <Input id="idUserID" value="{HostelModel>/UserID}" visible="true" /> -->
+				<Label text="Room Type" />
+				<Text id="GI_Roomtype" text="{= ${HostelModel>/BedType} + ' - ' + ${HostelModel>/ACType}}" width="100%" />
+				<!-- <Text text="{HostelModel>/BranchCode}"/> -->
+				<Label text="Rent Price" />
+
+                
+				<Text id="GI_RentPrice" text="{HostelModel>/FinalPrice}" width="100%" />
+
+
+				<Label text="Booking Duration" required="true" />
+
+
+                <ComboBox id="idPaymentMethod1" placeholder="Select Duration" selectedKey="{HostelModel>/SelectedPriceType}" width="100%" selectionChange="onRoomDurationChange">
+	<core:ListItem key="daily" text="Per Day" />
+	<core:ListItem key="monthly" text="Per Month" />
+	<core:ListItem key="yearly" text="Per Year" />
 </ComboBox>
-                               
-                <core:Title text="" />
-               <Label text="No of Persons" required="true" />
-                            <ComboBox
-                                id="id_Noofperson1"
-                                placeholder="Select Person"
-                                selectedKey="{HostelModel>/Person}"
-                               selectionChange="onNoOfPersonSelect"
-                                width="100%"
-                                change="onFieldValidation"
-                            >
-                                <core:ListItem key="1" text="1" />
-                                <core:ListItem key="2" text="2" />
-                            </ComboBox>
-
-                <!-- Site Contact -->
-              
-                <Label text="Start Date" required="true" />
-                            <DatePicker
-                                id="idStartDate1"
-                                value="{HostelModel>/StartDate}"
-                                valueFormat="dd/MM/yyyy"
-                                displayFormat="dd/MM/yyyy"
-                                change="onFieldValidation"
-                                width="100%"
-                            />
-
-                            <Label text="End Date" required="true" />
-                            <DatePicker
-                                id="idEndDate1"
-                                value="{HostelModel>/EndDate}"
-                                valueFormat="dd/MM/yyyy"
-                                displayFormat="dd/MM/yyyy"
-                                change="onFieldValidation"
-                                width="100%"
-                            />
-    
-            </f:content>
-        </f:SimpleForm>
-    </Panel>
+				<!-- <ComboBox id="idPaymentMethod1" placeholder="Select Duration" selectedKey="{HostelModel>/SelectedPriceType}" width="100%" selectionChange="onRoomDurationChange">
+					<core:ListItem key="daily" text="Per Day" />
+					<core:ListItem key="monthly" text="Per Month" />
+					<core:ListItem key="yearly" text="Per Year" />
+				</ComboBox> -->
+				<core:Title text="" />
+				<Label text="No of Persons" required="true" />
+				<ComboBox id="id_Noofperson1" placeholder="Select Person" selectedKey="{HostelModel>/Person}" selectionChange="onNoOfPersonSelect" width="100%" change="onFieldValidation">
+					<core:ListItem key="1" text="1" />
+					<core:ListItem key="2" text="2" />
+				</ComboBox>
+				<!-- Site Contact -->
+				<Label text="Start Date" required="true" />
+				<DatePicker id="idStartDate1" value="{HostelModel>/StartDate}" valueFormat="dd/MM/yyyy" displayFormat="dd/MM/yyyy" change="onFieldValidation" width="100%" />
+				<Label text="End Date" required="true" />
+				<DatePicker id="idEndDate1" value="{HostelModel>/EndDate}" valueFormat="dd/MM/yyyy" displayFormat="dd/MM/yyyy" change="onFieldValidation" width="100%" />
+			</f:content>
+		</f:SimpleForm>
+	</Panel>
 </core:FragmentDefinition>
