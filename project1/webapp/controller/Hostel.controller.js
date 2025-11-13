@@ -73,6 +73,8 @@ sap.ui.define([
                 await this.onReadcallforRoom();       // ✅ loads RoomCountModel etc.
                 await this._loadFilteredData("KLB01", "");
 
+
+
                 // ✅ only proceed once sBRModel is ready
                 const oBRModel = oView.getModel("sBRModel");
                 if (oBRModel && oBRModel.getData) {
@@ -86,7 +88,8 @@ sap.ui.define([
 
                 // ✅ Preselect default branch only after data loaded
                 this.byId("id_Branch").setSelectedKey("KLB01");
-
+             oView.byId("id_Area").setEnabled(true).setSelectedKey("KLB01");
+           oView.byId("id_Roomtype").setEnabled(true).setSelectedKey("All");
             } catch (error) {
                 console.error("❌ Error during initialization:", error);
             }
@@ -382,6 +385,7 @@ sap.ui.define([
 
                     const firstRoom = matchingRooms[0];
                     const price = firstRoom?.Price ? " " + firstRoom.Price : "";
+                     const Currency = firstRoom?.Currency ? " " + firstRoom.Currency : "";
 
                     let totalBooked = 0;
                     let totalCapacity = 0;
@@ -411,6 +415,7 @@ sap.ui.define([
                         ACType: room.ACType,
                         Description: room.Description || "",
                         Price: price,
+                        Currency:Currency,
                         BranchCode: room.BranchCode,
                         ID: room.ID,
 
@@ -1892,7 +1897,7 @@ sap.ui.define([
 
             // Reset previous selections
             oAreaCombo.setSelectedKey("").setEnabled(false);
-            oRoomType.setSelectedKey("").setEnabled(false);
+           oRoomType.setSelectedKey("");
 
             const oSelectedItem = oEvent.getParameter("selectedItem");
             if (!oSelectedItem) return;

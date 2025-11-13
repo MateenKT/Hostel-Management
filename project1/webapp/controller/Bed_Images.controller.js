@@ -2,8 +2,8 @@ sap.ui.define([
     "./BaseController",
     "../model/formatter",
     "sap/m/MessageBox",
-     "sap/ui/model/json/JSONModel",
-      "../utils/validation"
+    "sap/ui/model/json/JSONModel",
+    "../utils/validation"
 ], function (
     BaseController,
     Formatter,
@@ -20,59 +20,29 @@ sap.ui.define([
             this.getOwnerComponent().getRouter().getRoute("RouteRoomImages").attachMatched(this._onRouteMatched, this);
 
         },
-        _onRouteMatched:async function (oEvent) {
+        _onRouteMatched: async function (oEvent) {
 
-               var model = new sap.ui.model.json.JSONModel({
+            var model = new sap.ui.model.json.JSONModel({
                 Edit: false,
-                save:false
-               
+                save: false
+
             });
             this.getView().setModel(model, "editable")
 
-              var BedImageModel = new sap.ui.model.json.JSONModel({
-                  BranchCode: "",
+            var BedImageModel = new sap.ui.model.json.JSONModel({
+                BranchCode: "",
                 Name: "",
                 ACType: "",
-               
+
             });
             this.getView().setModel(BedImageModel, "BedImageModel")
 
-         this.BedID = oEvent.getParameter("arguments").sPath;
-  await  this.ajaxReadWithJQuery("HM_BedType", {
-    ID: this.BedID,
-}).then((oData) => {
-    var oFCIAerData = Array.isArray(oData.data.data) ? oData.data.data : [oData.data.data];
-    var oBedData = oFCIAerData[0]; // main data object
-    this.getView().getModel("BedImageModel").setData(oBedData)
-    var oBedImages = oData.data.bedDetails[0]; // contains Photo1..Photo5
+            this.BedID = oEvent.getParameter("arguments").sPath;
+            await this.refershModel(this.BedID)
 
-    // Transform Photo fields into array for gallery
-    var aDisplayImages = [];
-    for (var i = 1; i <= 5; i++) {
-        var photoKey = "Photo" + i;
-        var nameKey = "Photo" + i + "Name";
-        var typeKey = "Photo" + i + "Type";
-
-        if (oBedImages[photoKey]) {
-            // Ensure base64 string is converted into valid image URI
-            var sImageSrc = "data:" + (oBedImages[typeKey] || "image/jpeg") + ";base64," + oBedImages[photoKey];
-
-            aDisplayImages.push({
-                src: sImageSrc,
-                fileName: oBedImages[nameKey] || ("Photo " + i),
-                fileType: oBedImages[typeKey]
-            });
-        }
-    }
-
-    // Create a model for display
-    var oDisplayModel = new sap.ui.model.json.JSONModel({ DisplayImages: aDisplayImages });
-    this.getView().setModel(oDisplayModel, "DisplayImagesModel");
-});
-
- this.Onsearch()
+            this.Onsearch()
         },
-          Onsearch: function() {
+        Onsearch: function () {
             sap.ui.core.BusyIndicator.show(0);
 
             this.ajaxReadWithJQuery("HM_BedType", "").then((oData) => {
@@ -84,128 +54,283 @@ sap.ui.define([
 
             })
         },
+        refershModel: function (BEdID) {
+            this.ajaxReadWithJQuery("HM_BedType", {
+                ID: BEdID,
+            }).then((oData) => {
+                var oFCIAerData = Array.isArray(oData.data.data) ? oData.data.data : [oData.data.data];
+                var oBedData = oFCIAerData[0]; // main data object
+                this.getView().getModel("BedImageModel").setData(oBedData)
+                var oBedImages = oData.data.bedDetails[0]; // contains Photo1..Photo5
+
+                // Transform Photo fields into array for gallery
+                var aDisplayImages = [];
+                for (var i = 1; i <= 5; i++) {
+                    var photoKey = "Photo" + i;
+                    var nameKey = "Photo" + i + "Name";
+                    var typeKey = "Photo" + i + "Type";
+
+                    if (oBedImages[photoKey]) {
+                        // Ensure base64 string is converted into valid image URI
+                        var sImageSrc = "data:" + (oBedImages[typeKey] || "image/jpeg") + ";base64," + oBedImages[photoKey];
+
+                        aDisplayImages.push({
+                            src: sImageSrc,
+                            fileName: oBedImages[nameKey] || ("Photo " + i),
+                            fileType: oBedImages[typeKey],
+                            isPlaceholder: false
+                        });
+                    }
+                }
+                // Create a model for display
+                var oDisplayModel = new sap.ui.model.json.JSONModel({ DisplayImages: aDisplayImages });
+                this.getView().setModel(oDisplayModel, "DisplayImagesModel");
+            });
+        },
         onAddItemButtonPress: function () {
-    var oTable = this.byId("idTable");
-    var oModel = oTable.getModel("BedImageModel");
-    var aData = oModel.getData();
+            var oTable = this.byId("idTable");
+            var oModel = oTable.getModel("BedImageModel");
+            var aData = oModel.getData();
 
-    // Add new empty record for upload
-    aData.push({
-        FileName: "",
-        FileContent: ""
-    });
+            // Add new empty record for upload
+            aData.push({
+                FileName: "",
+                FileContent: ""
+            });
 
-    oModel.setData(aData);
-},
+            oModel.setData(aData);
+        },
 
-BI_onEditButtonPress:function(){
-    this.getView().getModel("editable").setProperty("/Edit",true)
-},
-BI_onSaveButtonPress:function(){
-    this.getView().getModel("editable").setProperty("/Edit",false)
+        BI_onEditButtonPress: function () {
+            this.getView().getModel("editable").setProperty("/Edit", true)
 
-},
-BI_onButtonPress:function(){
-      var oRouter = this.getOwnerComponent().getRouter();
-      oRouter.navTo("RouteBedDetails");
-},
-POO_onPOTableDelete: function (oEvent) {
-    // 🔹 Get table and model
-    var oTable = this.byId("idTable");
-    var oModel = oTable.getModel("BedImageModel");
-    var aData = oModel.getData();
+              const oModel = this.getView().getModel("DisplayImagesModel");
+            let aImages = oModel.getProperty("/DisplayImages") || [];
 
-    // 🔹 Get deleted item index
-    var oItem = oEvent.getParameter("listItem");
-    var sPath = oItem.getBindingContext("BedImageModel").getPath(); // e.g. "/2"
-    var iIndex = parseInt(sPath.split("/")[1]);
+            // Remove the deleted image
+            // aImages = aImages.filter(img => img.fileName !== sFileName);
 
-    // 🔹 Remove the selected item from the data
-    aData.splice(iIndex, 1);
+            // ✅ Count non-placeholder images
+            const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
 
-    // 🔹 Update model
-    oModel.setData(aData);
+            // ✅ If less than 3, ensure a placeholder exists
+            if (realImagesCount < 5 && !aImages.some(img => img.isPlaceholder)) {
+            aImages.push({ isPlaceholder: true });
+            }
 
-    // 🔹 Optional feedback
-    sap.m.MessageToast.show("Image removed.");
-},
-   onbranchChange: function (oEvent) {
+            oModel.setProperty("/DisplayImages", aImages);
+        },
+
+        BI_onButtonPress: function () {
+            var oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("RouteBedDetails");
+        },
+        // POO_onPOTableDelete: function (oEvent) {
+        //     // 🔹 Get table and model
+        //     var oTable = this.byId("idTable");
+        //     var oModel = oTable.getModel("BedImageModel");
+        //     var aData = oModel.getData();
+
+        //     // 🔹 Get deleted item index
+        //     var oItem = oEvent.getParameter("listItem");
+        //     var sPath = oItem.getBindingContext("BedImageModel").getPath(); // e.g. "/2"
+        //     var iIndex = parseInt(sPath.split("/")[1]);
+
+        //     // 🔹 Remove the selected item from the data
+        //     aData.splice(iIndex, 1);
+
+        //     // 🔹 Update model
+        //     oModel.setData(aData);
+
+        //     // 🔹 Optional feedback
+        //     sap.m.MessageToast.show("Image removed.");
+        // },
+        onbranchChange: function (oEvent) {
             utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
         },
-         onNameInputLiveChange: function (oEvent) {
+        onNameInputLiveChange: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent.getSource(), "ID");
         },
-  BT_onsavebuttonpress: async function () {
-    var oView = this.getView();
-    var Payload = oView.getModel("BedImageModel").getData();
-    // var DisplayImagesModel = oView.getModel("DisplayImagesModel").getData();
 
 
-    // var oFileUploader = this.byId("idFileUploader");
-    // var aFiles = oFileUploader.oFileUpload.files;
+        BT_onsavebuttonpress: async function () {
+            var oView = this.getView();
+            var Payload = oView.getModel("BedImageModel").getData();
+            var DisplayImagesModel = oView.getModel("DisplayImagesModel").getData();
 
-    if (
-        utils._LCstrictValidationComboBox(oView.byId("idRoomType12"), "ID") &&
-        utils._LCvalidateMandatoryField(oView.byId("idBedType"), "ID") &&
-        utils._LCstrictValidationComboBox(oView.byId("idRoomtype"), "ID") &&
-        utils._LCvalidateMandatoryField(oView.byId("idR"), "ID") &&
+            if (
+                utils._LCstrictValidationComboBox(oView.byId("idRoomType12"), "ID") &&
+                utils._LCvalidateMandatoryField(oView.byId("idBedType"), "ID") &&
+                utils._LCstrictValidationComboBox(oView.byId("idRoomtype"), "ID") &&
+                utils._LCvalidateMandatoryField(oView.byId("idR"), "ID") &&
+                utils._LCvalidateMandatoryField(oView.byId("id_MaxBeds"), "ID") &&
+                utils._LCvalidateMandatoryField(oView.byId("id_Description"), "ID")
+            ) {
+                var aBedDetails = oView.getModel("BedDetails").getData();
 
-        utils._LCvalidateMandatoryField(oView.byId("id_MaxBeds"), "ID") &&
-        utils._LCvalidateMandatoryField(oView.byId("id_Description"), "ID") 
-
-    ) {
-        // if (aFiles.length === 0 && !Payload.RoomPhotos) {
-        //     sap.m.MessageToast.show("Please select a file before saving.");
-        //     return;
-        // }
-
-        var aBedDetails = oView.getModel("BedDetails").getData();
-
-        var bDuplicate = aBedDetails.some(function (bed) {
-            // skip the same record in edit mode
-            if (Payload.ID && bed.ID === Payload.ID) {
-                return false;
-            }
-            return (
-                bed.Name.trim().toLowerCase() === Payload.Name.trim().toLowerCase() &&
-                bed.BranchCode === Payload.BranchCode &&
-                bed.ACType === Payload.ACType
-            );
-        });
-
-        if (bDuplicate) {
-            sap.m.MessageToast.show(
-                "A bed with the same Bed Type, Branch Code, and AC Type already exists."
-            );
-            return;
-        }
-
-        // var oFile = aFiles[0];
-        var payloadWithoutID = { ...Payload };
-
-        delete payloadWithoutID.ID;
-
-            if (Payload.ID) {
-                await this.ajaxUpdateWithJQuery("HM_BedType", {
-                    data: payloadWithoutID,
-                    filters: { ID: Payload.ID },
+                var bDuplicate = aBedDetails.some(function (bed) {
+                    if (Payload.ID && bed.ID === Payload.ID) return false;
+                    return (
+                        bed.Name.trim().toLowerCase() === Payload.Name.trim().toLowerCase() &&
+                        bed.BranchCode === Payload.BranchCode &&
+                        bed.ACType === Payload.ACType
+                    );
                 });
+
+                if (bDuplicate) {
+                    sap.m.MessageToast.show(
+                        "A bed with the same Bed Type, Branch Code, and AC Type already exists."
+                    );
+                    return;
+                }
+
+                const toBase64 = (file) => {
+                    return new Promise((resolve, reject) => {
+                        if (file.src && file.src.startsWith("data:")) {
+                            // Already base64
+                            resolve(file.src.split(",")[1]);
+                        } else if (file.file && file.file instanceof File) {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result.split(",")[1]);
+                            reader.onerror = (error) => reject(error);
+                            reader.readAsDataURL(file.file);
+                        } else {
+                            resolve(null);
+                        }
+                    });
+                };
+
+                sap.ui.core.BusyIndicator.show(0);
+                // Wait for all image conversions
+                const convertedImages = await Promise.all(DisplayImagesModel.DisplayImages.map(toBase64));
+
+                // Payload preparation
+                const oData = {
+                    data: {
+                        BranchCode: Payload.BranchCode,
+                        Name: Payload.Name,
+                        ACType: Payload.ACType,
+                        NoOfPerson: Payload.NoOfPerson,
+                        MaxBeds: Payload.MaxBeds,
+                        Description: Payload.Description,
+
+                    },
+                    Attachment: {
+                        BranchCode: Payload.BranchCode
+                    }
+                };
+
+                // Add images (up to 3)
+                DisplayImagesModel.DisplayImages.slice(0, 5).forEach((file, index) => {
+                    const num = index + 1;
+                    oData.Attachment[`Photo${num}`] = convertedImages[index] || "";
+                    oData.Attachment[`Photo${num}Name`] = file.fileName || "";
+                    oData.Attachment[`Photo${num}Type`] = file.fileType || "";
+                });
+
+                // Fill empty placeholders if less than 3
+                for (let i = DisplayImagesModel.DisplayImages.length + 1; i <= 5; i++) {
+                    oData.Attachment[`Photo${i}`] = "";
+                    oData.Attachment[`Photo${i}Name`] = "";
+                    oData.Attachment[`Photo${i}Type`] = "";
+                }
+
+                var payloadWithoutID = { ...oData };
+                delete payloadWithoutID.ID;
+                // attachmentObj.BranchCode=Payload.BranchCode
+
+                if (Payload.ID) {
+                    await this.ajaxUpdateWithJQuery("HM_BedType", {
+                        data: payloadWithoutID,
+                        filters: { ID: Payload.ID },
+                    });
+                    await this.refershModel(Payload.ID)
+                    this.getView().getModel("editable").setProperty("/Edit", false)
+
+                } else {
+                    await this.ajaxCreateWithJQuery("HM_BedType", { data: payloadWithoutID });
+                }
+
+                await this.Onsearch();
+                sap.m.MessageToast.show("Bed saved successfully.");
+                this.ARD_Dialog.close();
+
             } else {
-                await this.ajaxCreateWithJQuery("HM_BedType", { data: payloadWithoutID });
+                sap.m.MessageToast.show("Please fill all mandatory fields correctly.");
+            }
+        }
+        ,
+        onDeleteImage: function (oEvent) {
+            const oContext = oEvent.getSource().getBindingContext("DisplayImagesModel");
+            const sFileName = oContext.getProperty("fileName");
+            const oModel = this.getView().getModel("DisplayImagesModel");
+            let aImages = oModel.getProperty("/DisplayImages") || [];
+
+            // Remove the deleted image
+            aImages = aImages.filter(img => img.fileName !== sFileName);
+
+            // ✅ Count non-placeholder images
+            const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
+
+            // ✅ If less than 3, ensure a placeholder exists
+            if (realImagesCount < 5 && !aImages.some(img => img.isPlaceholder)) {
+            aImages.push({ isPlaceholder: true });
             }
 
-            await this.Onsearch();
-            sap.m.MessageToast.show("Bed saved successfully.");
-            this.ARD_Dialog.close();
+            oModel.setProperty("/DisplayImages", aImages);
+        }
+        ,
 
 
-    } else {
-        sap.m.MessageToast.show("Please fill all mandatory fields correctly.");
-    }
-}
+        onFileSelected: function (oEvent) {
+            const oFileUploader = oEvent.getSource();
+            const oFile = oEvent.getParameter("files")[0];
+            if (!oFile) return;
+
+            const oReader = new FileReader();
+            oReader.onload = (oLoadEvent) => {
+                const sBase64 = oLoadEvent.target.result;
+                const oModel = this.getView().getModel("DisplayImagesModel");
+                let aImages = oModel.getProperty("/DisplayImages") || [];
+
+                const iPlaceholderIndex = aImages.findIndex(img => img.isPlaceholder);
+
+                const oNewImage = {
+                    src: sBase64,
+                    fileName: oFile.name,
+                    isPlaceholder: false
+                };
+
+                if (iPlaceholderIndex !== -1) {
+                    aImages.splice(iPlaceholderIndex, 1, oNewImage);
+                } else {
+                    aImages.push(oNewImage);
+                }
+
+                // ✅ Count only real images (exclude placeholder)
+                const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
+
+                // ✅ If less than 3, keep one placeholder; else remove it
+                if (realImagesCount < 5) {
+                    if (!aImages.some(img => img.isPlaceholder)) {
+                        aImages.push({ isPlaceholder: true });
+                    }
+                } else {
+                    aImages = aImages.filter(img => !img.isPlaceholder);
+                }
+
+                oModel.setProperty("/DisplayImages", aImages);
+            };
+
+            oReader.readAsDataURL(oFile);
+        },
 
 
-       
+
+
+
+
+
 
     });
 });

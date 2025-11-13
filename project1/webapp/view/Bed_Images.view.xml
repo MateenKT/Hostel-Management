@@ -167,33 +167,63 @@
                     <subSections>
                         <ObjectPageSubSection id="POO_Purchaseordersection">
                             <blocks>
-                                <m:HBox 
-                                    id="idImagesContainer"
-                                    wrap="true"
-                                    justifyContent="Start"
-                                    alignItems="Start"
-                                    class="sapUiSmallMargin"
-                                    items="{DisplayImagesModel>/DisplayImages}"
-                                >
-                                    <m:VBox
-                                        class="sapUiSmallMarginEnd"
-                                        width="150px"
-                                        alignItems="Center"
-                                    >
-                                        <m:Image
-                                            src="{DisplayImagesModel>src}"
-                                            width="120px"
-                                            height="120px"
-                                            press="onImagePress"
-                                        />
-                                        <m:Text
-                                            text="{DisplayImagesModel>fileName}"
-                                            textAlign="Center"
-                                            wrapping="true"
-                                        />
-                                     
-                                    </m:VBox>
-                                </m:HBox>
+                   <m:HBox 
+    id="idImagesContainer"
+    wrap="true"
+    justifyContent="Start"
+    alignItems="Start"
+    class="sapUiSmallMargin"
+    items="{DisplayImagesModel>/DisplayImages}"
+>
+    <m:VBox
+        class="sapUiSmallMarginEnd"
+        width="150px"
+        alignItems="Center"
+    >
+
+        <!-- Normal Image Display -->
+        <m:Image
+            src="{DisplayImagesModel>src}"
+            width="120px"
+            height="120px"
+            press="onImagePress"
+            visible="{= ${DisplayImagesModel>isPlaceholder} === false }"
+        />
+
+        <!-- “+” Add Box (visible only for placeholder) -->
+          <u:FileUploader
+            id="fileUploader"
+            icon="sap-icon://add"
+            width="120px"
+            style="Transparent"
+            tooltip="Add Image"
+            placeholder=" "
+            buttonOnly="true"
+            sameFilenameAllowed="true"
+            visible="{= ${DisplayImagesModel>isPlaceholder} === true &amp;&amp; ${editable>/Edit} === true }"
+            change=".onFileSelected"
+        />
+
+        <!-- File name -->
+        <m:Text
+            text="{DisplayImagesModel>fileName}"
+            textAlign="Center"
+            wrapping="true"
+            visible="{= ${DisplayImagesModel>isPlaceholder} === false }"
+        />
+
+        <!-- Delete icon (visible only in Edit mode and not for placeholder) -->
+        <m:Button
+            icon="sap-icon://delete"
+            type="Reject"
+            visible="{= ${editable>/Edit} === true &amp;&amp; ${DisplayImagesModel>isPlaceholder} === false }"
+            press=".onDeleteImage"
+            tooltip="Delete Image"
+            width="100%"
+        />
+    </m:VBox>
+</m:HBox>
+
                             </blocks>
                         </ObjectPageSubSection>
                     </subSections>

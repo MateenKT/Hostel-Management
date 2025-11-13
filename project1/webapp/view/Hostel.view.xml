@@ -153,7 +153,8 @@
                             horizontal="true"
                             vertical="true"
                             focusable="true"
-                            class="sapUiContentPadding"                        >
+                            class="sapUiContentPadding"
+                        >
                             <fb:FilterBar
                                 id="filterbar"
                                 persistencyKey="myPersKey"
@@ -225,7 +226,6 @@
                                                 id="id_Roomtype"
                                                 placeholder="Select Room Type"
                                                 showClearIcon="true"
-                                                enabled="false"
                                             >
                                                 <core:Item
                                                     key="AC"
@@ -235,7 +235,7 @@
                                                     key="Non-AC"
                                                     text="Non-AC"
                                                 />
-												 <core:Item
+                                                <core:Item
                                                     key="All"
                                                     text="All"
                                                 />
@@ -278,21 +278,27 @@
                                                 wrapping="true"
                                             />
                                             <Text
-                                                text="₹ {VisibilityModel>Price}"
+                                                text="{= ${VisibilityModel>Currency} + ${VisibilityModel>Price}}"
                                                 class="bedCardPrice"
                                             />
-                                            <Button
-                                                text="{= ${VisibilityModel>Visible} ? 'View Deatils' : 'Occupied' }"
-                                                type="Default"
-                                                press=".viewDetails"
-                                                enabled="{VisibilityModel>Visible}"
-                                                class="{= ${VisibilityModel>Visible} ? '' : 'soldOutButton' }"
-                                            />
-                                            <Button
-                                                text="{= ${VisibilityModel>Visible} ? 'Book Now' : 'Sold Out' }"
-                                                press=".onBookNow"
-                                                enabled="{VisibilityModel>Visible}"
-                                            />
+                                            <HBox
+                                                justifyContent="Center"
+                                                alignItems="Center"
+                                                class="sapUiSmallMarginTop"
+                                            >
+                                                <Button
+                                                    text="{= ${VisibilityModel>Visible} ? 'View Details' : 'Occupied' }"
+                                                    type="Default"
+                                                    press=".viewDetails"
+                                                    enabled="{VisibilityModel>Visible}"
+                                                    class="{= ${VisibilityModel>Visible} ? '' : 'soldOutButton' }"
+                                                />
+                                                <Button
+                                                    text="{= ${VisibilityModel>Visible} ? 'Book Now' : 'Sold Out' }"
+                                                    press=".onBookNow"
+                                                    enabled="{VisibilityModel>Visible}"
+                                                />
+                                            </HBox>
                                         </VBox>
                                     </VBox>
                                 </items>

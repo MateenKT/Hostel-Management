@@ -139,13 +139,13 @@ sap.ui.define([
 
                 attachments.slice(0, 5).forEach((file, index) => {
                     const num = index + 1;
-                    oData.Attachment[`Photo${num}`] = file.content || null;
+                    oData.Attachment[`Photo${num}`] = file.content || "";
                     oData.Attachment[`Photo${num}Name`] = file.filename || "";
                     oData.Attachment[`Photo${num}Type`] = file.fileType || "";
                 });
 
                 for (let i = attachments.length + 1; i <= 5; i++) {
-                    oData.Attachment[`Photo${i}`] = null;
+                    oData.Attachment[`Photo${i}`] = "";
                     oData.Attachment[`Photo${i}Name`] = "";
                     oData.Attachment[`Photo${i}Type`] = "";
                 }
