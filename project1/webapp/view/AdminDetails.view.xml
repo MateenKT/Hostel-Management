@@ -114,7 +114,10 @@
 							<Toolbar>
 								<Title text="Booking Details" level="H5" />
 								<ToolbarSpacer />
+									<Button icon="sap-icon://add" text="Add" press="onAddFacilityDetails" type="Accept"/>
 								<Button icon="sap-icon://edit" text="Edit" press="onEditFacilityDetails" type="Emphasized"/>
+							
+
 							</Toolbar>
 						</headerToolbar>
 						<columns>

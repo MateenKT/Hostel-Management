@@ -129,7 +129,7 @@
                             press="HM_AssignRoom"
                             type="Accept"
                         />
-						<Button
+						<!-- <Button
                             text="Edit Room"
                             press="HM_ChangeRoom"
                             type="Default"
@@ -138,7 +138,7 @@
                             text="Check Out"
                             press="HM_EditRoom"
                             type="Emphasized"
-                        />
+                        /> -->
 					</OverflowToolbar>
 				</headerToolbar>
 				<columns>

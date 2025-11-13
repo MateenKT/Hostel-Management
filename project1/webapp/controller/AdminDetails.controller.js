@@ -32,7 +32,10 @@ sap.ui.define([
             this.decodedPath = decodeURIComponent(decodeURIComponent(sPath));
             this.AD_onSearch()
         },
-
+         onNavBack: function() {
+            var oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("TilePage");
+        },
         AD_onSearch: async function() {
             try {
                 sap.ui.core.BusyIndicator.show(0);

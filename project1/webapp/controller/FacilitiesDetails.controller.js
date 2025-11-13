@@ -9,6 +9,8 @@ sap.ui.define([
             this.getOwnerComponent().getRouter().getRoute("RouteFacilitiesDetails").attachMatched(this._onRouteMatched, this);
         },
         _onRouteMatched: async function(oEvent) {
+                var Layout = this.byId("FD_id_ObjectPageLayout");
+      Layout.setSelectedSection(this.byId("FD_id_OrderHeaderSection1"));
             const omodel = new sap.ui.model.json.JSONModel({
                 // for Database connection
                 url: "https://rest.kalpavrikshatechnologies.com/",

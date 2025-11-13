@@ -21,7 +21,9 @@ sap.ui.define([
 
         },
         _onRouteMatched: async function (oEvent) {
-
+        var Layout = this.byId("ObjectPageLayout");
+      Layout.setSelectedSection(this.byId("purchaseOrderHeaderSection1"));
+      
             var model = new sap.ui.model.json.JSONModel({
                 Edit: false,
                 save: false
@@ -55,6 +57,7 @@ sap.ui.define([
             })
         },
         refershModel: function (BEdID) {
+               sap.ui.core.BusyIndicator.show(0);
             this.ajaxReadWithJQuery("HM_BedType", {
                 ID: BEdID,
             }).then((oData) => {
@@ -85,6 +88,9 @@ sap.ui.define([
                 // Create a model for display
                 var oDisplayModel = new sap.ui.model.json.JSONModel({ DisplayImages: aDisplayImages });
                 this.getView().setModel(oDisplayModel, "DisplayImagesModel");
+
+                
+                sap.ui.core.BusyIndicator.hide();
             });
         },
         onAddItemButtonPress: function () {
