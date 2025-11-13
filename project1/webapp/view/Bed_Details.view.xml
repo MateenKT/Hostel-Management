@@ -76,6 +76,11 @@
 						<ToolbarSpacer />
 						<Button text="Add Bed" press="HM_RoomDetails" type="Accept"/>
 						<Button text="Delete" press="HM_DeleteDetails" type="Reject"/>
+						  <Button
+                        press="BD_onDownload"
+                        type="Transparent"
+                        text="Download"
+                    />
 					</OverflowToolbar>
 				</headerToolbar>
 				<columns>

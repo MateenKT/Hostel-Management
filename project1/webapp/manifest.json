@@ -170,6 +170,13 @@
           "target": [
             "TargetFacilitiesDetails"
           ]
+        },
+        {
+           "name": "RouteMaintainData",
+          "pattern": "MaintainData",
+          "target": [
+            "TargetMaintainData"
+          ]
         }
       ],
       "targets": {
@@ -256,6 +263,13 @@
           "clearControlAggregation": false,
           "viewId": "FacilitiesDetails",
           "viewName": "FacilitiesDetails"
+        },
+        "TargetMaintainData": {
+          "viewType": "XML",
+          "transition": "slide",
+          "clearControlAggregation": false,
+          "viewId": "MaintainData",
+          "viewName": "MaintainData"
         }
       }
     },

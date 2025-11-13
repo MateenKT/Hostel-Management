@@ -1,7 +1,10 @@
 sap.ui.define([
     "./BaseController",
-    "../utils/validation"
-], function(BaseController, utils) {
+    "../utils/validation",
+     "sap/m/MessageToast",
+    "sap/ui/export/Spreadsheet"
+], function(BaseController, utils,   MessageToast,
+    Spreadsheet) {
     "use strict";
     return BaseController.extend("sap.ui.com.project1.controller.Bed_Details", {
         onInit: function() {
@@ -378,6 +381,66 @@ sap.ui.define([
                     }.bind(this)
                 }
             );
-        }
+        },
+         BD_onDownload:function(){
+            const oModel = this.byId("id_BedTable").getModel("BedDetails").getData();
+            if (!oModel || oModel.length === 0) {
+                MessageToast.show("No data available to download.");
+                return;
+            }
+            const adjustedData = oModel.map(item => ({
+                ...item,
+                MaxBeds: item.MaxBeds ? String(item.MaxBeds) : "",
+                NoOfPerson: item.NoOfPerson ? String(item.NoOfPerson) : "",
+            }));
+            const aCols = this.createTableSheet();
+            const oSettings = {
+                workbook: {
+                    columns: aCols,
+                    hierarchyLevel: "Level"
+                },
+                dataSource: adjustedData,
+                fileName: "Bed_Details.xlsx",
+                worker: false,
+            };
+            MessageToast.show("Downloading Room Details");
+            const oSheet = new Spreadsheet(oSettings);
+            oSheet.build().finally(function () {
+                oSheet.destroy();
+            });
+        },
+
+         createTableSheet: function () {
+            return [{
+                label: "Branch Code",
+                property: "BranchCode",
+                type: "string"
+            },
+            {
+                label: "Bed Type",
+                property: "Name",
+                type: "string"
+            },
+            {
+                label: "Room Type",
+                property: "ACType",
+                type: "string"
+            },
+            {
+                label: "Max No of Rooms",
+                property: "MaxBeds",
+                type: "string"
+            },
+            {
+                label: "No of Persons",
+                property: "NoOfPerson",
+                type: "string"
+            },
+            {
+                label: "Description",
+                property: "Description",
+                type: "string"
+            }]
+        },
     });
 });

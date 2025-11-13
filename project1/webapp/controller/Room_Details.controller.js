@@ -1,11 +1,15 @@
 sap.ui.define([
     "./BaseController",
     "sap/ui/model/json/JSONModel",
-    "../utils/validation"
+    "../utils/validation",
+     "sap/m/MessageToast",
+    "sap/ui/export/Spreadsheet"
 ], function (
     BaseController,
     JSONModel,
-    utils
+    utils,
+      MessageToast,
+    Spreadsheet
 ) {
     "use strict";
 
@@ -31,6 +35,74 @@ sap.ui.define([
             })
 
         },
+
+         RD_onDownload: function () {
+            const oModel = this.byId("id_ARD_Table").getModel("RoomDetailsModel").getData();
+            if (!oModel || oModel.length === 0) {
+                MessageToast.show("No data available to download.");
+                return;
+            }
+            const adjustedData = oModel.map(item => ({
+                ...item,
+                Price: item.Price ? String(item.Price) : "",
+                MonthPrice: item.MonthPrice ? String(item.MonthPrice) : "",
+                YearPrice: item.YearPrice ? String(item.YearPrice) : "",
+            }));
+            const aCols = this.createTableSheet();
+            const oSettings = {
+                workbook: {
+                    columns: aCols,
+                    hierarchyLevel: "Level"
+                },
+                dataSource: adjustedData,
+                fileName: "Room_Details.xlsx",
+                worker: false,
+            };
+            MessageToast.show("Downloading Room Details");
+            const oSheet = new Spreadsheet(oSettings);
+            oSheet.build().finally(function () {
+                oSheet.destroy();
+            });
+        },
+
+        createTableSheet: function () {
+            return [{
+                label: "Branch Code",
+                property: "BranchCode",
+                type: "string"
+            },
+            {
+                label: "Room Number",
+                property: "RoomNo",
+                type: "string"
+            },
+            {
+                label: "Bed Type",
+                property: "BedTypeName",
+                type: "string"
+            },
+            {
+                label: "Extra Bed",
+                property: "ExtraBed",
+                type: "string"
+            },
+            {
+                label: "Daily Price",
+                property: "Price",
+                type: "string"
+            },
+            {
+                label: "Monthly Price",
+                property: "MonthPrice",
+                type: "string"
+            },
+            {
+                label: "Yearly Price",
+                property: "YearPrice",
+                type: "string"
+            }]
+        },
+        
         BedTypedetails: function () {
             this.ajaxReadWithJQuery("HM_BedType", "").then((oData) => {
                 var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];

@@ -50,6 +50,11 @@ sap.ui.define([
             });
             oView.setModel(oProfileMenuModel, "profileMenuModel");
 
+            var oModels = new sap.ui.model.json.JSONModel({
+                isEditMode: false
+            });
+            this.getView().setModel(oModels, "saveModel");
+
             const oLoginViewModel = new sap.ui.model.json.JSONModel({
                 isOtpSelected: false,
                 isPasswordSelected: true
@@ -1850,9 +1855,31 @@ sap.ui.define([
             oRouter.navTo("RouteBookRoom");
         },
 
+        onFormEdit: async function () {
+            var oSaveModel = this.getView().getModel("saveModel");
+            var oedit = oSaveModel.getProperty("/isEditMode");
+            var oEdit = this._oProfileDialog.getModel("profileData").getData();
+            if (!oedit) {
+                oSaveModel.setProperty("/isEditMode", true);
+                return;
+            }
+            var oPayload ={
+                  UserName: oEdit.name
+            }
 
-
-
-
+            const oId = this._oLoggedInUser || {};
+            const ID = oId.UserID || "";
+             const filter = {
+                    UserID: ID
+                };
+            try {
+                await this.ajaxUpdateWithJQuery("HM_Login", { data: oPayload, filters:filter});
+                sap.m.MessageToast.show("Data Saved successfully ");
+                oSaveModel.setProperty("/isEditMode", false);
+            }
+            catch (error) {
+                sap.m.MessageToast.show("Failed");
+            }
+        }
     });
 });

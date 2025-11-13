@@ -40,10 +40,33 @@
       <!-- My Profile Section (visible if section is 'profile') -->
       <VBox visible="{= ${profileSectionModel>/selectedSection} === 'profile' }">
         <Title text="General Information" level="H3"/>
-        <f:SimpleForm editable="true" layout="ColumnLayout">
-          <!-- All Profile Input Fields -->
+          <Toolbar>
+                                <ToolbarSpacer />
+                                <Button
+                                    text="{= ${saveModel>/isEditMode} ? 'Save' : 'Edit' }"
+                                    icon="sap-icon://edit"
+                                    press="onFormEdit"
+                                    type="Emphasized"
+                                />
+                            </Toolbar>
+  <f:SimpleForm
+                                editable="true"
+                                layout="ResponsiveGridLayout"
+                                labelSpanXL="3"
+                                labelSpanL="3"
+                                labelSpanM="3"
+                                labelSpanS="12"
+                                adjustLabelSpan="false"
+                                emptySpanXL="4"
+                                emptySpanL="4"
+                                emptySpanM="4"
+                                columnsXL="1"
+                                columnsL="1"
+                                columnsM="1"
+                            >
+                                      <!-- All Profile Input Fields -->
           <Label text="First Name"/>
-          <Input value="{profileData>/name}"/>
+          <Input value="{profileData>/name}" editable="{saveModel>/isEditMode}"/>
           <Label text="Last Name"/>
           <Input value="{profileData>/lastName}"/>
           <Label text="Gender"/>

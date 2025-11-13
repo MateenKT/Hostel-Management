@@ -96,10 +96,18 @@
                                                 />
                                             </TileContent>
                                         </GenericTile>
-
-    
-
-									
+                                             <GenericTile
+                                            visible="true"
+                                            class="sapUiMediumMargin"
+                                            header="Maintain Data"
+                                            press="TileV_onpressmaintaindata"
+                                        >
+                                           <TileContent unit="Maintain Data">
+                                                <ImageContent
+                                                    src="sap-icon://cancel-maintenance"
+                                                />
+                                            </TileContent>
+                                        </GenericTile>									
                                     </layout:HorizontalLayout>
                                 </ux:blocks>
                             </ux:ObjectPageSubSection>
