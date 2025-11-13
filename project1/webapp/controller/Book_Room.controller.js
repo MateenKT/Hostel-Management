@@ -56,6 +56,14 @@ sap.ui.define([
 			setTimeout(() => {
 				this.Roomdetails();
 			}, 100);
+      const oLoginModeModel = new sap.ui.model.json.JSONModel({
+                fullname: "",
+                Email: "",
+                Mobileno: "",
+                password: "",
+                comfirmpass: ""
+            });
+            this.getView().setModel(oLoginModeModel, "LoginMode")
 		},
 		Roomdetails: async function() {
 			try {
@@ -171,49 +179,67 @@ sap.ui.define([
 								}),
 								new sap.m.CheckBox({
 									 id:that.createId("IDSelfCheck_" + i),
-									select: function(oEvent) {
-										const oView = sap.ui.getCore().byId("idBookRoomView") || that.getView();
-										const oModel = oView.getModel("HostelModel");
-										const aPersons = oModel.getProperty("/Persons") || [];
+								select: function (oEvent) {
+  const oView = sap.ui.getCore().byId("idBookRoomView") || that.getView();
+  const oModel = oView.getModel("HostelModel");
+  const aPersons = oModel.getProperty("/Persons") || [];
 
-										if (aPersons.length === 0) {
-											console.warn("⚠ No persons data found in model.");
-											sap.m.MessageToast.show("Please add personal information first.");
-											return;
-										}
+  if (aPersons.length === 0) {
+    sap.m.MessageToast.show("Please add personal information first.");
+    return;
+  }
 
-										// Checkbox logic
-										const bSelected = oEvent.getParameter("selected");
+  const bSelected = oEvent.getParameter("selected");
 
-										if (bSelected) {
-											// Fill first person data with logged-in user info
-											const oLoginModel = sap.ui.getCore().getModel("LoginModel");
-											const oUser = oLoginModel ? oLoginModel.getData() : {};
+  // Access login model data
+  const oLoginModel = sap.ui.getCore().getModel("LoginModel");
+  const oUser = oLoginModel ? oLoginModel.getData() : null;
 
-											aPersons[0].FullName = oUser.UserName || "";
-											aPersons[0].CustomerEmail = oUser.EmailID || "";
-											aPersons[0].MobileNo = oUser.MobileNo || "";
-											aPersons[0].UserID = oUser.UserID || "";
+  if (bSelected) {
+    if (!oUser || !oUser.UserID) {
+      // No login data found, open fragment to alert user or prompt login
 
-											oModel.refresh(true);
+      // Lazy-load fragment if not already created
+      if (!that._oLoginAlertDialog) {
+        that._oLoginAlertDialog = sap.ui.xmlfragment(
+          that.createId("LoginAlertDialog"),
+          "sap.ui.com.project1.fragment.SignInSignup", // Change to your dialog fragment path
+          that
+        );
+        oView.addDependent(that._oLoginAlertDialog);
+      }
+      that._oLoginAlertDialog.open();
 
-										} else {
-											// Clear data when unchecked
-											aPersons[0].FullName = "";
-											aPersons[0].CustomerEmail = "";
-											aPersons[0].MobileNo = "";
-											aPersons[0].UserID = "";
+      // Uncheck the checkbox since login data is missing
+      oEvent.getSource().setSelected(false);
+      return;
+    }
 
-											oModel.refresh(true);
-										}
-									}
+    // Fill first person data from login user info
+    aPersons[0].FullName = oUser.UserName || "";
+    aPersons[0].CustomerEmail = oUser.EmailID || "";
+    aPersons[0].MobileNo = oUser.MobileNo || "";
+    aPersons[0].UserID = oUser.UserID || "";
+
+  } else {
+    // Clear first person data when unchecked
+    aPersons[0].FullName = "";
+    aPersons[0].CustomerEmail = "";
+    aPersons[0].MobileNo = "";
+    aPersons[0].UserID = "";
+  }
+
+  oModel.refresh(true);
+}
+
 
 
 								})
 							] :
 							[]),
 						new sap.m.Label({
-							text: "Full Name"
+							text: "Full Name",
+              required: true
 						}),
 						new sap.m.Input({
 							value: "{HostelModel>/Persons/" + i + "/FullName}"
@@ -229,7 +255,8 @@ sap.ui.define([
 						}),
 
 						new sap.m.Label({
-							text: "Date of Birth"
+							text: "Date of Birth",
+              required: true
 						}),
 						new sap.m.DatePicker({
 							value: "{HostelModel>/Persons/" + i + "/DateOfBirth}",
@@ -238,7 +265,8 @@ sap.ui.define([
 						}),
 
 						new sap.m.Label({
-							text: "Gender"
+							text: "Gender",
+              required: true
 						}),
 						new sap.m.ComboBox({
 							selectedKey: "{HostelModel>/Persons/" + i + "/Gender}",
@@ -259,29 +287,55 @@ sap.ui.define([
 						}),
 
 						new sap.m.Label({
-							text: "Mobile"
+							text: "Mobile",
+              required: true
 						}),
 						new sap.m.Input({
 							value: "{HostelModel>/Persons/" + i + "/MobileNo}",
+              type:"Number",
+              liveChange:function(oEvent){
+                 let sValue = oEvent.getParameter("value") || "";
+        const oInput = oEvent.getSource();
+
+        //  Allow only digits and strictly limit to 10
+        sValue = sValue.replace(/\D/g, ""); // remove non-digits
+        if (sValue.length > 10) {
+            sValue = sValue.substring(0, 10); // cut off anything beyond 10
+        }
+
+        //  Set sanitized value back
+        oInput.setValue(sValue);
+
+        //  Real-time validation feedback
+        if (sValue.length < 10) {
+            oInput.setValueState("Error");
+            oInput.setValueStateText("Mobile number must be 10 digits");
+        } else {
+            oInput.setValueState("None");
+        }
              
+              },
 						}),
 
 						new sap.m.Label({
-							text: "Email"
+							text: "Email",
+              required: true
 						}),
 						new sap.m.Input({
 							value: "{HostelModel>/Persons/" + i + "/CustomerEmail}"
 						}),
 
 						new sap.m.Label({
-							text: "Country"
+							text: "Country",
+              required: true
 						}),
 						new sap.m.Input({
 							value: "{HostelModel>/Persons/" + i + "/Country}"
 						}),
 
 						new sap.m.Label({
-							text: "City"
+							text: "City",
+              required: true
 						}),
 						new sap.m.Input({
 							value: "{HostelModel>/Persons/" + i + "/City}"
@@ -473,76 +527,75 @@ sap.ui.define([
     return bAllValid;
 },
 
-    // onDialogClose: function () {
-    //         this._oLoginAlertDialog.close()
-    //     },
-    //       onSignIn: async function () {
-    //         // var ofrag = sap.ui.getCore();
-    //         var oModel = this.getOwnerComponent().getModel("LoginMode");
-    //         var oData = oModel.getData();
-    //         const oLoginModel = this.getView().getModel("LoginModel"); 
+    onDialogClose: function () {
+            this._oLoginAlertDialog.close()
+        },
+          onSignIn: async function () {
+            // var ofrag = sap.ui.getCore();
+          
+            const oLoginModel = this.getView().getModel("LoginModel"); 
 
-    //         // Get input values
-    //         var sUserid = sap.ui.getCore().byId("signInuserid").getValue();
-    //         var sUsername = sap.ui.getCore().byId("signInusername").getValue();
-    //         var sPassword = sap.ui.getCore().byId("signinPassword").getValue();
+            // Get input values
+            var sUserid = sap.ui.getCore().byId("signInuserid").getValue();
+            var sUsername = sap.ui.getCore().byId("signInusername").getValue();
+            var sPassword = sap.ui.getCore().byId("signinPassword").getValue();
 
-    //         // Basic validation example
-    //         if (
-    //            !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInuserid"), "ID")|| !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID") ||
-    //             !utils._LCvalidatePassword(sap.ui.getCore().byId("signinPassword"), "ID")
-    //         ) {
-    //             sap.m.MessageToast.show("Make sure all the mandatory fields are filled/validate the entered value");
-    //             return;
-    //         }
+            // Basic validation example
+            if (
+               !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInuserid"), "ID")|| !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID") ||
+                !utils._LCvalidatePassword(sap.ui.getCore().byId("signinPassword"), "ID")
+            ) {
+                sap.m.MessageToast.show("Make sure all the mandatory fields are filled/validate the entered value");
+                return;
+            }
 
-    //         try {
-    //             //  Fetch all registered users (no payload — server ignores it anyway)
-    //             const oResponse = await this.ajaxReadWithJQuery("HM_Login", "");
+            try {
+                //  Fetch all registered users (no payload — server ignores it anyway)
+                const oResponse = await this.ajaxReadWithJQuery("HM_Login", "");
 
-    //             const aUsers = oResponse?.commentData || [];
+                const aUsers = oResponse?.commentData || [];
 
-    //             const oMatchedUser = aUsers.find(user =>
-    //             user.UserID === sUserid &&
-    //             user.UserName === sUsername &&
-    //             (user.Password === sPassword || user.Password === btoa(sPassword))
-    //             );
+                const oMatchedUser = aUsers.find(user =>
+                user.UserID === sUserid &&
+                user.UserName === sUsername &&
+                (user.Password === sPassword || user.Password === btoa(sPassword))
+                );
 
-    //             if (!oMatchedUser) {
-    //                 sap.m.MessageToast.show("Invalid credentials. Please try again.");
-    //                 return;
-    //             }
+                if (!oMatchedUser) {
+                    sap.m.MessageToast.show("Invalid credentials. Please try again.");
+                    return;
+                }
 
-    //             oLoginModel.setProperty("/EmployeeID", oMatchedUser.UserID);
-    //             oLoginModel.setProperty("/EmployeeName", oMatchedUser.UserName);
-    //             oLoginModel.setProperty("/EmailID", oMatchedUser.EmailID);
-    //             oLoginModel.setProperty("/Role", oMatchedUser.Role);
-    //             oLoginModel.setProperty("/BranchCode", oMatchedUser.BranchCode || "");
-    //             oLoginModel.setProperty("/MobileNo", oMatchedUser.MobileNo || "");
+                oLoginModel.setProperty("/EmployeeID", oMatchedUser.UserID);
+                oLoginModel.setProperty("/EmployeeName", oMatchedUser.UserName);
+                oLoginModel.setProperty("/EmailID", oMatchedUser.EmailID);
+                oLoginModel.setProperty("/Role", oMatchedUser.Role);
+                oLoginModel.setProperty("/BranchCode", oMatchedUser.BranchCode || "");
+                oLoginModel.setProperty("/MobileNo", oMatchedUser.MobileNo || "");
 
-    //             if (oMatchedUser.Role === "Customer") {
-    //                 this._oLoggedInUser = oMatchedUser;
-    //                 const oUserModel = new JSONModel(oMatchedUser);
-    //                 sap.ui.getCore().setModel(oUserModel, "LoginModel");
+                if (oMatchedUser.Role === "Customer") {
+                    this._oLoggedInUser = oMatchedUser;
+                    const oUserModel = new JSONModel(oMatchedUser);
+                    sap.ui.getCore().setModel(oUserModel, "LoginModel");
 
-    //                 sap.ui.getCore().byId("signInusername").setValue("");
-    //                 sap.ui.getCore().byId("signinPassword").setValue("");
+                    sap.ui.getCore().byId("signInusername").setValue("");
+                    sap.ui.getCore().byId("signinPassword").setValue("");
 
-    //                 if (this._oSignDialog) this._oSignDialog.close();
+                    if (this._oSignDialog) this._oSignDialog.close();
 
-    //                 const oView = this.getView();
-    //                 oView.byId("loginButton")?.setVisible(false);
-    //                 oView.byId("ProfileAvatar")?.setVisible(true);
+                    const oView = this.getView();
+                    oView.byId("loginButton")?.setVisible(false);
+                    oView.byId("ProfileAvatar")?.setVisible(true);
 
-    //             }else {
-    //                 sap.m.MessageToast.show("Invalid credentials. Please try again.");
-    //             }
+                }else {
+                    sap.m.MessageToast.show("Invalid credentials. Please try again.");
+                }
 
-    //         } catch (err) {
-    //             console.error("Login Error:", err);
-    //             sap.m.MessageToast.show("Failed to fetch login data: " + err);
-    //         }
-    //     },
+            } catch (err) {
+                console.error("Login Error:", err);
+                sap.m.MessageToast.show("Failed to fetch login data: " + err);
+            }
+        },
 		onDialogNextButton: async function() {
 			this._iSelectedStepIndex = this._oWizard.getSteps().indexOf(this._oSelectedStep);
 			this.oNextStep = this._oWizard.getSteps()[this._iSelectedStepIndex + 1];
@@ -591,18 +644,16 @@ sap.ui.define([
 				case 1:
 					oModel.setProperty("/PERVIOUSVIS", true);
 					oModel.setProperty("/NXTVis", true);
-            // if (!this._checkMandatoryFields()) {
-            //     sap.m.MessageToast.show("Please fill all mandatory personal details before proceeding.");
-            //     // Move wizard back to previous valid step
-            //     // If using goToStep/goBack, implement as needed to stay on current step
-            //     this._iSelectedStepIndex--;
-            //     this._oSelectedStep = this._oWizard.getSteps()[this._iSelectedStepIndex];
-            //     oModel.setProperty("/NXTVis", true);
-            //     return; // Exit without proceeding
-            // }
-           
+           if (!this._checkMandatoryFields()) {
+                sap.m.MessageToast.show("Please fill all mandatory personal details before proceeding.");
+                // Move wizard back to previous valid step
+                // If using goToStep/goBack, implement as needed to stay on current step
+                this._iSelectedStepIndex--;
+                this._oSelectedStep = this._oWizard.getSteps()[this._iSelectedStepIndex];
+                oModel.setProperty("/NXTVis", true);
+                return; // Exit without proceeding
+            }
             this._LoadFacilities()
-          
 					break;
 				case 2:
          
@@ -610,6 +661,7 @@ sap.ui.define([
 					oModel.setProperty("/Cancel", true);
 					oModel.setProperty("/NXTVis", false);
 					oModel.setProperty("/PERVIOUSVIS", false);
+          
             this.TC_onDialogNextButton()
 					break;
 				default:

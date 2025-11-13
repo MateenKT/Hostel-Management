@@ -780,81 +780,76 @@ sap.ui.define([
 
 
         
-       onConfirmBooking: function(oEvent) {
+//        onConfirmBooking: function(oEvent) {
 
-    // const oItem = oEvent.getSource().getBindingContext("HostelModel").getObject();
+//     // const oItem = oEvent.getSource().getBindingContext("HostelModel").getObject();
 
-    // Get existing model or create if not exists
-    let oHostelModel = sap.ui.getCore().getModel("HostelModel");
-    if (!oHostelModel) {
-        oHostelModel = new sap.ui.model.json.JSONModel({});
-        sap.ui.getCore().setModel(oHostelModel, "HostelModel");
-    }
+//     // Get existing model or create if not exists
+//     let oHostelModel = sap.ui.getCore().getModel("HostelModel");
+//     if (!oHostelModel) {
+//         oHostelModel = new sap.ui.model.json.JSONModel({});
+//         sap.ui.getCore().setModel(oHostelModel, "HostelModel");
+//     }
 
-     oHostelModel.setProperty("/SelectedPriceType", sSelectedType);
-            oHostelModel.setProperty("/SelectedPriceValue", sSelectedPrice);
+//      oHostelModel.setProperty("/SelectedPriceType", sSelectedType);
+//             oHostelModel.setProperty("/SelectedPriceValue", sSelectedPrice);
 
-    // Set selected tile data into model root properties (for easy binding)
-    oHostelModel.setProperty("/RoomType", oItem.Name || "");
-    oHostelModel.setProperty("/Price",sSelectedPrice || 0);
-    oHostelModel.setProperty("/ACType", oItem.ACType || "");
-    oHostelModel.setProperty("/Currency", "₹"); // Or your currency symbol
+//     // Set selected tile data into model root properties (for easy binding)
+//     oHostelModel.setProperty("/RoomType", oItem.Name || "");
+//     oHostelModel.setProperty("/Price",sSelectedPrice || 0);
+//     oHostelModel.setProperty("/ACType", oItem.ACType || "");
+//     oHostelModel.setProperty("/Currency", "₹"); // Or your currency symbol
 
-    // Optionally set other properties
-    oHostelModel.setProperty("/Image", oItem.Image || "");
-    oHostelModel.setProperty("/Description", oItem.Description || "");
+//     // Optionally set other properties
+//     oHostelModel.setProperty("/Image", oItem.Image || "");
+//     oHostelModel.setProperty("/Description", oItem.Description || "");
 
-    // Close dialog
-    this._oRoomDetailFragment.close();
+//     // Close dialog
+//     this._oRoomDetailFragment.close();
 
-    // Navigate to booking page
-    this.getOwnerComponent().getRouter().navTo("RouteBookRoom");
-},
-        // onConfirmBooking: function () {
-        //     const oView = this.getView();
-        //     const oHostelModel = oView.getModel("HostelModel");
-        //     console.log("onConfirmBooking: HostelModel data:", oHostelModel?.getData?.());
-        //     const oData = oHostelModel?.getData?.() || {};
+//     // Navigate to booking page
+//     this.getOwnerComponent().getRouter().navTo("RouteBookRoom");
+// },
+        onConfirmBooking: function () {
+            const oView = this.getView();
+            const oHostelModel = oView.getModel("HostelModel");
+            console.log("onConfirmBooking: HostelModel data:", oHostelModel?.getData?.());
+            const oData = oHostelModel?.getData?.() || {};
 
             // 1️⃣ Validate selection
-        //     if (!oData.SelectedPriceType || !oData.SelectedPriceValue) {
-        //         sap.m.MessageToast.show("Please select a pricing plan before booking.");
-        //         return;
-        //     }
+            if (!oData.SelectedPriceType || !oData.SelectedPriceValue) {
+                sap.m.MessageToast.show("Please select a pricing plan before booking.");
+                return;
+            }
 
-        //     // 2️⃣ Construct payload
-        //     const oPayload = {
-        //         BookingDate: new Date().toISOString(),
-        //         RoomNo: oData.RoomNo || "",
-        //         BedType: oData.BedType || "",
-        //         ACType: oData.ACType || "",
-        //         Capacity: oData.Capacity || "",
-        //         Address: oData.Address || "",
-        //         Description: oData.Description || "",
-        //         SelectedPriceType: oData.SelectedPriceType,
-        //         FinalPrice: oData.SelectedPriceValue,
-        //         Source: "UI5_HostelApp",
-        //         Status: "Pending"
-        //     };
+            // 2️⃣ Construct payload
+            const oPayload = {
+                BookingDate: new Date().toISOString(),
+                RoomNo: oData.RoomNo || "",
+                BedType: oData.BedType || "",
+                ACType: oData.ACType || "",
+                Capacity: oData.Capacity || "",
+                Address: oData.Address || "",
+                Description: oData.Description || "",
+                SelectedPriceType: oData.SelectedPriceType,
+                FinalPrice: oData.SelectedPriceValue,
+                Source: "UI5_HostelApp",
+                Status: "Pending"
+            };
 
-        //     // (Optional) Only keep if you actually need this extra property in model
-        //     oHostelModel.setProperty("/roomtype", oData.BedType);
+            // (Optional) Only keep if you actually need this extra property in model
+            oHostelModel.setProperty("/roomtype", oData.BedType);
 
-        //     console.log("Full Payload JSON:", JSON.stringify(oPayload, null, 4));
+            console.log("Full Payload JSON:", JSON.stringify(oPayload, null, 4));
 
-        //     // 3️⃣ User feedback
-        //     sap.m.MessageToast.show(
-        //         `Booking confirmed for ${oData.BedType || "Room"} (${oData.SelectedPriceType} plan)`
-        //     );
+            // 3️⃣ User feedback
+            sap.m.MessageToast.show(
+                `Booking confirmed for ${oData.BedType || "Room"} (${oData.SelectedPriceType} plan)`
+            );
 
-        //     // 4️⃣ Close the dialog
-        //     if (this._oRoomDetailFragment) this._oRoomDetailFragment.close();
-        // },
-
-
-
-
-
+            // 4️⃣ Close the dialog
+            if (this._oRoomDetailFragment) this._oRoomDetailFragment.close();
+        },
 
         onTabSelect: function (oEvent) {
             var oItem = oEvent.getParameter("item");
