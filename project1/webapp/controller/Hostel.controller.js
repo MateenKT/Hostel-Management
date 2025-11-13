@@ -9,8 +9,13 @@ sap.ui.define([
 
     return BaseController.extend("sap.ui.com.project1.controller.Hostel", {
 
-        onInit: async function () {
-            const oView = this.getView();
+        onInit:  function () {
+            this.getOwnerComponent().getRouter().getRoute("RouteHostel").attachMatched(this._onRouteMatched, this);
+
+           
+        },
+        _onRouteMatched:async function(){
+             const oView = this.getView();
 
             // 1️⃣ Login model setup
             const omodel = new sap.ui.model.json.JSONModel({
@@ -77,14 +82,11 @@ sap.ui.define([
 
                 // ✅ only proceed once sBRModel is ready
                 const oBRModel = oView.getModel("sBRModel");
-                if (oBRModel && oBRModel.getData) {
                     const oModelData = oBRModel.getData();
                     const aFiltered = oModelData.filter(item => item.Name === "Kalaburgi");
                     oView.setModel(new sap.ui.model.json.JSONModel(aFiltered), "AreaModel");
                     oView.byId("id_Area").setEnabled(true);
-                } else {
-                    console.warn("⚠️ sBRModel not available yet — skipping area filter setup");
-                }
+              
 
                 // ✅ Preselect default branch only after data loaded
                 this.byId("id_Branch").setSelectedKey("KLB01");
@@ -1705,7 +1707,7 @@ sap.ui.define([
 
             // 🔹 Make Area and Room Type non-editable
             if (oAreaTypeCombo) oAreaTypeCombo.setEnabled(false);
-            if (oRoomTypeCombo) oRoomTypeCombo.setEnabled(false);
+            if (oRoomTypeCombo) oRoomTypeCombo;
         },
 
         onAfterRendering: function () {

@@ -30,14 +30,34 @@ sap.ui.define([
 
             });
             this.getView().setModel(model, "RoomModel")
-
-            await  this.Onsearch()
-            await this.BedTypedetails()
-            await this.ajaxReadWithJQuery("Currency", "").then((oData) => {
+           await this.ajaxReadWithJQuery("Currency", "").then((oData) => {
                 var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
                 var model = new JSONModel(oFCIAerData);
                 this.getView().setModel(model, "CurrencyModel");
             })
+            await  this.Onsearch()
+            await this.BedTypedetails()
+            await this._loadBranchCode()
+          
+        },
+         _loadBranchCode: async function () {
+            try {
+                const oView = this.getView();
+
+                const oResponse = await this.ajaxReadWithJQuery("HM_Branch", {});
+
+                const aBranches = Array.isArray(oResponse?.data)
+                    ? oResponse.data
+                    : (oResponse?.data ? [oResponse.data] : []);
+
+                const oBranchModel = new sap.ui.model.json.JSONModel(aBranches);
+                oView.setModel(oBranchModel, "BranchModel");
+
+                console.log("oBranchModel:", oBranchModel.getData());
+                console.log("Branch data loaded successfully");
+            } catch (err) {
+                console.error("Error while loading branch data:", err);
+            }
         },
 
         RD_onDownload: function() {
@@ -113,6 +133,7 @@ sap.ui.define([
                 var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
                 var model = new JSONModel(oFCIAerData);
                 this.getView().setModel(model, "BedTypeModel");
+                  this._aAllBedTypes = oFCIAerData;
             })
         },
         _populateUniqueFilterValues: function(data) {
@@ -576,7 +597,7 @@ sap.ui.define([
                             this.Onsearch();
                             this.BedTypedetails()
 
-                            if (this.AR_Dialog) this.AR_Dialog.close();
+                             this.AR_Dialog.close();
                         }.bind(this),
                         error: function(err) {
                             sap.m.MessageBox.error("Error saving room data (Add/Update).");

@@ -56,43 +56,51 @@ sap.ui.define([
 
             })
         },
-        refershModel: function (BEdID) {
-               sap.ui.core.BusyIndicator.show(0);
-            this.ajaxReadWithJQuery("HM_BedType", {
-                ID: BEdID,
-            }).then((oData) => {
-                var oFCIAerData = Array.isArray(oData.data.data) ? oData.data.data : [oData.data.data];
-                var oBedData = oFCIAerData[0]; // main data object
-                this.getView().getModel("BedImageModel").setData(oBedData)
-                var oBedImages = oData.data.bedDetails[0]; // contains Photo1..Photo5
+       refershModel: function (BEdID) {
+    var that = this;
+    sap.ui.core.BusyIndicator.show(0); // show immediately
 
-                // Transform Photo fields into array for gallery
-                var aDisplayImages = [];
-                for (var i = 1; i <= 5; i++) {
-                    var photoKey = "Photo" + i;
-                    var nameKey = "Photo" + i + "Name";
-                    var typeKey = "Photo" + i + "Type";
+    this.ajaxReadWithJQuery("HM_BedType", { ID: BEdID })
+        .then(function(oData) {
+            var oFCIAerData = Array.isArray(oData.data.data) ? oData.data.data : [oData.data.data];
+            var oBedData = oFCIAerData[0]; // main data object
 
-                    if (oBedImages[photoKey]) {
-                        // Ensure base64 string is converted into valid image URI
-                        var sImageSrc = "data:" + (oBedImages[typeKey] || "image/jpeg") + ";base64," + oBedImages[photoKey];
+            // Set BedImageModel data
+            that.getView().getModel("BedImageModel").setData(oBedData);
 
-                        aDisplayImages.push({
-                            src: sImageSrc,
-                            fileName: oBedImages[nameKey] || ("Photo " + i),
-                            fileType: oBedImages[typeKey],
-                            isPlaceholder: false
-                        });
-                    }
+            var oBedImages = oData.data.bedDetails[0]; // Photo1..Photo5
+
+            // Transform Photo fields into array
+            var aDisplayImages = [];
+            for (var i = 1; i <= 5; i++) {
+                var photoKey = "Photo" + i;
+                var nameKey = "Photo" + i + "Name";
+                var typeKey = "Photo" + i + "Type";
+
+                if (oBedImages[photoKey]) {
+                    var sImageSrc = "data:" + (oBedImages[typeKey] || "image/jpeg") + ";base64," + oBedImages[photoKey];
+                    aDisplayImages.push({
+                        src: sImageSrc,
+                        fileName: oBedImages[nameKey] || ("Photo " + i),
+                        fileType: oBedImages[typeKey],
+                        isPlaceholder: false
+                    });
                 }
-                // Create a model for display
-                var oDisplayModel = new sap.ui.model.json.JSONModel({ DisplayImages: aDisplayImages });
-                this.getView().setModel(oDisplayModel, "DisplayImagesModel");
+            }
 
-                
-                sap.ui.core.BusyIndicator.hide();
-            });
-        },
+            // Set DisplayImagesModel
+            var oDisplayModel = new sap.ui.model.json.JSONModel({ DisplayImages: aDisplayImages });
+            that.getView().setModel(oDisplayModel, "DisplayImagesModel");
+        })
+        .catch(function(err) {
+            console.error("Error fetching BedType data:", err);
+            // optionally show MessageToast or MessageBox
+        })
+        .finally(function() {
+            // always hide busy indicator
+            sap.ui.core.BusyIndicator.hide();
+        });
+},
         onAddItemButtonPress: function () {
             var oTable = this.byId("idTable");
             var oModel = oTable.getModel("BedImageModel");

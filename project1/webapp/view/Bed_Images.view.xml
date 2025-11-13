@@ -162,7 +162,7 @@
                 <ObjectPageSection
                     titleUppercase="false"
                     id="purchaseOrderSection"
-                    title="Bed Images"
+                    title="Images"
                 >
                     <subSections>
                         <ObjectPageSubSection id="POO_Purchaseordersection">

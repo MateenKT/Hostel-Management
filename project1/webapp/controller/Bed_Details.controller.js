@@ -10,7 +10,7 @@ sap.ui.define([
         onInit: function() {
             this.getOwnerComponent().getRouter().getRoute("RouteBedDetails").attachMatched(this._onRouteMatched, this);
         },
-        _onRouteMatched: function() {
+        _onRouteMatched:async function() {
             const omodel = new sap.ui.model.json.JSONModel({
                 // for Database connection
                 url: "https://rest.kalpavrikshatechnologies.com/",
@@ -40,7 +40,28 @@ sap.ui.define([
 
             this.getView().setModel(oTokenModel, "tokenModel");
             this.getView().setModel(oUploaderData, "UploaderData");
+            await this._loadBranchCode()
             this.Onsearch()
+       
+        },
+         _loadBranchCode: async function () {
+            try {
+                const oView = this.getView();
+
+                const oResponse = await this.ajaxReadWithJQuery("HM_Branch", {});
+
+                const aBranches = Array.isArray(oResponse?.data)
+                    ? oResponse.data
+                    : (oResponse?.data ? [oResponse.data] : []);
+
+                const oBranchModel = new sap.ui.model.json.JSONModel(aBranches);
+                oView.setModel(oBranchModel, "BranchModel");
+
+                console.log("oBranchModel:", oBranchModel.getData());
+                console.log("Branch data loaded successfully");
+            } catch (err) {
+                console.error("Error while loading branch data:", err);
+            }
         },
 
         HM_RoomDetails: function(oEvent) {
