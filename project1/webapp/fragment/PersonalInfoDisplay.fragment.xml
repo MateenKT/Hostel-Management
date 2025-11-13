@@ -78,12 +78,12 @@
             </headerToolbar>
 
             <columns>
-                <Column><Text text="Facility Name" /></Column>
-                <Column><Text text="Facility Price (₹)" /></Column>
-                <Column><Text text="Start Date" /></Column>
-                <Column><Text text="End Date" /></Column>
-                <Column><Text text="Days" /></Column>
-                <Column><Text text="Total (₹)" /></Column>
+                <Column demandPopin="true" ><Text text="Facility Name" /></Column>
+                <Column demandPopin="true"><Text text="Facility Price (₹)" /></Column>
+                <Column minScreenWidth="Desktop" demandPopin="true" ><Text text="Start Date" /></Column>
+                <Column demandPopin="true" minScreenWidth="Desktop"><Text text="End Date" /></Column>
+                <Column minScreenWidth="Desktop" demandPopin="true" ><Text text="Days" /></Column>
+                <Column demandPopin="true" ><Text text="Total (₹)" /></Column>
             </columns>
 
             <items>
@@ -111,7 +111,7 @@
             </HBox>
             <HBox justifyContent="End" class="sapUiSmallMarginTop">
                 <Label text="Room Rent:" design="Bold" class="sapUiSmallMarginEnd"/>
-                <Text text="{HostelModel>/Price}" class="sapUiSmallMarginEnd"/>
+                <Text text="{HostelModel>/FinalPrice}" class="sapUiSmallMarginEnd"/>
             </HBox>
 
             <HBox justifyContent="End" class="sapUiSmallMarginTop">

@@ -162,7 +162,7 @@ onEditFacilitySave: function () {
     // ✅ Recalculate totals
     const sStartDate = oHostelModel.getProperty("/StartDate");
     const sEndDate = oHostelModel.getProperty("/EndDate");
-    const roomRentPrice = parseFloat(oHostelModel.getProperty("/Price")) || 0;
+    const roomRentPrice = parseFloat(oHostelModel.getProperty("/FinalPrice")) || 0;
 
     const totals = this.calculateTotals(aPersons, sStartDate, sEndDate, roomRentPrice);
    if (totals) {
@@ -172,7 +172,7 @@ onEditFacilitySave: function () {
     oHostelModel.setProperty("/GrandTotal", totals.GrandTotal);
 
     // ✅ Per-person recalculation
-    const roomRentPrice = parseFloat(oHostelModel.getProperty("/Price")) || 0;
+    const roomRentPrice = parseFloat(oHostelModel.getProperty("/FinalPrice")) || 0;
     aPersons.forEach((oPerson, iIndex) => {
         const aFacilities = oPerson.AllSelectedFacilities || [];
         const iFacilityTotal = aFacilities.reduce((sum, f) => {

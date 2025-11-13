@@ -723,7 +723,7 @@ sap.ui.define([
   const aPersons = oHostelModel.getProperty("/Persons") || [];
   const sStartDate = oHostelModel.getProperty("/StartDate");
   const sEndDate = oHostelModel.getProperty("/EndDate");
-  const roomRentPrice = parseFloat(oHostelModel.getProperty("/Price")) || 0;
+  const roomRentPrice = parseFloat(oHostelModel.getProperty("/FinalPrice")) || 0;
 
   // Parse and validate dates
   const oStartDate = this._parseDate(sStartDate);
@@ -983,7 +983,7 @@ sap.ui.define([
 
 				// On success
 				sap.m.MessageToast.show("Booking successful!");
-        
+
 				var oroute = this.getOwnerComponent().getRouter();
 				oroute.navTo("RouteHostel");
 				// Clear uploaded files
@@ -1118,7 +1118,6 @@ sap.ui.define([
 			);
 
 			if (!oMatchingRoom) {
-				console.warn("⚠️ No matching room found for type:", sRoomType);
 				oHostelModel.setProperty("/FinalPrice", "");
 				return;
 			}
@@ -1150,8 +1149,7 @@ sap.ui.define([
 			// 💥 Apply model refresh so UI text updates instantly
 			oHostelModel.refresh(true);
 
-			console.log(`💰 Duration changed → ${sSelectedKey}, Price updated to ₹${sNewPrice}`);
-			sap.m.MessageToast.show(`Updated to ${sSelectedKey} plan — ₹${sNewPrice}`);
+		
 		}
 
 
