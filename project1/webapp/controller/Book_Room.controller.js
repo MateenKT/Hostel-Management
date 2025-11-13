@@ -11,27 +11,37 @@ sap.ui.define([
 
 	return BaseController.extend("sap.ui.com.project1.controller.Book_Room", {
 		Formatter: Formatter,
-		onInit: function () {
-			const oUserModel = sap.ui.getCore().getModel("LoginModel");
-			this._oLoggedInUser = oUserModel ? oUserModel.getData() : {};
+		onInit: function() {
 
+			const oUserModel = sap.ui.getCore().getModel("LoginModel");
+			if (oUserModel) {
+				this._oLoggedInUser = oUserModel.getData();
+			} else {
+				this._oLoggedInUser = {}; // fallback
+			}
 			let oHostelModel = sap.ui.getCore().getModel("HostelModel");
 
 			if (!oHostelModel) {
-				// Create fallback if model missing
+				// If not found, create a fallback model
 				oHostelModel = new JSONModel({
-					BedType: "",
-					ACType: "",
-					FinalPrice: "",
-					SelectedPriceType: "",
+					UserID: "",
+					RoomType: "",
+					Price: "",
+					PaymentType: "",
 					Person: "",
 					StartDate: "",
-					EndDate: ""
+					EndDate: "",
+          BedType: "",
+					ACType: "",
+					FinalPrice: "",
+					SelectedPriceType: ""
 				});
 				sap.ui.getCore().setModel(oHostelModel, "HostelModel");
 			}
 
-			// 🔥 Ensure defaults come from previous step (HostelModel)
+			// Set it on the view
+
+      // 🔥 Ensure defaults come from previous step (HostelModel)
 			const oData = oHostelModel.getData();
 
 			// If older fields exist, normalize them to new ones
@@ -59,34 +69,33 @@ sap.ui.define([
 			oHostelModel.refresh(true);
 			this.getView().setModel(oHostelModel, "HostelModel");
 
-			// Load data asynchronously after model ready
 			setTimeout(() => {
-				this._LoadFacilities();
-				this.Roomdetails();
+				this._LoadFacilities()
 			}, 100);
-
-			// Footer buttons
-			const oBTn = new JSONModel({
+			var oBTn = new JSONModel({
 				Next: false,
 				Previous: false,
 				Submit: false,
 				Cancel: false,
 				NXTVis: true,
 				PERVIOUSVIS: false,
-			});
-			this.getView().setModel(oBTn, "OBTNModel");
 
-			// Login mode model
-			const oLoginModeModel = new JSONModel({
-				fullname: "",
-				Email: "",
-				Mobileno: "",
-				password: "",
-				comfirmpass: ""
-			});
-			this.getView().setModel(oLoginModeModel, "LoginMode");
+
+			})
+			this.getView().setModel(oBTn, "OBTNModel")
+
+			setTimeout(() => {
+				this.Roomdetails();
+			}, 100);
+      const oLoginModeModel = new sap.ui.model.json.JSONModel({
+                fullname: "",
+                Email: "",
+                Mobileno: "",
+                password: "",
+                comfirmpass: ""
+            });
+            this.getView().setModel(oLoginModeModel, "LoginMode")
 		},
-
 		Roomdetails: async function() {
 			try {
 				const oData = await this.ajaxReadWithJQuery("HM_Rooms", {});
@@ -412,115 +421,124 @@ sap.ui.define([
 
 
 				/** ---- FACILITIES SECTION (card layout) ---- **/
-				const oFacilities = new sap.m.Panel({
-					headerText: "Facilities",
-					expandable: true,
-					expanded: true,
-					content: [
-						...(i === 0 && iPersons > 1 ?
-							[
-								new sap.m.CheckBox({
-									text: "For Both",
-									selected: true,
-									select: (e) => {
-										oData.ForBothSelected = e.getParameter("selected");
-										oModel.refresh(true);
-									}
-								})
-							] :
-							[]),
+			 const oFacilities = new sap.m.Panel({
+      headerText: "Facilities",
+      expandable: true,
+      expanded: true,
+      content: [
+        ...(i === 0 && iPersons > 1 ?
+          [
+            new sap.m.CheckBox({
+              text: "For Both",
+              selected: true,
+              select: (e) => {
+                oData.ForBothSelected = e.getParameter("selected");
+                if (oData.ForBothSelected && iPersons > 1) {
+                  // Copy selected facilities from first person to second person
+                  oData.Persons[1].Facilities.SelectedFacilities = oData.Persons[0].Facilities.SelectedFacilities.map(f => ({...f}));
+                }
+                oModel.refresh(true);
+              }
+            })
+          ] :
+          []),
 
-						new sap.m.FlexBox({
-							wrap: "Wrap",
-							alignItems: "Start",
-							justifyContent: "SpaceAround",
-							items: {
-								path: "FacilityModel>/Facilities",
-								template: new sap.m.VBox({
-									width: "264px",
-									height: "230px",
-									alignItems: "Center",
-									justifyContent: "Center",
-									styleClass: "serviceCard",
-									items: [
-										// Facility Image + Overlay Name
-										new sap.m.VBox({
-											width: "264px",
-											height: "178px",
-											styleClass: "imageContainer",
-											items: [
-												new sap.m.Image({
-													src: "{FacilityModel>Image}",
-													width: "264px",
-													height: "178px",
-													class: "serviceImage",
-													densityAware: false,
-													press: function(oEvent) {
-														const oCtx = oEvent.getSource().getBindingContext("FacilityModel");
-														const oFacilityObj = oCtx.getObject();
-														const aPersons = oModel.getProperty("/Persons");
-														const aSelected = aPersons[i].Facilities.SelectedFacilities;
-														const oCard = oEvent.getSource().getParent().getParent();
-														const bAlreadySelected = aSelected.find(f => f.FacilityName === oFacilityObj.FacilityName);
+        new sap.m.FlexBox({
+          wrap: "Wrap",
+          alignItems: "Start",
+          justifyContent: "SpaceAround",
+          items: {
+            path: "FacilityModel>/Facilities",
+            template: new sap.m.VBox({
+              width: "264px",
+              height: "230px",
+              alignItems: "Center",
+              justifyContent: "Center",
+              styleClass: "serviceCard",
+              items: [
+                // Facility Image + Overlay Name
+                new sap.m.VBox({
+                  width: "264px",
+                  height: "178px",
+                  styleClass: "imageContainer",
+                  items: [
+                    new sap.m.Image({
+                      src: "{FacilityModel>Image}",
+                      width: "264px",
+                      height: "178px",
+                      class: "serviceImage",
+                      densityAware: false,
+                      press: function (oEvent) {
+                        const oCtx = oEvent.getSource().getBindingContext("FacilityModel");
+                        const oFacilityObj = oCtx.getObject();
+                        const aPersons = oModel.getProperty("/Persons");
+                        const aSelected = aPersons[i].Facilities.SelectedFacilities;
+                        const oCard = oEvent.getSource().getParent().getParent();
+                        const bAlreadySelected = aSelected.find(f => f.FacilityName === oFacilityObj.FacilityName);
 
-														if (bAlreadySelected) {
-															const idx = aSelected.findIndex(f => f.FacilityName === oFacilityObj.FacilityName);
-															aSelected.splice(idx, 1);
-															oCard.removeStyleClass("serviceCardSelected");
-														} else {
-															aSelected.push({
-																FacilityName: oFacilityObj.FacilityName,
-																Price: oFacilityObj.Price,
-																Image: oFacilityObj.Image
-															});
-															oCard.addStyleClass("serviceCardSelected");
-														}
+                        if (bAlreadySelected) {
+                          const idx = aSelected.findIndex(f => f.FacilityName === oFacilityObj.FacilityName);
+                          aSelected.splice(idx, 1);
+                          oCard.removeStyleClass("serviceCardSelected");
+                        } else {
+                          aSelected.push({
+                            FacilityName: oFacilityObj.FacilityName,
+                            Price: oFacilityObj.Price,
+                            Image: oFacilityObj.Image
+                          });
+                          oCard.addStyleClass("serviceCardSelected");
+                        }
 
-														oModel.refresh(true);
-													}
-												}),
+                        // If "For Both" is selected, copy selected facilities to second person
+                        if (oData.ForBothSelected && iPersons > 1) {
+                          oData.Persons[1].Facilities.SelectedFacilities = aSelected.map(f => ({...f}));
+                        }
 
-												// Facility name overlay (hover effect)
-												(() => {
-													const oHTML = new sap.ui.core.HTML({
-														content: `
-                          <div class="facility-overlay">
-                            <a href="#" class="facility-overlay-link">{FacilityModel>FacilityName}</a>
-                          </div>
-                        `
-													}).bindElement("FacilityModel");
-													return oHTML;
-												})()
-											]
-										}),
+                        oModel.refresh(true);
+                      }
+                    }),
 
-										// Facility Price (below the image)
-										new sap.m.Text({
-											text: "{= '₹ ' + ${FacilityModel>Price}}",
-											class: "facilityPriceText"
-										})
-									]
-								})
-							}
-						})
-					],
-					visible: {
-						path: "HostelModel>/ForBothSelected",
-						formatter: function(bSel) {
-							if (bSel && i > 0) return false;
-							return true;
-						}
-					}
-				});
+                    // Facility name overlay (hover effect)
+                    (() => {
+                      const oHTML = new sap.ui.core.HTML({
+                        content: `
+                      <div class="facility-overlay">
+                        <a href="#" class="facility-overlay-link">{FacilityModel>FacilityName}</a>
+                      </div>
+                    `
+                      }).bindElement("FacilityModel");
+                      return oHTML;
+                    })()
+                  ]
+                }),
 
-				// Add sections for each person
-				oVBox.addItem(oForm);
-				oVBox.addItem(oDocument);
-				oVBox.addItem(oFacilities);
-			}
+                // Facility Price (below the image)
+                new sap.m.Text({
+                  text: "{= '₹ ' + ${FacilityModel>Price}}",
+                  class: "facilityPriceText"
+                })
+              ]
+            })
+          }
+        })
+      ],
+      visible: {
+        path: "HostelModel>/ForBothSelected",
+        formatter: function (bSel) {
+          if (bSel && i > 0) return false;
+          return true;
+        }
+      }
+    });
 
-			oModel.refresh(true);
-		},
+    // Add sections for each person
+    oVBox.addItem(oForm);
+    oVBox.addItem(oDocument);
+    oVBox.addItem(oFacilities);
+  }
+
+  oModel.refresh(true);
+},
     _checkMandatoryFields: function() {
     const oModel = this.getView().getModel("HostelModel");
     const aPersons = oModel.getProperty("/Persons") || [];
@@ -666,15 +684,15 @@ sap.ui.define([
 				case 1:
 					oModel.setProperty("/PERVIOUSVIS", true);
 					oModel.setProperty("/NXTVis", true);
-           if (!this._checkMandatoryFields()) {
-                sap.m.MessageToast.show("Please fill all mandatory personal details before proceeding.");
-                // Move wizard back to previous valid step
-                // If using goToStep/goBack, implement as needed to stay on current step
-                this._iSelectedStepIndex--;
-                this._oSelectedStep = this._oWizard.getSteps()[this._iSelectedStepIndex];
-                oModel.setProperty("/NXTVis", true);
-                return; // Exit without proceeding
-            }
+          //  if (!this._checkMandatoryFields()) {
+          //       sap.m.MessageToast.show("Please fill all mandatory personal details before proceeding.");
+          //       // Move wizard back to previous valid step
+          //       // If using goToStep/goBack, implement as needed to stay on current step
+          //       this._iSelectedStepIndex--;
+          //       this._oSelectedStep = this._oWizard.getSteps()[this._iSelectedStepIndex];
+          //       oModel.setProperty("/NXTVis", true);
+          //       return; // Exit without proceeding
+          //   }
             this._LoadFacilities()
 					break;
 				case 2:
@@ -692,44 +710,78 @@ sap.ui.define([
 		},
 
 		TC_onDialogNextButton: function () {
-    const oView = this.getView();
-    const oHostelModel = oView.getModel("HostelModel");
-    const aPersons = oHostelModel.getProperty("/Persons") || [];
-    const sStartDate = oHostelModel.getProperty("/StartDate");
-    const sEndDate = oHostelModel.getProperty("/EndDate");
-    const roomRentPrice = oHostelModel.getProperty("/Price");
+  const oView = this.getView();
+  const oHostelModel = oView.getModel("HostelModel");
+  const aPersons = oHostelModel.getProperty("/Persons") || [];
+  const sStartDate = oHostelModel.getProperty("/StartDate");
+  const sEndDate = oHostelModel.getProperty("/EndDate");
+  const roomRentPrice = parseFloat(oHostelModel.getProperty("/Price")) || 0;
 
-    const oStartDate = this._parseDate(sStartDate);
-    const oEndDate = this._parseDate(sEndDate);
-    const diffTime = oEndDate - oStartDate;
-    const iDays = Math.ceil(diffTime / (1000 * 3600 * 24));
+  // Parse and validate dates
+  const oStartDate = this._parseDate(sStartDate);
+  const oEndDate = this._parseDate(sEndDate);
+  const iDays = Math.ceil((oEndDate - oStartDate) / (1000 * 3600 * 24));
 
-    if (iDays <= 0) {
-        sap.m.MessageToast.show("End Date must be after Start Date");
-        return;
-    }
+  if (iDays <= 0) {
+    sap.m.MessageToast.show("End Date must be after Start Date");
+    return;
+  }
 
-    // Calculate totals (assuming returns structure with AllSelectedFacilities)
-    const totals = this.calculateTotals(aPersons, sStartDate, sEndDate, roomRentPrice);
-    if (!totals) return;  
+  // Step 1: Get all facilities across persons
+  const totals = this.calculateTotals(aPersons, sStartDate, sEndDate, roomRentPrice);
+  if (!totals) return;
 
-    // Deep copy and attach unique facilities
-    const aUpdatedPersons = aPersons.map((oPerson, iIndex) => {
-        const personName = oPerson.FullName || `Person ${iIndex + 1}`;
-        const aFacilities = totals.AllSelectedFacilities.filter(f => f.PersonName === personName);
+  // Step 2: Calculate per-person totals
+  const aUpdatedPersons = aPersons.map((oPerson, iIndex) => {
+    const personName = oPerson.FullName || `Person ${iIndex + 1}`;
+    const aPersonFacilities = (totals.AllSelectedFacilities || []).filter(
+      f => f.PersonName === personName
+    );
 
-        return Object.assign({}, oPerson, {
-            PersonFacilitiesSummary: JSON.parse(JSON.stringify(aFacilities))
-        });
-    });
+    // ✅ Calculate TotalFacilityPrice = Σ (Price × TotalDays)
+    const facilityTotal = aPersonFacilities.reduce((sum, f) => {
+      const iPrice = parseFloat(f.Price) || 0;
+      const iDays = parseFloat(f.TotalDays) || 0;
+      return sum + (iPrice * iDays);
+    }, 0);
 
-    oHostelModel.setProperty("/Persons", aUpdatedPersons);
-    oHostelModel.setProperty("/TotalDays", totals.TotalDays);
-    oHostelModel.setProperty("/TotalFacilityPrice", totals.TotalFacilityPrice);
-    oHostelModel.setProperty("/GrandTotal", totals.GrandTotal);
-    oHostelModel.setProperty("/AllSelectedFacilities", totals.AllSelectedFacilities);
-    oHostelModel.refresh(true);
+    // ✅ Grand total = room rent + facility total
+    const grandTotal = roomRentPrice + facilityTotal;
+
+    return {
+      ...oPerson,
+      PersonFacilitiesSummary: aPersonFacilities,
+      AllSelectedFacilities: aPersonFacilities,
+      TotalFacilityPrice: facilityTotal,
+      GrandTotal: grandTotal,
+      TotalDays: iDays
+    };
+  });
+
+  // Step 3: Calculate global totals
+  const totalFacilitySum = aUpdatedPersons.reduce((sum, p) => sum + (p.TotalFacilityPrice || 0), 0);
+  const grandTotalSum = aUpdatedPersons.reduce((sum, p) => sum + (p.GrandTotal || 0), 0);
+
+  // Step 4: Update model with clean data
+  oHostelModel.setProperty("/Persons", aUpdatedPersons);
+  oHostelModel.setProperty("/TotalDays", iDays);
+  oHostelModel.setProperty("/TotalFacilityPrice", totalFacilitySum);
+  oHostelModel.setProperty("/GrandTotal", grandTotalSum);
+
+  // Step 5: Merge unique facilities for combined table (optional)
+  const aUniqueFacilities = [
+    ...new Map(
+      aUpdatedPersons
+        .flatMap(p => p.AllSelectedFacilities || [])
+        .map(item => [`${item.PersonName}_${item.FacilityName}`, item])
+    ).values()
+  ];
+  oHostelModel.setProperty("/AllSelectedFacilities", aUniqueFacilities);
+
+  // ✅ Refresh bindings (not refresh(true))
+  oHostelModel.updateBindings(true);
 }
+
 ,
 
 
@@ -922,9 +974,10 @@ sap.ui.define([
 				await this.ajaxCreateWithJQuery("HM_Customer", oPayload);
 
 				// On success
+				sap.m.MessageToast.show("Booking successful!");
+        
 				var oroute = this.getOwnerComponent().getRouter();
 				oroute.navTo("RouteHostel");
-				sap.m.MessageToast.show("Booking successful!");
 				// Clear uploaded files
 				oData.Persons.forEach((_, idx) => {
 					const uploader = sap.ui.getCore().byId("idFileUploader_" + idx);
@@ -1027,14 +1080,14 @@ sap.ui.define([
 		// 		}
 
 		// 		// Update Price in HostelModel
-		// 		oHostelModel.setProperty("/FinalPrice", sNewPrice);
+		// 		oHostelModel.setProperty("/Price", sNewPrice);
 
 		// 	} else {
 		// 		// No matching room found - clear price or handle otherwise
-		// 		oHostelModel.setProperty("/FinalPrice", "");
+		// 		oHostelModel.setProperty("/Price", "");
 		// 	}
-		// }
-		onRoomDurationChange: function (oEvent) {
+		// },
+    	onRoomDurationChange: function (oEvent) {
 			const sSelectedKey = oEvent.getParameter("selectedItem").getKey(); // e.g. "daily", "monthly", "yearly"
 			const oHostelModel = this.getView().getModel("HostelModel");
 			const oRoomDetailModel = this.getView().getModel("RoomDetailModel");

@@ -293,11 +293,11 @@
                                                     enabled="{VisibilityModel>Visible}"
                                                     class="{= ${VisibilityModel>Visible} ? '' : 'soldOutButton' }"
                                                 />
-                                                <Button
+                                                <!-- <Button
                                                     text="{= ${VisibilityModel>Visible} ? 'Book Now' : 'Sold Out' }"
                                                     press=".onBookNow"
                                                     enabled="{VisibilityModel>Visible}"
-                                                />
+                                                /> -->
                                             </HBox>
                                         </VBox>
                                     </VBox>

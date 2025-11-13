@@ -18,7 +18,7 @@
                 <!-- Booking Details -->
                 <core:Title text="{i18n>bookingDetailsTitle}" />
                <Label text="Desired Room Type" required="true" />
-                            <Text id="idRoomType2" text="{HostelModel>/RoomType}"  />
+                            <Text id="idRoomType2" text="{HostelModel>/BedType}"  />
 
                             <Label text="Price" required="true" />
                             <Text id="idPrice3" text="{HostelModel>/Price}"   />

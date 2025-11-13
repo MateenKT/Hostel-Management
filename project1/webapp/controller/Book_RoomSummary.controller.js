@@ -6,13 +6,13 @@ sap.ui.define([
 
     return Controller.extend("sap.ui.com.project1.controller.Book_RoomSummary", {
         onInit() {
-             const oTable = this.byId("idFacilityRoomTable");
+    //          const oTable = this.byId("idFacilityRoomTable");
 
-    // Make the whole row selectable, not just the radio button
-    oTable.attachItemPress(function (oEvent) {
-        oTable.setSelectedItem(oEvent.getParameter("listItem"));
-    });
-            return sap.ui.core.UIComponent.getRouterFor(this);
+    // // Make the whole row selectable, not just the radio button
+    // oTable.attachItemPress(function (oEvent) {
+    //     oTable.setSelectedItem(oEvent.getParameter("listItem"));
+    // });
+    //         return sap.ui.core.UIComponent.getRouterFor(this);
             
         },
 
@@ -121,10 +121,10 @@ onEditFacilitySave: function () {
     const oView = this.getView();
     const oHostelModel = oView.getModel("HostelModel");
     const oEditModel = oView.getModel("edit");
-    const oUpdatedData = oEditModel.getData();
+    const oUpdatedData = { ...oEditModel.getData() }; // shallow copy
     const oSelected = this._oSelectedFacility;
 
-    let aFacilities = oHostelModel.getProperty("/AllSelectedFacilities") || [];
+    let aFacilities = [...(oHostelModel.getProperty("/AllSelectedFacilities") || [])];
     const iIndex = aFacilities.findIndex(facility => facility === oSelected);
 
     if (iIndex === -1) {
@@ -132,53 +132,68 @@ onEditFacilitySave: function () {
         return;
     }
 
-    // Update the global facility with edited data
+    // ✅ Update the selected facility in global list (replace with copy)
     aFacilities[iIndex] = oUpdatedData;
     oHostelModel.setProperty("/AllSelectedFacilities", aFacilities);
 
-    // Update the overall start and end dates based on all facilities
-    // Extract all start/end dates in "dd/MM/yyyy", convert to Date for comparison
-    let aStartDates = aFacilities.map(fac => fac.StartDate).filter(Boolean);
-    let aEndDates = aFacilities.map(fac => fac.EndDate).filter(Boolean);
-
-    const formatDateForCompare = (sDate) => new Date(sDate.split("/").reverse().join("-")); // "dd/MM/yyyy" to Date
-
-    const minStartDateObj = aStartDates.length > 0 ? new Date(Math.min(...aStartDates.map(formatDateForCompare))) : null;
-    const maxEndDateObj = aEndDates.length > 0 ? new Date(Math.max(...aEndDates.map(formatDateForCompare))) : null;
-
-    if (minStartDateObj) {
-        oHostelModel.setProperty("/StartDate", this._formatDateToDDMMYYYY(minStartDateObj));
-    }
-    if (maxEndDateObj) {
-        oHostelModel.setProperty("/EndDate", this._formatDateToDDMMYYYY(maxEndDateObj));
-    }
-
-    // Now update corresponding PersonFacilitiesSummary per person
+    // ✅ Update each person's facility summary
     const aPersons = oHostelModel.getProperty("/Persons") || [];
     aPersons.forEach((oPerson, iIndex) => {
-        // Filter facilities in global list by person name
-        const aPersonFacilitiesSummary = aFacilities.filter(
-            item => item.PersonName === (oPerson.FullName || `Person ${iIndex + 1}`)
-        );
-        oHostelModel.setProperty(`/Persons/${iIndex}/PersonFacilitiesSummary`, aPersonFacilitiesSummary);
+        const personName = oPerson.FullName || `Person ${iIndex + 1}`;
+        const aPersonFacilities = aFacilities.filter(f => f.PersonName === personName);
+        oHostelModel.setProperty(`/Persons/${iIndex}/PersonFacilitiesSummary`, aPersonFacilities);
+        oHostelModel.setProperty(`/Persons/${iIndex}/AllSelectedFacilities`, aPersonFacilities);
     });
 
-    // Recalculate totals based on updated AllSelectedFacilities and updated dates, rent price
-    const sStartDate = oHostelModel.getProperty("/StartDate");
-    const sEndDate = oHostelModel.getProperty("/EndDate");
-    const roomRentPrice = oHostelModel.getProperty("/Price");
+    // ✅ Recalculate start/end range across all facilities
+    const parseDDMMYYYY = sDate => new Date(sDate.split("/").reverse().join("-"));
+    const allStartDates = aFacilities.map(f => parseDDMMYYYY(f.StartDate));
+    const allEndDates = aFacilities.map(f => parseDDMMYYYY(f.EndDate));
 
-    const totals = this.calculateTotals(aPersons, sStartDate, sEndDate, roomRentPrice);
-    if (totals) {
-        oHostelModel.setProperty("/TotalDays", totals.TotalDays);
-        oHostelModel.setProperty("/TotalFacilityPrice", totals.TotalFacilityPrice);
-        oHostelModel.setProperty("/GrandTotal", totals.GrandTotal);
+    if (allStartDates.length) {
+        const minStart = new Date(Math.min(...allStartDates));
+        oHostelModel.setProperty("/StartDate", this._formatDateToDDMMYYYY(minStart));
+    }
+    if (allEndDates.length) {
+        const maxEnd = new Date(Math.max(...allEndDates));
+        oHostelModel.setProperty("/EndDate", this._formatDateToDDMMYYYY(maxEnd));
     }
 
-    oHostelModel.refresh(true);
+    // ✅ Recalculate totals
+    const sStartDate = oHostelModel.getProperty("/StartDate");
+    const sEndDate = oHostelModel.getProperty("/EndDate");
+    const roomRentPrice = parseFloat(oHostelModel.getProperty("/Price")) || 0;
+
+    const totals = this.calculateTotals(aPersons, sStartDate, sEndDate, roomRentPrice);
+   if (totals) {
+    // Global totals
+    oHostelModel.setProperty("/TotalDays", totals.TotalDays);
+    oHostelModel.setProperty("/TotalFacilityPrice", totals.TotalFacilityPrice);
+    oHostelModel.setProperty("/GrandTotal", totals.GrandTotal);
+
+    // ✅ Per-person recalculation
+    const roomRentPrice = parseFloat(oHostelModel.getProperty("/Price")) || 0;
+    aPersons.forEach((oPerson, iIndex) => {
+        const aFacilities = oPerson.AllSelectedFacilities || [];
+        const iFacilityTotal = aFacilities.reduce((sum, f) => {
+            const iPrice = parseFloat(f.Price) || 0;
+            const iDays = parseFloat(f.TotalDays) || 0;
+            return sum + (iPrice * iDays);
+        }, 0);
+        const iGrandTotal = roomRentPrice + iFacilityTotal;
+        oHostelModel.setProperty(`/Persons/${iIndex}/TotalFacilityPrice`, iFacilityTotal);
+        oHostelModel.setProperty(`/Persons/${iIndex}/GrandTotal`, iGrandTotal);
+    });
+}
+
+
+    // ✅ Instead of refresh(true) — rebind items properly
     const oTable = oView.byId("idFacilityRoomTable");
     if (oTable) {
-        oTable.removeSelections();
+        const oBinding = oTable.getBinding("items");
+        if (oBinding) {
+            oBinding.refresh(); // triggers re-render with new data
+        }
     }
 
     this.onEditDialogClose();
