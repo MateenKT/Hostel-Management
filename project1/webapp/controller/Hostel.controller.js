@@ -839,7 +839,7 @@ sap.ui.define([
                         template: new sap.m.Image({
                             src: "{HostelModel>}",
                             width: "100%",
-                            height: "250px",
+                            // height: "250px",
                             densityAware: false,
                             decorative: false
                         }).addStyleClass("roomCarouselImage")

@@ -859,7 +859,6 @@
   font-weight: bold !important;
 }
 
-/* 📱 Responsive rule: Resize button to 50% on small screens */
 @media only screen and (max-width: 600px) {
   .myCustomButton {
     width: 50% !important;
@@ -903,10 +902,6 @@
 }
 
 
-/* ============================================
-   ROOM DETAILS – MODERN PREMIUM THEME
-   ============================================ */
-
 /* Dialog Styling */
 .customHeaderColor .sapMBar,
 .customHeaderColor .sapMDialogScrollCont {
@@ -939,9 +934,6 @@
     background-color: #e7fbff !important;
 }
 
-/* ============================================
-   TILES – PRICING PLANS
-   ============================================ */
 .sapMGT {
     background: #ffffff !important;
     color: #008c9e !important;
@@ -949,10 +941,8 @@
     padding: 10px;
     transition: all .25s ease;
     
-    /* --- YAHAN BADLAV KIYA GAYA HAI --- */
-    border: 1px solid #e0e0e0; /* Subtle light gray border */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Light, gentle shadow */
-    /* ------------------------------------- */
+    border: 1px solid #e0e0e0; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .sapMGT:hover {
@@ -967,7 +957,7 @@
     color: white !important;
     transform: scale(1.06);
     box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-    border: none !important; /* Keep the selected tile bold and without border */
+    border: none !important; 
 }
 
 /* Selected Tile */
@@ -981,23 +971,20 @@
 }
 
 
-/* ============================================
-   CAROUSEL – PREMIUM LOOK
-   ============================================ */
 
 
 .roomCarouselImage img,
 .roomCarouselImage {
   object-fit: cover;
   width: 100%;
-  height: 400px; /* Changed from 250px */
+  height: 400px; 
   border-radius: 8px;
 }
 
 /* Main Carousel container */
 .roomCarouselImage {
-  height: 400px !important; /* Changed from 320px */
-  max-height: 400px !important; /* Changed from 320px */
+  height: 400px !important; 
+  max-height: 400px !important;
   width: 650px !important;
   border-radius: 10px;
   overflow: hidden;
@@ -1009,35 +996,33 @@
 .roomCarouselImage .sapMCrslInner,
 .roomCarouselImage .sapMCrslItem,
 .roomCarouselImage .sapMCrslItem img {
-  height: 400px !important; /* Changed from 320px */
-  max-height: 400px !important; /* Changed from 320px */
+  height: 400px !important; 
+  max-height: 400px !important; 
   width: 650px !important;
   object-fit: cover !important;
 }
 
-/* Reduce gap below page indicators */
+
 .roomCarouselImage .sapMCrslBulleted {
   margin-bottom: 0 !important;
 }
 
-/* Remove internal padding */
+
 .roomCarouselImage .sapMCrsl {
   padding: 0 !important;
 }
 
-/* Responsive scaling for mobile (Optional: aap isko bhi adjust kar sakte ho) */
 @media (max-width: 768px) {
   .roomCarouselImage,
   .roomCarouselImage .sapMCrslInner,
   .roomCarouselImage .sapMCrslItem,
   .roomCarouselImage .sapMCrslItem img {
-    height: 250px !important; /* Mobile height ko adjust kiya (example ke liye 250px) */
-    max-height: 250px !important; /* Mobile max-height ko adjust kiya (example ke liye 250px) */
+    height: 250px !important; 
+    max-height: 250px !important; 
   }
 }
-/* ============================================
-   NO IMAGE PLACEHOLDER
-   ============================================ */
+
+
 
 .noImagePlaceholder {
     height: 250px;
@@ -1053,9 +1038,6 @@
     opacity: 0.9;
 }
 
-/* ============================================
-   FACILITIES PANEL
-   ============================================ */
 
 .customHeaderColor .sapMPanelHdr {
     background: linear-gradient(135deg, #00b7c7, #007984) !important;
