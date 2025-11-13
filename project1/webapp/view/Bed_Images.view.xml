@@ -167,7 +167,7 @@
                     <subSections>
                         <ObjectPageSubSection id="POO_Purchaseordersection">
                             <blocks>
-                   <m:HBox 
+                             <m:HBox
     id="idImagesContainer"
     wrap="true"
     justifyContent="Start"
@@ -179,8 +179,8 @@
         class="sapUiSmallMarginEnd"
         width="150px"
         alignItems="Center"
+        justifyContent="Center"
     >
-
         <!-- Normal Image Display -->
         <m:Image
             src="{DisplayImagesModel>src}"
@@ -190,8 +190,17 @@
             visible="{= ${DisplayImagesModel>isPlaceholder} === false }"
         />
 
-        <!-- “+” Add Box (visible only for placeholder) -->
-          <u:FileUploader
+        <!-- Placeholder Box (visible only when no image) -->
+        <m:VBox
+            visible="{= ${DisplayImagesModel>isPlaceholder} === true &amp;&amp; ${editable>/Edit} === true }"
+            width="120px"
+            height="120px"
+            alignItems="Center"
+            justifyContent="Center"
+          
+                     class="placeholderBox"
+        >
+            <u:FileUploader
             id="fileUploader"
             icon="sap-icon://add"
             width="120px"
@@ -203,6 +212,9 @@
             visible="{= ${DisplayImagesModel>isPlaceholder} === true &amp;&amp; ${editable>/Edit} === true }"
             change=".onFileSelected"
         />
+        </m:VBox>
+
+       
 
         <!-- File name -->
         <m:Text
@@ -212,7 +224,7 @@
             visible="{= ${DisplayImagesModel>isPlaceholder} === false }"
         />
 
-        <!-- Delete icon (visible only in Edit mode and not for placeholder) -->
+        <!-- Delete icon -->
         <m:Button
             icon="sap-icon://delete"
             type="Reject"

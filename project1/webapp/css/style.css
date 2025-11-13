@@ -1067,4 +1067,14 @@
     margin-left: auto;
     margin-right: auto;
 }
+.placeholderBox {
+    border: 2px solid black;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
 
+.placeholderBox:hover {
+    background-color: #f4f4f4;
+    border-color: #000000;
+}

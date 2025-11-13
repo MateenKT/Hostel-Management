@@ -1,15 +1,21 @@
 <c:FragmentDefinition
-	xmlns="sap.m"
-	xmlns:c="sap.ui.core"
-	xmlns:f="sap.ui.layout.form"
-	xmlns:core="sap.ui.core"
-	xmlns:u="sap.ui.unified">
-	<Dialog
+    xmlns="sap.m"
+    xmlns:c="sap.ui.core"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:core="sap.ui.core"
+    xmlns:u="sap.ui.unified"
+>
+    <Dialog
         id="sds12"
         title="Bed Details"
         type="Message"
-        class="sapUiContentPadding"  resizable="true" draggable="true" contentHeight="auto" contentWidth="40%" >
-		<f:SimpleForm
+        class="sapUiContentPadding"
+        resizable="true"
+        draggable="true"
+        contentHeight="auto"
+        contentWidth="40%"
+    >
+        <f:SimpleForm
             editable="true"
             layout="ResponsiveGridLayout"
             labelSpanXL="4"
@@ -18,42 +24,114 @@
             labelSpanS="12"
             columnsXL="2"
             columnsL="2"
-            columnsM="1">
-			<f:content>
-             <!-- Branch Code -->
-				<Label text="Branch Code" required="true"/>
-				<ComboBox id="idRoomType12"  placeholder="Select branch Code" selectedKey="{BedModel>/BranchCode}"
-                items="{BranchModel>/}"  change="onbranchChange"  showSecondaryValues="true" valueStateText="Select Branch Code">
-				<core:ListItem key="{BranchModel>BranchID}" text="{BranchModel>BranchID}"  additionalText="{BranchModel>Name}"/>
-				</ComboBox>
-                 <!-- Bed Type -->
-				<Label text="Bed Type" required="true"/>
-				<Input id="idBedType" value="{BedModel>/Name}" placeholder="Enter Bed Type" maxLength="60"
-                liveChange="onNameInputLiveChange" valueStateText="Enter Bed Type"/>
-                 <!-- Room Type -->
-				<Label text="Room Type" required="true"/>
-				<ComboBox id="idRoomtype" placeholder="Select Room type" selectedKey="{BedModel>/ACType}"
-                change="onbranchChange" valueStateText="Select Room Type">
-					<core:ListItem key="AC" text="AC"/>
-					<core:ListItem key="Non-Ac" text="Non-Ac"/>
-				</ComboBox>
-                 <!-- No Of Person -->
-				<Label text="No Of Person" required="true"/>
-				<Input id="idR" value="{BedModel>/NoOfPerson}" placeholder="Enter No Of Beds" liveChange="onNameInputLiveChange"
-                type="Number" valueStateText="Enter No of person"/>
-                 <!-- No of rooms -->
-				<Label text="No Of Rooms" required="true"/>
-				<Input id="id_MaxBeds" value="{BedModel>/MaxBeds}" placeholder="Enter No Of Beds"
-                liveChange="onNameInputLiveChange" type="Number" valueStateText="Enter Max no of Beds"/>
-                 <!-- Description -->
-				<Label text="Description" required="true"/>
-				<TextArea id="id_Description" value="{BedModel>/Description}" placeholder="Enter No Of Description"
-                liveChange="onNameInputLiveChange" valueStateText="Enter Description" maxLength="100"/>
-				<!-- Upload -->
-				<Label text="Add Image" required="true" />
-				<HBox alignItems="Center" width="100%" renderType="Bare">
-					<VBox width="25%">
-						<u:FileUploader
+            columnsM="1"
+        >
+            <f:content>
+                <!-- Branch Code -->
+                <Label
+                    text="Branch Code"
+                    required="true"
+                />
+                <ComboBox
+                    id="idRoomType12"
+                    placeholder="Select branch Code"
+                    selectedKey="{BedModel>/BranchCode}"
+                    items="{BranchModel>/}"
+                    change="onbranchChange"
+                    showSecondaryValues="true"
+                    valueStateText="Select Branch Code"
+                >
+                    <core:ListItem
+                        key="{BranchModel>BranchID}"
+                        text="{BranchModel>BranchID} - {BranchModel>Name}"
+                        additionalText="{BranchModel>City}"
+                    />
+                </ComboBox>
+                <!-- Bed Type -->
+                <Label
+                    text="Bed Type"
+                    required="true"
+                />
+                <Input
+                    id="idBedType"
+                    value="{BedModel>/Name}"
+                    placeholder="Enter Bed Type"
+                    maxLength="60"
+                    liveChange="onNameInputLiveChange"
+                    valueStateText="Enter Bed Type"
+                />
+                <!-- Room Type -->
+                <Label
+                    text="Room Type"
+                    required="true"
+                />
+                <ComboBox
+                    id="idRoomtype"
+                    placeholder="Select Room type"
+                    selectedKey="{BedModel>/ACType}"
+                    change="onbranchChange"
+                    valueStateText="Select Room Type"
+                >
+                    <core:ListItem
+                        key="AC"
+                        text="AC"
+                    />
+                    <core:ListItem
+                        key="Non-Ac"
+                        text="Non-Ac"
+                    />
+                </ComboBox>
+                <!-- No Of Person -->
+                <Label
+                    text="No Of Person"
+                    required="true"
+                />
+                <Input
+                    id="idR"
+                    value="{BedModel>/NoOfPerson}"
+                    placeholder="Enter No Of Beds"
+                    liveChange="onNameInputLiveChange"
+                    type="Number"
+                    valueStateText="Enter No of person"
+                />
+                <!-- No of rooms -->
+                <Label
+                    text="No Of Rooms"
+                    required="true"
+                />
+                <Input
+                    id="id_MaxBeds"
+                    value="{BedModel>/MaxBeds}"
+                    placeholder="Enter No Of Beds"
+                    liveChange="onNameInputLiveChange"
+                    type="Number"
+                    valueStateText="Enter Max no of Beds"
+                />
+                <!-- Description -->
+                <Label
+                    text="Description"
+                    required="true"
+                />
+                <TextArea
+                    id="id_Description"
+                    value="{BedModel>/Description}"
+                    placeholder="Enter No Of Description"
+                    liveChange="onNameInputLiveChange"
+                    valueStateText="Enter Description"
+                    maxLength="100"
+                />
+                <!-- Upload -->
+                <Label
+                    text="Add Image"
+                    required="true"
+                />
+                <HBox
+                    alignItems="Center"
+                    width="100%"
+                    renderType="Bare"
+                >
+                    <VBox width="25%">
+                        <u:FileUploader
                             id="BT_id_FileUploader"
                             fileSizeExceed="onFileSizeExceeds"
                             maximumFileSize="5MB"
@@ -66,34 +144,51 @@
                             buttonText="Upload Images"
                             multiple="true"
                             uploadOnChange="false"
-                            tooltip="Only JPG, PNG, or PDF files under 5MB allowed"/>
-					</VBox>
-					<!-- Tokenizer -->
-					<VBox width="75%">
-						<ScrollContainer
+                            tooltip="Only JPG, PNG, or PDF files under 5MB allowed"
+                        />
+                    </VBox>
+                    <!-- Tokenizer -->
+                    <VBox width="75%">
+                        <ScrollContainer
                             height="70px"
                             width="100%"
                             horizontal="false"
-                            vertical="true">
-							<Tokenizer
+                            vertical="true"
+                        >
+                            <Tokenizer
                                 id="BD_id_TokenList"
                                 width="100%"
                                 tokenDelete="onTokenDelete"
                                 tokens="{tokenModel>/tokens}"
                             >
-								<Token key="{tokenModel>key}" text="{tokenModel>text}" />
-							</Tokenizer>
-						</ScrollContainer>
-					</VBox>
-				</HBox>
-			</f:content>
-		</f:SimpleForm>
-		<footer>
-			<Toolbar>
-				<ToolbarSpacer />
-				<Button text="Save" press="BT_onsavebuttonpress" type="Accept" id="AR_id_saveButton" class="marginRight"/>
-				<Button text="Cancel" press="BT_onCancelButtonPress" type="Reject" id="AR_id_CancelButton" class="marginRight"/>
-			</Toolbar>
-		</footer>
-	</Dialog>
+                                <Token
+                                    key="{tokenModel>key}"
+                                    text="{tokenModel>text}"
+                                />
+                            </Tokenizer>
+                        </ScrollContainer>
+                    </VBox>
+                </HBox>
+            </f:content>
+        </f:SimpleForm>
+        <footer>
+            <Toolbar>
+                <ToolbarSpacer />
+                <Button
+                    text="Save"
+                    press="BT_onsavebuttonpress"
+                    type="Accept"
+                    id="AR_id_saveButton"
+                    class="marginRight"
+                />
+                <Button
+                    text="Cancel"
+                    press="BT_onCancelButtonPress"
+                    type="Reject"
+                    id="AR_id_CancelButton"
+                    class="marginRight"
+                />
+            </Toolbar>
+        </footer>
+    </Dialog>
 </c:FragmentDefinition>

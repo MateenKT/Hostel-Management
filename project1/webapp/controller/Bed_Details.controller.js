@@ -128,7 +128,7 @@ sap.ui.define([
                const oData = {
                     data: {
                         Name: Payload.Name,
-                        BranchCode: Payload.BranchCode,
+                        BranchCode: Payload.BranchCode.split('-')[0],
                         ACType: Payload.ACType,
                         NoOfPerson: Payload.NoOfPerson,
                         MaxBeds: Payload.MaxBeds,

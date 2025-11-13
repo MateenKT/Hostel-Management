@@ -140,8 +140,9 @@
 					<subSections>
 						<ObjectPageSubSection id="FD_id_ordersection">
 							<blocks>
-								<m:HBox
-    id="FD_id_ImagesContainer"
+								    <m:HBox
+    id="idImagesContainer"
+    wrap="true"
     justifyContent="Start"
     alignItems="Start"
     class="sapUiSmallMargin"
@@ -151,8 +152,8 @@
         class="sapUiSmallMarginEnd"
         width="150px"
         alignItems="Center"
+        justifyContent="Center"
     >
- 
         <!-- Normal Image Display -->
         <m:Image
             src="{DisplayImagesModel>src}"
@@ -161,9 +162,19 @@
             press="onImagePress"
             visible="{= ${DisplayImagesModel>isPlaceholder} === false }"
         />
- 
-        <u:FileUploader
-            id="FD_id_fileUploader"
+
+        <!-- Placeholder Box (visible only when no image) -->
+        <m:VBox
+            visible="{= ${DisplayImagesModel>isPlaceholder} === true &amp;&amp; ${editable>/Edit} === true }"
+            width="120px"
+            height="120px"
+            alignItems="Center"
+            justifyContent="Center"
+          
+                     class="placeholderBox"
+        >
+            <u:FileUploader
+            id="fileUploader"
             icon="sap-icon://add"
             width="120px"
             style="Transparent"
@@ -171,11 +182,13 @@
             placeholder=" "
             buttonOnly="true"
             sameFilenameAllowed="true"
-             visible="{= ${editable>/Edit} === true  &amp;&amp; ${DisplayImagesModel>/CanAddMore} === true  &amp;&amp; ${DisplayImagesModel>isPlaceholder} === true }"
+            visible="{= ${DisplayImagesModel>isPlaceholder} === true &amp;&amp; ${editable>/Edit} === true }"
             change=".onFileSelected"
-
         />
- 
+        </m:VBox>
+
+       
+
         <!-- File name -->
         <m:Text
             text="{DisplayImagesModel>fileName}"
@@ -183,8 +196,8 @@
             wrapping="true"
             visible="{= ${DisplayImagesModel>isPlaceholder} === false }"
         />
- 
-        <!-- Delete icon (visible only in Edit mode and not for placeholder) -->
+
+        <!-- Delete icon -->
         <m:Button
             icon="sap-icon://delete"
             type="Reject"

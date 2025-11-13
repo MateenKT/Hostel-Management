@@ -31,8 +31,8 @@ sap.ui.define([
             });
             this.getView().setModel(model, "RoomModel")
 
-            this.Onsearch()
-            this.BedTypedetails()
+            await  this.Onsearch()
+            await this.BedTypedetails()
             await this.ajaxReadWithJQuery("Currency", "").then((oData) => {
                 var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
                 var model = new JSONModel(oFCIAerData);

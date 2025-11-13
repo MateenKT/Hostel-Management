@@ -54,21 +54,47 @@ sap.ui.define([
             sap.ui.core.BusyIndicator.hide();
         },
 
-        BI_onEditButtonPress: function() {
-            const oView = this.getView();
-            oView.getModel("editable").setProperty("/Edit", true);
-            const oDisplayModel = oView.getModel("DisplayImagesModel");
-            if (!oDisplayModel) return;
-            const aImages = oDisplayModel.getProperty("/DisplayImages") || [];
-            const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
-            oDisplayModel.setProperty("/CanAddMore", realImagesCount < 3);
-            if (realImagesCount < 3 && !aImages.some(img => img.isPlaceholder)) {
-                aImages.push({
-                    isPlaceholder: true
-                });
-                oDisplayModel.setProperty("/DisplayImages", aImages);
-            }
-        },
+        // BI_onEditButtonPress: function() {
+        //     const oView = this.getView();
+        //     oView.getModel("editable").setProperty("/Edit", true);
+        //     const oDisplayModel = oView.getModel("DisplayImagesModel");
+        //     if (!oDisplayModel) return;
+        //     const aImages = oDisplayModel.getProperty("/DisplayImages") || [];
+        //     const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
+        //     oDisplayModel.setProperty("/CanAddMore", realImagesCount < 3);
+        //     if (realImagesCount < 3 && !aImages.some(img => img.isPlaceholder)) {
+        //         aImages.push({
+        //             isPlaceholder: true
+        //         });
+        //         oDisplayModel.setProperty("/DisplayImages", aImages);
+        //     }
+        // },
+          BI_onEditButtonPress: function () {
+    const oView = this.getView();
+    oView.getModel("editable").setProperty("/Edit", true);
+
+    const oModel = oView.getModel("DisplayImagesModel");
+    let aImages = oModel.getProperty("/DisplayImages") || [];
+
+    // Count actual images (non-placeholder)
+    const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
+              oModel.setProperty("/CanAddMore", realImagesCount < 3);
+
+    // Decide how many placeholders to show
+    const maxImages = 3; // total slots to show
+    let placeholdersNeeded = maxImages - realImagesCount;
+
+    // Remove existing placeholders
+    aImages = aImages.filter(img => !img.isPlaceholder);
+
+    // Add required placeholders
+    for (let i = 0; i < placeholdersNeeded; i++) {
+        aImages.push({ isPlaceholder: true });
+    }
+
+    // Update the model
+    oModel.setProperty("/DisplayImages", aImages);
+},
 
         BI_onButtonPress: function() {
             var oRouter = this.getOwnerComponent().getRouter();
@@ -105,23 +131,51 @@ sap.ui.define([
             if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
         },
 
-        onDeleteImage: function(oEvent) {
-            const oContext = oEvent.getSource().getBindingContext("DisplayImagesModel");
-            if (!oContext) return;
+        // onDeleteImage: function(oEvent) {
+        //     const oContext = oEvent.getSource().getBindingContext("DisplayImagesModel");
+        //     if (!oContext) return;
 
-            const sFileName = oContext.getProperty("fileName");
-            const oModel = this.getView().getModel("DisplayImagesModel");
-            let aImages = oModel.getProperty("/DisplayImages") || [];
-            aImages = aImages.filter(img => img.fileName !== sFileName);
-            const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
-            if (realImagesCount < 3 && !aImages.some(img => img.isPlaceholder)) {
-                aImages.push({
-                    isPlaceholder: true
-                });
-            }
-            oModel.setProperty("/DisplayImages", aImages);
-            oModel.setProperty("/CanAddMore", realImagesCount < 3);
-        },
+        //     const sFileName = oContext.getProperty("fileName");
+        //     const oModel = this.getView().getModel("DisplayImagesModel");
+        //     let aImages = oModel.getProperty("/DisplayImages") || [];
+        //     aImages = aImages.filter(img => img.fileName !== sFileName);
+        //     const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
+        //     if (realImagesCount < 3 && !aImages.some(img => img.isPlaceholder)) {
+        //         aImages.push({
+        //             isPlaceholder: true
+        //         });
+        //     }
+        //     oModel.setProperty("/DisplayImages", aImages);
+        //     oModel.setProperty("/CanAddMore", realImagesCount < 3);
+        // },
+            onDeleteImage: function (oEvent) {
+    const oContext = oEvent.getSource().getBindingContext("DisplayImagesModel");
+    const sFileName = oContext.getProperty("fileName");
+    const oModel = this.getView().getModel("DisplayImagesModel");
+    let aImages = oModel.getProperty("/DisplayImages") || [];
+
+    // Remove the deleted image
+    aImages = aImages.filter(img => img.fileName !== sFileName);
+
+    // Count non-placeholder images
+    const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
+
+    // Decide how many placeholders are needed to reach 5 slots
+    const maxImages = 3;
+    let placeholdersNeeded = maxImages - realImagesCount;
+
+    // Remove existing placeholders
+    aImages = aImages.filter(img => !img.isPlaceholder);
+
+    // Add required placeholders
+    for (let i = 0; i < placeholdersNeeded; i++) {
+        aImages.push({ isPlaceholder: true });
+    }
+
+    // Update the model
+    oModel.setProperty("/DisplayImages", aImages);
+     oModel.setProperty("/CanAddMore", realImagesCount < 3);
+},
 
         onFileSelected: function(oEvent) {
             const oFileUploader = oEvent.getSource();
@@ -308,6 +362,52 @@ sap.ui.define([
             } finally {
                 sap.ui.core.BusyIndicator.hide();
             }
-        }
+        },
+     onImagePress: function (oEvent) {
+    var oSource = oEvent.getSource(); // the clicked image
+    var sImageSrc = oSource.getSrc(); // get the image src
+
+    // Get the filename from binding context if available
+    var oContext = oSource.getBindingContext("DisplayImagesModel");
+    var sFileName = oContext ? oContext.getProperty("fileName") : "Image Preview";
+
+    // Check if dialog already exists
+    if (!this._oImageDialog) {
+        this._oImageDialog = new sap.m.Dialog({
+            title: sFileName, // set dynamic title
+            contentWidth: "80%",
+            contentHeight: "80%",
+            resizable: true,
+            draggable: true,
+            content: [
+                new sap.m.Image({
+                    id: this.createId("previewImage"),
+                    width: "100%",
+                    height: "100%",
+                    densityAware: false
+                })
+            ],
+            beginButton: new sap.m.Button({
+                text: "Close",
+                press: function () {
+                    this._oImageDialog.close();
+                }.bind(this)
+            })
+        });
+
+        // Add dialog to the view for lifecycle handling
+        this.getView().addDependent(this._oImageDialog);
+    } else {
+        // If dialog already exists, update the title dynamically
+        this._oImageDialog.setTitle(sFileName);
+    }
+
+    // Set the image source dynamically
+    this.byId("previewImage").setSrc(sImageSrc);
+
+    // Open the dialog
+    this._oImageDialog.open();
+}
+
     });
 });

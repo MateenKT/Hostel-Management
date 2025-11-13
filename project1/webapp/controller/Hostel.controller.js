@@ -79,7 +79,7 @@ sap.ui.define([
                 const oBRModel = oView.getModel("sBRModel");
                 if (oBRModel && oBRModel.getData) {
                     const oModelData = oBRModel.getData();
-                    const aFiltered = oModelData.filter(item => item.Name === "Kalaburagi");
+                    const aFiltered = oModelData.filter(item => item.Name === "Kalaburgi");
                     oView.setModel(new sap.ui.model.json.JSONModel(aFiltered), "AreaModel");
                     oView.byId("id_Area").setEnabled(true);
                 } else {
