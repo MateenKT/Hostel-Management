@@ -882,160 +882,200 @@
 
 
 
+.barheader,
+.barheader .sapMBar,
+.barheader .sapMBarRight,
+.barheader .sapMBarMiddle,
+.barheader .sapMBarLeft {
+    background: linear-gradient(135deg, #00b7c7, #008b96) !important;
+    color: white !important;
+}
+
+.barheader .sapMText,
+.barheader .sapMLabel,
+.barheader .sapMBarRight button,
+.barheader .sapMBarMiddle button {
+    color: white !important;
+}
+
+.barheader .sapMBtnInner {
+    color: white !important;
+}
 
 
+/* ============================================
+   ROOM DETAILS – MODERN PREMIUM THEME
+   ============================================ */
 
-
-
-
-/* Apply a uniform blue background to the entire dialog */
-.customHeaderColor .sapMDialogScrollCont,
-.customHeaderColor .sapMDialogSection,
-.customHeaderColor,
+/* Dialog Styling */
 .customHeaderColor .sapMBar,
-.customHeaderColor .sapMPanelHdr,
-.customHeaderColor .sapMPanelContent,
-.customHeaderColor .sapMList,
-.customHeaderColor .sapMListBgTransparent,
-.customHeaderColor .sapMPanel,
-.customHeaderColor .sapMPanelExpandablePart {
-    background-color: #00a9b9 !important;  /* Bright teal-blue shade */
+.customHeaderColor .sapMDialogScrollCont {
+    background: linear-gradient(135deg, #00b7c7, #008b96) !important;
     color: white !important;
 }
 
-/* Force text elements to appear white for readability */
-.customHeaderColor .sapMText,
-.customHeaderColor .sapMTitle,
-.customHeaderColor .sapMLabel,
-.customHeaderColor .sapMBarText,
-.customHeaderColor .sapMObjectAttributeTitle,
-.customHeaderColor .sapMObjectAttributeText {
-    color: white !important;
+.customHeaderColor .sapMDialog {
+    border-radius: 14px !important;
+    overflow: hidden !important;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.25) !important;
 }
 
-/* Button styling to match blue theme */
+/* Title Texts */
+.customTitleColor {
+    color: #008c9e !important;
+    font-weight: 600;
+}
+
+/* Buttons */
 .customHeaderColor .sapMBtnInner {
     background-color: white !important;
-    color: #008C9E !important;
-    border: none !important;
-    font-weight: bold;
+    color: #008c9e !important;
+    border-radius: 8px !important;
+    padding: 0.65rem 1.2rem !important;
+    font-weight: 600;
 }
 
-.customHeaderColor .sapMBtn:hover .sapMBtnInner {
-    background-color: #b2f0ff !important;
+.customHeaderColor .sapMBtnInner:hover {
+    background-color: #e7fbff !important;
 }
 
-/* Optional: Remove white edges or dialog shadow if visible */
-.customHeaderColor .sapMDialog {
-    box-shadow: none !important;
-    border: none !important;
-}
-
-/* Tile consistency */
-.customHeaderColor .sapMGT {
-    background-color: #00b7c7 !important;
-    color: white !important;
-    border-radius: 12px;
-}
-
-/* Facilities list alignment */
-.customHeaderColor .sapMCustomListItem {
-    background-color: transparent !important;
-}
-/* Base tile style (for consistency) */
-.customHeaderColor .sapMGT {
-    background-color: #00b7c7 !important; /* normal blue */
-    color: white !important;
-    border-radius: 12px;
-    transition: all 0.2s ease-in-out;
-}
-
-/* Add hover effect for better UX */
-.customHeaderColor .sapMGT:hover {
-    transform: scale(1.02);
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
-}
-
-/* Selected tile state */
-.tileSelected {
-    background-color: #ffffff !important;       /* white tile */
-    color: #00a9b9 !important;                  /* blue text */
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.6);
-    transform: scale(1.05);
-    border: 2px solid #ffffff !important;
-}
-
-/* Ensure inner header/subheader texts flip color too */
-.tileSelected .sapMGTTitle,
-.tileSelected .sapMGTSubHdrTxt {
-    color: #00a9b9 !important;
-}
-
-
-
+/* ============================================
+   TILES – PRICING PLANS
+   ============================================ */
 .sapMGT {
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+    background: #ffffff !important;
+    color: #008c9e !important;
+    border-radius: 14px !important;
+    padding: 10px;
+    transition: all .25s ease;
+    
+    /* --- YAHAN BADLAV KIYA GAYA HAI --- */
+    border: 1px solid #e0e0e0; /* Subtle light gray border */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); /* Light, gentle shadow */
+    /* ------------------------------------- */
 }
 
-.selectedTile {
-    transform: scale(1.10); /* 10% bigger */
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
-    border: 2px solid #ffffff !important;
-    background: linear-gradient(145deg, #00b7c7, #007c8a) !important;
-    color: #ffffff !important;
-}
-
-/* Ensure text remains white and clean */
-.selectedTile .sapMGTTitle,
-.selectedTile .sapMGTSubHdrTxt {
-    color: #322c2c !important;
-}
 .sapMGT:hover {
-    transform: scale(1.10);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+}
+
+/* Selected Tile */
+.tileSelected,
+.selectedTile {
+    background: linear-gradient(135deg, #00b7c7, #007984) !important;
+    color: white !important;
+    transform: scale(1.06);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    border: none !important; /* Keep the selected tile bold and without border */
+}
+
+/* Selected Tile */
+.tileSelected,
+.selectedTile {
+    background: linear-gradient(135deg, #00b7c7, #007984) !important;
+    color: white !important;
+    transform: scale(1.06);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    border: none !important;
 }
 
 
-.noImagePlaceholder {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 250px;
-  width: 100%;
-  color: #fff;
-  font-weight: 600;
-  font-size: 1.2rem;
-  background: url("../image/no-image.png") center center / contain no-repeat,
-              rgba(0, 0, 0, 0.25);
-  background-blend-mode: overlay;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
-  animation: fadeIn 0.4s ease-in-out;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.profile-header-bg{
-  background-color: #009688;
-}
-
-.profile-sidebar{
-  background-color: #f5f5f5;
-  border-right: 2px;
-}
-
-.profile-contact-text {
-    color: #E0F2F1;
-}
+/* ============================================
+   CAROUSEL – PREMIUM LOOK
+   ============================================ */
 
 
 .roomCarouselImage img,
 .roomCarouselImage {
   object-fit: cover;
   width: 100%;
-  height: 250px;
+  height: 400px; /* Changed from 250px */
   border-radius: 8px;
+}
+
+/* Main Carousel container */
+.roomCarouselImage {
+  height: 400px !important; /* Changed from 320px */
+  max-height: 400px !important; /* Changed from 320px */
+  width: 650px !important;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 10px !important;
+  margin-bottom: 10px !important;
+}
+
+/* Override SAPUI5 inner layers */
+.roomCarouselImage .sapMCrslInner,
+.roomCarouselImage .sapMCrslItem,
+.roomCarouselImage .sapMCrslItem img {
+  height: 400px !important; /* Changed from 320px */
+  max-height: 400px !important; /* Changed from 320px */
+  width: 650px !important;
+  object-fit: cover !important;
+}
+
+/* Reduce gap below page indicators */
+.roomCarouselImage .sapMCrslBulleted {
+  margin-bottom: 0 !important;
+}
+
+/* Remove internal padding */
+.roomCarouselImage .sapMCrsl {
+  padding: 0 !important;
+}
+
+/* Responsive scaling for mobile (Optional: aap isko bhi adjust kar sakte ho) */
+@media (max-width: 768px) {
+  .roomCarouselImage,
+  .roomCarouselImage .sapMCrslInner,
+  .roomCarouselImage .sapMCrslItem,
+  .roomCarouselImage .sapMCrslItem img {
+    height: 250px !important; /* Mobile height ko adjust kiya (example ke liye 250px) */
+    max-height: 250px !important; /* Mobile max-height ko adjust kiya (example ke liye 250px) */
+  }
+}
+/* ============================================
+   NO IMAGE PLACEHOLDER
+   ============================================ */
+
+.noImagePlaceholder {
+    height: 250px;
+    width: 100%;
+    border-radius: 10px;
+    background: #e2f9ff;
+    color: #007c8a;
+    font-size: 1.2rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.9;
+}
+
+/* ============================================
+   FACILITIES PANEL
+   ============================================ */
+
+.customHeaderColor .sapMPanelHdr {
+    background: linear-gradient(135deg, #00b7c7, #007984) !important;
+    color: white !important;
+    font-weight: 600;
+    border-radius: 8px !important;
+}
+
+.customHeaderColor .sapMCustomListItem {
+    background: rgba(255,255,255,0.1) !important;
+    padding: 8px !important;
+    border-radius: 8px;
+}
+
+.customHeaderColor .sapMCustomListItem:hover {
+    background: rgba(255,255,255,0.2) !important;
+}
+
+/* Image in facilities */
+.customHeaderColor .sapMCustomListItem img {
+    border-radius: 8px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.15);
 }
