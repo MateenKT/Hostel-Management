@@ -544,74 +544,75 @@ sap.ui.define([
             );
         },
 
-        onConfirmBooking: function () {
-            const oView = this.getView();
-            const oLocalModel = oView.getModel("HostelModel"); // Local model bound to dialog
-            const oData = oLocalModel?.getData?.() || {};
+       onConfirmBooking: function () {
+    const oView = this.getView();
+    const oLocalModel = oView.getModel("HostelModel"); // Local model bound to dialog
+    const oData = oLocalModel?.getData?.() || {};
 
-            console.log("onConfirmBooking: HostelModel data:", oData);
+    if (!oData.SelectedPriceType || !oData.SelectedPriceValue) {
+        sap.m.MessageToast.show("Please select a pricing plan before booking.");
+        return;
+    }
 
-            // 1️⃣ Validate selection
-            if (!oData.SelectedPriceType || !oData.SelectedPriceValue) {
-                sap.m.MessageToast.show("Please select a pricing plan before booking.");
-                return;
-            }
+    // 1️⃣ Get or create global model
+    let oGlobalModel = sap.ui.getCore().getModel("HostelModel");
+    if (!oGlobalModel) {
+        oGlobalModel = new sap.ui.model.json.JSONModel({});
+        sap.ui.getCore().setModel(oGlobalModel, "HostelModel");
+    }
 
-            // 2️⃣ Retrieve or create global HostelModel
-            let oGlobalModel = sap.ui.getCore().getModel("HostelModel");
-            if (!oGlobalModel) {
-                oGlobalModel = new sap.ui.model.json.JSONModel({});
-                sap.ui.getCore().setModel(oGlobalModel, "HostelModel");
-            }
+    // 2️⃣ Build booking data
+    const oBookingData = {
+        BookingDate: new Date().toISOString(),
+        RoomNo: oData.RoomNo || "",
+        BedType: oData.BedType || "",
+        ACType: oData.ACType || "",
+        Capacity: parseInt(oData.Capacity) || 1,
+        Address: oData.Address || "",
+        Description: oData.Description || "",
+        BranchCode: oData.BranchCode || "",
+        SelectedPriceType: oData.SelectedPriceType,
+        FinalPrice: oData.SelectedPriceValue,
+        Source: "UI5_HostelApp",
+        Status: "Pending"
+    };
 
-            // 3️⃣ Construct clean booking payload
-            const oBookingData = {
-                BookingDate: new Date().toISOString(),
-                RoomNo: oData.RoomNo || "",
-                BedType: oData.BedType || "",
-                ACType: oData.ACType || "",
-                Capacity: oData.Capacity || "",
-                Address: oData.Address || "",
-                Description: oData.Description || "",
-                BranchCode: oData.BranchCode || "",
-                SelectedPriceType: oData.SelectedPriceType,
-                FinalPrice: oData.SelectedPriceValue,
-                Source: "UI5_HostelApp",
-                Status: "Pending"
-            };
+    // 3️⃣ Merge and clean
+    const oMergedData = {
+        ...oGlobalModel.getData(),
+        ...oBookingData
+    };
 
-            // 4️⃣ Merge data (only necessary info)
-            const oMergedData = {
-                ...oGlobalModel.getData(), // Keep global info like user details
-                ...oBookingData            // Overwrite with current booking info
-            };
+    delete oMergedData.Price;
+    delete oMergedData.MonthPrice;
+    delete oMergedData.YearPrice;
 
-            // 5️⃣ Remove unnecessary pricing keys
-            delete oMergedData.Price;
-            delete oMergedData.MonthPrice;
-            delete oMergedData.YearPrice;
+    // ✅ 4️⃣ Dynamically create dropdown items for Capacity
+    const iCapacity = oMergedData.Capacity || 1;
+    const aPersonsList = Array.from({ length: iCapacity }, (_, i) => ({
+        key: (i + 1).toString(),
+        text: (i + 1).toString()
+    }));
 
-            oGlobalModel.setData(oMergedData, true);
+    // Set dynamic list to model (for ComboBox binding)
+    oMergedData.NoOfPersonsList = aPersonsList;
 
-            // 6️⃣ Feedback for user
-            sap.m.MessageToast.show(
-                `Booking prepared for ${oData.BedType || "Room"} (${oData.SelectedPriceType} plan)`
-            );
+    //  Update global model
+    oGlobalModel.setData(oMergedData, true);
 
-            console.log("✅ Cleaned Global HostelModel:", oGlobalModel.getData());
+    sap.m.MessageToast.show(
+        `Booking prepared for ${oData.BedType || "Room"} (${oData.SelectedPriceType} plan)`
+    );
 
-            // 7️⃣ Clear dialog + close
-            this._clearRoomDetailDialog();
-            if (this._oRoomDetailFragment) this._oRoomDetailFragment.close();
+    // Close dialog
+    this._clearRoomDetailDialog();
+    if (this._oRoomDetailFragment) this._oRoomDetailFragment.close();
 
-            // 8️⃣ Navigate to booking route
-            const oRouter = this.getOwnerComponent().getRouter();
-            oRouter.navTo("RouteBookRoom");
-        },
-
-
-
-
+    // ✅ 6️⃣ Navigate to booking view
+    const oRouter = this.getOwnerComponent().getRouter();
+    oRouter.navTo("RouteBookRoom");
+}
+,
 
         BedTypedetails: async function () {
             try {
@@ -624,9 +625,6 @@ sap.ui.define([
                 console.error("❌ Failed to load BedType details:", err);
             }
         },
-
-
-
         _getBedTypeImages: async function (sBedTypeID) {
             try {
                 if (!sBedTypeID) {

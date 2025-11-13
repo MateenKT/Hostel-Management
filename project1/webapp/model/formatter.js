@@ -81,5 +81,11 @@ calculateDays: function(sStartDate, sEndDate) {
             const mb = bytes / (1024 * 1024);
             return mb.toFixed(2) + " MB";
         },  
+        minDate: function (sStartDate) {
+    if (!sStartDate) return null;
+    const [d, m, y] = sStartDate.split("/");
+    return new Date(`${y}-${m}-${d}`);
+}
+
    }
 });

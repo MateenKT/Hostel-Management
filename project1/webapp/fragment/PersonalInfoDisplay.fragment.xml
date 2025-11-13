@@ -108,6 +108,7 @@
                     path: 'HostelModel>TotalFacilityPrice',
                     formatter: '.Formatter.formatCurrency'
                 }" class="sapUiSmallMarginEnd"/>
+              
             </HBox>
             <HBox justifyContent="End" class="sapUiSmallMarginTop">
                 <Label text="Room Rent:" design="Bold" class="sapUiSmallMarginEnd"/>

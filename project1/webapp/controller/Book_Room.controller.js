@@ -34,7 +34,8 @@ sap.ui.define([
           BedType: "",
 					ACType: "",
 					FinalPrice: "",
-					SelectedPriceType: ""
+					SelectedPriceType: "",
+          Capacity:""
 				});
 				sap.ui.getCore().setModel(oHostelModel, "HostelModel");
 			}
@@ -280,6 +281,22 @@ sap.ui.define([
 							text: "Full Name",
               required: true
 						}),
+              new sap.m.ComboBox({
+							selectedKey: "{HostelModel>/Persons/" + i + "/Gender}",
+							items: [
+								new sap.ui.core.ListItem({
+									key: "Mr",
+									text: "Mr"
+								}),	new sap.ui.core.ListItem({
+									key: "Mrs",
+									text: "Mrs"
+								}),
+                	new sap.ui.core.ListItem({
+									key: "Other",
+									text: "Other"
+								})
+							]
+						}),
 						new sap.m.Input({
 							value: "{HostelModel>/Persons/" + i + "/FullName}"
 						}),
@@ -329,6 +346,15 @@ sap.ui.define([
 							text: "Mobile",
               required: true
 						}),
+            new sap.m.ComboBox({
+							selectedKey: "{HostelModel>/Persons/" + i + "/Gender}",
+							items: [
+								new sap.ui.core.ListItem({
+									key: "",
+									text: ""
+								})
+							]
+						}),
 						new sap.m.Input({
 							value: "{HostelModel>/Persons/" + i + "/MobileNo}",
               type:"Number",
@@ -358,7 +384,8 @@ sap.ui.define([
 
 						new sap.m.Label({
 							text: "Email",
-              required: true
+              required: true,
+              type:"Email"
 						}),
 						new sap.m.Input({
 							value: "{HostelModel>/Persons/" + i + "/CustomerEmail}"
@@ -723,7 +750,7 @@ sap.ui.define([
   const aPersons = oHostelModel.getProperty("/Persons") || [];
   const sStartDate = oHostelModel.getProperty("/StartDate");
   const sEndDate = oHostelModel.getProperty("/EndDate");
-  const roomRentPrice = parseFloat(oHostelModel.getProperty("/FinalPrice")) || 0;
+  const roomRentPrice = parseFloat(oHostelModel.getProperty("/FinalPrice ")) || 0;
 
   // Parse and validate dates
   const oStartDate = this._parseDate(sStartDate);
@@ -865,7 +892,7 @@ sap.ui.define([
 			const aFields = [
 				"idBankName", "idAmount", "idPaymentTypeField", "idTransactionID",
 				"idPaymentDate", "idCurrency", "idUPIID", "idCardNumber", "idCardExpiry", "idCardCVV"
-			];
+			]
 			aFields.forEach(id => sap.ui.getCore().byId(id)?.setValue(""));
 			sap.ui.getCore().byId("idPaymentTypeGroup").setSelectedIndex(0);
 
@@ -1006,23 +1033,67 @@ sap.ui.define([
 			oRouter.navTo("RouteHostel")
 		},
 
-		onFieldValidation: function() {
-			var oView = this.getView();
-			var oHostelModel = oView.getModel("HostelModel").getData();
-			var oBtnModel = oView.getModel("OBTNModel");
+	onFieldValidation: function (oEvent) {
+    const oView = this.getView();
+    const oHostelModel = oView.getModel("HostelModel");
+    const oBtnModel = oView.getModel("OBTNModel");
 
-			// var sRoomType = oView.byId("idRoomType1")?.getValue() || "";
-			// var sPrice = oView.byId("idPrice2")?.getValue() || "";
-			var sPayment = oHostelModel.PaymentType || oView.byId("idPaymentMethod1")?.getSelectedKey() || "";
-			var sPerson = oHostelModel.Person || oView.byId("id_Noofperson1")?.getSelectedKey() || "";
-			var sStartDate = oHostelModel.StartDate || oView.byId("idStartDate1")?.getValue() || "";
-			var sEndDate = oHostelModel.EndDate || oView.byId("idEndDate1")?.getValue() || "";
-			var bAllFilled = sPayment && sPerson && sStartDate && sEndDate;
+    // Read model data safely
+    const oData = oHostelModel.getData();
 
-			//  Force Boolean (true/false) type — critical fix
-			oBtnModel.setProperty("/Next", !!bAllFilled);
-			// oBtnModel.setProperty("/PERVIOUSVIS", !!bAllFilled);
-		},
+    // Get references
+    const oStartDatePicker = oView.byId("idStartDate1");
+    const oEndDatePicker = oView.byId("idEndDate1");
+
+    const sStartDate = oStartDatePicker?.getValue() || "";
+    const sEndDate = oEndDatePicker?.getValue() || "";
+    const sPaymentType = oData.SelectedPriceType || oView.byId("idPaymentMethod1")?.getSelectedKey() || "";
+    const sPerson = oData.Person || oView.byId("id_Noofperson1")?.getSelectedKey() || "";
+
+    let bAllFilled = sPaymentType && sPerson && sStartDate && sEndDate;
+
+    // ✅ When start date is selected and plan is monthly — auto add 30 days
+    if (oEvent.getSource().getId().includes("idStartDate1") && sStartDate && sPaymentType === "monthly") {
+        const oStart = this._parseDate(sStartDate); // Helper function converts "dd/MM/yyyy" → Date
+        if (oStart instanceof Date && !isNaN(oStart)) {
+            const oNewEnd = new Date(oStart);
+            oNewEnd.setDate(oStart.getDate() + 30);
+            const sNewEndDate = this._formatDateToDDMMYYYY(oNewEnd);
+
+            // Update EndDate in model and picker
+            oHostelModel.setProperty("/EndDate", sNewEndDate);
+            oEndDatePicker.setValue(sNewEndDate);
+        }
+    }
+
+    //  Ensure End Date >= Start Date
+    if (sStartDate && sEndDate) {
+        const oStart = this._parseDate(sStartDate);
+        const oEnd = this._parseDate(sEndDate);
+
+        if (oEnd < oStart) {
+            // Reset invalid end date and show error
+            oEndDatePicker.setValueState("Error");
+            oEndDatePicker.setValueStateText("End date cannot be before start date");
+            sap.m.MessageToast.show("End date cannot be before start date");
+            oHostelModel.setProperty("/EndDate", "");
+            bAllFilled = false;
+        } else {
+            oEndDatePicker.setValueState("None");
+        }
+    }
+
+    //  Update button state
+    oBtnModel.setProperty("/Next", !!bAllFilled);
+},
+_formatDateToDDMMYYYY: function (oDate) {
+    if (!(oDate instanceof Date)) return "";
+    const dd = String(oDate.getDate()).padStart(2, "0");
+    const mm = String(oDate.getMonth() + 1).padStart(2, "0");
+    const yyyy = oDate.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+},
+
 		onNavBack: function() {
 			var oRouter = this.getOwnerComponent().getRouter();
 			oRouter.navTo("RouteHostel");

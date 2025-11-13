@@ -40,18 +40,19 @@
 </ComboBox>
                                
                 <core:Title text="" />
-               <Label text="No of Persons" required="true" />
-                            <ComboBox
-                                id="id_Noofperson1"
-                                placeholder="Select Person"
-                                selectedKey="{HostelModel>/Person}"
-                               selectionChange="onNoOfPersonSelect"
-                                width="100%"
-                                change="onFieldValidation"
-                            >
-                                <core:ListItem key="1" text="1" />
-                                <core:ListItem key="2" text="2" />
-                            </ComboBox>
+            <Label text="No of Persons" required="true" />
+<Select
+    id="id_Noofperson1"
+    width="100%"
+    selectedKey="{HostelModel>/SelectedPerson}"
+    change="onNoOfPersonSelect"
+    items="{
+        path: 'HostelModel>/NoOfPersonsList'
+    }"
+>
+    <core:Item key="{HostelModel>key}" text="{HostelModel>text}" />
+</Select>
+
 
                 <!-- Site Contact -->
               
@@ -63,17 +64,20 @@
                                 displayFormat="dd/MM/yyyy"
                                 change="onFieldValidation"
                                 width="100%"
+                                
                             />
 
                             <Label text="End Date" required="true" />
-                            <DatePicker
-                                id="idEndDate1"
-                                value="{HostelModel>/EndDate}"
-                                valueFormat="dd/MM/yyyy"
-                                displayFormat="dd/MM/yyyy"
-                                change="onFieldValidation"
-                                width="100%"
-                            />
+<DatePicker
+    id="idEndDate1"
+    value="{HostelModel>/EndDate}"
+    valueFormat="dd/MM/yyyy"
+    displayFormat="dd/MM/yyyy"
+    change="onFieldValidation"
+    minDate="{path: 'HostelModel>/StartDate', formatter: '.Formatter.minDate'}"
+    width="100%"
+/>
+
     
             </f:content>
         </f:SimpleForm>
