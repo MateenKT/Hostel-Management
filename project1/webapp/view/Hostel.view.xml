@@ -244,60 +244,53 @@
                                     </fb:FilterGroupItem>
                                 </fb:filterGroupItems>
                             </fb:FilterBar>
+                            
                             <FlexBox
                                 id="idBedTypeFlex"
                                 wrap="Wrap"
                                 direction="Row"
                                 justifyContent="SpaceAround"
                                 alignItems="Start"
-                                items="{
-            path: 'VisibilityModel>/BedTypes'
-        }"
-                            >
+                                items="{path: 'VisibilityModel>/BedTypes'}">
                                 <items>
                                     <VBox
                                         class="bedCard sapUiMediumMargin"
-                                        visible="{VisibilityModel>Visible}"
-                                    >
-                                        <Image
-                                            src="{VisibilityModel>Image}"
-                                            width="100%"
-                                            height="300px"
-                                            class="bedCardImage"
-                                        />
-                                        <VBox
-                                            class="bedCardContent sapUiSmallMargin"
-                                        >
+                                        visible="{VisibilityModel>Visible}">
+                                        <Carousel id="idBedImageCarousel"
+                                height="300px"
+                                width="100%"
+                                loop="true"
+                                showPageIndicator="false"
+                                backgroundDesign="Transparent"
+                                pages="{VisibilityModel>Images}">
+                                            <pages>
+                                                <Image
+                                        src="{VisibilityModel>src}"
+                                        width="100%"
+                                        height="300px"
+                                        class="bedCardImage"
+                                        decorative="false"
+                                    />
+                                            </pages>
+                                        </Carousel>
+                                        <VBox class="bedCardContent sapUiSmallMargin">
                                             <Text
                                                 text="{= ${VisibilityModel>Name} + ' (' + ${VisibilityModel>ACType} + ')' }"
-                                                class="bedCardTitle"
-                                            />
+                                                class="bedCardTitle" />
                                             <Text
                                                 text="{VisibilityModel>Description}"
                                                 class="bedCardDesc"
-                                                wrapping="true"
-                                            />
+                                                wrapping="true" />
                                             <Text
                                                 text="{= ${VisibilityModel>Currency} + ${VisibilityModel>Price}}"
-                                                class="bedCardPrice"
-                                            />
-                                            <HBox
-                                                justifyContent="Center"
-                                                alignItems="Center"
-                                                class="sapUiSmallMarginTop"
-                                            >
+                                                class="bedCardPrice" />
+                                            <HBox justifyContent="Center" alignItems="Center" class="sapUiSmallMarginTop">
                                                 <Button
                                                     text="{= ${VisibilityModel>Visible} ? 'View Details' : 'Occupied' }"
                                                     type="Default"
                                                     press=".viewDetails"
                                                     enabled="{VisibilityModel>Visible}"
-                                                    class="{= ${VisibilityModel>Visible} ? '' : 'soldOutButton' }"
-                                                />
-                                                <!-- <Button
-                                                    text="{= ${VisibilityModel>Visible} ? 'Book Now' : 'Sold Out' }"
-                                                    press=".onBookNow"
-                                                    enabled="{VisibilityModel>Visible}"
-                                                /> -->
+                                                    class="{= ${VisibilityModel>Visible} ? '' : 'soldOutButton' }" />
                                             </HBox>
                                         </VBox>
                                     </VBox>

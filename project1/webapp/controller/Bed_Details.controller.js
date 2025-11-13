@@ -335,48 +335,58 @@ sap.ui.define([
         },
         HM_DeleteDetails: function() {
             var table = this.byId("id_BedTable");
-            var selected = table.getSelectedItem();
+            var aSelectedItems = table.getSelectedItems();
 
-            if (!selected) {
-                sap.m.MessageToast.show("Please select a record to delete.");
+            if (aSelectedItems.length === 0) {
+                sap.m.MessageToast.show("Please select at least one record to delete.");
                 return;
             }
 
-            var Model = selected.getBindingContext("BedDetails");
-            var data = Model.getObject();
+            // Collect bed names for confirmation display
+            var sBedNames = aSelectedItems.map(item => {
+                return item.getBindingContext("BedDetails").getObject().Name;
+            }).join(", ");
 
-            // Confirmation popup
             sap.m.MessageBox.confirm(
-                "Are you sure you want to delete this Bed?", {
+                `Are you sure you want to delete the selected bed(s): ${sBedNames}?`, {
                     title: "Confirm Deletion",
+                    icon: sap.m.MessageBox.Icon.WARNING,
                     actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
-                    onClose: function(sAction) {
+                    onClose: async function(sAction) {
                         if (sAction === sap.m.MessageBox.Action.OK) {
-                            var oBody = {
-                                filters: {
-                                    ID: data.ID
-                                }
-                            };
+                            sap.ui.core.BusyIndicator.show(0);
+                            try {
+                                // Create array of delete promises
+                                const deletePromises = aSelectedItems.map((item) => {
+                                    const data = item.getBindingContext("BedDetails").getObject();
+                                    const oBody = {
+                                        filters: { ID: data.ID }
+                                    };
 
-                            $.ajax({
-                                url: "https://rest.kalpavrikshatechnologies.com/HM_BedType",
-                                method: "DELETE",
-                                contentType: "application/json",
-                                data: JSON.stringify(oBody),
-                                headers: {
-                                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-                                },
-                                success: function(response) {
-                                    sap.m.MessageToast.show("Room deleted successfully!");
-                                    this.Onsearch();
-                                    table.removeSelections();
+                                    return $.ajax({
+                                        url: "https://rest.kalpavrikshatechnologies.com/HM_BedType",
+                                        method: "DELETE",
+                                        contentType: "application/json",
+                                        data: JSON.stringify(oBody),
+                                        headers: {
+                                            name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                                            password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+                                        }
+                                    });
+                                });
 
-                                }.bind(this),
-                                error: function(xhr) {
-                                    sap.m.MessageToast.show("Error: " + xhr.statusText);
-                                }
-                            });
+                                // Wait for all deletions to complete
+                                await Promise.all(deletePromises);
+
+                                sap.m.MessageToast.show("Selected bed(s) deleted successfully!");
+                                this.Onsearch();
+                            } catch (error) {
+                                console.error("Delete failed:", error);
+                                sap.m.MessageBox.error("Error while deleting bed(s). Please try again.");
+                            } finally {
+                                sap.ui.core.BusyIndicator.hide();
+                                table.removeSelections(true);
+                            }
                         }
                     }.bind(this)
                 }

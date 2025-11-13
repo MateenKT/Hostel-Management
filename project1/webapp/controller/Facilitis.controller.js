@@ -394,21 +394,26 @@ sap.ui.define([
                 sPath: ofacilityID
             });
         },
+        
         HM_DeleteDetails: async function() {
             var oTable = this.byId("id_facilityTable");
-            var oSelectedItem = oTable.getSelectedItem();
+            var aSelectedItems = oTable.getSelectedItems();
 
-            if (!oSelectedItem) {
-                sap.m.MessageToast.show("Please select a record to delete.");
+            if (aSelectedItems.length === 0) {
+                sap.m.MessageToast.show("Please select at least one record to delete.");
                 return;
             }
 
-            var oContext = oSelectedItem.getBindingContext("Facilities");
-            var oData = oContext.getObject();
             var that = this;
 
+            // Build facility names for confirmation message
+            var sNames = aSelectedItems.map(item => {
+                var oData = item.getBindingContext("Facilities").getObject();
+                return oData.FacilityName;
+            }).join(", ");
+
             sap.m.MessageBox.confirm(
-                `Are you sure you want to delete the facility ${oData.FacilityName}?`, {
+                `Are you sure you want to delete the selected facilities: ${sNames}?`, {
                     icon: sap.m.MessageBox.Icon.WARNING,
                     title: "Confirm Deletion",
                     actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO],
@@ -417,26 +422,33 @@ sap.ui.define([
                         if (sAction === sap.m.MessageBox.Action.YES) {
                             try {
                                 sap.ui.core.BusyIndicator.show(0);
-                                await that.ajaxDeleteWithJQuery("HM_ExtraFacilities", {
-                                    filters: {
-                                        ID: oData.ID
-                                    }
+
+                                // Collect all delete promises
+                                const aDeletePromises = aSelectedItems.map(async (item) => {
+                                    var oData = item.getBindingContext("Facilities").getObject();
+                                    await that.ajaxDeleteWithJQuery("HM_ExtraFacilities", {
+                                        filters: { ID: oData.ID }
+                                    });
                                 });
-                                sap.m.MessageToast.show("Facility deleted successfully!");
-                                await that.Onsearch(); // refresh table data
+
+                                // Wait for all deletions to complete
+                                await Promise.all(aDeletePromises);
+
+                                sap.m.MessageToast.show("Selected facilities deleted successfully!");
+                                await that.Onsearch(); // refresh table
                             } catch (err) {
                                 console.error("Delete failed:", err);
-                                sap.m.MessageBox.error("Error while deleting Facility. Please try again.");
+                                sap.m.MessageBox.error("Error while deleting facilities. Please try again.");
                             } finally {
                                 sap.ui.core.BusyIndicator.hide();
                                 oTable.removeSelections(true);
                             }
-                        } else if (sAction === sap.m.MessageBox.Action.NO) {
+                        } else {
                             oTable.removeSelections(true);
                         }
                     }
                 }
             );
-        },
+        }
     });
 });

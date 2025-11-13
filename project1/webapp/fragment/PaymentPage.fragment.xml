@@ -1,72 +1,123 @@
 <core:FragmentDefinition
 	xmlns="sap.m"
-	xmlns:core="sap.ui.core"
-	xmlns:l="sap.ui.layout">
+	xmlns:f="sap.ui.layout.form"
+	xmlns:l="sap.ui.layout"
+	xmlns:core="sap.ui.core">
 	<Dialog
         id="idPaymentDialog"
-        title="Proceed to Payment"
-        contentWidth="400px"
-        afterClose=".onPaymentClose"
-        class="sapUiContentPadding">
-		<VBox width="100%" renderType="Bare">
-			<!-- Payment Type Radio Buttons -->
-			<RadioButtonGroup id="idPaymentTypeGroup" columns="2" select=".onPaymentTypeSelect">
-				<buttons>
-					<RadioButton text="UPI" selected="true" />
-					<RadioButton text="Debit/Credit Card" />
-				</buttons>
-			</RadioButtonGroup>
-			<HBox justifyContent="Start" class="sapUiSmallMarginTop">
-				<Label text="Grand Total:" design="Bold" class="sapUiSmallMarginEnd"/>
-				<Text text="{
+        title="Proceed to Payment">
+
+       <f:SimpleForm id="Exp_id_SimpleFrom"
+            editable="true"
+                                    layout="ColumnLayout"
+                                    labelSpanXL="12"
+                                    labelSpanL="12"
+                                    labelSpanM="12"
+                                    labelSpanS="12"
+                                    adjustLabelSpan="false"
+                                    emptySpanXL="0"
+                                    emptySpanL="0"
+                                    emptySpanM="0"
+                                    emptySpanS="0"
+                                    columnsXL="2"
+                                    columnsL="2"
+                                    columnsM="1">
+			<f:content>
+
+            
+
+                <!-- Payment Type -->
+                <Label text="Payment Type" />
+                <RadioButtonGroup id="idPaymentTypeGroup" columns="2" select=".onPaymentTypeSelect">
+                    <buttons>
+                        <RadioButton text="UPI" selected="true" />
+                        <RadioButton text="Debit/Credit Card" />
+                    </buttons>
+                </RadioButtonGroup>
+
+                <Label text="Grand Total" design="Bold" />
+                <Text text="{
                     path: 'HostelModel>/GrandTotal',
                     formatter: '.Formatter.formatCurrency'
                 }" class="sapUiSmallMarginEnd"/>
-			</HBox>
-			<!-- UPI Section -->
-			<VBox id="idUPISection" class="sapUiSmallMarginTop">
-				<Label text="UPI ID" required="true"/>
-				<Input id="idUPIID" placeholder="Enter your UPI ID" />
-				<Image src="image/UPI.jpg" width="150px" class="sapUiMediumMarginTop" />
-			</VBox>
-			<!-- Card Section -->
-			<VBox id="idCardSection" visible="false" class="sapUiSmallMarginTop">
-				<Label text="Card Number" />
-				<Input id="idCardNumber" placeholder="Enter Card Number" />
-				<Label text="Expiry Date" />
-				<Input id="idCardExpiry" placeholder="MM/YY" />
-				<Label text="CVV" />
-				<Input id="idCardCVV" type="Password" placeholder="***" />
-			</VBox>
-		</VBox>
-		<!-- Common Fields (Visible for both types) -->
-		<l:VerticalLayout width="100%" class="sapUiSmallMarginTop">
-			<Label text="Bank Name" required="true"/>
-			<Input id="idBankName" placeholder="Enter Bank Name" />
-			<Label text="Amount" required="true"/>
-			<HBox width="100%" justifyContent="Start" alignItems="Center">
-				<VBox width="50%">
-					<Input id="idAmount" type="Number" placeholder="Enter Amount" />
-				</VBox>
-				<VBox width="50%">
-					<ComboBox id="idCurrency" items="{CurrencyModel>/}"  valueStateText="Select Currency"
-              width="100%" change=".onFacilitybranchChange" placeholder="Select Currency">
-						<core:Item  key="{CurrencyModel>currency}" text="{CurrencyModel>currency}"/>
-					</ComboBox>
-				</VBox>
-			</HBox>
-			<Label text="Payment Type" required="true"/>
-			<Input id="idPaymentTypeField" placeholder="Enter Payment Type (e.g., Yearly)" />
-			<Label text="Bank Transaction ID" required="true"/>
-			<Input id="idTransactionID" placeholder="Enter Transaction ID" />
-			<Label text="Date" required="true"/>
-			<DatePicker id="idPaymentDate" displayFormat="yyyy-MM-dd" valueFormat="yyyy-MM-dd" />
-		</l:VerticalLayout>
-		<beginButton>
-			<Button text="Submit Payment" type="Emphasized" press=".onSubmitPress" />
-		</beginButton>
-		<endButton>
-			<Button text="Cancel" press=".onPaymentClose" />
-		</endButton>
+
+                <!-- ================= UPI SECTION ================= -->
+				 <Label visible="true" id="lblUPIImage"/>
+                <Image
+                    id="idUPIImage"
+                    src="image/UPI.jpg"
+                    visible="true"
+                    width="150px"
+                    class="sapUiSmallMarginTop centerUPIImage"
+                    decorative="false" />
+
+                <Label text="UPI ID" required="true" visible="true" id="lblUPIID"/>
+                <Input
+                    id="idUPIID"
+                    placeholder="Enter your UPI ID"
+                    visible="true"
+                    liveChange=".onChangeUPIID"
+                    valueStateText="{i18n>enterUPIID}" />
+
+                <!-- ================= CARD SECTION ================= -->
+                <Label text="Card Number" visible="false" id="lblCardNumber"/>
+                <Input id="idCardNumber" placeholder="Enter Card Number" visible="false"/>
+
+                <Label text="Expiry Date" visible="false" id="lblCardExpiry"/>
+                <Input id="idCardExpiry" placeholder="MM/YY" visible="false"/>
+
+                <Label text="CVV" visible="false" id="lblCardCVV"/>
+                <Input id="idCardCVV" type="Password" placeholder="***" visible="false"/>
+
+                <!-- ================= COMMON FIELDS ================= -->
+                <Label text="Bank Name" required="true"/>
+                <Input id="idBankName" placeholder="Enter Bank Name"
+                       liveChange=".onBankNameChange"
+                       valueStateText="{i18n>enterBankName}"/>
+
+                <Label text="Amount" required="true"/>
+                <Input id="idAmount" type="Number" placeholder="Enter Amount"
+                       liveChange=".onAmountChange"
+                       valueStateText="{i18n>enterAmount}"/>
+
+                <Label text="Currency" required="true"/>
+                <ComboBox
+                    id="idCurrency"
+                    items="{CurrencyModel>/}"
+                    placeholder="Select Currency"
+                    valueStateText="Select Currency"
+                    change=".onCurrencyChange">
+                    <core:Item key="{CurrencyModel>currency}" text="{CurrencyModel>currency}"/>
+                </ComboBox>
+
+                <Label text="Payment Type" required="true"/>
+                <Input id="idPaymentTypeField"
+                       placeholder="Enter Payment Type"
+                       liveChange=".onPaymentTypeChange"
+                       valueStateText="{i18n>enterPaymentType}"/>
+
+                <Label text="Bank Transaction ID" required="true"/>
+                <Input id="idTransactionID"
+                       placeholder="Enter Transaction ID"
+                       liveChange=".onTransactionIDChange"
+                       valueStateText="{i18n>enterTransactionID}"/>
+
+                <Label text="Date" required="true"/>
+                <DatePicker id="idPaymentDate"
+                            displayFormat="yyyy-MM-dd"
+                            valueFormat="yyyy-MM-dd"
+                            change=".onPaymentDateChange"
+                            valueStateText="{i18n>selectPaymentDate}"/>
+            </f:content>
+        </f:SimpleForm>
+
+        <!-- Footer -->
+        <footer>
+            <Toolbar>
+                <ToolbarSpacer/>
+                <Button text="Submit Payment" type="Emphasized" press=".onSubmitPress"/>
+                <Button text="Cancel" press=".onPaymentClose"/>
+            </Toolbar>
+        </footer>
 	</Dialog>
 </core:FragmentDefinition>

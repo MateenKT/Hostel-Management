@@ -315,7 +315,7 @@ sap.ui.define([
         //         sap.m.MessageToast.show("Failed to load bed type data.");
         //     }
         // },
-        _loadFilteredData: async function (sBranchCode, sACType) {
+      _loadFilteredData: async function (sBranchCode, sACType) {
             if (sACType === "All") {
                 sACType = ""
             }
@@ -385,7 +385,7 @@ sap.ui.define([
 
                     const firstRoom = matchingRooms[0];
                     const price = firstRoom?.Price ? " " + firstRoom.Price : "";
-                     const Currency = firstRoom?.Currency ? " " + firstRoom.Currency : "";
+                    const Currency = firstRoom?.Currency ? " " + firstRoom.Currency : "";
 
                     let totalBooked = 0;
                     let totalCapacity = 0;
@@ -393,7 +393,6 @@ sap.ui.define([
                     matchingRooms.forEach(rm => {
                         totalCapacity += rm.NoofPerson || 0;
 
-                        // Count customers for each matching room
                         const bookedCount = customerData.filter(cust =>
                             cust.Bookings?.some(bk =>
                                 bk.BranchCode?.toLowerCase() === sBranchCode.toLowerCase() &&
@@ -407,19 +406,29 @@ sap.ui.define([
                     });
 
                     const isFull = totalBooked >= totalCapacity && totalCapacity > 0;
-
                     const isVisible = !isFull && price.trim() !== "";
+
+                    //  Collect all valid images
+                    const aImages = [];
+                    for (let i = 1; i <= 5; i++) {
+                        const base64 = room[`Photo${i}`];
+                        const type = room[`Photo${i}Type`];
+                        if (base64) {
+                            aImages.push({
+                                src: convertBase64ToImage(base64, type)
+                            });
+                        }
+                    }
 
                     return {
                         Name: room.Name,
                         ACType: room.ACType,
                         Description: room.Description || "",
                         Price: price,
-                        Currency:Currency,
+                        Currency: Currency,
                         BranchCode: room.BranchCode,
                         ID: room.ID,
-
-                        Image: convertBase64ToImage(room.Photo1 || room.Photo1Type),
+                        Images: aImages, // 🔹 store multiple images here
                         Visible: isVisible
                     };
                 });
@@ -1700,30 +1709,47 @@ sap.ui.define([
         },
 
         onAfterRendering: function () {
-            var oCarousel = this.byId("customSlideCarousel");
-            var iIndex = 0;
-            var that = this;
-            var iSlideCount = oCarousel.getPages().length;
+            setTimeout(() => {
+                this._startCarouselAutoSlide();
+            }, 500);
+        },
 
-            // Clear existing interval (in case of rerender)
-            if (this._autoSlideInterval) {
-                clearInterval(this._autoSlideInterval);
-            }
+        _startCarouselAutoSlide: function () {
+            const oView = this.getView();
 
-            // Set new interval
-            this._autoSlideInterval = setInterval(function () {
-                if (oCarousel && !oCarousel.bIsDestroyed) {
-                    iIndex = (iIndex + 1) % iSlideCount;
-                    oCarousel.setActivePage(oCarousel.getPages()[iIndex]);
+            // Find all Carousel controls rendered in the view
+            const aCarousels = oView.findAggregatedObjects(true, control => control.isA("sap.m.Carousel"));
+
+            aCarousels.forEach(carousel => {
+                let currentIndex = 0;
+
+                // Clear existing timers to avoid duplicates
+                if (carousel._autoSlideInterval) {
+                    clearInterval(carousel._autoSlideInterval);
                 }
-            }, 3000); // Auto-scroll every 3 seconds
+
+                const iSlideCount = carousel.getPages().length;
+                if (iSlideCount <= 1) return; // Skip if only one image
+
+                // Start auto-slide
+                carousel._autoSlideInterval = setInterval(() => {
+                    if (!carousel || carousel.bIsDestroyed) return;
+
+                    currentIndex = (currentIndex + 1) % iSlideCount;
+                    carousel.setActivePage(carousel.getPages()[currentIndex]);
+                }, 3000);
+            });
         },
 
         onExit: function () {
-            // Clear interval when view is destroyed
-            if (this._autoSlideInterval) {
-                clearInterval(this._autoSlideInterval);
-            }
+            // Clear all intervals when leaving view
+            const oView = this.getView();
+            const aCarousels = oView.findAggregatedObjects(true, c => c.isA("sap.m.Carousel"));
+            aCarousels.forEach(c => {
+                if (c._autoSlideInterval) {
+                    clearInterval(c._autoSlideInterval);
+                }
+            });
         },
         onEditBooking: function () {
             var oTable = sap.ui.getCore().byId("IdProfileaTable");

@@ -1,29 +1,28 @@
 <mvc:View
     controllerName="sap.ui.com.project1.controller.Room_Details"
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m"
-    xmlns:m="sap.m"
-    xmlns:c="sap.ui.core"
-    xmlns:fb="sap.ui.comp.filterbar"
-    xmlns:core="sap.ui.core"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:m="sap.m"
+	xmlns:c="sap.ui.core"
+	xmlns:fb="sap.ui.comp.filterbar"
+	xmlns:core="sap.ui.core"
     displayBlock="true"
     height="100%"
-    busyIndicatorDelay="0"
->
-    <Page  showHeader="true" >
-       <customHeader>
-        <Bar>
-            <contentLeft>
-                <Button icon="sap-icon://nav-back" press=".onNavBack" />
-                <Title text="Shah Hostel" class="customPageTitle"/>
-            </contentLeft>
-              <contentRight>
-                <Button icon="sap-icon://log" press=".onHome" />
-            </contentRight>
-        </Bar>
-    </customHeader>
-        <content>
-            <fb:FilterBar
+    busyIndicatorDelay="0">
+	<Page  showHeader="true" >
+		<customHeader>
+			<Bar>
+				<contentLeft>
+					<Button icon="sap-icon://nav-back" press=".onNavBack" />
+					<Title text="Shah Hostel" class="customPageTitle"/>
+				</contentLeft>
+				<contentRight>
+					<Button icon="sap-icon://log" press=".onHome" />
+				</contentRight>
+			</Bar>
+		</customHeader>
+		<content>
+			<fb:FilterBar
                 id="RD_id_FilterbarEmployee"
                 persistencyKey="myPersKey"
                 useToolbar="false"
@@ -33,193 +32,100 @@
                 filterChange="IA_.onFilterChange"
                 afterVariantLoad="IA_.onAfterVariantLoad"
                 showFilterConfiguration="false"
-                filterContainerWidth="auto"
-				
-            >
-                <fb:filterGroupItems>
-                    <fb:FilterGroupItem
+                filterContainerWidth="auto">
+				<fb:filterGroupItems>
+					<fb:FilterGroupItem
                         name="Room Number"
                         label="Room Number"
                         groupName="Group"
                         visibleInFilterBar="true"
                     >
-                        <fb:control>
-                            <ComboBox
+						<fb:control>
+							<ComboBox
                                 id="RD_id_CustomerName1"
                                 items="{RoomDetailsModel>/}"
                                 showClearIcon="true"
                             >
-                                <core:Item
+								<core:Item
                                     key="{RoomDetailsModel>RoomNo}"
                                     text="{RoomDetailsModel>RoomNo}"
                                 />
-                            </ComboBox>
-                        </fb:control>
-                    </fb:FilterGroupItem>
-                </fb:filterGroupItems>
-
-                <fb:filterGroupItems>
-                    <fb:FilterGroupItem
+							</ComboBox>
+						</fb:control>
+					</fb:FilterGroupItem>
+				</fb:filterGroupItems>
+				<fb:filterGroupItems>
+					<fb:FilterGroupItem
                         name="Bed Type"
                         label="Bed Type"
                         groupName="Group"
                         visibleInFilterBar="true"	
                     >
-                        <fb:control>
-                            <ComboBox
+						<fb:control>
+							<ComboBox
                                 id="RD_id_CompanyName1"
                                 items="{RoomDetailsModel>/}"
                                 showClearIcon="true"
                             >
-                                <core:ListItem
+								<core:ListItem
                                     key="{RoomDetailsModel>BedTypeName}"
                                     text="{RoomDetailsModel>BedTypeName}"
                                 />
-                            </ComboBox>
-                        </fb:control>
-                    </fb:FilterGroupItem>
-                </fb:filterGroupItems>
-
-             
-            </fb:FilterBar>
-            <Table
+							</ComboBox>
+						</fb:control>
+					</fb:FilterGroupItem>
+				</fb:filterGroupItems>
+			</fb:FilterBar>
+			<Table
                 id="id_ARD_Table"
                 sticky="ColumnHeaders,HeaderToolbar"
-                mode="SingleSelectLeft"
+                mode="MultiSelect"
                 width="auto"
                 class="sapUiResponsiveMargin"
-                items="{path: 'RoomDetailsModel>/'}"
-            >
-                <headerToolbar>
-                    <OverflowToolbar>
-                        <Title
-                            text="Room List ({=${RoomDetailsModel>/}.length})"
-                        />
-                        <ToolbarSpacer />
-                        <Button
-                            text="Create Room"
-                            press="HM_AddRoom"
-                            type="Accept"
-                        />
-                           <Button
-                            text="Edit"
-                            press="HM_EditRoom"
-                            type="Ghost"
-                        />
-                           <Button
-                            text="Delete"
-                            press="HM_DeleteRoom"
-                            type="Reject"
-                        />
-                          <Button
-                            press="RD_onDownload"
-                            type="Transparent"
-                            text="Download"
-                        />
-                     
-                    </OverflowToolbar>
-                </headerToolbar>
-                <columns>
-                
-					   <Column demandPopin="true">
-                        <Text
-                            text="Branch Code"
-                        />
-                    </Column>
-                    <Column demandPopin="true">
-                        <Text
-                            text="Room No"
-                        />
-                    </Column>
-                      <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text
-                            text="Bed Type"
-                        />
-                    </Column>
-                   <!-- <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text
-                            text="No Of persons"
-                        />
-                    </Column> -->
-                      <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text
-                            text="Extra Bed"
-                        />
-                    </Column>
-                    <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text
-                            text="Daily Price"
-                        />
-                    </Column>   
-                     <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text
-                            text="Month Price"
-                        />
-                    </Column> 
-                     <Column
-                        minScreenWidth="Tablet"
-                        demandPopin="true"
-                    >
-                        <Text
-                            text="Year Price"
-                        />
-                    </Column>                
-                </columns>
-                <items>
-                    <ColumnListItem
-                    >
-                        <cells>
-							<Text text="{RoomDetailsModel>BranchCode}" />
-							
-                            <Text text="{RoomDetailsModel>RoomNo}" />
-                        
-                            <Text text="{RoomDetailsModel>BedTypeName}" />
-                            <!-- <Text text="{RoomDetailsModel>NoofPerson}" /> -->
-                            <Text text="{RoomDetailsModel>ExtraBed}" />
-                            <!-- <Text text="{= ${RoomDetailsModel>Price} ? ${RoomDetailsModel>Price} + ' ' + ${RoomDetailsModel>PriceType} : '' }" /> -->
-
-
-
-    <Text
-        text="{= ${RoomDetailsModel>Price} ?  + ${RoomDetailsModel>Price} + ' ' + ${RoomDetailsModel>Currency} : '' }"
-    />
-    <Text
-        text="{= ${RoomDetailsModel>MonthPrice} ?  + ${RoomDetailsModel>MonthPrice} + ' ' + ${RoomDetailsModel>Currency} : '' }"
-    />
-    <Text
-        text="{= ${RoomDetailsModel>YearPrice} ? + ${RoomDetailsModel>YearPrice} + ' ' + ${RoomDetailsModel>Currency} : '' }"
-    />
-
-                            <!-- <Text text="{HostelModel>RoomType}" /> -->
-                           <Button
-                            text="View"
-                            press="HM_viewroom"
-                            type="Transparent"
-                        />
-
-                            
-                           
-                           
-                        </cells>
-                    </ColumnListItem>
-                </items>
-            </Table>
-        </content>
-    
-    </Page>
+                items="{path: 'RoomDetailsModel>/', sorter: {path: 'BranchCode',descending: false,group: true}}">
+				<headerToolbar>
+					<OverflowToolbar>
+						<Title  text="Room List ({=${RoomDetailsModel>/}.length})"/>
+						<ToolbarSpacer />
+						<Button  text="Create Room" press="HM_AddRoom" type="Accept"/>
+						<Button text="Edit"  press="HM_EditRoom" type="Ghost"/>
+						<Button text="Delete" press="HM_DeleteRoom" type="Reject"/>
+						<Button press="RD_onDownload" type="Transparent" text="Download"/>
+					</OverflowToolbar>
+				</headerToolbar>
+				<columns>
+					<Column demandPopin="true">
+						<Text text="Room No"/>
+					</Column>
+					<Column demandPopin="true">
+						<Text  text="Bed Type"/>
+					</Column>
+					<Column demandPopin="true">
+						<Text text="Extra Bed"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text  text="Daily Price"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="Month Price" />
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text  text="Year Price" />
+					</Column>
+				</columns>
+				<items>
+					<ColumnListItem>
+						<cells>
+							<Text text="{RoomDetailsModel>RoomNo}" />
+							<Text text="{RoomDetailsModel>BedTypeName}" />
+							<Text text="{RoomDetailsModel>ExtraBed}" />
+							<Text text="{= ${RoomDetailsModel>Price} ?  + ${RoomDetailsModel>Price} + ' ' + ${RoomDetailsModel>Currency} : '' }"/>
+							<Text text="{= ${RoomDetailsModel>MonthPrice} ?  + ${RoomDetailsModel>MonthPrice} + ' ' + ${RoomDetailsModel>Currency} : '' }"/>
+							<Text text="{= ${RoomDetailsModel>YearPrice} ? + ${RoomDetailsModel>YearPrice} + ' ' + ${RoomDetailsModel>Currency} : '' }"/>
+						</cells>
+					</ColumnListItem>
+				</items>
+			</Table>
+		</content>
+	</Page>
 </mvc:View>

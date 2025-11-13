@@ -65,11 +65,11 @@
 			<Table
                 id="id_BedTable"
                 sticky="ColumnHeaders,HeaderToolbar"
-                mode="SingleSelectLeft"
+                mode="MultiSelect"
                 width="auto"
                 busyIndicatorDelay="0"
                 class="sapUiResponsiveMargin"
-                items="{path: 'BedDetails>/'}">
+				items="{path: 'BedDetails>/', sorter: {path: 'BranchCode',descending: false,group: true}}">
 				<headerToolbar>
 					<OverflowToolbar>
 						<Title text="Bed List ({=${BedDetails>/}.length})"/>
@@ -85,15 +85,12 @@
 				</headerToolbar>
 				<columns>
 					<Column demandPopin="true">
-						<Text  text="Branch Code"/>
-					</Column>
-					<Column demandPopin="true">
 						<Text text="Bed Type"/>
 					</Column>
 					<Column demandPopin="true">
 						<Text text="Room Type"/>
 					</Column>
-						<Column minScreenWidth="Tablet" demandPopin="true">
+						<Column demandPopin="true">
 						<Text text="No Of Rooms"/>
 					</Column>
 						<Column minScreenWidth="Tablet" demandPopin="true">
@@ -106,7 +103,6 @@
 				<items>
 					<ColumnListItem type="Navigation" press="onColumnListItemPress">
 						<cells>
-							<Text text="{BedDetails>BranchCode}" />
 							<Text text="{BedDetails>Name}" />
 							<Text text="{BedDetails>ACType}" />
 							<Text text="{BedDetails>MaxBeds}" />
