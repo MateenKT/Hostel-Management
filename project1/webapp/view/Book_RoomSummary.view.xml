@@ -29,8 +29,55 @@
                 type="XML"
                 binding="{HostelModel>}"
             />
+            
         </CustomListItem>
     </List>
+   <Table
+    id="idGrandTotalSummaryTable"
+    visible="{HostelModel>/ShowSummary}"
+    items="{
+        path: 'HostelModel>/Persons'
+    }"
+>
+
+    <headerToolbar>
+        <Toolbar>
+            <Title text="Grand Total Summary" />
+        </Toolbar>
+    </headerToolbar>
+
+    <columns>
+        <Column><Text text="Person Name" /></Column>
+        <Column><Text text="Facility Cost" /></Column>
+        <Column><Text text="Room Rent" /></Column>
+        <Column><Text text="Total" /></Column>
+    </columns>
+
+    <items>
+        <ColumnListItem>
+            <cells>
+                <Text text="{HostelModel>FullName}" />
+                <Text text="{path:'HostelModel>TotalFacilityPrice',formatter: '.Formatter.formatCurrency'}" />
+                <Text text="{path:'HostelModel>RoomRentPerPerson',formatter: '.Formatter.formatCurrency'}" />
+                <Text text="{ path:'HostelModel>GrandTotal',formatter: '.Formatter.formatCurrency'}" />
+            </cells>
+        </ColumnListItem>
+    </items>
+
+</Table>
+
+        <!-- Totals for THIS person (NOTE: all RELATIVE, no leading "/") -->
+        <VBox class="sapUiSmallMarginTop">
+            <HBox justifyContent="End" class="sapUiSmallMarginTop">
+                <Label text="Total Cost:" design="Bold" class="sapUiSmallMarginEnd"/>
+                <Text text="{
+                    path: 'HostelModel>/OverallTotalCost',
+                    formatter: '.Formatter.formatCurrency'
+                }" class="sapUiSmallMarginEnd"/>
+              
+            </HBox>
+           
+        </VBox>
      <!--<VBox class="sapUiMediumMarginBottom">
         <VBox
             visible="{= ${oTCModel>/Visiblity/Services/TrafficManagement} || ${oTCModel>/Visiblity/Services/TrafficManagementVehicles} }"

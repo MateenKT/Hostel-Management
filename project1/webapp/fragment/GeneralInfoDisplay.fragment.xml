@@ -17,25 +17,27 @@
             <f:content>
                 <!-- Booking Details -->
                 <core:Title text="{i18n>bookingDetailsTitle}" />
-               <Label text="Desired Room Type" required="true" />
+               <Label text="Desired Room Type" />
                             <Text id="idRoomType2" text="{HostelModel>/BedType}"  />
 
-                            <Label text="Price" required="true" />
+                            <Label text="Price" />
                             <Text id="idPrice3" text="{HostelModel>/FinalPriceTotal}"   />
                 
-                 <Label text="Payment Method" required="true" />
+                 <Label text="Payment Method" />
                             <Text text="{HostelModel>/SelectedPriceType}"/>
                 <!-- Project Address -->
                 <core:Title text="Select Person" />
-               <Label text="No of Persons" required="true" />
-                           <Text text="{HostelModel>/SelectedPerson}"/>
+               <Label text="No of Persons"/>
+               <Text text="{HostelModel>/SelectedPerson}"/>
 
                 <!-- Site Contact -->
                 <core:Title text="Dates" />
-                <Label text="Start Date" required="true" />
+                <Label text="Start Date" />
                            <Text text="{HostelModel>/StartDate}"/>
-                            <Label text="End Date" required="true" />
+                            <Label text="End Date" />
                            <Text text="{HostelModel>/EndDate}"/>
+                            <Label text="Month" />
+                           <Text text="{HostelModel>/SelectedMonths}"/>
              
             </f:content>
         </f:SimpleForm>

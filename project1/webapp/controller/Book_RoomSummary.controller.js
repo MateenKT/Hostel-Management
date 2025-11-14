@@ -1,10 +1,12 @@
 sap.ui.define([
     "./BaseController",
    "sap/ui/model/json/JSONModel",
-], (Controller,JSONModel) => {
+   "../model/formatter",
+], (Controller,JSONModel,Formatter) => {
     "use strict";
 
     return Controller.extend("sap.ui.com.project1.controller.Book_RoomSummary", {
+        	Formatter: Formatter,
         onInit() {
     //          const oTable = this.byId("idFacilityRoomTable");
 

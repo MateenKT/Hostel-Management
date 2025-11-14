@@ -85,7 +85,17 @@ calculateDays: function(sStartDate, sEndDate) {
     if (!sStartDate) return null;
     const [d, m, y] = sStartDate.split("/");
     return new Date(`${y}-${m}-${d}`);
-}
+},
+  formatCurrency: function (value, code) {
+            if (value || value === 0) {
+                var oCurrencyFormat = sap.ui.core.format.NumberFormat.getCurrencyInstance({
+                    currencyCode: false // hides the currency code like "INR"
+                });
+                var formatted = oCurrencyFormat.format(value);
+                return code ? formatted + " " + code : formatted;
+            }
+            return "";
+        }
 
    }
 });

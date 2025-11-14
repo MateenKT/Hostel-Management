@@ -43,7 +43,7 @@ sap.ui.define([
 
 			// Set it on the view
 
-      // 🔥 Ensure defaults come from previous step (HostelModel)
+      //  Ensure defaults come from previous step (HostelModel)
 			const oData = oHostelModel.getData();
 
 			// If older fields exist, normalize them to new ones
@@ -535,14 +535,17 @@ new sap.m.DatePicker({
         ...(i === 0 && iPersons > 1 ?
           [
             new sap.m.CheckBox({
-              text: "For Both",
+              text: "For All",
               selected: true,
               select: (e) => {
                 oData.ForBothSelected = e.getParameter("selected");
-                if (oData.ForBothSelected && iPersons > 1) {
-                  // Copy selected facilities from first person to second person
-                  oData.Persons[1].Facilities.SelectedFacilities = oData.Persons[0].Facilities.SelectedFacilities.map(f => ({...f}));
-                }
+              if (oData.ForBothSelected && iPersons > 1) {
+    for (let p = 1; p < iPersons; p++) {
+        oData.Persons[p].Facilities.SelectedFacilities =
+            oData.Persons[0].Facilities.SelectedFacilities.map(f => ({ ...f }));
+    }
+}
+
                 oModel.refresh(true);
               }
             })
@@ -883,13 +886,24 @@ oHostelModel.setProperty("/FinalPrice", perPersonPrice);
         }, 0);
 
         return {
-            ...oPerson,
-            PersonFacilitiesSummary: aPersonFacilities,
-            AllSelectedFacilities: aPersonFacilities,
-            TotalFacilityPrice: facilityTotal,
-            GrandTotal: totalFinalPrice + facilityTotal,
-            TotalDays: iDays
-        };
+    ...oPerson,
+
+    // Facility details per person
+    PersonFacilitiesSummary: aPersonFacilities,
+    AllSelectedFacilities: aPersonFacilities,
+
+    // Per-person facility cost
+    TotalFacilityPrice: facilityTotal,
+
+    // Per-person room rent
+    RoomRentPerPerson: perPersonPrice,
+
+    // Per-person total
+    GrandTotal: perPersonPrice + facilityTotal,
+
+    TotalDays: iDays
+};
+
     });
 
     const totalFacilitySum = aUpdatedPersons.reduce((sum, obj) => sum + obj.TotalFacilityPrice, 0);
@@ -899,7 +913,7 @@ oHostelModel.setProperty("/FinalPrice", perPersonPrice);
     oHostelModel.setProperty("/TotalDays", iDays);
     oHostelModel.setProperty("/TotalFacilityPrice", totalFacilitySum);
     oHostelModel.setProperty("/GrandTotal", grandTotalSum);
-
+oHostelModel.setProperty("/OverallTotalCost", grandTotalSum);
     oHostelModel.updateBindings(true);
 },
 		// Separated calculation function

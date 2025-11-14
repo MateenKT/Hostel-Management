@@ -113,7 +113,7 @@
             </HBox>
             <HBox justifyContent="End" class="sapUiSmallMarginTop">
                 <Label text="Room Rent:" design="Bold" class="sapUiSmallMarginEnd"/>
-                <Text text="{HostelModel>/FinalPrice}" class="sapUiSmallMarginEnd"/>
+                <Text text="{path:'HostelModel>/FinalPrice',formatter: '.Formatter.formatCurrency'}" class="sapUiSmallMarginEnd"/>
             </HBox>
 
             <HBox justifyContent="End" class="sapUiSmallMarginTop">
@@ -124,57 +124,9 @@
                 }" class="sapUiSmallMarginEnd"/>
             </HBox>
         </VBox>
-  
-  <!-- Grand Total section -->
 
-        <Table
-            class="sapUiSmallMarginTop"
-            items="{
-                path: 'HostelModel>'
-            }"
-            mode="SingleSelectLeft"
-            inset="false"
-            selectionChange="onTableSelection">
-            <headerToolbar>
-                <Toolbar>
-                    <Title text="Grand Total Summary" level="H5" />
-                    <ToolbarSpacer />
-                    <Button icon="sap-icon://edit" text="Edit" press="onEditFacilityDetails" type="Emphasized" />
-                </Toolbar>
-            </headerToolbar>
-
-            <columns>
-                <Column demandPopin="true" ><Text text="Person Name" /></Column>
-                <Column demandPopin="true"><Text text="Total Faciliti" /></Column>
-                <Column minScreenWidth="Desktop" demandPopin="true" ><Text text="Rent Price" /></Column>
-                <Column demandPopin="true"><Text text="Total" /></Column>
-                
-            </columns>
-
-            <items>
-                <ColumnListItem>
-                    <cells>
-                        <Text text="{HostelModel>}" />
-                        <Text text="{HostelModel>}" />
-                        <Text text="{HostelModel>}" />
-                        <Text text="{HostelModel>}" />
-                       
-                    </cells>
-                </ColumnListItem>
-            </items>
-        </Table>
-
-        <!-- Totals for THIS person (NOTE: all RELATIVE, no leading "/") -->
-        <VBox class="sapUiSmallMarginTop">
-            <HBox justifyContent="End" class="sapUiSmallMarginTop">
-                <Label text="Total Cost:" design="Bold" class="sapUiSmallMarginEnd"/>
-                <Text text="{
-                    path: 'HostelModel>TotalFacilityPrice',
-                    formatter: '.Formatter.formatCurrency'
-                }" class="sapUiSmallMarginEnd"/>
-              
-            </HBox>
-           
-        </VBox>
     </Panel>
+    <!-- Grand Total section -->
+   
+
 </core:FragmentDefinition>
