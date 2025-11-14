@@ -21,7 +21,7 @@
                             <Text id="idRoomType2" text="{HostelModel>/BedType}"  />
 
                             <Label text="Price" required="true" />
-                            <Text id="idPrice3" text="{HostelModel>/FinalPrice}"   />
+                            <Text id="idPrice3" text="{HostelModel>/FinalPriceTotal}"   />
                 
                  <Label text="Payment Method" required="true" />
                             <Text text="{HostelModel>/SelectedPriceType}"/>

@@ -829,21 +829,28 @@ TC_onDialogNextButton: function () {
         return;
     }
 
-    // ⭐ PRICE CALCULATION BASED ON DURATION
-    let totalFinalPrice = 0;
+// ⭐ NEW MULTI-STEP PRICE LOGIC
+const basePrice = perUnitPrice;
 
-    if (sDurationType === "daily") {
-        totalFinalPrice = perUnitPrice * iDays;
-    }
-    else if (sDurationType === "monthly") {
-        totalFinalPrice = perUnitPrice * iSelectedMonthsOrYears;
-    }
-    else if (sDurationType === "yearly") {
-        totalFinalPrice = perUnitPrice * iSelectedMonthsOrYears;
-    }
+// 1️⃣ Number of Persons
+const persons = parseInt(oHostelModel.getProperty("/SelectedPerson") || "1", 10);
 
-    // ⭐ UPDATE FINAL PRICE FOR DISPLAY
-    oHostelModel.setProperty("/FinalPrice", totalFinalPrice);
+// 2️⃣ Number of months/years selected
+const monthsOrYears = parseInt(oHostelModel.getProperty("/SelectedMonths") || "1", 10);
+
+// 3️⃣ TOTAL PRICE = basePrice × persons × months/years
+const totalFinalPrice = basePrice * persons * monthsOrYears;
+
+// Save full room rent
+oHostelModel.setProperty("/FinalPriceTotal", totalFinalPrice);
+
+// 4️⃣ PER PERSON PRICE = total / persons
+const perPersonPrice = totalFinalPrice / persons;
+
+// Save per-person price (shown in UI)
+oHostelModel.setProperty("/FinalPrice", perPersonPrice);
+
+
 
     // Continue your existing logic...
     const totals = this.calculateTotals(aPersons, sStartDate, sEndDate, perUnitPrice);
@@ -881,8 +888,6 @@ TC_onDialogNextButton: function () {
 
     oHostelModel.updateBindings(true);
 },
-
-
 		// Separated calculation function
 		calculateTotals: function(aPersons, sStartDate, sEndDate, roomRentPrice) {
 				const oStartDate = this._parseDate(sStartDate);
