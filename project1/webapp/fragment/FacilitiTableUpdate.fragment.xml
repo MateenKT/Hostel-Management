@@ -42,7 +42,7 @@
                 <DatePicker id="editStartDate" value="{edit>/StartDate}" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd" change="onEditDateChange" />
 
                 <Label text="End Date" />
-                <DatePicker id="editEndDate" value="{path:'edit>/EndDate',formatter: '.Formatter.formatDate'}" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd" change="onEditDateChange"  />
+                <DatePicker id="editEndDate" value="{path:'edit>/EndDate'}" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd" change="onEditDateChange"  />
 
                 <Label text="Days" />
                 <Input id="editDays" value="{edit>/TotalDays}" editable="false" />
