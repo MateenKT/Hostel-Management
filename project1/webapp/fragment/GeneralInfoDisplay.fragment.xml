@@ -24,11 +24,11 @@
                             <Text id="idPrice3" text="{HostelModel>/FinalPrice}"   />
                 
                  <Label text="Payment Method" required="true" />
-                            <Text text="{HostelModel>/PaymentType}"/>
+                            <Text text="{HostelModel>/SelectedPriceType}"/>
                 <!-- Project Address -->
                 <core:Title text="Select Person" />
                <Label text="No of Persons" required="true" />
-                           <Text text="{HostelModel>/Person}"/>
+                           <Text text="{HostelModel>/SelectedPerson}"/>
 
                 <!-- Site Contact -->
                 <core:Title text="Dates" />
