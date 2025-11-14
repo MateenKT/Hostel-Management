@@ -450,18 +450,36 @@ sap.ui.define([
             }
         },
 
-        _LoadFacilities: async function (sBranchID) {
+
+
+
+
+        _LoadFacilities: async function (sBranchCode) {
             try {
                 const oView = this.getView();
 
-                // Fetch all facilities
-                const Response = await this.ajaxReadWithJQuery("HM_ExtraFacilities", {});
+                if (!sBranchCode) {
+                    console.warn("⚠️ No BranchCode passed to _LoadFacilities");
+                    return;
+                }
+
+                let oHostelModel = this.getView().getModel("HostelModel").getData();
+
+                let oBranch = oHostelModel.BranchCode;
+
+                const filter = {
+                    BranchCode: oBranch   // ✅ Correct filter
+                };
+
+
+
+                const Response = await this.ajaxReadWithJQuery("HM_Facilities", filter);
                 const aFacilities = Response?.data || [];
 
-                // Helper: convert Base64 → data:image URL
                 const convertBase64ToImage = (base64String, fileType) => {
-                    if (!base64String) return "./image/Fallback.png";
+                    if (!base64String) return sap.ui.require.toUrl("sap/ui/com/project1/image/Fallback.png");
                     let sBase64 = base64String.replace(/\s/g, "");
+
                     try {
                         if (!sBase64.startsWith("iVB") && !sBase64.startsWith("data:image")) {
                             const decoded = atob(sBase64);
@@ -470,37 +488,35 @@ sap.ui.define([
                     } catch (e) {
                         console.warn("Base64 decode error:", e);
                     }
+
                     const mimeType = fileType || "image/jpeg";
-                    return sBase64.startsWith("data:image") ? sBase64 : `data:${mimeType};base64,${sBase64}`;
+                    return sBase64.startsWith("data:image")
+                        ? sBase64
+                        : `data:${mimeType};base64,${sBase64}`;
                 };
 
-                // Normalize and filter facilities by branch
-                const normalize = v => (v ? String(v).trim().toLowerCase() : "");
-
-                const aFilteredFacilities = aFacilities.filter(f => {
-                    // keep all if no BranchID is passed
-                    if (!sBranchID) return true;
-                    const facilityBranch = normalize(f.BranchID || f.BranchCode || f.Address || f.Location);
-                    return facilityBranch && facilityBranch.includes(normalize(sBranchID));
-                });
-
-                // Convert images and prepare final data
-                const aFinalFacilities = aFilteredFacilities.map(f => ({
-                    FacilityID: f.FacilityID,
+                const aFinalFacilities = aFacilities.map(f => ({
+                    FacilityID: f.ID,
                     FacilityName: f.FacilityName,
-                    Image: convertBase64ToImage(f.FicilityImage, f.FileType),
-                    Price: Number(f.Price)
+                    Image: convertBase64ToImage(f.Photo1, f.Photo1Type),
+                    Price: f.Price
                 }));
 
-                // Bind to view model
-                const oFacilityModel = new sap.ui.model.json.JSONModel({ Facilities: aFinalFacilities });
+                const oFacilityModel = new sap.ui.model.json.JSONModel({
+                    Facilities: aFinalFacilities
+                });
+
                 oView.setModel(oFacilityModel, "FacilityModel");
 
-                console.log("Facilities loaded for branch:", sBranchID, aFinalFacilities);
-            } catch (e) {
-                console.error("Error loading filtered facilities:", e);
+                console.log("🏨 Facilities for branch", sBranchCode, aFinalFacilities);
+
+            } catch (err) {
+                console.error("❌ Facility loading error:", err);
             }
         },
+
+
+
 
 
         onSelectPricePlan: function (oEvent) {
@@ -521,39 +537,45 @@ sap.ui.define([
             const sPriceKey = mPriceMap[sType];
             const sPriceValue = sPriceKey ? oData[sPriceKey] : "N/A";
 
-            // Clear any previously selected plan (for visual and logical consistency)
-            oModel.setProperty("/SelectedPriceType", "");
-            oModel.setProperty("/SelectedPriceValue", "");
+            // Clear any previously selected plan(for visual and logical consistency)
+    oModel.setProperty("/SelectedPriceType", "");
+    oModel.setProperty("/SelectedPriceValue", "");
 
-            // Update the model with only the chosen plan
-            oModel.setProperty("/SelectedPriceType", sType);
-            oModel.setProperty("/SelectedPriceValue", sPriceValue);
+    // Update the model with only the chosen plan
+    oModel.setProperty("/SelectedPriceType", sType);
+    oModel.setProperty("/SelectedPriceValue", sPriceValue);
 
-            // --- VISUAL FEEDBACK SECTION ---
-            const oParent = oTile.getParent();
-            let aSiblings = [];
+    // --- VISUAL FEEDBACK SECTION ---
+    const oParent = oTile.getParent();
+    let aSiblings = [];
 
-            if (oParent.getItems) {
-                aSiblings = oParent.getItems(); // HBox/VBox/List/Grid
-            } else if (oParent.getContent) {
-                aSiblings = oParent.getContent(); // layout controls
-            }
+    if (oParent.getItems) {
+        aSiblings = oParent.getItems(); // HBox/VBox/List/Grid
+    } else if (oParent.getContent) {
+        aSiblings = oParent.getContent(); // layout controls
+    }
 
-            // Remove highlight from all other tiles
-            aSiblings.forEach(oItem => {
-                if (oItem.removeStyleClass) {
-                    oItem.removeStyleClass("selectedTile");
-                }
-            });
+    // Remove highlight from all other tiles
+    aSiblings.forEach(oItem => {
+        if (oItem.removeStyleClass) {
+            oItem.removeStyleClass("selectedTile");
+            oItem.addStyleClass("defaultTile");
+        }
+    });
 
-            // Add selection highlight to current one
-            oTile.addStyleClass("selectedTile");
 
-            // User feedback
-            sap.m.MessageToast.show(
-                `Selected ${sType.charAt(0).toUpperCase() + sType.slice(1)} plan — ₹${sPriceValue}`
-            );
-        },
+    // Add selection highlight to current one
+    oTile.removeStyleClass("defaultTile");
+    oTile.addStyleClass("selectedTile");
+
+
+
+    // User feedback
+    sap.m.MessageToast.show(
+        `Selected ${sType.charAt(0).toUpperCase() + sType.slice(1)} plan — ₹${sPriceValue}`
+    );
+},
+
 
        onConfirmBooking: function () {
     const oView = this.getView();
@@ -820,7 +842,7 @@ sap.ui.define([
                 console.log("🖼️ Final ImageList bound to HostelModel:", aImageList.length, "images");
 
                 // 7️⃣ Load facilities
-                await this._LoadFacilities(oRoomDetails.BranchID || oRoomDetails.BranchCode || oFullDetails.Address);
+                await this._LoadFacilities(sBranchCode);
 
                 // 8️⃣ Load fragment
                 if (!this._oRoomDetailFragment) {
@@ -848,10 +870,10 @@ sap.ui.define([
                         template: new sap.m.Image({
                             src: "{HostelModel>}",
                             width: "100%",
-                            // height: "250px",
                             densityAware: false,
                             decorative: false
-                        }).addStyleClass("roomCarouselImage")
+                        })
+
                     });
 
                     console.log("🎠 Carousel bound successfully:", oCarousel.getId());
