@@ -69,32 +69,6 @@ sap.ui.define([
                 { BranchCode: "BR004", BranchName: "Nashik" }
             ];
             oView.setModel(new sap.ui.model.json.JSONModel({ Branches: aBranches }), "BranchModel");
-
-            // 6️⃣ Async data loading sequence
-            try {
-                await this.BedTypedetails();          // ✅ loads BedTypeModel
-                await this.CustomerDetails();
-                await this._loadBranchCode();         // ✅ loads sBRModel
-                await this.onReadcallforRoom();       // ✅ loads RoomCountModel etc.
-                await this._loadFilteredData("KLB01", "");
-
-
-
-                // ✅ only proceed once sBRModel is ready
-                const oBRModel = oView.getModel("sBRModel");
-                    const oModelData = oBRModel.getData();
-                    const aFiltered = oModelData.filter(item => item.Name === "Kalaburgi");
-                    oView.setModel(new sap.ui.model.json.JSONModel(aFiltered), "AreaModel");
-                    oView.byId("id_Area").setEnabled(true);
-              
-
-                // ✅ Preselect default branch only after data loaded
-                this.byId("id_Branch").setSelectedKey("KLB01");
-             oView.byId("id_Area").setEnabled(true).setSelectedKey("KLB01");
-           oView.byId("id_Roomtype").setEnabled(true).setSelectedKey("All");
-            } catch (error) {
-                console.error("❌ Error during initialization:", error);
-            }
         },
 
         CustomerDetails: async function () {
@@ -1008,22 +982,46 @@ sap.ui.define([
             this._clearRoomDetailDialog();
         },
 
-
-
-
-
-
-
-
-
-        onTabSelect: function (oEvent) {
+        onTabSelect: async function(oEvent) {
             var oItem = oEvent.getParameter("item");
             const sKey = oItem.getKey();
+
             this.byId("pageContainer").to(this.byId(sKey));
 
             var page = this.byId(sKey);
             if (page && page.scrollTo) page.scrollTo(0, 0);
 
+            if (sKey === "idRooms") {
+                await this._loadRoomsPageData();
+            }
+        },
+
+        _loadRoomsPageData: async function() {
+            const oView = this.getView();
+            try {
+                sap.ui.core.BusyIndicator.show(0); // Show busy indicator immediately
+                 await this.BedTypedetails(); 
+                await this.CustomerDetails();
+                await this._loadBranchCode();
+                await this.onReadcallforRoom();
+                await this._loadFilteredData("KLB01", "");
+
+                const oBRModel = oView.getModel("sBRModel");
+                const oModelData = oBRModel.getData();
+                const aFiltered = oModelData.filter(item => item.Name === "Kalaburgi");
+
+                oView.setModel(new sap.ui.model.json.JSONModel(aFiltered), "AreaModel");
+                oView.byId("id_Area").setEnabled(true);
+
+                // Default selections
+                this.byId("id_Branch").setSelectedKey("KLB01");
+                oView.byId("id_Area").setEnabled(true).setSelectedKey("KLAB01");
+                oView.byId("id_Roomtype").setEnabled(true).setSelectedKey("All");
+                sap.ui.core.BusyIndicator.hide(); // Hide busy indicator
+            } catch (error) {
+                sap.ui.core.BusyIndicator.hide(); // Hide busy indicator
+                console.error("❌ Error while loading Rooms data:", error);
+            }
         },
 
         onpressFilter: function () {

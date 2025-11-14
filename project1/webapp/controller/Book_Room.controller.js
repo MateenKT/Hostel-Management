@@ -180,8 +180,9 @@ sap.ui.define([
 				FacilityID: f.ID,
 				FacilityName: f.FacilityName,
 				Image: convertBase64ToImage(f.Photo1, f.Photo1Type),
-        Price:f.Price,
-        UnitText:f.UnitText
+				Price:f.Price,
+				UnitText:f.UnitText,
+				Currency:f.Currency
 			}));
 
 			//  Wrap in object for proper binding
@@ -462,6 +463,14 @@ new sap.m.DatePicker({
 						}),
 
 						new sap.m.Label({
+							text: "State",
+              required: true
+						}),
+						new sap.m.Input({
+							value: "{HostelModel>/Persons/" + i + "/State}"
+						}),
+
+						new sap.m.Label({
 							text: "City",
               required: true
 						}),
@@ -581,7 +590,9 @@ new sap.m.DatePicker({
                           aSelected.push({
                             FacilityName: oFacilityObj.FacilityName,
                             Price: oFacilityObj.Price,
-                            Image: oFacilityObj.Image
+                            Image: oFacilityObj.Image,
+							Currency: oFacilityObj.Currency,
+							UnitText: oFacilityObj.UnitText
                           });
                           oCard.addStyleClass("serviceCardSelected");
                         }
@@ -610,9 +621,11 @@ new sap.m.DatePicker({
                 }),
 
                 // Facility Price (below the image)
-                new sap.m.Text({
-                  text: "{= '₹ ' + ${FacilityModel>Price}}"
-                }).addStyleClass("sapUiTinyMarginTop facilityPriceText")
+				new sap.m.Text({
+    text: "{= '₹ ' + ${FacilityModel>Price} + ' ' + ${FacilityModel>Currency} + ' ' + ${FacilityModel>UnitText} }"
+}).addStyleClass("sapUiTinyMarginTop facilityPriceText")
+
+            
               ]
             })
           }
@@ -649,6 +662,7 @@ new sap.m.DatePicker({
             { key: "MobileNo", label: "Mobile" },
             { key: "CustomerEmail", label: "Email" },
             { key: "Country", label: "Country" },
+			{ key: "State", label: "State" },
             { key: "City", label: "City" },
             { key: "Address", label: "Address" }
         ];
@@ -918,7 +932,9 @@ oHostelModel.setProperty("/FinalPrice", perPersonPrice);
 							EndDate: sEndDate,
 							TotalDays: iDays,
 							TotalAmount: fTotal,
-							Image: f.Image
+							Image: f.Image,
+							Currency: f.Currency,
+							UnitText: f.UnitText
 						});
 					});
 				});
@@ -1214,9 +1230,8 @@ onRoomDurationChange: function (oEvent) {
 
     oBTN.refresh(true);
     oHostelModel.refresh(true);
-}
-,
-onOpenProceedtoPay: function() {
+},
+		onOpenProceedtoPay: function() {
 			if (!this._oPaymentDialog) {
 				this._oPaymentDialog = sap.ui.xmlfragment(
 					"sap.ui.com.project1.fragment.PaymentPage",
@@ -1419,30 +1434,49 @@ onOpenProceedtoPay: function() {
 					};
 				});
 
-				// Final payload structure
-				const oPayload = {
-					data: formattedPayload
-				};
+			// Final payload structure
+			const oPayload = {
+				data: formattedPayload
+			};
 
-				// Use your reusable AJAX helper
-				await this.ajaxCreateWithJQuery("HM_Customer", oPayload);
+			// AJAX call
+			const oResponse = await this.ajaxCreateWithJQuery("HM_Customer", oPayload);
 
-				// On success
-				sap.m.MessageToast.show("Booking successful!");
-        
-				var oroute = this.getOwnerComponent().getRouter();
-				oroute.navTo("RouteHostel");
-				// Clear uploaded files
-				oData.Persons.forEach((_, idx) => {
-					const uploader = sap.ui.getCore().byId("idFileUploader_" + idx);
-					if (uploader) uploader.setValue("");
-				});
+			// Extract BookingDetails array
+			const aBookingDetails = oResponse.BookingDetails || [];
 
-				// Close dialog if exists
-				if (this.FCIA_Dialog) {
-					this.FCIA_Dialog.close();
-				}
+			// Prepare message text
+			let sMessage = "Booking Successful!\n\n";
 
+			aBookingDetails.forEach((item, index) => {
+				sMessage += 
+					"Customer " + (index + 1) + ":\n" +
+					"Customer ID: " + item.CustomerID + "\n" +
+					"Booking ID: " + item.BookingID + "\n\n";
+			});
+
+			// Show success box
+			sap.m.MessageBox.success(sMessage, {
+				title: "Success",
+				actions: [sap.m.MessageBox.Action.OK],
+				onClose: function () {
+
+					// Navigate after user clicks OK
+					var oRoute = this.getOwnerComponent().getRouter();
+					oRoute.navTo("RouteHostel");
+
+					// Clear uploaded files
+					oData.Persons.forEach((_, idx) => {
+						const uploader = sap.ui.getCore().byId("idFileUploader_" + idx);
+						if (uploader) uploader.setValue("");
+					});
+
+					// Close dialog if exists
+					if (this.FCIA_Dialog) {
+						this.FCIA_Dialog.close();
+					}
+				}.bind(this)
+			});
 			} catch (err) {
 				sap.m.MessageBox.error("Error while booking: " + err);
 			}

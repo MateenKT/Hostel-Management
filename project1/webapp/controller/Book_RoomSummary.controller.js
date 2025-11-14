@@ -42,10 +42,10 @@ sap.ui.define([
     //  Extract index from binding path and store it
     this._oSelectedIndex = parseInt(this._sSelectedPath.split("/").pop(), 10);
 
-    console.log("Selected Row Path:", this._sSelectedPath);
-    console.log("Selected Index:", this._oSelectedIndex);
+    // console.log("Selected Row Path:", this._sSelectedPath);
+    // console.log("Selected Index:", this._oSelectedIndex);
 
-    sap.m.MessageToast.show("Selected: " + oSelectedData.PersonName);
+    // sap.m.MessageToast.show("Selected: " + oSelectedData.PersonName);
 },
 
 
@@ -209,8 +209,6 @@ _formatDateToDDMMYYYY: function(oDate) {
     const year = oDate.getFullYear();
     return `${day}/${month}/${year}`;
 },
-
-
 
 calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
     const oStartDate = this._parseDate(sStartDate);

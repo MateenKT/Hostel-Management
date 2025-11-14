@@ -12,26 +12,31 @@
 
                 <Label text="Facility Name" />
                 <Input id="editFacilityName" value="{edit>/FacilityName}" editable="false" />
-               <Label text="Unit Type" required="true" />
+                <Label text="Unit Type" required="true" />
 
-<ComboBox
-    id="idUnitType"
-    selectedKey="{edit>/UnitText}"
-    placeholder="Select Unit Type"
-    selectionChange="onUnitTextChange"
-    width="100%"
-    items="{FacilityModel>/}"
->
-    <core:ListItem key="{FacilityModel>UnitText}" text="{FacilityModel>UnitText}" />
-   
-</ComboBox>
-
-                
-                
-              
+                <ComboBox id="idUnitType" placeholder="Select Unit Type"  items="{RateType>/}" selectedKey="Per Day"
+                value="{edit>/UnitText}" change=".onUnitTextChange" width="100%" valueStateText="{i18n>selectRateType}">
+                     <core:Item key="{RateType>ID}" text="{RateType>RateType}" />
+                </ComboBox>
 
                 <Label text="Facility Price (₹)" />
                 <Input id="editPrice" value="{edit>/Price}" type="Number" editable="false" />
+
+                <Label text="Currency" required="true" />
+                <ComboBox
+                    id="FU_id_Currency"
+                    selectedKey="{edit>/Currency}"
+                    items="{CurrencyModel>/}"
+                    valueStateText="Select Currency"
+                    width="100%"
+                    change=".onCurrecnyChange"
+                    placeholder="Select Currency"
+                >
+                    <core:Item
+                        key="{CurrencyModel>currency}"
+                        text="{CurrencyModel>currency}"
+                    />
+                </ComboBox>
 
                 <Label text="Start Date" />
                 <DatePicker id="editStartDate" value="{edit>/StartDate}" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd" change="onEditDateChange" />
