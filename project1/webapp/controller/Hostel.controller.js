@@ -1015,7 +1015,7 @@ sap.ui.define([
 
                 // Default selections
                 this.byId("id_Branch").setSelectedKey("KLB01");
-                oView.byId("id_Area").setEnabled(true).setSelectedKey("KLAB01");
+                oView.byId("id_Area").setEnabled(true).setSelectedKey("KLB01");
                 oView.byId("id_Roomtype").setEnabled(true).setSelectedKey("All");
                 sap.ui.core.BusyIndicator.hide(); // Hide busy indicator
             } catch (error) {

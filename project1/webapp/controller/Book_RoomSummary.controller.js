@@ -84,23 +84,32 @@ this._oEditDialog.close();
 },
 onEditDateChange: function (oEvent) {
     const oEditModel = this.getView().getModel("edit");
+let sStartDateRaw = oEditModel.getProperty("/StartDate");
 
-    const sStartDateRaw = oEditModel.getProperty("/StartDate");
-    const sEndDateRaw = oEditModel.getProperty("/EndDate");
+let sStartDate = sStartDateRaw.includes("/")
+    ? sStartDateRaw.split("/").reverse().join("-")
+    : sStartDateRaw;
 
-    if (!sStartDateRaw || !sEndDateRaw) {
+let sEndDateRaw = oEditModel.getProperty("/EndDate");
+
+let sEndDate = sEndDateRaw.includes("/")
+    ? sEndDateRaw.split("/").reverse().join("-")
+    : sEndDateRaw;
+
+
+    // Reset TotalDays if either date is missing
+    if (!sStartDate || !sEndDate) {
         oEditModel.setProperty("/TotalDays", 0);
         return;
     }
 
-    // Parse and format dates to dd/MM/yyyy
-    const oStart = new Date(sStartDateRaw.split("T")[0]);
-    const oEnd = new Date(sEndDateRaw.split("T")[0]);
+    // Convert ISO date strings to Date objects
+    const oStart = new Date(sStartDate);
+    const oEnd = new Date(sEndDate);
 
     // Validate dates
     if (isNaN(oStart.getTime()) || isNaN(oEnd.getTime())) {
         oEditModel.setProperty("/TotalDays", 0);
-     
         return;
     }
 
@@ -110,15 +119,22 @@ onEditDateChange: function (oEvent) {
         return;
     }
 
-    // Update StartDate and EndDate in formatted form
+    // Optional: Format dates to dd/MM/yyyy in the model
     oEditModel.setProperty("/StartDate", this._formatDateToDDMMYYYY(oStart));
     oEditModel.setProperty("/EndDate", this._formatDateToDDMMYYYY(oEnd));
 
-    // Calculate days difference
-    const iDiffDays = Math.ceil((oEnd - oStart) / (1000 * 60 * 60 * 24));
+    // Calculate difference in days (inclusive or exclusive)
+    const iDiffDays = Math.ceil((oEnd - oStart) / (1000 * 60 * 60 * 24)) + 1; // +1 if you want inclusive of start date
     oEditModel.setProperty("/TotalDays", iDiffDays);
-}
-,
+},
+
+// Utility function to format date
+_formatDateToDDMMYYYY: function (oDate) {
+    const dd = String(oDate.getDate()).padStart(2, '0');
+    const mm = String(oDate.getMonth() + 1).padStart(2, '0'); // Months start at 0
+    const yyyy = oDate.getFullYear();
+    return dd + "/" + mm + "/" + yyyy;
+},
 onEditFacilitySave: function () {
     const oView = this.getView();
     const oHostelModel = oView.getModel("HostelModel");

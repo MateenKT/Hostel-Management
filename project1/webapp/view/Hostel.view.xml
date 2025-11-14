@@ -283,8 +283,8 @@
                                                 wrapping="true" />
                                             <Text
                                                 text="{= ${VisibilityModel>Currency} + ${VisibilityModel>Price}}"
-                                                class="bedCardPrice" />
-                                            <HBox justifyContent="Center" alignItems="Center" class="sapUiSmallMarginTop">
+                                                class="bedCardPrice sapUiSmallMarginTop" />
+                                            <HBox justifyContent="Center" alignItems="Center" >
                                                 <Button
                                                     text="{= ${VisibilityModel>Visible} ? 'View Details' : 'Occupied' }"
                                                     type="Default"
