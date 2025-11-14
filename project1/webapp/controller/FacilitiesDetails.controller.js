@@ -265,7 +265,6 @@ sap.ui.define([
                     });
                 };
 
-                sap.ui.core.BusyIndicator.show(0);
                 try {
                     const convertedImages = await Promise.all(attachments.map(toBase64));
 
@@ -301,6 +300,7 @@ sap.ui.define([
                     }
 
                     // Send AJAX update
+                     sap.ui.core.BusyIndicator.show(0);
                     await this.ajaxUpdateWithJQuery("HM_ExtraFacilities", {
                         data: oData,
                         filters: {
@@ -308,11 +308,6 @@ sap.ui.define([
                         }
                     });
 
-                    this.getView().getModel("DisplayImagesModel").setData({
-                        DisplayImages: [{
-                            isPlaceholder: true
-                        }]
-                    });
                     await this._refreshFacilityDetails(Payload.ID);
                     this.getView().getModel("editable").setProperty("/Edit", false)
                     sap.m.MessageToast.show("Facility updated successfully!");
@@ -325,7 +320,6 @@ sap.ui.define([
         },
 
         _refreshFacilityDetails: async function(sFacilityID) {
-            sap.ui.core.BusyIndicator.show(0);
             try {
                 const oData = await this.ajaxReadWithJQuery("HM_ExtraFacilities", {
                     ID: sFacilityID

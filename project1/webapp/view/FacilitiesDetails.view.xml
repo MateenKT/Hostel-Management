@@ -144,8 +144,7 @@
 						<ObjectPageSubSection id="FD_id_ordersection">
 							<blocks>
 								    <m:HBox
-    id="idImagesContainer"
-    wrap="true"
+    id="FD_id_ImagesContainer"
     justifyContent="Start"
     alignItems="Start"
     class="sapUiSmallMargin"
@@ -177,7 +176,6 @@
                      class="placeholderBox"
         >
             <u:FileUploader
-            id="fileUploader"
             icon="sap-icon://add"
             width="120px"
             style="Transparent"
