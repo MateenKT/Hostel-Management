@@ -41,10 +41,11 @@ sap.ui.define([
             this.getView().setModel(oTokenModel, "tokenModel");
             this.getView().setModel(oUploaderData, "UploaderData");
             await this._loadBranchCode()
-            this.Onsearch()
-       
+            await this.Onsearch()
+         
         },
          _loadBranchCode: async function () {
+             sap.ui.core.BusyIndicator.show(0);
             try {
                 const oView = this.getView();
 
@@ -273,16 +274,12 @@ sap.ui.define([
             oRouter.navTo("RouteHostel");
         },
         Onsearch: function() {
-            sap.ui.core.BusyIndicator.show(0);
-
             this.ajaxReadWithJQuery("HM_BedType", "").then((oData) => {
                 var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
                 var model = new sap.ui.model.json.JSONModel(oFCIAerData);
                 this.getView().setModel(model, "BedDetails")
                 this._populateUniqueFilterValues(oFCIAerData);
-
-                sap.ui.core.BusyIndicator.hide();
-
+                    sap.ui.core.BusyIndicator.hide();
             })
         },
         _populateUniqueFilterValues: function(data) {

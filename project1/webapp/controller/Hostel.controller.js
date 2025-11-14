@@ -1000,7 +1000,7 @@ sap.ui.define([
             const oView = this.getView();
             try {
                 sap.ui.core.BusyIndicator.show(0); // Show busy indicator immediately
-                 await this.BedTypedetails(); 
+                //  await this.BedTypedetails(); 
                 await this.CustomerDetails();
                 await this._loadBranchCode();
                 await this.onReadcallforRoom();

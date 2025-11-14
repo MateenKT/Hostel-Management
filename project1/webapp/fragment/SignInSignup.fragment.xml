@@ -38,6 +38,7 @@
                     press="onSwitchToSignIn"
                 />
                 <Button
+                id="signupvisible"
                     text="SIGN UP"
                     type="Transparent"
                     class="switch-toggle-btn {= ${LoginViewModel>/selectedAccountType} === 'biz' ? 'active' : 'inactive'}"

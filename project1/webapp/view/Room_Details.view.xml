@@ -72,7 +72,7 @@
                 id="id_ARD_Table"
                 sticky="ColumnHeaders,HeaderToolbar"
                 mode="MultiSelect"
-                width="auto"
+                width="auto" busyIndicatorDelay="0"
                 class="sapUiResponsiveMargin"
                 items="{path: 'RoomDetailsModel>/', sorter: {path: 'BranchCode',descending: false,group: true}}">
 				<headerToolbar>

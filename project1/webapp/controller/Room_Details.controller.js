@@ -30,14 +30,17 @@ sap.ui.define([
 
             });
             this.getView().setModel(model, "RoomModel")
+            sap.ui.core.BusyIndicator.show(0);
            await this.ajaxReadWithJQuery("Currency", "").then((oData) => {
                 var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
                 var model = new JSONModel(oFCIAerData);
                 this.getView().setModel(model, "CurrencyModel");
             })
-            await  this.Onsearch()
+          
             await this.BedTypedetails()
             await this._loadBranchCode()
+              await  this.Onsearch()
+            //  sap.ui.core.BusyIndicator.hide();
           
         },
          _loadBranchCode: async function () {
@@ -570,12 +573,19 @@ sap.ui.define([
                         data: Payload
                     };
 
-                    if (aRoomDetails.some(r => r.RoomNo === Payload.RoomNo)) {
-                        sMethod = "PUT";
-                        oBody.filters = {
-                            RoomNo: Payload.RoomNo
-                        };
-                    }
+                    // if (aRoomDetails.some(r => r.RoomNo === Payload.RoomNo)) {
+                    //     sMethod = "PUT";
+                    //     oBody.filters = {
+                    //         RoomNo: Payload.RoomNo
+                    //     };
+                    // }
+                    if (Payload._isEditing === true) {
+    // Always do PUT when editing
+    sMethod = "PUT";
+    oBody.filters = {
+        RoomNo: this.RoomNo      // Original RoomNo before edit
+    };
+}
 
                     delete Payload._isEditing;
 
@@ -676,8 +686,6 @@ sap.ui.define([
             );
         },
         Onsearch: function() {
-            sap.ui.core.BusyIndicator.show(0);
-
             $.ajax({
                 url: "https://rest.kalpavrikshatechnologies.com/HM_Rooms",
                 method: "GET",
@@ -690,11 +698,10 @@ sap.ui.define([
                     var model = new JSONModel(response.commentData);
                     this.getView().setModel(model, "RoomDetailsModel");
                     this._populateUniqueFilterValues(response.commentData);
-                    sap.ui.core.BusyIndicator.hide();
-
-
+                                 sap.ui.core.BusyIndicator.hide();
                 }.bind(this),
                 error: function(err) {
+                     sap.ui.core.BusyIndicator.hide();
                     sap.m.MessageBox.error("Error uploading data or file.");
                 }
             });
@@ -739,6 +746,10 @@ sap.ui.define([
         },
         onACtypeChange: function(oEvent) {
             utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
-        }
+        },
+         onHome: function() {
+            var oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("RouteHostel");
+        },
     });
 });

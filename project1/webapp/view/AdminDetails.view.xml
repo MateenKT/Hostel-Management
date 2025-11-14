@@ -108,6 +108,7 @@
                     class="sapUiSmallMarginTop"
                     items="{path: 'CustomerData>/AllSelectedFacilities'}"
                     mode="SingleSelectLeft"
+					busyIndicatorDelay="0"
                     inset="false"
                     selectionChange="onTableSelection">
 						<headerToolbar>
