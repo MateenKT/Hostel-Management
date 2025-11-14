@@ -193,13 +193,29 @@ sap.ui.define([
 
 		onNoOfPersonSelect: function(oEvent) {
 			var that = this
-			const iPersons = parseInt(oEvent.getSource().getSelectedKey());
+       var sKey = "";
+    if (oEvent && oEvent.getSource && oEvent.getSource().getSelectedKey) {
+        sKey = oEvent.getSource().getSelectedKey();
+    }
+    // fallback to model value (in case we call this without an event)
+    var oModel = this.getView().getModel("HostelModel");
+    if (!sKey) {
+        sKey = oModel.getProperty("/SelectedPerson");
+    }
+    const iPersons = parseInt(sKey) || 1;
+
+    // If Persons already present and count matches, do nothing
+    const oData = oModel.getData();
+    if (oData.Persons && oData.Persons.length === iPersons) {
+        return; // already created
+    }
+			// const iPersons = parseInt(oEvent.getSource().getSelectedKey());
 			const oVBox = this.getView().byId("idPersonalContainer1");
-			const oModel = this.getView().getModel("HostelModel");
+			// const oModel = this.getView().getModel("HostelModel");
 			const oFacilityModel = this.getView().getModel("FacilityModel");
 			const oLoginModel = sap.ui.getCore().getModel("LoginModel");
 			const sUserID = oLoginModel?.getData().UserID || "";
-			const oData = oModel.getData();
+			// const oData = oModel.getData();
 
 			oData.Persons = [];
 			oVBox.destroyItems();
@@ -698,6 +714,12 @@ new sap.m.DatePicker({
 }
 ,
 		onDialogNextButton: async function() {
+        if (this._iSelectedStepIndex === 1) {
+        if (!this._checkMandatoryFields()) {
+            sap.m.MessageToast.show("Please fill all mandatory personal details before proceeding.");
+            return; // STOP navigation
+        }
+    }
 			this._iSelectedStepIndex = this._oWizard.getSteps().indexOf(this._oSelectedStep);
 			this.oNextStep = this._oWizard.getSteps()[this._iSelectedStepIndex + 1];
 			if (this._oSelectedStep && !this._oSelectedStep.bLast) {
@@ -745,15 +767,30 @@ new sap.m.DatePicker({
 				case 1:
 					oModel.setProperty("/PERVIOUSVIS", true);
 					oModel.setProperty("/NXTVis", true);
-           if (!this._checkMandatoryFields()) {
-                sap.m.MessageToast.show("Please fill all mandatory personal details before proceeding.");
-                // Move wizard back to previous valid step
-                // If using goToStep/goBack, implement as needed to stay on current step
-                this._iSelectedStepIndex--;
-                this._oSelectedStep = this._oWizard.getSteps()[this._iSelectedStepIndex];
-                oModel.setProperty("/NXTVis", true);
-                return; // Exit without proceeding
-            }
+           try {
+        // First try to get the Select control and call handler with a fake event
+        const oSelect = this.getView().byId("id_Noofperson1");
+        if (oSelect) {
+            // call original handler with a synthetic event object that provides getSource()
+            this.onNoOfPersonSelect({ getSource: function() { return oSelect; } });
+        } else {
+            // fallback: call handler without event so it uses model value
+            this.onNoOfPersonSelect();
+        }
+    } catch (e) {
+        // safe fallback: call without event
+        this.onNoOfPersonSelect();
+    }
+          //  if (!this._checkMandatoryFields()) {
+          //       sap.m.MessageToast.show("Please fill all mandatory personal details before proceeding.");
+          //       // Move wizard back to previous valid step
+          //       // If using goToStep/goBack, implement as needed to stay on current step
+          //       this._iSelectedStepIndex--;
+          //       this._oSelectedStep = this._oWizard.getSteps()[this._iSelectedStepIndex];
+          //       oModel.setProperty("/NXTVis", true);
+          //       return; // Exit without proceeding
+          //   }
+            
             this._LoadFacilities()
 					break;
 				case 2:
