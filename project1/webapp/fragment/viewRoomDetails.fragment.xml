@@ -2,7 +2,8 @@
 	xmlns="sap.m" 
 	xmlns:m="sap.m" 
 	xmlns:core="sap.ui.core" 
-	xmlns:l="sap.ui.layout">
+	xmlns:l="sap.ui.layout" 
+	xmlns:card="sap.ui.integration.widgets">
 	<Dialog id="roomDetailID" title="Room Details" type="Message" class="sapUiContentPadding roomDetailDialog" afterClose=".onDialogAfterClose">
 		<customHeader>
 			<Bar class="barheader">
@@ -16,9 +17,7 @@
 		</customHeader>
 		<content>
 			<VBox width="100%" class="sapUiSmallMargin" renderType="Bare">
-				<!-- TOP: IMAGE + DETAILS -->
 				<l:Grid width="100%" hSpacing="1" vSpacing="1">
-					<!-- LEFT: CAROUSEL -->
 					<l:content>
 						<VBox width="100%">
 							<layoutData>
@@ -31,66 +30,52 @@
 							</HBox>
 						</VBox>
 					</l:content>
-					<!-- RIGHT: DETAILS -->
 					<l:content>
-						<VBox width="100%" class="roomDetailsBox sapUiSmallMargin">
+						<VBox width="100%">
 							<layoutData>
 								<l:GridData span="L4 M6 S12"/>
 							</layoutData>
-							<HBox alignItems="Center" class="sapUiSmallMarginBottom">
-								<core:Icon src="sap-icon://home-share" size="1.4rem" class="titleIcon"/>
-								<Title text="Capacity: {HostelModel>/Capacity}" />
-							</HBox>
-							<HBox alignItems="Center" class="sapUiSmallMarginBottom">
-								<core:Icon src="sap-icon://business-card" size="1.4rem" class="titleIcon"/>
-								<Title text="Room Type: {HostelModel>/ACType}" />
-							</HBox>
-							<HBox alignItems="Center" class="sapUiSmallMarginBottom">
-								<core:Icon src="sap-icon://business-card" size="1.4rem" class="titleIcon"/>
-								<Title text="{HostelModel>/Description}" wrapping="true" class="sapUiSmallMarginTop sapUiSmallMarginBottom" />	
+							<card:Card manifest="./cards/roomDetailsCard.json" class="sapUiSmallMarginTop roomDetailsCard " manifestChanges='{  "sap.card": {   "data": { "json": {  "BedType": "{HostelModel>/BedType}",  "Capacity": "{HostelModel>/Capacity}",  "ACType": "{HostelModel>/ACType}",  }   }  } }'/>
+							<HBox class="descriptionBox sapUiSmallMarginTop" alignItems="Start">
+								<core:Icon src="sap-icon://detail-view" size="1.8rem" class="descIcon"/>
+								<Text text="{HostelModel>/Description}" wrapping="true" class="descTextLarge" width="100%" />
 							</HBox>
 						</VBox>
 					</l:content>
 				</l:Grid>
 				<!-- PRICE PLANS -->
-				<l:Grid defaultSpan="L4 M6 S12" hSpacing="1" vSpacing="1" class="sapUiTinyMarginBottom">
-					<HBox alignItems="Center" class="">
-						<core:Icon src="sap-icon://course-program" size="1.4rem" class="titleIcon"/>
-						<Title text="Choose a plan" />
-					</HBox>
-					<GenericTile header="Per Day" subheader="₹{HostelModel>/Price}" class="myTile defaultTile" frameType="OneByHalf" press=".onSelectPricePlan">
+				<HBox justifyContent="SpaceBetween" alignItems="Center" class="priceRow">
+					<GenericTile header="Per Day" subheader="{HostelModel>/Currency} {HostelModel>/Price}" class="defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan">
 						<customData>
-							<core:CustomData key="type" value="daily" />
+							<core:CustomData key="type" value="daily"/>
 						</customData>
 					</GenericTile>
-					<GenericTile header="Per Month" subheader="₹{HostelModel>/MonthPrice}" class="myTile defaultTile" frameType="OneByHalf" press=".onSelectPricePlan">
+					<GenericTile header="Per Month" subheader="{HostelModel>/Currency} {HostelModel>/MonthPrice}" class=" defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan">
 						<customData>
-							<core:CustomData key="type" value="monthly" />
+							<core:CustomData key="type" value="monthly"/>
 						</customData>
 					</GenericTile>
-					<GenericTile header="Per Year" subheader="₹{HostelModel>/YearPrice}" class="myTile defaultTile" frameType="OneByHalf" press=".onSelectPricePlan">
+					<GenericTile header="Per Year" subheader="{HostelModel>/Currency} {HostelModel>/YearPrice}" class=" defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan">
 						<customData>
-							<core:CustomData key="type" value="yearly" />
+							<core:CustomData key="type" value="yearly"/>
 						</customData>
 					</GenericTile>
-				</l:Grid>
-				<!-- DESCRIPTION -->
-				<!-- BOOK NOW BUTTON -->
-				<HBox justifyContent="End" class="sapUiMediumMarginTop">
-					<Button text="Book Now" type="Emphasized" press=".onConfirmBooking" class="myCustomButton" />
+					<Button text="Book Now" type="Emphasized" press=".onConfirmBooking" class="myCustomButton priceItem" />
 				</HBox>
 				<!-- FACILITIES -->
-				<Panel expandable="true" expanded="true" headerText="Available Facilities" class="customHeaderColor sapUiMediumMarginTop">
-					<HBox wrap="Wrap" class="facilityCardWrap sapUiMediumMarginBegin" items="{FacilityModel>/Facilities}">
-						<VBox class="facilityCard">
-							<Image src="{FacilityModel>Image}" class="facilityCardImg" densityAware="false" />
-							<Text text="{FacilityModel>FacilityName}" class="facilityCardTitle" />
-							<Text text="₹{FacilityModel>Price}" class="facilityCardPrice" />
-						</VBox>
-					</HBox>
-				</Panel>
+				<Bar design="Header" class="sapUiMediumMarginTop">
+					<contentMiddle>
+						<Title text="Available Facilities" class="" />
+					</contentMiddle>
+				</Bar>
+				<HBox wrap="Wrap" class="facilityCardWrap sapUiMediumMargin" items="{FacilityModel>/Facilities}">
+					<VBox class="facilityCard">
+						<Image src="{FacilityModel>Image}" class="facilityCardImg" densityAware="false" />
+						<Text text="{FacilityModel>FacilityName}" class="facilityCardTitle" />
+						<Text text="₹{FacilityModel>Price}" class="facilityCardPrice" />
+					</VBox>
+				</HBox>
 			</VBox>
 		</content>
 	</Dialog>
 </core:FragmentDefinition>
-<!-- <GenericTile class="myBigTile sapUiTinyMarginBegin sapUiTinyMarginTop" header="Capacity: {HostelModel>/Capacity}" frameType= "TwoByHalf"><TileContent ><ImageContent src="sap-icon://home-share" /></TileContent></GenericTile>		 -->

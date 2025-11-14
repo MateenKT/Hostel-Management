@@ -1195,3 +1195,235 @@
     margin-right: 8px;
     color: #0a6ed1; /* optional: consistent branding */
 }
+
+
+
+
+
+
+
+
+        /* Close button specific styling */
+.barheader .sapMBarRight .sapMBtnInner {
+    background: #008b96 !important; /* solid teal */
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 6px !important;
+}
+
+/* Make the icon white and sharp */
+.barheader .sapMBarRight .sapMBtnIcon {
+    color: white !important;
+    font-size: 1.2rem !important;
+}
+
+/* Remove the translucent hover effect */
+.barheader .sapMBarRight .sapMBtn:hover .sapMBtnInner {
+    background: #007785 !important; /* slightly darker teal on hover */
+}
+
+/* Kill the gradient on the button wrapper/container */
+.barheader .sapMBarRight,
+.barheader .sapMBarRight .sapMBtn {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+
+
+/* --- Room Detail Dialog Overrides --- */
+.roomDetailDialog {
+    max-width: 80% !important;
+    width: 80% !important;
+}
+
+.roomDetailDialog .sapMDialogSection {
+    max-width: 100% !important;
+}
+
+.roomDetailDialog .sapMDialogScroll,
+.roomDetailDialog .sapMDialogSection {
+    overflow-x: hidden !important;
+}
+
+.roomDetailDialog .sapMDialogScroll {
+    padding-right: 1rem !important;
+}
+
+
+
+/* Remove focus outline from Carousel root container */
+.roomCarouselImage:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+
+
+
+.centerUPIImage {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+
+.sapUiCompFilterBar{
+  background-image: url("../image/filterbackground.png"); 
+  background-size: cover; 
+  background-position: center;
+}
+
+/* --- Text/Labels --- */
+.customTitleColor {
+    color: #008c9e !important;
+    font-weight: 600;
+}
+
+.titleIcon {
+    margin-right: 8px;
+    color: #0a6ed1;
+}
+
+.descriptionBox {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+
+
+.descTextLarge {
+    display: block;              
+    text-align: justify;         
+    text-justify: inter-word;    
+    font-size: 1rem !important;
+    line-height: 1.4 !important;
+    color: #2c3e50;
+    font-weight: 500;
+    margin-left: 0.5rem;       
+}
+
+.descIcon {
+    margin-right: 0.5rem;        
+}
+
+
+/* 🔹 Increase font size inside the card */
+.roomDetailsCard .sapFCardContent, 
+.roomDetailsCard .sapMText,
+.roomDetailsCard .sapMLabel {
+  font-size: 1.2rem !important; /* adjust as needed */
+  line-height: 1.6 !important;
+}
+
+/* Optional: make title text larger */
+.roomDetailsCard .sapFCardHeaderTitle {
+  font-size: 1.4rem !important;
+  font-weight: 600 !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* --- BUTTON SIZE AND STYLING (COLOR CHANGED TO MATCH TILE) --- */
+.myCustomButton {
+  height: 83px !important;
+  width: 280px !important;
+  min-width: 280px !important;
+  font-size: 20px !important;
+  padding: 0 !important;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Inner styling */
+.myCustomButton .sapMBtnInner {
+  background: linear-gradient(135deg, #00b6c76e, #007984a2) !important;
+  height: 100% !important;
+  line-height: normal !important; 
+  padding: 26px 10px 24px 10px !important; 
+  font-size: 20px !important;
+  border-radius: 8px;
+  transition: all 0.25s ease-in-out; 
+  text-align: center !important; 
+  border: none !important; 
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+}
+
+.myCustomButton .sapMBtnContent {
+  display: block !important; 
+  width: 100%;
+  /* CHANGED: White Text Color */
+  color: white !important; 
+  font-size: 20px !important;
+  font-weight: bold !important; 
+  transition: font-size 0.2s ease-in-out;
+  text-align: center !important; 
+}
+
+/* Hover effect */
+.myCustomButton:hover .sapMBtnInner {
+  /* Hover effect to match tile hover */
+  transform: translateY(-3px) !important; 
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important;
+  background: linear-gradient(135deg, #00c6d8, #008892) !important;
+}
+
+
+/* TILE HEIGHT MATCHING BUTTON (Height: 83px) */
+.sapMGTOneByHalf.priceItem {
+    height: 83px !important; 
+    min-height: 83px !important;
+}
+
+
+
+.priceRow {
+    width: 100%;
+    gap: 20px;
+}
+
+.priceRow .priceItem {
+    flex: 1;             
+    max-width: 280px; 
+    min-width: 280px;   
+}
+/******/
+.defaultTile * {
+    font-size: 17px !important; 
+    /* font-weight: bold !important; */
+    text-align: center !important;
+    color: whitesmoke !important;
+}
+.selectedTile *{
+    font-size: 17px !important; 
+    /* font-weight: bold !important; */
+    text-align: center !important;
+    color: 2c3e50 !important;
+}
