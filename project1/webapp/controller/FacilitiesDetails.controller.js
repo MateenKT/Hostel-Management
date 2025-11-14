@@ -51,6 +51,7 @@ sap.ui.define([
 
             this.BedID = oEvent.getParameter("arguments").sPath;
             await this._refreshFacilityDetails(this.BedID);
+            await this.Onsearch()
             sap.ui.core.BusyIndicator.hide();
         },
 
@@ -223,9 +224,20 @@ sap.ui.define([
             oReader.readAsDataURL(oFile);
         },
 
+         Onsearch: function() {
+            sap.ui.core.BusyIndicator.show(0);
+            this.ajaxReadWithJQuery("HM_ExtraFacilities", "").then((oData) => {
+                var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
+                var model = new sap.ui.model.json.JSONModel(oFCIAerData);
+                this.getView().setModel(model, "Facilities")
+                sap.ui.core.BusyIndicator.hide();
+            })
+        },
+
         BT_onsavebuttonpress: async function() {
             var oView = this.getView();
             var Payload = oView.getModel("FacilitiesModel").getData();
+             var aFacilitiesData = oView.getModel("Facilities").getData();
 
             // Field validations
             if (
@@ -247,6 +259,21 @@ sap.ui.define([
                     sap.m.MessageBox.error("You can upload a maximum of 3 images only.");
                     return;
                 }
+
+                //  Duplicate check
+            var bDuplicate = aFacilitiesData.some(function(facility) {
+                if (Payload.ID && facility.ID === Payload.ID) return false; // Skip comparing the same record during update
+                return (
+                    facility.BranchCode === Payload.BranchCode &&
+                    facility.FacilityName.trim().toLowerCase() === Payload.FacilityName.trim().toLowerCase() &&
+                    facility.UnitText === Payload.UnitText
+                );
+            });
+
+            if (bDuplicate) {
+                sap.m.MessageToast.show("Facility with the same rate type already exists for this branch.");
+                return;
+            }
 
                 // Convert image files to Base64
                 const toBase64 = (file) => {
