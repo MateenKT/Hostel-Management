@@ -1,114 +1,250 @@
 <core:FragmentDefinition
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
-      xmlns:f="sap.ui.layout.form"
-    xmlns:l="sap.ui.layout">
-    <Dialog id="authDialog"  draggable="true" resizable="true" class="authDialog">
-    <customHeader>
-    <Bar>
-      <contentMiddle>
-        <Title text="Student Portal Access" />
-      </contentMiddle>
-      <contentRight>
-        <Button type="Transparent" icon="sap-icon://decline" press="onDialogClose"/>
-      </contentRight>
-    </Bar>
-  </customHeader>
-    
+    xmlns:f="sap.ui.layout.form"
+    xmlns:l="sap.ui.layout"
+>
+    <Dialog
+        id="authDialog"
+        draggable="true"
+        resizable="true"
+        class="authDialog"
+    >
+        <customHeader>
+            <Bar>
+                <contentMiddle>
+                    <Title text="Student Portal Access" />
+                </contentMiddle>
+                <contentRight>
+                    <Button
+                        type="Transparent"
+                        icon="sap-icon://decline"
+                        press="onDialogClose"
+                    />
+                </contentRight>
+            </Bar>
+        </customHeader>
+
         <VBox>
             <!-- Switch Button -->
-          <HBox justifyContent="Center" class="switch-toggle-container">
-    <Button text="SIGN IN"
-            type="Transparent"
-            class="switch-toggle-btn {= ${LoginViewModel>/selectedAccountType} === 'personal' ? 'active' : 'inactive'}"
-            press="onSwitchToSignIn" />
-    <Button text="SIGN UP"
-            type="Transparent"
-            class="switch-toggle-btn {= ${LoginViewModel>/selectedAccountType} === 'biz' ? 'active' : 'inactive'}"
-            press="onSwitchToSignUp" />
-    </HBox>
+            <HBox
+                justifyContent="Center"
+                class="switch-toggle-container"
+            >
+                <Button
+                    text="SIGN IN"
+                    type="Transparent"
+                    class="switch-toggle-btn {= ${LoginViewModel>/selectedAccountType} === 'personal' ? 'active' : 'inactive'}"
+                    press="onSwitchToSignIn"
+                />
+                <Button
+                    text="SIGN UP"
+                    type="Transparent"
+                    class="switch-toggle-btn {= ${LoginViewModel>/selectedAccountType} === 'biz' ? 'active' : 'inactive'}"
+                    press="onSwitchToSignUp"
+                />
+            </HBox>
 
             <!-- Sign In Panel -->
-            <Panel id="signInPanel" expandable="false">
+            <Panel
+                id="signInPanel"
+                expandable="false"
+            >
                 <VBox>
-                <Label text="User ID"  required="true" />
-                    <Input id="signInuserid" placeholder="User ID" type="Email" width="100%" required="true" liveChange="onUserlivechange" valueStateText="Enter ID"  />
-                 <Label text="User Name"  required="true" />
-                    <Input id="signInusername" placeholder="User Name" type="Email" width="100%" required="true" liveChange="onUserlivechange" valueStateText="Enter Name"  />
-                    <Label text="Login with"/>
-                    <HBox alignItems="End" justifyContent="Start">
-                       <RadioButton text="Password"   class="sapUiTinyMarginEnd " selected="{LoginViewModel>/isPasswordSelected}" />
-                    <RadioButton text="OTP"   class="sapUiTinyMarginEnd "  selected="{LoginViewModel>/isOtpSelected}"/>
-                    <Button text="Send OTP" press="onPressOTP" />
+                    <Label
+                        text="User ID"
+                        required="true"
+                    />
+                    <Input
+                        id="signInuserid"
+                        placeholder="User ID"
+                        type="Email"
+                        width="100%"
+                        required="true"
+                        liveChange="onUserlivechange"
+                        valueStateText="Enter ID"
+                    />
+                    <Label
+                        text="User Name"
+                        required="true"
+                    />
+                    <Input
+                        id="signInusername"
+                        placeholder="User Name"
+                        type="Email"
+                        width="100%"
+                        required="true"
+                        liveChange="onUserlivechange"
+                        valueStateText="Enter Name"
+                    />
+                    <Label text="Login with" />
+                    <HBox
+                        alignItems="End"
+                        justifyContent="Start"
+                    >
+                        <RadioButton
+                            text="Password"
+                            class="sapUiTinyMarginEnd "
+                            selected="{LoginViewModel>/isPasswordSelected}"
+                        />
+                        <RadioButton
+                            text="OTP"
+                            class="sapUiTinyMarginEnd "
+                            selected="{LoginViewModel>/isOtpSelected}"
+                        />
+                        <Button
+                            text="Send OTP"
+                            press="onPressOTP"
+                        />
                     </HBox>
-                   <Label text="Password" id="id_frgnewpass" required="true" />
-					<Input id="signinPassword"  placeholder="Enter Password" valueState="{}"  type="Password" liveChange="SM_onChnageSetAndConfirm"  showValueHelp="true" valueStateText="Enter Password" valueHelpIconSrc="sap-icon://show"  valueHelpRequest="SM_onTogglePasswordVisibility" submit="onSignIn" maxLength="50" />
+                    <Label
+                        text="Password"
+                        id="id_frgnewpass"
+                        required="true"
+                    />
+                    <Input
+                        id="signinPassword"
+                        placeholder="Enter Password"
+                        valueState="{}"
+                        type="Password"
+                        liveChange="SM_onChnageSetAndConfirm"
+                        showValueHelp="true"
+                        valueStateText="Enter Password"
+                        valueHelpIconSrc="sap-icon://show"
+                        valueHelpRequest="SM_onTogglePasswordVisibility"
+                        submit="onSignIn"
+                        maxLength="50"
+                    />
 
-                    <HBox justifyContent="SpaceBetween" class="sapUiTinyMarginTop">
-                        <Button text="Forgot Password?" type="Transparent" press="onForgotPassword"/>
-                        <Button text="Sign In" type="Accept" width="100px" press="onSignIn"/>
+                    <HBox
+                        justifyContent="SpaceBetween"
+                        class="sapUiTinyMarginTop"
+                    >
+                        <Button
+                            text="Forgot Password?"
+                            type="Transparent"
+                            press="onForgotPassword"
+                        />
+                        <Button
+                            text="Sign In"
+                            type="Accept"
+                            width="100px"
+                            press="onSignIn"
+                        />
                     </HBox>
                 </VBox>
             </Panel>
 
             <!-- Sign Up Panel -->
-          <Panel id="signUpPanel" expandable="false" visible="false">
-    <content>
-        <f:SimpleForm
-            id="signUpForm"
-            editable="true"
-            layout="ResponsiveGridLayout"
-            labelSpanL="3"
-            labelSpanM="3"
-            emptySpanL="1"
-            emptySpanM="1"
-            columnsL="2"
-            columnsM="1"
-            class="sapUiNoContentPadding sapUiSmallMarginTop">
+            <Panel
+                id="signUpPanel"
+                expandable="false"
+                visible="false"
+            >
+                <content>
+                    <f:SimpleForm
+                        id="signUpForm"
+                        editable="true"
+                        layout="ResponsiveGridLayout"
+                        labelSpanL="3"
+                        labelSpanM="3"
+                        emptySpanL="1"
+                        emptySpanM="1"
+                        columnsL="2"
+                        columnsM="1"
+                        class="sapUiNoContentPadding sapUiSmallMarginTop"
+                    >
+                        <Label
+                            text="Full Name"
+                            required="true"
+                        />
+                        <Input
+                            id="signUpName"
+                            value="{LoginMode>/fullname}"
+                            placeholder="Full Name"
+                            required="true"
+                            liveChange="onUserlivechange"
+                            valueStateText="Enter Name"
+                        />
 
-            <Label text="Full Name" required="true" />
-            <Input id="signUpName"
-                value="{LoginMode>/fullname}"
-                   placeholder="Full Name" 
-                   required="true"  liveChange="onUserlivechange" valueStateText="Enter Name" />
+                        <!-- Row 2: Email (full width) -->
+                        <Label
+                            text="Email"
+                            required="true"
+                        />
+                        <Input
+                            id="signUpEmail"
+                            value="{LoginMode>/Email}"
+                            placeholder="Email"
+                            type="Email"
+                            required="true"
+                            liveChange="onEmailliveChange"
+                        />
 
-            <!-- Row 2: Email (full width) -->
-            <Label text="Email" required="true" />
-            <Input id="signUpEmail"
-                   value="{LoginMode>/Email}"
-                   placeholder="Email"
-                   type="Email"
-                   required="true"  liveChange="onEmailliveChange"/>
+                        <Label
+                            text="Mobile Number"
+                            required="true"
+                        />
+                        <Input
+                            id="signUpPhone"
+                            value="{LoginMode>/Mobileno}"
+                            placeholder="Mobile Number"
+                            liveChange="onMobileLivechnage"
+                            valueStateText="Enter MobileNo"
+                            required="true"
+                        />
 
-         
-            <Label text="Mobile Number" required="true" />
-            <Input id="signUpPhone"
-                   value="{LoginMode>/Mobileno}"
-                   placeholder="Mobile Number"
-                   liveChange="onMobileLivechnage"
-                   valueStateText="Enter MobileNo"
-                   required="true" />
+                        <Label
+                            text="Create Password"
+                            required="true"
+                        />
+                        <Input
+                            id="signUpPassword"
+                            placeholder="Enter Password"
+                            value="{LoginMode>/password}"
+                            valueState="{LoginViewModel>/frgNewPasswordValueState}"
+                            type="Password"
+                            liveChange="SM_onChnageSetAndConfirm"
+                            showValueHelp="true"
+                            valueStateText="Enter Password"
+                            valueHelpIconSrc="sap-icon://show"
+                            valueHelpRequest="SM_onTogglePasswordVisibility"
+                            maxLength="50"
+                        />
 
-                    <Label text="Create Password"  required="true" />
-					<Input id="signUpPassword"  placeholder="Enter Password" value="{LoginMode>/password}" valueState="{LoginViewModel>/frgNewPasswordValueState}"  type="Password" liveChange="SM_onChnageSetAndConfirm"  showValueHelp="true" valueStateText="Enter Password" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility" maxLength="50" />
+                        <Label
+                            text="Confirm Password"
+                            required="true"
+                        />
+                        <Input
+                            id="signUpConfirmPassword"
+                            placeholder="Enter Confirm Password"
+                            value="{LoginMode>/comfirmpass}"
+                            valueState="{}"
+                            type="Password"
+                            change="FSM_onConfirm"
+                            showValueHelp="true"
+                            valueStateText="Enter Confirm Password"
+                            valueHelpIconSrc="sap-icon://show"
+                            valueHelpRequest="SM_onTogglePasswordVisibility"
+                            maxLength="50"
+                        />
+                    </f:SimpleForm>
 
-
-                    <Label text="Confirm Password"  required="true" />
-					<Input id="signUpConfirmPassword"  placeholder="Enter Confirm Password" value="{LoginMode>/comfirmpass}" valueState="{}"  type="Password" change="FSM_onConfirm"  showValueHelp="true" valueStateText="Enter Confirm Password" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility" maxLength="50" />
-
-        </f:SimpleForm>
-
-        <!-- Sign Up Button -->
-        <HBox justifyContent="End" class="sapUiSmallMarginTop">
-            <Button text="Sign Up"
-                    type="Emphasized"
-                    width="120px"
-                    press="onSignUp" />
-        </HBox>
-    </content>
-</Panel>
-
-
+                    <!-- Sign Up Button -->
+                    <HBox
+                        justifyContent="End"
+                        class="sapUiSmallMarginTop"
+                    >
+                        <Button
+                            text="Sign Up"
+                            type="Emphasized"
+                            width="120px"
+                            press="onSignUp"
+                        />
+                    </HBox>
+                </content>
+            </Panel>
         </VBox>
     </Dialog>
 </core:FragmentDefinition>

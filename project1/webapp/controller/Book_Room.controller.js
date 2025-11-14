@@ -289,6 +289,16 @@ sap.ui.define([
         oView.addDependent(that._oLoginAlertDialog);
       }
       that._oLoginAlertDialog.open();
+	  			                                     sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signInusername").setValue("").setValueState("None");
+				                                     sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signinPassword").setValue("").setValueState("None");
+				                                     sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signInuserid").setValue("").setValueState("None");
+				                                     sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signUpName").setValue("").setValueState("None");
+				                                     sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signUpEmail").setValue("").setValueState("None");
+
+				                                     sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signUpPhone").setValue("").setValueState("None");
+
+				                                     sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signUpPassword").setValue("").setValueState("None");
+				                                     sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signUpConfirmPassword").setValue("").setValueState("None");
 
       // Uncheck the checkbox since login data is missing
       oEvent.getSource().setSelected(false);
@@ -1437,6 +1447,200 @@ onOpenProceedtoPay: function() {
 			var oRouter = this.getOwnerComponent().getRouter()
 			oRouter.navTo("RouteHostel")
 		},
+			onSwitchToSignIn: function () {
+			var oSignInPanel = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInPanel");
+			var oSignUpPanel = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpPanel");
+
+			oSignInPanel.setVisible(true);
+			oSignUpPanel.setVisible(false);
+
+			this.getView().getModel("LoginViewModel").setProperty("/selectedAccountType", "personal");
+		},
+
+		onSwitchToSignUp: function () {
+			var oSignInPanel = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInPanel");
+			var oSignUpPanel = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpPanel");
+
+			oSignInPanel.setVisible(false);
+			oSignUpPanel.setVisible(true);
+
+			this.getView().getModel("LoginViewModel").setProperty("/selectedAccountType", "biz");
+		},
+
+		// Sign In
+		onSignIn: async function () {
+			var oLoginModel = this.getView().getModel("LoginModel");
+			var oLoginViewModel = this.getView().getModel("LoginViewModel");
+			var oFragment = this._oLoginAlertDialog; // Correct reference to fragment dialog
+
+			// Get input values using Fragment.byId
+			var sUserid = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInuserid").getValue();
+			var sUsername = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInusername").getValue();
+			var sPassword = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signinPassword").getValue();
+
+			// Validation
+			if (
+				!utils._LCvalidateMandatoryField(sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInuserid"), "ID") ||
+				!utils._LCvalidateMandatoryField(sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInusername"), "ID") ||
+				!utils._LCvalidatePassword(sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signinPassword"), "ID")
+
+			) {
+				sap.m.MessageToast.show("Make sure all the mandatory fields are filled/validate the entered value");
+				return;
+			}
+
+			try {
+				const oResponse = await this.ajaxReadWithJQuery("HM_Login", "");
+				const aUsers = oResponse?.commentData || [];
+
+				const oMatchedUser = aUsers.find(user =>
+					user.UserID === sUserid &&
+					user.UserName === sUsername &&
+					(user.Password === sPassword || user.Password === btoa(sPassword))
+				);
+
+				if (!oMatchedUser) {
+					sap.m.MessageToast.show("Invalid credentials. Please try again.");
+					return;
+				}
+
+				// Update LoginModel
+				oLoginModel.setProperty("/EmployeeID", oMatchedUser.UserID);
+				oLoginModel.setProperty("/EmployeeName", oMatchedUser.UserName);
+				oLoginModel.setProperty("/EmailID", oMatchedUser.EmailID);
+				oLoginModel.setProperty("/Role", oMatchedUser.Role);
+				oLoginModel.setProperty("/BranchCode", oMatchedUser.BranchCode || "");
+				oLoginModel.setProperty("/MobileNo", oMatchedUser.MobileNo || "");
+
+				// Clear input fields
+				sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInusername").setValue("");
+				sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signinPassword").setValue("");
+
+				// Close dialog
+				if (oFragment) oFragment.close();
+
+				// Handle UI visibility based on role
+				const oView = this.getView();
+				if (oMatchedUser.Role === "Customer") {
+					this._oLoggedInUser = oMatchedUser;
+					sap.ui.getCore().setModel(new sap.ui.model.json.JSONModel(oMatchedUser), "LoginModel");
+
+					oView.byId("loginButton")?.setVisible(false);
+					oView.byId("ProfileAvatar")?.setVisible(true);
+
+				} else if (oMatchedUser.Role === "Admin" || oMatchedUser.Role === "Employee") {
+					this.getOwnerComponent().getRouter().navTo("TilePage");
+				} else {
+					sap.m.MessageToast.show("Invalid credentials. Please try again.");
+				}
+
+			} catch (err) {
+				console.error("Login Error:", err);
+				sap.m.MessageToast.show("Failed to fetch login data: " + err);
+			}
+		},
+
+		// Sign Up
+		onSignUp: async function () {
+			var oDialog = this._oLoginAlertDialog; // Fragment dialog reference
+			var oModel = this.getView().getModel("LoginMode");
+			var oData = oModel.getData();
+			var oFragment = this._oLoginAlertDialog;
+			const oConfirmInput = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpConfirmPassword");
+
+			// Validate
+			if (
+				!utils._LCvalidateMandatoryField(sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpName"), "ID") ||
+				!utils._LCvalidateEmail(sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpEmail"), "ID") ||
+				!utils._LCvalidateMobileNumber(sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpPhone"), "ID") ||
+				!utils._LCvalidatePassword(sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpPassword"), "ID") ||
+				!utils._LCvalidatePassword(sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpConfirmPassword"), "ID")
+
+
+
+			) {
+				sap.m.MessageToast.show("Make sure all the mandatory fields are filled/validate the entered value");
+				return;
+			}
+			if (oData.password !== oData.comfirmpass) {
+				oConfirmInput.setValueState("Error");
+				sap.m.MessageToast.show("Password Mismatch");
+				return; // Stop signup
+			} else {
+				oConfirmInput.setValueState("None");
+			}
+
+			// Timestamp
+			var oNow = new Date();
+			var sTimeDate = `${oNow.getFullYear()}-${String(oNow.getMonth() + 1).padStart(2, "0")}-${String(oNow.getDate()).padStart(2, "0")} ` +
+				`${String(oNow.getHours()).padStart(2, "0")}:${String(oNow.getMinutes()).padStart(2, "0")}:${String(oNow.getSeconds()).padStart(2, "0")}`;
+
+			// Payload
+			var oPayload = {
+				data: {
+					UserName: oData.fullname,
+					EmailID: oData.Email,
+					MobileNo: oData.Mobileno,
+					Password: btoa(oData.password),
+					Role: "Customer",
+					TimeDate: sTimeDate,
+					Status: "Active"
+				}
+			};
+
+			try {
+				await this.ajaxCreateWithJQuery("HM_Login", oPayload);
+				sap.m.MessageToast.show("Sign Up successful!");
+
+				// Reset model
+				oModel.setData({
+					salutation: "Mr.",
+					fullname: "",
+					Email: "",
+					STDCode: "+91",
+					Mobileno: "",
+					password: "",
+					comfirmpass: ""
+				});
+
+				// if (oDialog) oDialog.close();
+				sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInPanel").setVisible(true)
+				sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpPanel").setVisible(false)
+
+
+			} catch (err) {
+				sap.m.MessageToast.show("Error in Sign Up: " + err);
+			}
+		},
+		onUserlivechange: function (oEvent) {
+			utils._LCvalidateMandatoryField(oEvent);
+		},
+		onEmailliveChange: function (oEvent) {
+			utils._LCvalidateEmail(oEvent);
+		},
+		onMobileLivechnage: function (oEvent) {
+			utils._LCvalidateMobileNumber(oEvent)
+		},
+		SM_onChnageSetAndConfirm: function (oEvent) {
+			utils._LCvalidatePassword(oEvent);
+		},
+		FSM_onConfirm: function () {
+			const oFragModel = this.getView().getModel("LoginMode");
+
+			const sPassword = oFragModel.getProperty("/password");
+			const sConfirm = oFragModel.getProperty("/comfirmpass");
+
+			// Get the input using Fragment.byId
+			const oConfirmInput = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpConfirmPassword");
+
+			if (sPassword !== sConfirm) {
+				oConfirmInput.setValueState("Error");
+				sap.m.MessageToast.show("Password Mismatch");
+				return;
+			} else {
+				oConfirmInput.setValueState("None");
+			}
+		}
 
 
 
