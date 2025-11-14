@@ -116,6 +116,10 @@ sap.ui.define([
             });
             this.getView().setModel(oLoginModeModel, "LoginMode")
 
+			this._fetchCommonData("Country", "CountryModel","");
+			this._fetchCommonData("State", "StateModel");
+            this._fetchCommonData("City", "CityModel");    
+
 			this.ajaxReadWithJQuery("Currency", "").then((oData) => {
                 var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
                 var model = new JSONModel(oFCIAerData);
@@ -406,46 +410,6 @@ new sap.m.DatePicker({
 						}),
 
 						new sap.m.Label({
-							text: "Mobile",
-              required: true
-						}),
-            new sap.m.ComboBox({
-							selectedKey: "{HostelModel>/Persons/" + i + "/Gender}",
-							items: [
-								new sap.ui.core.ListItem({
-									key: "",
-									text: ""
-								})
-							]
-						}),
-						new sap.m.Input({
-							value: "{HostelModel>/Persons/" + i + "/MobileNo}",
-              type:"Number",
-              liveChange:function(oEvent){
-                 let sValue = oEvent.getParameter("value") || "";
-        const oInput = oEvent.getSource();
-
-        //  Allow only digits and strictly limit to 10
-        sValue = sValue.replace(/\D/g, ""); // remove non-digits
-        if (sValue.length > 10) {
-            sValue = sValue.substring(0, 10); // cut off anything beyond 10
-        }
-
-        //  Set sanitized value back
-        oInput.setValue(sValue);
-
-        //  Real-time validation feedback
-        if (sValue.length < 10) {
-            oInput.setValueState("Error");
-            oInput.setValueStateText("Mobile number must be 10 digits");
-        } else {
-            oInput.setValueState("None");
-        }
-             
-              },
-						}),
-
-						new sap.m.Label({
 							text: "Email",
               required: true,
               type:"Email"
@@ -456,27 +420,169 @@ new sap.m.DatePicker({
 
 						new sap.m.Label({
 							text: "Country",
-              required: true
-						}),
-						new sap.m.Input({
-							value: "{HostelModel>/Persons/" + i + "/Country}"
+              required: true,
 						}),
 
-						new sap.m.Label({
+						 new sap.m.ComboBox({
+            selectedKey: "{HostelModel>/Persons/" + i + "/Country}",
+            items: {
+                path: "CountryModel>/",
+				length:1000, showSecondaryValues:true,
+                template: new sap.ui.core.ListItem({
+                    key: "{CountryModel>countryName}",
+                    text: "{CountryModel>countryName}",
+                    additionalText: "{CountryModel>code}"  // country code
+                })
+            },
+            change: function (oEv) {
+                const oSel = oEv.getSource().getSelectedItem();
+                const aPersons = oModel.getProperty("/Persons");
+
+                // Clear dependents
+                aPersons[i].State = "";
+                aPersons[i].City = "";
+                aPersons[i].STDCode = "";
+
+                if (!oSel) {
+                    oModel.refresh(true);
+                    return;
+                }
+
+                const oCountryObj = oSel.getBindingContext("CountryModel").getObject();
+                const sCountryCode = oCountryObj.code;
+                const sSTDCode = oCountryObj.stdCode;
+
+                aPersons[i].Country = oCountryObj.countryName;
+                aPersons[i].STDCode = sSTDCode;
+
+                // Filter states
+                const oStateCombo = sap.ui.getCore().byId(that.createId("ID_State_" + i));
+                oStateCombo.getBinding("items").filter([
+                    new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+                ]);
+
+                // Set mobile length rules dynamically
+                const oMobileInput = sap.ui.getCore().byId(that.createId("ID_Mobile_" + i));
+                if (oCountryObj.countryName === "India") {
+                    oMobileInput.setMaxLength(10);
+                } else {
+                    oMobileInput.setMaxLength(20);
+                }
+
+                oModel.refresh(true);
+            }
+        }).addStyleClass("sapUiSmallMarginBottom"),
+
+		new sap.m.Label({
 							text: "State",
-              required: true
+              required: true, 
 						}),
-						new sap.m.Input({
-							value: "{HostelModel>/Persons/" + i + "/State}"
+        new sap.m.ComboBox({
+            id: that.createId("ID_State_" + i),
+            selectedKey: "{HostelModel>/Persons/" + i + "/State}",
+            items: {
+                path: "StateModel>/", length:1000, showSecondaryValues:true,
+                template: new sap.ui.core.ListItem({
+                    key: "{StateModel>stateName}",
+                    text: "{StateModel>stateName}",
+					 additionalText:"{StateModel>countryCode}"
+                })
+            },
+            change: function (oEv) {
+    const oSel = oEv.getSource().getSelectedItem();
+    const aPersons = oModel.getProperty("/Persons");
+    aPersons[i].State = "";
+
+    if (!oSel) {
+        oModel.refresh(true);
+        return;
+    }
+
+    const sStateName = oSel.getText();
+    aPersons[i].State = sStateName;
+
+    // Get selected country name from Persons
+    const oCountryName = aPersons[i].Country;
+
+    // ✔ FIXED – fetch CountryModel correctly
+    const oCountryData = that.getView().getModel("CountryModel").getData();
+    const oCountryObj = oCountryData.find(x => x.countryName === oCountryName);
+
+    // Filter cities
+    const oCityCombo = sap.ui.getCore().byId(that.createId("ID_City_" + i));
+    oCityCombo.getBinding("items").filter([
+        new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, sStateName),
+        new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, oCountryObj?.code)
+    ]);
+
+    oModel.refresh(true);
+}
+		}),
+
+		new sap.m.Label({
+							text: "City",
+              required: true, 
 						}),
 
-						new sap.m.Label({
-							text: "City",
-              required: true
+        new sap.m.ComboBox({
+            id: that.createId("ID_City_" + i),
+            selectedKey: "{HostelModel>/Persons/" + i + "/City}",
+            items: {
+                path: "CityModel>/", length:1000, showSecondaryValues:true,
+                template: new sap.ui.core.ListItem({
+                    key: "{CityModel>cityName}",
+                    text: "{CityModel>cityName}",
+                    additionalText: "{CityModel>branchCode}"
+                })
+            },
+            change: function (oEv) {
+                const oSel = oEv.getSource().getSelectedItem();
+                const aPersons = oModel.getProperty("/Persons");
+                aPersons[i].City = oSel ? oSel.getText() : "";
+                oModel.refresh(true);
+            }
+        }),
+
+		new sap.m.Label({
+							text: "Mobile No",
+              required: true, 
 						}),
-						new sap.m.Input({
-							value: "{HostelModel>/Persons/" + i + "/City}"
-						}),
+
+		 new sap.m.Input({
+            value: "{HostelModel>/Persons/" + i + "/STDCode}",
+        }),
+
+             new sap.m.Input({
+            id: that.createId("ID_Mobile_" + i),
+            value: "{HostelModel>/Persons/" + i + "/MobileNo}",
+            type: "Number", maxLength: 20,
+            liveChange: function (oEv) {
+                let sValue = oEv.getSource().getValue();
+                const oInput = oEv.getSource();
+                const aPersons = oModel.getProperty("/Persons");
+
+                sValue = sValue.replace(/\D/g, "");
+
+                const sCountry = aPersons[i].Country;
+                const maxLength = oInput.getMaxLength();
+
+                oInput.setValue(sValue);
+                oInput.setValueState("None");
+
+                if (sCountry === "India") {
+                    if (sValue.length !== 10) {
+                        oInput.setValueState("Error");
+                        oInput.setValueStateText("Mobile No must be 10 digits");
+                    }
+                } else {
+                    if (sValue.length < 4) {
+                        oInput.setValueState("Error");
+                        oInput.setValueStateText("Mobile must be at least 4 digits");
+                    }
+                }
+            }
+        }),
+
 
 						new sap.m.Label({
 							text: "Address",
@@ -535,17 +641,14 @@ new sap.m.DatePicker({
         ...(i === 0 && iPersons > 1 ?
           [
             new sap.m.CheckBox({
-              text: "For All",
+              text: "For Both",
               selected: true,
               select: (e) => {
                 oData.ForBothSelected = e.getParameter("selected");
-              if (oData.ForBothSelected && iPersons > 1) {
-    for (let p = 1; p < iPersons; p++) {
-        oData.Persons[p].Facilities.SelectedFacilities =
-            oData.Persons[0].Facilities.SelectedFacilities.map(f => ({ ...f }));
-    }
-}
-
+                if (oData.ForBothSelected && iPersons > 1) {
+                  // Copy selected facilities from first person to second person
+                  oData.Persons[1].Facilities.SelectedFacilities = oData.Persons[0].Facilities.SelectedFacilities.map(f => ({...f}));
+                }
                 oModel.refresh(true);
               }
             })

@@ -32,6 +32,7 @@
                     this.setModel(models.createDeviceModel(), "device");
 
                     this._fetchCommonData("HM_Branch", "BranchModel","");
+                    this._fetchCommonData("Country", "Country","");
 
                     
 

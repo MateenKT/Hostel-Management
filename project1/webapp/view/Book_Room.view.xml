@@ -6,11 +6,15 @@
     xmlns:f="sap.ui.layout.form"
     xmlns:core="sap.ui.core"
 >
+
     <Page
         showHeader="false"
         class="sapUiResponsivePadding--footer sapUiResponsivePadding--floatingFooter"
         enableScrolling="false"
     >
+     <headerContent>
+	     <core:Fragment fragmentName="sap.ui.com.project1.fragment.Header" type="XML"/>
+		</headerContent>
        <content>
          <core:Fragment
             fragmentName="sap.ui.com.project1.fragment.Header"

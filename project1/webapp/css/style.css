@@ -1157,6 +1157,13 @@
     border: 2px solid #00b7c7 !important;
 }
 
+/* text style*/
+.boldBlueText {
+  font-weight: bold;
+  color: #00b7c7 !important;
+}
+
+
 /* Text color inside tiles */
 .sapMGT.defaultTile .sapMGTHdrTxt,
 .sapMGT.defaultTile .sapMGTSubHdrTxt,

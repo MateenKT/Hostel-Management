@@ -21,12 +21,7 @@
         title="Bed Details"
     >
         <m:headerContent>
-            <m:Button
-                press="onLogout"
-                icon="sap-icon://log"
-                tooltip="{i18n>logoutTooltip}"
-                type="Transparent"
-            />
+           <core:Fragment fragmentName="sap.ui.com.project1.fragment.Header" type="XML"/>
         </m:headerContent>
         <ObjectPageLayout id="ObjectPageLayout">
             <!-- <headerTitle><ObjectPageDynamicHeaderTitle><expandedHeading><m:Title text="{objectModel>/0/PurchaseOrder/0/CustomerName}" wrapping="true" /></expandedHeading><snappedHeading /></ObjectPageDynamicHeaderTitle></headerTitle><headerContent><m:FlexBox wrap="Wrap" fitContainer="true"><m:Avatar class="sapUiSmallMarginEnd" src="../image/logo.jpeg" displaySize="L" /><layout:VerticalLayout class="sapUiSmallMarginBeginEnd"><m:ObjectIdentifier title="Customer Address" text="{objectModel>/0/PurchaseOrder/0/Address}" tooltip="Customer Address" /></layout:VerticalLayout><layout:VerticalLayout class="sapUiSmallMarginBeginEnd"><m:ObjectIdentifier title="PAN Number" text="{objectModel>/0/PurchaseOrder/0/PAN}" tooltip="PAN Number" /></layout:VerticalLayout><layout:VerticalLayout class="sapUiSmallMarginBeginEnd"><m:ObjectIdentifier title="Type" text="{objectModel>/0/PurchaseOrder/0/Type}" tooltip="Type" /></layout:VerticalLayout></m:FlexBox></headerContent> -->

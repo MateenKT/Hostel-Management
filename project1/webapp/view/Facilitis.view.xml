@@ -10,17 +10,9 @@
     height="100%"
     busyIndicatorDelay="0">
 	<Page showHeader="true">
-		<customHeader>
-			<Bar>
-				<contentLeft>
-					<Button icon="sap-icon://nav-back"  press=".onNavBack"/>
-					<Title text="Shah Hostel" class="customPageTitle"/>
-				</contentLeft>
-				<contentRight>
-					<Button  icon="sap-icon://log" press=".onHome"/>
-				</contentRight>
-			</Bar>
-		</customHeader>
+	 <headerContent>
+	     <core:Fragment fragmentName="sap.ui.com.project1.fragment.Header" type="XML"/>
+		</headerContent>
 		<content>
 			<fb:FilterBar
                 id="FO_id_FilterbarEmployee"

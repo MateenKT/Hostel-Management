@@ -11,7 +11,9 @@
     busyIndicatorDelay="0"
 >
     <Page>
-       
+        <headerContent>
+	     <core:Fragment fragmentName="sap.ui.com.project1.fragment.Header" type="XML"/>
+		</headerContent>
         <content>
             <!-- <fb:FilterBar
                 id="PO_id_FilterbarEmployee"

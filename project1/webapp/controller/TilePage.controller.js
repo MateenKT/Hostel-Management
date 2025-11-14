@@ -10,18 +10,19 @@ sap.ui.define([
         },
         _onRouteMatched: function() {
             const oExistingModel = this.getOwnerComponent().getModel("LoginModel");
-            if (oExistingModel) {
-                const oData = oExistingModel.getData();
-                oData.url = "https://rest.kalpavrikshatechnologies.com/";
-                oData.headers = {
-                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                    password:"$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
-                    "Content-Type": "application/json",
-                },
-                oData.isRadioVisible = false;
-                oExistingModel.setData(oData);
-                this.getView().setModel(oExistingModel, "LoginModel");
-            }
+            // if (oExistingModel) {
+            //     const oData = oExistingModel.getData();
+            //     oData.url = "https://rest.kalpavrikshatechnologies.com/";
+            //     oData.headers = {
+            //         name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+            //         password:"$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
+            //         "Content-Type": "application/json",
+            //     },
+            //     oData.isRadioVisible = false;
+            //     oExistingModel.setData(oData);
+            //     this.getView().setModel(oExistingModel, "LoginModel");
+            // }
+            this.getView().getModel("LoginModel");
         },
         TileV_onpressInbox: function() {
             var oRouter = this.getOwnerComponent().getRouter();
