@@ -81,15 +81,32 @@ sap.ui.define([
 				Cancel: false,
 				NXTVis: true,
 				PERVIOUSVIS: false,
-
-
+        Month:false,
+        Year:false
 			})
 			this.getView().setModel(oBTn, "OBTNModel")
+       var oEndDatePicker = this.getView().byId("idEndDate1")
+       const sSelectedType = oData.SelectedPriceType?.toLowerCase() || "";
+
+    if (sSelectedType === "daily") {
+        oBTn.setProperty("/Month", false);
+        oBTn.setProperty("/Year", false);
+        oEndDatePicker.setEditable(true)
+    } else if (sSelectedType === "monthly") {
+        oBTn.setProperty("/Month", true);
+        oBTn.setProperty("/Year", false);
+    } else if (sSelectedType === "yearly") {
+        oBTn.setProperty("/Month", false);
+        oBTn.setProperty("/Year", true);
+    }
+
+    //  Refresh visibility
+    oBTn.refresh(true);
 
 			setTimeout(() => {
 				this.Roomdetails();
 			}, 100);
-      const oLoginModeModel = new sap.ui.model.json.JSONModel({
+      const oLoginModeModel = new JSONModel({
                 fullname: "",
                 Email: "",
                 Mobileno: "",
@@ -105,6 +122,11 @@ sap.ui.define([
             }).catch((err) => {
                 console.error("Error fetching currency data:", err);
             });
+
+            const oToday = new Date();
+    // Strip time (set hours to 0) to avoid timezone offset issues
+    oToday.setHours(0, 0, 0, 0);
+    oHostelModel.setProperty("/TodayDate", oToday)
 		},
 		Roomdetails: async function() {
 			try {
@@ -157,7 +179,8 @@ sap.ui.define([
 				FacilityID: f.ID,
 				FacilityName: f.FacilityName,
 				Image: convertBase64ToImage(f.Photo1, f.Photo1Type),
-        Price:f.Price
+        Price:f.Price,
+        UnitText:f.UnitText
 			}));
 
 			//  Wrap in object for proper binding
@@ -238,8 +261,7 @@ sap.ui.define([
 
   if (bSelected) {
     if (!oUser || !oUser.UserID) {
-      // No login data found, open fragment to alert user or prompt login
-
+      
       // Lazy-load fragment if not already created
       if (!that._oLoginAlertDialog) {
         that._oLoginAlertDialog = sap.ui.xmlfragment(
@@ -272,9 +294,6 @@ sap.ui.define([
 
   oModel.refresh(true);
 }
-
-
-
 								})
 							] :
 							[]),
@@ -312,14 +331,29 @@ sap.ui.define([
 						}),
 
 						new sap.m.Label({
-							text: "Date of Birth",
-              required: true
-						}),
-						new sap.m.DatePicker({
-							value: "{HostelModel>/Persons/" + i + "/DateOfBirth}",
-							valueFormat: "dd/MM/yyyy",
-							displayFormat: "dd/MM/yyyy"
-						}),
+    text: "Date of Birth",
+    required: true
+}),
+new sap.m.DatePicker({
+    value: "{HostelModel>/Persons/" + i + "/DateOfBirth}",
+    valueFormat: "dd/MM/yyyy",
+    displayFormat: "dd/MM/yyyy",
+    maxDate: (function () {
+        // Calculate today's date minus 10 years
+        const oToday = new Date();
+        oToday.setFullYear(oToday.getFullYear() - 20);
+        return oToday;
+    })(),
+    placeholder: "Select Date of Birth",
+    change: function (oEvent) {
+        const oDate = oEvent.getSource().getDateValue();
+        if (oDate > new Date()) {
+            sap.m.MessageToast.show("Date of Birth cannot be in the future.");
+            oEvent.getSource().setValue("");
+        }
+    }
+})
+,
 
 						new sap.m.Label({
 							text: "Gender",
@@ -550,9 +584,8 @@ sap.ui.define([
 
                 // Facility Price (below the image)
                 new sap.m.Text({
-                  text: "{= '₹ ' + ${FacilityModel>Price}}",
-                  class: "facilityPriceText"
-                })
+                  text: "{= '₹ ' + ${FacilityModel>Price}}"
+                }).addStyleClass("sapUiTinyMarginTop facilityPriceText")
               ]
             })
           }
@@ -606,72 +639,64 @@ sap.ui.define([
     onDialogClose: function () {
             this._oLoginAlertDialog.close()
         },
-          onSignIn: async function () {
-            // var ofrag = sap.ui.getCore();
-          
-            const oLoginModel = this.getView().getModel("LoginModel"); 
+         onSignIn: async function () {
+    const oLoginModel = this.getView().getModel("LoginModel");
 
-            // Get input values
-            var sUserid = sap.ui.getCore().byId("signInuserid").getValue();
-            var sUsername = sap.ui.getCore().byId("signInusername").getValue();
-            var sPassword = sap.ui.getCore().byId("signinPassword").getValue();
+    // Access the fragment inputs safely
+    const sUserId = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInuserid")?.getValue();
+    const sUserName = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInusername")?.getValue();
+    const sPassword = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signinPassword")?.getValue();
 
-            // Basic validation example
-            if (
-               !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInuserid"), "ID")|| !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID") ||
-                !utils._LCvalidatePassword(sap.ui.getCore().byId("signinPassword"), "ID")
-            ) {
-                sap.m.MessageToast.show("Make sure all the mandatory fields are filled/validate the entered value");
-                return;
-            }
+    // Basic validation
+    if (!sUserId || !sUserName || !sPassword) {
+        sap.m.MessageToast.show("Please fill in all fields.");
+        return;
+    }
 
-            try {
-                //  Fetch all registered users (no payload — server ignores it anyway)
-                const oResponse = await this.ajaxReadWithJQuery("HM_Login", "");
+    try {
+        const oResponse = await this.ajaxReadWithJQuery("HM_Login", "");
+        const aUsers = oResponse?.commentData || [];
 
-                const aUsers = oResponse?.commentData || [];
+        const oMatchedUser = aUsers.find(user =>
+            user.UserID === sUserId &&
+            user.UserName === sUserName &&
+            (user.Password === sPassword || user.Password === btoa(sPassword))
+        );
 
-                const oMatchedUser = aUsers.find(user =>
-                user.UserID === sUserid &&
-                user.UserName === sUsername &&
-                (user.Password === sPassword || user.Password === btoa(sPassword))
-                );
+        if (!oMatchedUser) {
+            sap.m.MessageToast.show("Invalid credentials. Please try again.");
+            return;
+        }
 
-                if (!oMatchedUser) {
-                    sap.m.MessageToast.show("Invalid credentials. Please try again.");
-                    return;
-                }
+        oLoginModel.setProperty("/EmployeeID", oMatchedUser.UserID);
+        oLoginModel.setProperty("/EmployeeName", oMatchedUser.UserName);
+        oLoginModel.setProperty("/EmailID", oMatchedUser.EmailID);
+        oLoginModel.setProperty("/Role", oMatchedUser.Role);
+        oLoginModel.setProperty("/BranchCode", oMatchedUser.BranchCode || "");
+        oLoginModel.setProperty("/MobileNo", oMatchedUser.MobileNo || "");
 
-                oLoginModel.setProperty("/EmployeeID", oMatchedUser.UserID);
-                oLoginModel.setProperty("/EmployeeName", oMatchedUser.UserName);
-                oLoginModel.setProperty("/EmailID", oMatchedUser.EmailID);
-                oLoginModel.setProperty("/Role", oMatchedUser.Role);
-                oLoginModel.setProperty("/BranchCode", oMatchedUser.BranchCode || "");
-                oLoginModel.setProperty("/MobileNo", oMatchedUser.MobileNo || "");
+        if (oMatchedUser.Role === "Customer") {
+            const oUserModel = new sap.ui.model.json.JSONModel(oMatchedUser);
+            sap.ui.getCore().setModel(oUserModel, "LoginModel");
 
-                if (oMatchedUser.Role === "Customer") {
-                    this._oLoggedInUser = oMatchedUser;
-                    const oUserModel = new JSONModel(oMatchedUser);
-                    sap.ui.getCore().setModel(oUserModel, "LoginModel");
+            // Clear input fields
+            sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInusername").setValue("");
+            sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signinPassword").setValue("");
 
-                    sap.ui.getCore().byId("signInusername").setValue("");
-                    sap.ui.getCore().byId("signinPassword").setValue("");
+            // Close dialog
+            if (this._oLoginAlertDialog) this._oLoginAlertDialog.close();
 
-                    if (this._oSignDialog) this._oSignDialog.close();
+            sap.m.MessageToast.show("Login successful!");
+        } else {
+            sap.m.MessageToast.show("Invalid credentials.");
+        }
 
-                    const oView = this.getView();
-                    oView.byId("loginButton")?.setVisible(false);
-                    oView.byId("ProfileAvatar")?.setVisible(true);
-
-                }else {
-                    sap.m.MessageToast.show("Invalid credentials. Please try again.");
-                }
-
-            } catch (err) {
-                console.error("Login Error:", err);
-                sap.m.MessageToast.show("Failed to fetch login data: " + err);
-            }
-        },
+    } catch (err) {
+        console.error("Login Error:", err);
+        sap.m.MessageToast.show("Failed to fetch login data: " + err);
+    }
+}
+,
 		onDialogNextButton: async function() {
 			this._iSelectedStepIndex = this._oWizard.getSteps().indexOf(this._oSelectedStep);
 			this.oNextStep = this._oWizard.getSteps()[this._iSelectedStepIndex + 1];
@@ -885,10 +910,7 @@ sap.ui.define([
     const oHostelModel = oView.getModel("HostelModel");
     const oBtnModel = oView.getModel("OBTNModel");
 
-    // Read model data safely
     const oData = oHostelModel.getData();
-
-    // Get references
     const oStartDatePicker = oView.byId("idStartDate1");
     const oEndDatePicker = oView.byId("idEndDate1");
 
@@ -896,43 +918,80 @@ sap.ui.define([
     const sEndDate = oEndDatePicker?.getValue() || "";
     const sPaymentType = oData.SelectedPriceType || oView.byId("idPaymentMethod1")?.getSelectedKey() || "";
     const sPerson = oData.Person || oView.byId("id_Noofperson1")?.getSelectedKey() || "";
+    const iSelectedMonths = parseInt(oHostelModel.getProperty("/SelectedMonths") || 1, 10);
 
     let bAllFilled = sPaymentType && sPerson && sStartDate && sEndDate;
 
-    // ✅ When start date is selected and plan is monthly — auto add 30 days
+    // ✅ Auto-calculate End Date if plan is "monthly" and Start Date selected
     if (oEvent.getSource().getId().includes("idStartDate1") && sStartDate && sPaymentType === "monthly") {
-        const oStart = this._parseDate(sStartDate); // Helper function converts "dd/MM/yyyy" → Date
+        const oStart = this._parseDate(sStartDate);
         if (oStart instanceof Date && !isNaN(oStart)) {
             const oNewEnd = new Date(oStart);
-            oNewEnd.setDate(oStart.getDate() + 30);
+            // Add 30 days per month
+            oNewEnd.setDate(oStart.getDate() + (30 * iSelectedMonths));
             const sNewEndDate = this._formatDateToDDMMYYYY(oNewEnd);
 
-            // Update EndDate in model and picker
+            // Update model and picker
             oHostelModel.setProperty("/EndDate", sNewEndDate);
             oEndDatePicker.setValue(sNewEndDate);
+
+            // Enable "Next" automatically
+            oBtnModel.setProperty("/Next", true);
+            return;
         }
     }
 
-    //  Ensure End Date >= Start Date
+    // ✅ Validate: End Date cannot be before Start Date
     if (sStartDate && sEndDate) {
         const oStart = this._parseDate(sStartDate);
         const oEnd = this._parseDate(sEndDate);
 
         if (oEnd < oStart) {
-            // Reset invalid end date and show error
             oEndDatePicker.setValueState("Error");
             oEndDatePicker.setValueStateText("End date cannot be before start date");
             sap.m.MessageToast.show("End date cannot be before start date");
             oHostelModel.setProperty("/EndDate", "");
-            bAllFilled = false;
+            oBtnModel.setProperty("/Next", false);
+            return;
         } else {
             oEndDatePicker.setValueState("None");
         }
     }
 
-    //  Update button state
-    oBtnModel.setProperty("/Next", !!bAllFilled);
-},
+    // ✅ Control “Next” button visibility based on EndDate validity
+    const bEndDateValid = !!(sEndDate && sEndDate.trim() !== "");
+    oBtnModel.setProperty("/Next", !!(bAllFilled && bEndDateValid));
+}
+,
+onMonthSelectionChange: function (oEvent) {
+    const oView = this.getView();
+    const oHostelModel = oView.getModel("HostelModel");
+
+    const sStartDate = oView.byId("idStartDate1")?.getValue() || "";
+    const iSelectedMonths = parseInt(oEvent.getSource().getSelectedKey() || "1", 10);
+
+    if (!sStartDate) {
+        sap.m.MessageToast.show("Please select Start Date first.");
+        return;
+    }
+
+    // Calculate End Date = Start + (30 * months)
+    const oStart = this._parseDate(sStartDate);
+    if (oStart instanceof Date && !isNaN(oStart)) {
+        const oNewEnd = new Date(oStart);
+        oNewEnd.setDate(oStart.getDate() + (30 * iSelectedMonths));
+
+        const sNewEndDate = this._formatDateToDDMMYYYY(oNewEnd);
+        oHostelModel.setProperty("/EndDate", sNewEndDate);
+        oView.byId("idEndDate1").setValue(sNewEndDate);
+
+        // Make sure to enable “Next”
+        const oBtnModel = oView.getModel("OBTNModel");
+        oBtnModel.setProperty("/Next", true);
+    }
+}
+,
+
 _formatDateToDDMMYYYY: function (oDate) {
     if (!(oDate instanceof Date)) return "";
     const dd = String(oDate.getDate()).padStart(2, "0");
@@ -1013,62 +1072,95 @@ _formatDateToDDMMYYYY: function (oDate) {
 		// 		oHostelModel.setProperty("/Price", "");
 		// 	}
 		// },
-    	onRoomDurationChange: function (oEvent) {
-			const sSelectedKey = oEvent.getParameter("selectedItem").getKey(); // e.g. "daily", "monthly", "yearly"
-			const oHostelModel = this.getView().getModel("HostelModel");
-			const oRoomDetailModel = this.getView().getModel("RoomDetailModel");
+ onRoomDurationChange: function (oEvent) {
+    const oView = this.getView();
+    const oHostelModel = oView.getModel("HostelModel");
+    const oRoomDetailModel = oView.getModel("RoomDetailModel");
+    const oBTn = oView.getModel("OBTNModel"); // ✅ button visibility model
 
-			// Defensive guards
-			if (!oHostelModel || !oRoomDetailModel) {
-				console.warn("⚠️ Missing models in onRoomDurationChange");
-				return;
-			}
+    if (!oHostelModel || !oRoomDetailModel || !oBTn) {
+        console.warn("⚠️ Missing models in onRoomDurationChange");
+        return;
+    }
 
-			const sRoomType = this.getView().byId("GI_Roomtype")?.getText()?.trim() || "";
-			const aRoomDetails = oRoomDetailModel.getData();
+    const sSelectedKey = oEvent.getParameter("selectedItem").getKey(); // "daily", "monthly", "yearly"
+    const sRoomType = oView.byId("GI_Roomtype")?.getText()?.trim() || "";
+    const aRoomDetails = oRoomDetailModel.getData();
+    const normalize = v => (v ? String(v).trim().toLowerCase() : "");
 
-			// Normalize helper
-			const normalize = v => (v ? String(v).trim().toLowerCase() : "");
+    const oMatchingRoom = aRoomDetails.find(item =>
+        normalize(item.BedTypeName) === normalize(sRoomType)
+    );
 
-			// Find the matching room by BedTypeName (case-insensitive)
-			const oMatchingRoom = aRoomDetails.find(item =>
-				normalize(item.BedTypeName) === normalize(sRoomType)
-			);
+    if (!oMatchingRoom) {
+        oHostelModel.setProperty("/FinalPrice", "");
+        return;
+    }
 
-			if (!oMatchingRoom) {
-				oHostelModel.setProperty("/FinalPrice", "");
-				return;
-			}
+    // 🔹 Determine correct price
+    let sNewPrice = "";
+    switch (sSelectedKey.toLowerCase()) {
+        case "daily":
+            sNewPrice = oMatchingRoom.Price || "";
+            break;
+        case "monthly":
+            sNewPrice = oMatchingRoom.MonthPrice || "";
+            break;
+        case "yearly":
+            sNewPrice = oMatchingRoom.YearPrice || "";
+            break;
+        default:
+            sNewPrice = oMatchingRoom.Price || "";
+    }
 
-			// 🔄 Determine correct price based on selected duration
-			let sNewPrice = "";
-			switch (sSelectedKey.toLowerCase()) {
-				case "daily":
-					sNewPrice = oMatchingRoom.Price || "";
-					break;
-				case "monthly":
-					sNewPrice = oMatchingRoom.MonthPrice || "";
-					break;
-				case "yearly":
-					sNewPrice = oMatchingRoom.YearPrice || "";
-					break;
-				default:
-					sNewPrice = oMatchingRoom.Price || "";
-			}
+    // 🔹 Update model
+    oHostelModel.setProperty("/FinalPrice", sNewPrice);
+    oHostelModel.setProperty("/SelectedPriceType", sSelectedKey);
+    oHostelModel.setProperty("/Price", sNewPrice);
+    oHostelModel.setProperty("/PaymentType", sSelectedKey);
 
-			// ✅ Update price and duration in model
-			oHostelModel.setProperty("/FinalPrice", sNewPrice);
-			oHostelModel.setProperty("/SelectedPriceType", sSelectedKey);
+    // 🔹 Dynamically toggle End Date editability
+    const oEndDatePicker = oView.byId("idEndDate1");
+    if (sSelectedKey.toLowerCase() === "daily") {
+        oEndDatePicker.setEditable(true);
+        oEndDatePicker.setTooltip("Select your end date for daily plan");
+    } else {
+        oEndDatePicker.setEditable(false);
+        oEndDatePicker.setTooltip("End date auto-calculated for this plan");
 
-			// 🧠 For backward compatibility (if other logic depends on these)
-			oHostelModel.setProperty("/Price", sNewPrice);
-			oHostelModel.setProperty("/PaymentType", sSelectedKey);
+        const sStartDate = oHostelModel.getProperty("/StartDate");
+        if (sStartDate) {
+            const oStart = this._parseDate(sStartDate);
+            const oEnd = new Date(oStart);
 
-			// 💥 Apply model refresh so UI text updates instantly
-			oHostelModel.refresh(true);
-		},
+            if (sSelectedKey.toLowerCase() === "monthly") {
+                oEnd.setMonth(oEnd.getMonth() + 1);
+            } else if (sSelectedKey.toLowerCase() === "yearly") {
+                oEnd.setFullYear(oEnd.getFullYear() + 1);
+            }
 
-		onOpenProceedtoPay: function() {
+            const sNewEnd = this._formatDateToDDMMYYYY(oEnd);
+            oHostelModel.setProperty("/EndDate", sNewEnd);
+        }
+    }
+
+    // 🔥 Control Month/Year visibility based on selected type
+    if (sSelectedKey.toLowerCase() === "daily") {
+        oBTn.setProperty("/Month", false);
+        oBTn.setProperty("/Year", false);
+    } else if (sSelectedKey.toLowerCase() === "monthly") {
+        oBTn.setProperty("/Month", true);
+        oBTn.setProperty("/Year", false);
+    } else if (sSelectedKey.toLowerCase() === "yearly") {
+        oBTn.setProperty("/Month", false);
+        oBTn.setProperty("/Year", true);
+    }
+
+    // ✅ Refresh visibility bindings
+    oBTn.refresh(true);
+    oHostelModel.refresh(true);
+},
+onOpenProceedtoPay: function() {
 			if (!this._oPaymentDialog) {
 				this._oPaymentDialog = sap.ui.xmlfragment(
 					"sap.ui.com.project1.fragment.PaymentPage",
@@ -1304,5 +1396,11 @@ _formatDateToDDMMYYYY: function (oDate) {
 			var oRouter = this.getOwnerComponent().getRouter()
 			oRouter.navTo("RouteHostel")
 		},
+
+
+
+
+
+
 	});
 });

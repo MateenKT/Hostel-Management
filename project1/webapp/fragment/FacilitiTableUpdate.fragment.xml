@@ -12,6 +12,23 @@
 
                 <Label text="Facility Name" />
                 <Input id="editFacilityName" value="{edit>/FacilityName}" editable="false" />
+               <Label text="Unit Type" required="true" />
+
+<ComboBox
+    id="idUnitType"
+    selectedKey="{edit>/UnitText}"
+    placeholder="Select Unit Type"
+    selectionChange="onUnitTextChange"
+    width="100%"
+    items="{FacilityModel>/}"
+>
+    <core:ListItem key="{FacilityModel>UnitText}" text="{FacilityModel>UnitText}" />
+   
+</ComboBox>
+
+                
+                
+              
 
                 <Label text="Facility Price (₹)" />
                 <Input id="editPrice" value="{edit>/Price}" type="Number" editable="false" />
