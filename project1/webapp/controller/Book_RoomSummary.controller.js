@@ -280,7 +280,7 @@ aPersons.forEach((oPerson, iIndex) => {
             sap.m.MessageToast.show("Facility updated successfully!");
 
 
-                  const oSummaryTable = this.getView().byId("idFacilitySummaryTable");
+                
 if (this._oSelectedTable) {
     this._oSelectedTable.removeSelections();
 }

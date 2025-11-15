@@ -186,7 +186,8 @@ sap.ui.define([
         Image: convertBase64ToImage(f.Photo1, f.Photo1Type),
         Price: f.Price,
         UnitText: f.UnitText,
-        Currency: f.Currency
+        Currency: f.Currency,
+        BranchCode:f.BranchCode
       }));
 
       //  Wrap in object for proper binding
@@ -658,6 +659,13 @@ sap.ui.define([
               justifyContent: "SpaceAround",
               items: {
                 path: "FacilityModel>/Facilities",
+              filters: [
+            new sap.ui.model.Filter(
+                "BranchCode",
+                sap.ui.model.FilterOperator.EQ,
+                oModel.getProperty("/BranchCode")
+            )
+        ],
                 template: new sap.m.VBox({
                   width: "264px",
                   height: "230px",
@@ -749,7 +757,7 @@ sap.ui.define([
         oVBox.addItem(oDocument);
         oVBox.addItem(oFacilities);
       }
-
+oFacilityModel.refresh(true);
       oModel.refresh(true);
     },
     _checkMandatoryFields: function () {
