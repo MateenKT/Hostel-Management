@@ -14,8 +14,8 @@
                 <Input id="editFacilityName" value="{edit>/FacilityName}" editable="false" />
                 <Label text="Unit Type" required="true" />
 
-                <ComboBox id="idUnitType" placeholder="Select Unit Type"  items="{RateType>/}" selectedKey="Per Day"
-                value="{edit>/UnitText}" change=".onUnitTextChange" width="100%" valueStateText="{i18n>selectRateType}">
+                <ComboBox id="idUnitType" placeholder="Select Unit Type"  items="{RateType>/}" 
+                value="{edit>/UnitText}" change="onUnitTextChange" width="100%" valueStateText="{i18n>selectRateType}">
                      <core:Item key="{RateType>ID}" text="{RateType>RateType}" />
                 </ComboBox>
 

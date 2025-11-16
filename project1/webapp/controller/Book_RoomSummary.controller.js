@@ -27,78 +27,82 @@ sap.ui.define([
         onNavBack: function () {
             this.getOwnerComponent().getRouter().navTo("RouteHomePage");
         },
-        onTableSelection: function (oEvent) {
-            const oSelectedItem = oEvent.getParameter("listItem");
-            if (!oSelectedItem) {
-                sap.m.MessageToast.show("No row selected");
-                return;
-            }
+       onTableSelection: function (oEvent) {
+    const oSelectedItem = oEvent.getParameter("listItem");
+    if (!oSelectedItem) {
+        sap.m.MessageToast.show("No row selected");
+        return;
+    }
+
+    // store table ref so we can remove selections later
     this._oSelectedTable = oEvent.getSource();
-            const oContext = oSelectedItem.getBindingContext("HostelModel");
-            const oSelectedData = oContext.getObject();
 
-            // Save the selected data + path
-        
-            this._oSelectedFacility = oSelectedData;
-            this._sSelectedPath = oContext.getPath(); // e.g. "/AllSelectedFacilities/2"
+    const oContext = oSelectedItem.getBindingContext("HostelModel");
+    if (!oContext) {
+        sap.m.MessageToast.show("Selection has no binding context");
+        return;
+    }
 
-            //  Extract index from binding path and store it
-            this._oSelectedIndex = parseInt(this._sSelectedPath.split("/").pop(), 10);
+    const oSelectedData = oContext.getObject();
+    this._oSelectedFacility = oSelectedData;
+    this._sSelectedPath = oContext.getPath(); // e.g. "/AllSelectedFacilities/2"
 
-            // console.log("Selected Row Path:", this._sSelectedPath);
-            // console.log("Selected Index:", this._oSelectedIndex);
+    // Try to parse index from path when possible
+    let idx = -1;
+    try {
+        const parts = this._sSelectedPath.split("/");
+        idx = parseInt(parts[parts.length - 1], 10);
+        if (isNaN(idx)) idx = -1;
+    } catch (e) {
+        idx = -1;
+    }
+    this._oSelectedIndex = idx;
 
-            // sap.m.MessageToast.show("Selected: " + oSelectedData.PersonName);
-        },
-        onEditFacilityDetails: function () {
-            if (!this._oSelectedFacility) {
-                sap.m.MessageToast.show("Please select a row to edit.");
-                return;
-            }
+    // keep a small debug log (optional)
+    // console.log("Selected facility:", this._oSelectedFacility, "index:", this._oSelectedIndex);
+},
 
-            const oFacilityData = this._oSelectedFacility || {};
+// --- Open edit dialog for selected facility ---
+onEditFacilityDetails: function () {
+    if (!this._oSelectedFacility) {
+        sap.m.MessageToast.show("Please select a row to edit.");
+        return;
+    }
 
-            // Preserve important fields
-            const oSafeCopy = Object.assign({}, oFacilityData, {
-                FacilityID: oFacilityData.FacilityID || (Date.now() + "_" + Math.random()),
-                PersonName: oFacilityData.PersonName || oFacilityData.PersonName || ""
-            });
+    // Create safe shallow copy for editing
+    const oFacilityData = this._oSelectedFacility || {};
+    const oSafeCopy = Object.assign({}, oFacilityData, {
+        FacilityID: oFacilityData.FacilityID || (Date.now() + "_" + Math.random()),
+        PersonName: oFacilityData.PersonName || oFacilityData.PersonName || ""
+    });
 
-            // Create a temporary model for dialog
-            this._oEditModel = new sap.ui.model.json.JSONModel(oSafeCopy);
-            this.getView().setModel(this._oEditModel, "edit");
+    // Create / set edit model
+    this._oEditModel = new sap.ui.model.json.JSONModel(oSafeCopy);
+    this.getView().setModel(this._oEditModel, "edit");
 
-            // Lazy-load fragment/dialog
-            if (!this._oEditDialog) {
-                this._oEditDialog = sap.ui.xmlfragment(
-                    this.getView().getId(), // id prefix so controls are addressable
-                    "sap.ui.com.project1.fragment.FacilitiTableUpdate",
-                    this
-                );
-                this.getView().addDependent(this._oEditDialog);
-            }
+    // Lazy load fragment (use view id as prefix)
+    if (!this._oEditDialog) {
+        this._oEditDialog = sap.ui.xmlfragment(
+            this.getView().getId(),
+            "sap.ui.com.project1.fragment.FacilitiTableUpdate",
+            this
+        );
+        this.getView().addDependent(this._oEditDialog);
+    }
 
-            // Open dialog
-            this._oEditDialog.open();
+    // open dialog
+    this._oEditDialog.open();
 
-
-            const sStart = oFacilityData.StartDate || oFacilityData.StartDateText || "";
-
-            const oMinDate = this._parsePossibleDateString(sStart);
-            if (oMinDate && !isNaN(oMinDate.getTime())) {
-                // Fragment controls are created with view id prefix; use Fragment.byId(viewId, controlId)
-                const oStartPicker = sap.ui.core.Fragment.byId(this.getView().getId(), "editStartDate");
-                if (oStartPicker) {
-                    oStartPicker.setMinDate(oMinDate);
-                }
-                // Also set minDate on endDate if needed (optional)
-                const oEndPicker = sap.ui.core.Fragment.byId(this.getView().getId(), "editEndDate");
-                if (oEndPicker) {
-                    // Keep endDate >= startDate
-                    oEndPicker.setMinDate(oMinDate);
-                }
-            }
-        },
+    // Set minDate on datepickers to not allow earlier than existing start (if any)
+    const sStart = oFacilityData.StartDate || oFacilityData.StartDateText || "";
+    const oMinDate = this._parsePossibleDateString(sStart);
+    if (oMinDate && !isNaN(oMinDate.getTime())) {
+        const oStartPicker = sap.ui.core.Fragment.byId(this.getView().getId(), "editStartDate");
+        const oEndPicker = sap.ui.core.Fragment.byId(this.getView().getId(), "editEndDate");
+        if (oStartPicker) oStartPicker.setMinDate(oMinDate);
+        if (oEndPicker) oEndPicker.setMinDate(oMinDate);
+    }
+},
         _parsePossibleDateString: function (s) {
             if (!s) return null;
             // If already a Date
@@ -193,103 +197,143 @@ sap.ui.define([
             const yyyy = oDate.getFullYear();
             return dd + "/" + mm + "/" + yyyy;
         },
-        onEditFacilitySave: function () {
-            const oView = this.getView();
-            const oHostelModel = oView.getModel("HostelModel");
-            const oEditModel = oView.getModel("edit");
-            const oUpdatedData = { ...oEditModel.getData() }; // shallow copy
-            const oSelected = this._oSelectedFacility;
+onEditFacilitySave: function () {
+    const oView = this.getView();
+    const oHostelModel = oView.getModel("HostelModel");
+    const oEditModel = oView.getModel("edit");
+    if (!oHostelModel || !oEditModel) {
+        sap.m.MessageToast.show("Missing models");
+        return;
+    }
 
-            let aFacilities = this.getView().getModel("HostelModel").getData().Persons[oSelected.ID].AllSelectedFacilities
-            const iIndex = aFacilities.findIndex(facility => facility === oSelected);
+    const oUpdatedData = Object.assign({}, oEditModel.getData()); // shallow copy
+    let aFacilities = oHostelModel.getProperty("/AllSelectedFacilities") || [];
 
-            if (iIndex === -1) {
-                sap.m.MessageToast.show("No selected facility found.");
-                return;
-            }
+    // Fallback: if /AllSelectedFacilities is empty, build it from persons
+    if (!Array.isArray(aFacilities) || aFacilities.length === 0) {
+        const aPersons = oHostelModel.getProperty("/Persons") || [];
+        aFacilities = aPersons.flatMap((p, pi) => {
+            const arr = (p.AllSelectedFacilities || p.Facilities?.SelectedFacilities || []);
+            // ensure PersonName present
+            return (arr || []).map(f => Object.assign({}, f, { PersonName: p.FullName || (`Person ${pi+1}`) }));
+        });
+        // set it back so future ops are consistent
+        oHostelModel.setProperty("/AllSelectedFacilities", aFacilities);
+    }
 
-            //  Update the selected facility in global list (replace with copy)
-            aFacilities[iIndex] = oUpdatedData;
-            oHostelModel.setProperty("/AllSelectedFacilities", aFacilities);
+    // Attempt 1: use stored index (if it looks valid)
+    let iIndex = (typeof this._oSelectedIndex === "number" && this._oSelectedIndex >= 0 && this._oSelectedIndex < aFacilities.length)
+        ? this._oSelectedIndex
+        : -1;
 
-            // Update each person's facility summary
-            const aPersons = oHostelModel.getProperty("/Persons") || [];
-            aPersons.forEach((oPerson, iIndex) => {
-                const personName = oPerson.FullName || `Person ${iIndex + 1}`;
-                const aPersonFacilities = aFacilities.filter(f => f.PersonName === personName);
-                oHostelModel.setProperty(`/Persons/${iIndex}/PersonFacilitiesSummary`, aPersonFacilities);
-                oHostelModel.setProperty(`/Persons/${iIndex}/AllSelectedFacilities`, aPersonFacilities);
-            });
+    // Attempt 2: if index invalid, find by identity (FacilityID + PersonName + StartDate + EndDate)
+    if (iIndex === -1 && this._oSelectedFacility) {
+        const sel = this._oSelectedFacility;
+        iIndex = aFacilities.findIndex(f => {
+            // Prefer unique key FacilityID if present
+            if (f.FacilityID && sel.FacilityID) return String(f.FacilityID) === String(sel.FacilityID);
+            // else fallback to composite match
+            return (
+                String(f.FacilityName || "") === String(sel.FacilityName || "") &&
+                String(f.PersonName || "") === String(sel.PersonName || "") &&
+                String(f.StartDate || "") === String(sel.StartDate || "") &&
+                String(f.EndDate || "") === String(sel.EndDate || "")
+            );
+        });
+    }
 
-            // //  Recalculate start/end range across all facilities
-            // const parseDDMMYYYY = sDate => new Date(sDate.split("/").reverse().join("-"));
-            // const allStartDates = aFacilities.map(f => parseDDMMYYYY(f.StartDate));
-            // const allEndDates = aFacilities.map(f => parseDDMMYYYY(f.EndDate));
+    // If still not found, show helpful debug message and try best-effort: abort
+    if (iIndex === -1) {
+        console.warn("Could not find selected facility in /AllSelectedFacilities", {
+            all: aFacilities,
+            selected: this._oSelectedFacility
+        });
+        sap.m.MessageToast.show("Could not find selected facility in global list. Please re-select the row and try again.");
+        return;
+    }
 
-       
-            // const roomRentPrice = parseFloat(oHostelModel.getProperty("/FinalPrice")) || 0;
+    // Replace the facility entry at the found index
+    aFacilities[iIndex] = oUpdatedData;
+    oHostelModel.setProperty("/AllSelectedFacilities", aFacilities);
 
-            // const totals = this.calculateTotals(aPersons, allStartDates, allEndDates, roomRentPrice);
-            // if (totals) {// Recalculate start/end range across all facilities
-const parseDDMMYYYY = sDate => new Date(sDate.split("/").reverse().join("-"));
-const allStartDates = aFacilities.map(f => parseDDMMYYYY(f.StartDate));
-const allEndDates = aFacilities.map(f => parseDDMMYYYY(f.EndDate));
+    // Rebuild each person's facility arrays from global list
+    const aPersons = oHostelModel.getProperty("/Persons") || [];
+    aPersons.forEach((oPerson, pIdx) => {
+        const personName = oPerson.FullName || `Person ${pIdx + 1}`;
+        const personFacs = aFacilities.filter(f => String(f.PersonName || "") === String(personName));
+        oHostelModel.setProperty(`/Persons/${pIdx}/AllSelectedFacilities`, personFacs);
+        oHostelModel.setProperty(`/Persons/${pIdx}/PersonFacilitiesSummary`, personFacs);
+    });
 
-const minStart = this._formatDateToDDMMYYYY(new Date(Math.min(...allStartDates)));
-const maxEnd = this._formatDateToDDMMYYYY(new Date(Math.max(...allEndDates)));
+    // Recalculate start/end from global facility dates (safe parse)
+    const parseDDMMYYYY = s => {
+        if (!s) return null;
+        if (typeof s !== "string") return new Date(s);
+        if (s.indexOf("/") > -1) {
+            const p = s.split("/");
+            return new Date(p[2], p[1] - 1, p[0]);
+        }
+        // fallback to Date
+        return new Date(s);
+    };
+    const startDates = aFacilities.map(f => parseDDMMYYYY(f.StartDate)).filter(Boolean);
+    const endDates = aFacilities.map(f => parseDDMMYYYY(f.EndDate)).filter(Boolean);
+    if (startDates.length) {
+        const minStart = new Date(Math.min(...startDates.map(d => d.getTime())));
+        oHostelModel.setProperty("/StartDate", this._formatDateToDDMMYYYY(minStart));
+    }
+    if (endDates.length) {
+        const maxEnd = new Date(Math.max(...endDates.map(d => d.getTime())));
+        oHostelModel.setProperty("/EndDate", this._formatDateToDDMMYYYY(maxEnd));
+    }
 
-oHostelModel.setProperty("/StartDate", minStart);
-oHostelModel.setProperty("/EndDate", maxEnd);
+    // Recalculate totals using your helper — pass model date strings
+    const sStart = oHostelModel.getProperty("/StartDate");
+    const sEnd = oHostelModel.getProperty("/EndDate");
 
-// Correct rent values
-const fullRoomRent = parseFloat(oHostelModel.getProperty("/FinalPriceTotal")) || 0;
-const perPersonRent = parseFloat(oHostelModel.getProperty("/FinalPrice")) || 0;
+    // room rent: use per-person rent stored in /FinalPrice (per person) OR /FinalPriceTotal as needed
+    const perPersonRent = parseFloat(oHostelModel.getProperty("/FinalPrice")) || parseFloat(oHostelModel.getProperty("/Price")) || 0;
 
-// Recalculate totals globally
-const totals = this.calculateTotals(aPersons, minStart, maxEnd, perPersonRent);
-if (totals) {
-    oHostelModel.setProperty("/TotalDays", totals.TotalDays);
-    oHostelModel.setProperty("/TotalFacilityPrice", totals.TotalFacilityPrice);
-    oHostelModel.setProperty("/GrandTotal", totals.GrandTotal);
+    const totals = this.calculateTotals(aPersons, sStart, sEnd, perPersonRent);
+    if (totals) {
+        oHostelModel.setProperty("/TotalDays", totals.TotalDays);
+        oHostelModel.setProperty("/TotalFacilityPrice", totals.TotalFacilityPrice);
+        oHostelModel.setProperty("/GrandTotal", totals.GrandTotal);
+    }
+
+    // Per-person recalculation
+    aPersons.forEach((oPerson, idx) => {
+        const facs = oPerson.AllSelectedFacilities || [];
+        const facTotal = facs.reduce((sum, f) => {
+            const price = parseFloat(f.Price) || 0;
+            const days = parseFloat(f.TotalDays) || 0;
+            return sum + (price * days);
+        }, 0);
+        oHostelModel.setProperty(`/Persons/${idx}/TotalFacilityPrice`, facTotal);
+        oHostelModel.setProperty(`/Persons/${idx}/RoomRentPerPerson`, perPersonRent);
+        oHostelModel.setProperty(`/Persons/${idx}/GrandTotal`, facTotal + perPersonRent);
+    });
+
+    // Refresh bindings (table)
+    const oTable = this._oSelectedTable || oView.byId("idFacilitySummaryTable");
+    if (oTable) {
+        // remove selection
+        try { oTable.removeSelections(true); } catch (e) { /* ignore */ }
+        const oBinding = oTable.getBinding("items");
+        if (oBinding) oBinding.refresh();
+    }
+
+    // Clear selection cache
+    this._oSelectedTable = null;
+    this._oSelectedFacility = null;
+    this._oSelectedIndex = null;
+    this._sSelectedPath = null;
+
+    this.onEditDialogClose();
+    sap.m.MessageToast.show("Facility updated successfully!");
 }
 
-// Recalculate per-person totals
-aPersons.forEach((oPerson, iIndex) => {
-    const aFac = oPerson.AllSelectedFacilities || [];
-    const iFacilityTotal = aFac.reduce((sum, f) => {
-        return sum + (parseFloat(f.Price) || 0) * (parseFloat(f.TotalDays) || 0);
-    }, 0);
-
-    oHostelModel.setProperty(`/Persons/${iIndex}/TotalFacilityPrice`, iFacilityTotal);
-    oHostelModel.setProperty(`/Persons/${iIndex}/RoomRentPerPerson`, perPersonRent);
-    oHostelModel.setProperty(`/Persons/${iIndex}/GrandTotal`, iFacilityTotal + perPersonRent);
-});
-            
-
-            //  Instead of refresh(true) — rebind items properly
-            const oTable = oView.byId("idFacilityRoomTable");
-            if (oTable) {
-                const oBinding = oTable.getBinding("items");
-                if (oBinding) {
-                    oBinding.refresh(); // triggers re-render with new data
-                }
-            }
-      
-
-            this.onEditDialogClose();
-            sap.m.MessageToast.show("Facility updated successfully!");
-
-
-                
-if (this._oSelectedTable) {
-    this._oSelectedTable.removeSelections();
-}
-this._oSelectedTable = null;
-this._oSelectedFacility = null;
-this._oSelectedIndex = null;
-this._sSelectedPath = null;
-
-        },
+,
 
         _formatDateToDDMMYYYY: function (oDate) {
             if (!(oDate instanceof Date)) {
@@ -367,6 +411,34 @@ this._sSelectedPath = null;
 
     return new Date(aParts[2], aParts[1] - 1, aParts[0]);
 },
+
+onUnitTextChange: function (oEvent) {
+    const oEditModel = this.getView().getModel("edit");
+    const oFacilityModel = this.getView().getModel("FacilityModel");
+
+    const sSelectedUnit = oEvent.getSource().getSelectedItem().getText(); // Per Day / Per Month
+    const sFacilityName = oEditModel.getProperty("/FacilityName");
+
+    // Update unit type in edit model
+    oEditModel.setProperty("/UnitText", sSelectedUnit);
+
+    // Get ALL facilities from FacilityModel
+    const aFacilities = oFacilityModel.getProperty("/Facilities") || [];
+
+    // Find row matching both facility name + selected unit
+    const oMatched = aFacilities.find(f =>
+        f.FacilityName === sFacilityName &&
+        f.UnitText === sSelectedUnit
+    );
+
+    if (!oMatched) {
+        sap.m.MessageToast.show("Price not found for selected Unit Type.");
+        return;
+    }
+
+    // Update the correct price in dialog
+    oEditModel.setProperty("/Price", oMatched.Price);
+}
 
 
 
