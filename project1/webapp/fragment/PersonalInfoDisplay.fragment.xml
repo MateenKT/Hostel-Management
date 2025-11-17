@@ -111,7 +111,7 @@
                 }" class="sapUiSmallMarginEnd"/>
               
             </HBox>
-            <HBox justifyContent="End" class="sapUiSmallMarginTop">
+            <!-- <HBox justifyContent="End" class="sapUiSmallMarginTop">
                 <Label text="Room Rent:" design="Bold" class="sapUiSmallMarginEnd"/>
                 <Text text="{path:'HostelModel>/FinalPrice',formatter: '.Formatter.formatCurrency'}" class="sapUiSmallMarginEnd"/>
             </HBox>
@@ -122,7 +122,7 @@
                     path: 'HostelModel>GrandTotal',
                     formatter: '.Formatter.formatCurrency'
                 }" class="sapUiSmallMarginEnd"/>
-            </HBox>
+            </HBox> -->
         </VBox>
 
     </Panel>

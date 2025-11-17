@@ -26,13 +26,13 @@
                 vertical="true"
                 horizontal="false"
             >
-                <VBox class="sapUiSmallMargin">
+    <!-- <VBox class="sapUiSmallMargin">
                     <Title
                         text="Hostel Boking"
                         class="boldBlackText"
                     />
 
-                    <!-- Booking Status and Price -->
+                  
                     <HBox class="sapUiSmallMarginTop">
                         <VBox>
                             <Text
@@ -55,7 +55,7 @@
                             />
                         </VBox> 
                     </HBox>
-                </VBox>
+                </VBox> -->
                 <!-- Wizard -->
                 <Wizard
                     class="sapUiResponsivePadding--header sapUiResponsivePadding--content"

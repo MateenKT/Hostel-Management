@@ -893,12 +893,12 @@ oFacilityModel.refresh(true);
     }
     ,
     onDialogNextButton: async function () {
-          if (this._iSelectedStepIndex === 1) {
-          if (!this._checkMandatoryFields()) {
-              sap.m.MessageToast.show("Please fill all mandatory personal details before proceeding.");
-              return; // STOP navigation
-          }
-      }
+      //     if (this._iSelectedStepIndex === 1) {
+      //     if (!this._checkMandatoryFields()) {
+      //         sap.m.MessageToast.show("Please fill all mandatory personal details before proceeding.");
+      //         return; // STOP navigation
+      //     }
+      // }
       this._iSelectedStepIndex = this._oWizard.getSteps().indexOf(this._oSelectedStep);
       this.oNextStep = this._oWizard.getSteps()[this._iSelectedStepIndex + 1];
       if (this._oSelectedStep && !this._oSelectedStep.bLast) {
@@ -1012,7 +1012,7 @@ oFacilityModel.refresh(true);
       // Save full room rent
       oHostelModel.setProperty("/FinalPriceTotal", totalFinalPrice);
 
-      // 4️⃣ PER PERSON PRICE = total / persons
+      // 4 PER PERSON PRICE = total / persons
       const perPersonPrice = totalFinalPrice / persons;
 
       // Save per-person price (shown in UI)
