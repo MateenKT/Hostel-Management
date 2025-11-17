@@ -1497,3 +1497,8 @@
     background-color: #1976d2 !important;
     border-color: #1976d2 !important;
 }
+
+.noBottomSpace {
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+}

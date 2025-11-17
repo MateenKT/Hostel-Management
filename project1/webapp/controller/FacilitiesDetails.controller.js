@@ -152,51 +152,35 @@ sap.ui.define([
             if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
         },
 
-        // onDeleteImage: function(oEvent) {
-        //     const oContext = oEvent.getSource().getBindingContext("DisplayImagesModel");
-        //     if (!oContext) return;
+           onDeleteImage: function (oEvent) {
 
-        //     const sFileName = oContext.getProperty("fileName");
-        //     const oModel = this.getView().getModel("DisplayImagesModel");
-        //     let aImages = oModel.getProperty("/DisplayImages") || [];
-        //     aImages = aImages.filter(img => img.fileName !== sFileName);
-        //     const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
-        //     if (realImagesCount < 3 && !aImages.some(img => img.isPlaceholder)) {
-        //         aImages.push({
-        //             isPlaceholder: true
-        //         });
-        //     }
-        //     oModel.setProperty("/DisplayImages", aImages);
-        //     oModel.setProperty("/CanAddMore", realImagesCount < 3);
-        // },
-            onDeleteImage: function (oEvent) {
     const oContext = oEvent.getSource().getBindingContext("DisplayImagesModel");
     const sFileName = oContext.getProperty("fileName");
     const oModel = this.getView().getModel("DisplayImagesModel");
+
+    // Original array
     let aImages = oModel.getProperty("/DisplayImages") || [];
 
-    // Remove the deleted image
-    aImages = aImages.filter(img => img.fileName !== sFileName);
+    // ----------- 1. REMOVE ONLY THE CLICKED IMAGE -----------
+    let aRealImages = aImages.filter(img => !img.isPlaceholder);
+    aRealImages = aRealImages.filter(img => img.fileName !== sFileName);
 
-    // Count non-placeholder images
-    const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
-
-    // Decide how many placeholders are needed to reach 5 slots
+    // ----------- 2. RECALCULATE PLACEHOLDER COUNT -----------
     const maxImages = 3;
-    let placeholdersNeeded = maxImages - realImagesCount;
+    const placeholdersNeeded = maxImages - aRealImages.length;
 
-    // Remove existing placeholders
-    aImages = aImages.filter(img => !img.isPlaceholder);
+    // ----------- 3. BUILD NEW ARRAY WITH REAL IMAGES + PLACEHOLDERS -----------
+    let aFinalImages = [...aRealImages];
 
-    // Add required placeholders
     for (let i = 0; i < placeholdersNeeded; i++) {
-        aImages.push({ isPlaceholder: true });
+        aFinalImages.push({ isPlaceholder: true });
     }
 
-    // Update the model
-    oModel.setProperty("/DisplayImages", aImages);
-     oModel.setProperty("/CanAddMore", realImagesCount < 3);
-},
+    // ----------- 4. UPDATE MODEL -----------
+    oModel.setProperty("/DisplayImages", aFinalImages);
+    oModel.setProperty("/CanAddMore", aRealImages.length < maxImages);
+}
+,
 
         onFileSelected: function(oEvent) {
             const oFileUploader = oEvent.getSource();

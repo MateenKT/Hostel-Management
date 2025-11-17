@@ -9,11 +9,61 @@ sap.ui.define([
 
     return BaseController.extend("sap.ui.com.project1.controller.Hostel", {
 
-        onInit: function () {
+         onInit: function () {
             this.getOwnerComponent().getRouter().getRoute("RouteHostel").attachMatched(this._onRouteMatched, this);
-
-
+            this._getBrowserLocation();
         },
+
+        _getBrowserLocation: function () {
+    if (!navigator.geolocation) {
+        sap.m.MessageToast.show("Geolocation not supported!");
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            let lat = pos.coords.latitude;
+            let lng = pos.coords.longitude;
+            this._getLocationName(lat, lng);
+        },
+        (err) => {
+            console.error("Location error:", err);
+        }
+    );
+},
+
+_getLocationName: function (lat, lng) {
+    let url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+
+    $.ajax({
+        url: url,
+        method: "GET",
+        success: (data) => {
+            if (!data || !data.address) {
+                console.log("Address not found");
+                return;
+            }
+
+            let city = data.address.city 
+                    || data.address.town 
+                    || data.address.village 
+                    || data.address.municipality;
+
+            let state = data.address.state;
+            let country = data.address.country;
+
+            console.log("City:", city);
+            console.log("State:", state);
+            console.log("Country:", country);
+
+            console.log("Full Location:", `${city}, ${state}, ${country}`);
+        },
+        error: (err) => {
+            console.error("Reverse geocoding failed", err);
+        }
+    });
+}
+,
         _onRouteMatched: async function () {
             const oView = this.getView();
 

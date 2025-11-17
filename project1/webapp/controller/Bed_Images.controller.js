@@ -301,33 +301,40 @@ sap.ui.define([
                 sap.m.MessageToast.show("Please fill all mandatory fields correctly.");
             }
         },
-      onDeleteImage: function (oEvent) {
+    onDeleteImage: function (oEvent) {
     const oContext = oEvent.getSource().getBindingContext("DisplayImagesModel");
     const sFileName = oContext.getProperty("fileName");
+
     const oModel = this.getView().getModel("DisplayImagesModel");
     let aImages = oModel.getProperty("/DisplayImages") || [];
 
-    // Remove the deleted image
-    aImages = aImages.filter(img => img.fileName !== sFileName);
+    // STEP 1: Remove ONLY the clicked image
+    const index = aImages.findIndex(img => img.fileName === sFileName);
 
-    // Count non-placeholder images
-    const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
-
-    // Decide how many placeholders are needed to reach 5 slots
-    const maxImages = 5;
-    let placeholdersNeeded = maxImages - realImagesCount;
-
-    // Remove existing placeholders
-    aImages = aImages.filter(img => !img.isPlaceholder);
-
-    // Add required placeholders
-    for (let i = 0; i < placeholdersNeeded; i++) {
-        aImages.push({ isPlaceholder: true });
+    if (index !== -1) {
+        aImages.splice(index, 1); // Delete ONLY one item
     }
 
-    // Update the model
-    oModel.setProperty("/DisplayImages", aImages);
-},
+    // STEP 2: Remove all placeholders
+    const realImages = aImages.filter(img => !img.isPlaceholder);
+
+    // STEP 3: Add placeholders until list reaches 5 items
+    const maxImages = 5;
+    const placeholdersNeeded = maxImages - realImages.length;
+
+    const finalImages = [...realImages];
+
+    for (let i = 0; i < placeholdersNeeded; i++) {
+        finalImages.push({
+            isPlaceholder: true,
+            fileName: null
+        });
+    }
+
+    // STEP 4: Update Model
+    oModel.setProperty("/DisplayImages", finalImages);
+}
+,
        
 
         onFileSelected: function (oEvent) {
