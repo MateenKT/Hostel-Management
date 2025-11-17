@@ -19,9 +19,8 @@
                 <core:Title text="{i18n>bookingDetailsTitle}" />
                <Label text="Room Type" />
                             <Text id="idRoomType2" text="{HostelModel>/BedType}"  />
-
-                            <!-- <Label text="Price" />
-                            <Text id="idPrice3" text="{HostelModel>/FinalPriceTotal}"   /> -->
+                            <Label text="Rent Price" /> 
+                            <Text id="idPrice3" text="{HostelModel>/FinalPrice}"   />
                 
                  <Label text="Payment Method" />
                             <Text text="{HostelModel>/SelectedPriceType}"/>

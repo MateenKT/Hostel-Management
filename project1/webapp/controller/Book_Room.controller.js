@@ -36,7 +36,8 @@ sap.ui.define([
           ACType: "",
           FinalPrice: "",
           SelectedPriceType: "",
-          Capacity: ""
+          Capacity: "",
+          StopPriceRecalculateByPerson:false
         });
         sap.ui.getCore().setModel(oHostelModel, "HostelModel");
       }
@@ -206,6 +207,7 @@ sap.ui.define([
       }
       // fallback to model value (in case we call this without an event)
       var oModel = this.getView().getModel("HostelModel");
+      // oModel.setProperty("/StopPriceRecalculateByPerson", true);   
       if (!sKey) {
         sKey = oModel.getProperty("/SelectedPerson");
       }
@@ -976,97 +978,95 @@ oFacilityModel.refresh(true);
       }
     },
 
-    TC_onDialogNextButton: function () {
-      const oView = this.getView();
-      const oHostelModel = oView.getModel("HostelModel");
-      const aPersons = oHostelModel.getProperty("/Persons") || [];
+   TC_onDialogNextButton: function () {
+  const oView = this.getView();
 
-      const sStartDate = oHostelModel.getProperty("/StartDate");
-      const sEndDate = oHostelModel.getProperty("/EndDate");
-      const sDurationType = oHostelModel.getProperty("/SelectedPriceType"); // daily, monthly, yearly
-      const iSelectedMonthsOrYears = parseInt(oHostelModel.getProperty("/SelectedMonths") || "1", 10);
-      const perUnitPrice = parseFloat(oHostelModel.getProperty("/FinalPrice")) || 0;
+  // Keep summary price bound
+  const oPriceSummary = oView.byId("idPrice3");
+  if (oPriceSummary) {
+    oPriceSummary.bindText("HostelModel>/FinalPrice");
+  }
 
-      // Convert dates
-      const oStartDate = this._parseDate(sStartDate);
-      const oEndDate = this._parseDate(sEndDate);
+  const oHostelModel = oView.getModel("HostelModel");
+  const aPersons = oHostelModel.getProperty("/Persons") || [];
 
-      const iDays = Math.ceil((oEndDate - oStartDate) / (1000 * 3600 * 24));
-      if (iDays <= 0) {
-        sap.m.MessageToast.show("End Date must be after Start Date");
-        return;
-      }
+  const sStartDate = oHostelModel.getProperty("/StartDate");
+  const sEndDate = oHostelModel.getProperty("/EndDate");
 
-      // ⭐ NEW MULTI-STEP PRICE LOGIC
-      const basePrice = perUnitPrice;
+  // perUnitPrice is the current stored FinalPrice (could be base or already per-person)
+  const perUnitPrice = parseFloat(oHostelModel.getProperty("/FinalPrice")) || 0;
 
-      // 1️⃣ Number of Persons
-      const persons = parseInt(oHostelModel.getProperty("/SelectedPerson") || "1", 10);
+  // Convert dates
+  const oStartDate = this._parseDate(sStartDate);
+  const oEndDate = this._parseDate(sEndDate);
 
-      // 2️⃣ Number of months/years selected
-      const monthsOrYears = parseInt(oHostelModel.getProperty("/SelectedMonths") || "1", 10);
+  const iDays = Math.ceil((oEndDate - oStartDate) / (1000 * 3600 * 24));
+  if (iDays <= 0) {
+    sap.m.MessageToast.show("End Date must be after Start Date");
+    return;
+  }
+  
+  // NEW MULTI-STEP PRICE LOGIC
+  // ALWAYS GET ORIGINAL BASE PRICE
+const baseRoomRent = parseFloat(oHostelModel.getProperty("/FinalPrice")) || 0;
 
-      // 3️⃣ TOTAL PRICE = basePrice × persons × months/years
-      const totalFinalPrice = basePrice * persons * monthsOrYears;
+// Number of months selected
+const monthsOrYears = parseInt(oHostelModel.getProperty("/SelectedMonths") || "1", 10);
 
-      // Save full room rent
-      oHostelModel.setProperty("/FinalPriceTotal", totalFinalPrice);
+// Always calculate correct rent
+let roomRentPerPerson = baseRoomRent * monthsOrYears;
 
-      // 4 PER PERSON PRICE = total / persons
-      const perPersonPrice = totalFinalPrice / persons;
+  // Reset flags
+  oHostelModel.setProperty("/StopPriceRecalculate", false);
+  oHostelModel.setProperty("/StopPriceRecalculateByPerson", false);
 
-      // Save per-person price (shown in UI)
-      oHostelModel.setProperty("/FinalPrice", perPersonPrice);
+  // Continue your existing logic...
+  const totals = this.calculateTotals(aPersons, sStartDate, sEndDate, perUnitPrice);
+  if (!totals) return;
 
+  const aUpdatedPersons = aPersons.map((oPerson, iIndex) => {
+    const personName = oPerson.FullName || `Person ${iIndex + 1}`;
+    const aPersonFacilities = (totals.AllSelectedFacilities || []).filter(
+      f => f.PersonName === personName
+    );
 
+    const facilityTotal = aPersonFacilities.reduce((sum, f) => {
+      const iPrice = parseFloat(f.Price) || 0;
+      const iDays = parseFloat(f.TotalDays) || 0;
+      return sum + (iPrice * iDays);
+    }, 0);
 
-      // Continue your existing logic...
-      const totals = this.calculateTotals(aPersons, sStartDate, sEndDate, perUnitPrice);
-      if (!totals) return;
+    return {
+      ...oPerson,
+      // Facility details per person
+      PersonFacilitiesSummary: aPersonFacilities,
+      AllSelectedFacilities: aPersonFacilities,
 
-      const aUpdatedPersons = aPersons.map((oPerson, iIndex) => {
-        const personName = oPerson.FullName || `Person ${iIndex + 1}`;
-        const aPersonFacilities = (totals.AllSelectedFacilities || []).filter(
-          f => f.PersonName === personName
-        );
+      // Per-person facility cost
+      TotalFacilityPrice: facilityTotal,
 
-        const facilityTotal = aPersonFacilities.reduce((sum, f) => {
-          const iPrice = parseFloat(f.Price) || 0;
-          const iDays = parseFloat(f.TotalDays) || 0;
-          return sum + (iPrice * iDays);
-        }, 0);
+      // Per-person room rent (now uses the safely-declared variable)
+      RoomRentPerPerson: roomRentPerPerson,
 
-        return {
-          ...oPerson,
+      // Per-person total
+      GrandTotal: roomRentPerPerson + facilityTotal,
 
-          // Facility details per person
-          PersonFacilitiesSummary: aPersonFacilities,
-          AllSelectedFacilities: aPersonFacilities,
+      TotalDays: iDays
+    };
+  });
 
-          // Per-person facility cost
-          TotalFacilityPrice: facilityTotal,
+  const totalFacilitySum = aUpdatedPersons.reduce((sum, obj) => sum + obj.TotalFacilityPrice, 0);
+  const grandTotalSum = aUpdatedPersons.reduce((sum, obj) => sum + obj.GrandTotal, 0);
 
-          // Per-person room rent
-          RoomRentPerPerson: perPersonPrice,
-
-          // Per-person total
-          GrandTotal: perPersonPrice + facilityTotal,
-
-          TotalDays: iDays
-        };
-
-      });
-
-      const totalFacilitySum = aUpdatedPersons.reduce((sum, obj) => sum + obj.TotalFacilityPrice, 0);
-      const grandTotalSum = aUpdatedPersons.reduce((sum, obj) => sum + obj.GrandTotal, 0);
-
-      oHostelModel.setProperty("/Persons", aUpdatedPersons);
-      oHostelModel.setProperty("/TotalDays", iDays);
-      oHostelModel.setProperty("/TotalFacilityPrice", totalFacilitySum);
-      oHostelModel.setProperty("/GrandTotal", grandTotalSum);
-      oHostelModel.setProperty("/OverallTotalCost", grandTotalSum);
-      oHostelModel.updateBindings(true);
-    },
+  oHostelModel.setProperty("/Persons", aUpdatedPersons);
+  oHostelModel.setProperty("/TotalDays", iDays);
+  oHostelModel.setProperty("/TotalFacilityPrice", totalFacilitySum);
+  oHostelModel.setProperty("/GrandTotal", grandTotalSum);
+  oHostelModel.setProperty("/OverallTotalCost", grandTotalSum);
+  oHostelModel.updateBindings(true);
+  oHostelModel.refresh(true);
+}
+,
     // Separated calculation function
     calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
       const oStartDate = this._parseDate(sStartDate);
@@ -1206,8 +1206,9 @@ oFacilityModel.refresh(true);
     ,
     onMonthSelectionChange: function (oEvent) {
       const oView = this.getView();
-      const oHostelModel = oView.getModel("HostelModel");
 
+      const oHostelModel = oView.getModel("HostelModel");
+oHostelModel.setProperty("/StopPriceRecalculate", true);
       const sStartDate = oView.byId("idStartDate1")?.getValue() || "";
       const iSelectedNumber = parseInt(oEvent.getSource().getSelectedKey() || "1", 10);
       const sDuration = oHostelModel.getProperty("/SelectedPriceType");  // daily / monthly / yearly
@@ -1250,7 +1251,6 @@ oFacilityModel.refresh(true);
       oHostelModel.setProperty("/EndDate", sEndDate);
       oView.byId("idEndDate1")?.setValue(sEndDate);
     }
-
     ,
 
     _formatDateToDDMMYYYY: function (oDate) {
@@ -1347,12 +1347,12 @@ oFacilityModel.refresh(true);
       const sSelectedKey = oEvent.getParameter("selectedItem").getKey(); // daily / monthly / yearly
       const iSelectedValue = parseInt(oHostelModel.getProperty("/SelectedMonths") || "1", 10);  // <-- HOW MANY MONTH/YEAR
       const sStartDate = oHostelModel.getProperty("/StartDate");
-
+      const sBranchCode = oHostelModel.getProperty("/BranchCode") || ""
       // ⭐ UPDATE PRICE (same as your code)
       const sRoomType = oView.byId("GI_Roomtype")?.getText()?.trim() || "";
       const aRoomDetails = oRoomDetailModel.getData();
       const normalize = v => (v ? String(v).trim().toLowerCase() : "");
-      const oMatchingRoom = aRoomDetails.find(item => normalize(item.BedTypeName) === normalize(sRoomType));
+      const oMatchingRoom = aRoomDetails.find(item => normalize(item.BedTypeName) === normalize(sRoomType) &&  normalize(item.BranchCode) === normalize(sBranchCode));
 
       if (!oMatchingRoom) {
         oHostelModel.setProperty("/FinalPrice", "");
@@ -1378,7 +1378,7 @@ oFacilityModel.refresh(true);
         return;
       }
 
-      // ⭐ MONTHLY or YEARLY → need “How Many Month/Year”
+      //  MONTHLY or YEARLY → need “How Many Month/Year”
       oBTN.setProperty("/Month", true);
       oEndDatePicker.setEditable(false);
 
