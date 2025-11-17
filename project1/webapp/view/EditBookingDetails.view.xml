@@ -133,7 +133,7 @@
     >
         <f:SimpleForm
         id="idPersonalForm"
-            editable="false"
+            editable="true"
             layout="ColumnLayout"
             columnsM="1"
             columnsL="2"
