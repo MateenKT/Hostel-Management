@@ -31,11 +31,9 @@
                     // set the device model
                     this.setModel(models.createDeviceModel(), "device");
 
-                    this._fetchCommonData("HM_Branch", "BranchModel","");
-                    this._fetchCommonData("Country", "Country","");
-
-                    
-
+                    this._fetchCommonData("City", "CityModel");                   
+                    this._fetchCommonData("State", "StateModel");
+                    this._fetchCommonData("Country", "CountryModel");
                     
                 },
                 _fetchCommonData: async function (entityName, modelName, filter = "") {
