@@ -1099,6 +1099,7 @@
     margin-right: auto;
 }
 .placeholderBox {
+    margin-top: 8px;
     border: 2px solid black;
     border-radius: 8px;
     cursor: pointer;
@@ -1109,10 +1110,6 @@
     background-color: #f4f4f4;
     border-color: #000000;
 }
-
-
-
-
 
 .roomDetailDialog {
     max-width: 80% !important;

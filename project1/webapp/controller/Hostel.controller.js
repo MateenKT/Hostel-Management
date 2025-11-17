@@ -173,12 +173,36 @@ _getLocationName: function (lat, lng) {
 
                 const oBranchModel = new sap.ui.model.json.JSONModel(aBranches);
                 oView.setModel(oBranchModel, "sBRModel");
+                               this._populateUniqueFilterValues(aBranches);
+
 
                 console.log("oBranchModel:", oBranchModel.getData());
                 console.log("Branch data loaded successfully");
             } catch (err) {
                 console.error("Error while loading branch data:", err);
             }
+        },
+         _populateUniqueFilterValues: function(data) {
+            let uniqueValues = {
+                id_Branch: new Set(),
+
+            };
+
+            data.forEach(item => {
+                uniqueValues.id_Branch.add(item.City);
+            });
+
+            let oView = this.getView();
+            ["id_Branch"].forEach(field => {
+                let oComboBox = oView.byId(field);
+                oComboBox.destroyItems();
+                Array.from(uniqueValues[field]).sort().forEach(value => {
+                    oComboBox.addItem(new sap.ui.core.Item({
+                        key: value,
+                        text: value
+                    }));
+                });
+            });
         },
 
 
@@ -375,7 +399,7 @@ _getLocationName: function (lat, lng) {
 
    
         const response = await this.ajaxReadWithJQuery("HM_BedType", {
-            BranchCode: aBranchCodes
+            BranchCode: JSON.stringify(aBranchCodes)
         });
 
         let matchedRooms = response?.data?.data || [];

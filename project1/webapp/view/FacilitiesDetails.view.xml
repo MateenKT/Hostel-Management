@@ -1,35 +1,42 @@
-<mvc:View controllerName="sap.ui.com.project1.controller.FacilitiesDetails"
-	xmlns:mvc="sap.ui.core.mvc"
-	xmlns:m="sap.m"
-	xmlns:suite="sap.suite.ui.commons"
-	xmlns="sap.uxap"
-	xmlns:uxap="sap.uxap"
-	xmlns:richtexteditor="sap.ui.richtexteditor"
-	xmlns:layout="sap.ui.layout"
-	xmlns:f="sap.ui.layout.form"
-	xmlns:c="sap.ui.core"
+<mvc:View
+    controllerName="sap.ui.com.project1.controller.FacilitiesDetails"
+    xmlns:mvc="sap.ui.core.mvc"
+    xmlns:m="sap.m"
+    xmlns:suite="sap.suite.ui.commons"
+    xmlns="sap.uxap"
+    xmlns:uxap="sap.uxap"
+    xmlns:richtexteditor="sap.ui.richtexteditor"
+    xmlns:layout="sap.ui.layout"
+    xmlns:f="sap.ui.layout.form"
+    xmlns:c="sap.ui.core"
     displayBlock="true"
     height="100%"
-	xmlns:core="sap.ui.core"
+    xmlns:core="sap.ui.core"
     busyIndicatorDelay="0"
-	xmlns:u="sap.ui.unified">
-	<m:Page
+    xmlns:u="sap.ui.unified"
+>
+    <m:Page
         navButtonPress="BI_onButtonPress"
         showNavButton="true"
-        title="Facility Details">
-         <m:headerContent>
-           <core:Fragment fragmentName="sap.ui.com.project1.fragment.Header" type="XML"/>
-        </m:headerContent>  
-		<ObjectPageLayout id="FD_id_ObjectPageLayout">
-			<sections>
-				<ObjectPageSection
+        title="Facility Details"
+    >
+        <m:headerContent>
+            <core:Fragment
+                fragmentName="sap.ui.com.project1.fragment.Header"
+                type="XML"
+            />
+        </m:headerContent>
+        <ObjectPageLayout id="FD_id_ObjectPageLayout">
+            <sections>
+                <ObjectPageSection
                     titleUppercase="false"
                     id="FD_id_OrderHeaderSection1"
-                    title="Facility Information">
-					<subSections>
-						<ObjectPageSubSection id="FD_id_dsd1">
-							<blocks>
-								<f:SimpleForm
+                    title="Facility Information"
+                >
+                    <subSections>
+                        <ObjectPageSubSection id="FD_id_dsd1">
+                            <blocks>
+                                <f:SimpleForm
                                     id="FD_id_simpleCompanyDetails"
                                     busyIndicatorDelay="0"
                                     editable="true"
@@ -46,194 +53,216 @@
                                     columnsXL="3"
                                     columnsL="2"
                                     columnsM="2"
-                                    singleContainerFullSize="false">
-									<f:content>
-										<!-- Branch Code -->
-										<m:Label text="Branch Code" required="true" />
-										<m:ComboBox
-                    id="FD_id_RoomType123"
-                    placeholder="Select branch Code"
-                    selectedKey="{FacilitiesModel>/BranchCode}"
-                    items="{BranchModel>/}"
-                    showSecondaryValues="true"
-                    change=".onFacilitybranchChange"
-                    valueStateText="{i18n>selectBranchCode}" editable="{editable>/Edit}">
-											<core:ListItem
-                        key="{BranchModel>BranchID}"
-                        text="{BranchModel>BranchID}"
-                        additionalText="{BranchModel>Name}"
-                    />
-										</m:ComboBox>
-										<!-- Facility Name -->
-										<m:Label text="Facility Name" required="true" />
-										<m:Input
-                    id="FD_id_FacilityName"
-                    value="{FacilitiesModel>/FacilityName}"
-                    placeholder="Enter Facility Name"
-                    maxLength="60"
-                    liveChange=".onFacilityNameChange"
-                    valueStateText="{i18n>enterFacilityName}"  editable="{editable>/Edit}"
-                />
-										<!-- Type -->
-										<m:Label text="Type" required="true" />
-										<m:ComboBox
-                    id="FD_id_FacilityName1"
-                    items="{FacilityType>/}"
-                    placeholder="Enter Type"
-                    value="{FacilitiesModel>/Type}"
-                    change=".onFacilityTypeChange"
-                    width="100%"
-                    valueStateText="{i18n>enterFacilityType}" editable="{editable>/Edit}"
-                >
-											<core:Item
-                        key="{FacilityType>ID}"
-                        text="{FacilityType>FacilityName}"
-                    />
-										</m:ComboBox>
-										<!-- Price + Unit -->
-										<m:Label text="Price" required="true" />
-										<m:Input
-                            id="FD_id_Price"
-                            value="{FacilitiesModel>/Price}"
-                            placeholder="Enter Price"
-                            maxLength="10"
-                            liveChange=".onFacilityPriceChange"
-                            valueStateText="{i18n>enterFacilityPrice}" editable="{editable>/Edit}"
-                        />
-										<m:ComboBox
-                            id="FD_id_Rate"
-                            items="{RateType>/}"
-                            selectedKey="Per Day"
-                            value="{FacilitiesModel>/UnitText}"
-                            change=".onFacilityRateChange"
-                            width="100%"
-                            valueStateText="{i18n>selectRateType}" editable="{editable>/Edit}"
-                        >
-											<core:Item
-                                key="{RateType>ID}"
-                                text="{RateType>RateType}"
-                            />
-										</m:ComboBox>
-										<!-- Currency -->
-										<m:Label text="Currency" required="true" />
-										<m:ComboBox
-                    id="FD_id_Currency"
-                    selectedKey="{FacilitiesModel>/Currency}"
-                    items="{CurrencyModel>/}"
-                    valueStateText="Select Currency"
-                    width="100%"
-                    change=".onFacilitybranchChange"
-                    placeholder="Select Currency" editable="{editable>/Edit}"
-                >
-											<c:Item
-                        key="{CurrencyModel>currency}"
-                        text="{CurrencyModel>currency}"
-                    />
-										</m:ComboBox>
-									</f:content>
-								</f:SimpleForm>
-							</blocks>
-						</ObjectPageSubSection>
-					</subSections>
-				</ObjectPageSection>
-				<ObjectPageSection
+                                    singleContainerFullSize="false"
+                                >
+                                    <f:content>
+                                        <!-- Branch Code -->
+                                        <m:Label
+                                            text="Branch Code"
+                                            required="true"
+                                        />
+                                        <m:ComboBox
+                                            id="FD_id_RoomType123"
+                                            placeholder="Select branch Code"
+                                            selectedKey="{FacilitiesModel>/BranchCode}"
+                                            items="{BranchModel>/}"
+                                            showSecondaryValues="true"
+                                            change=".onFacilitybranchChange"
+                                            valueStateText="{i18n>selectBranchCode}"
+                                            editable="{editable>/Edit}"
+                                        >
+                                            <core:ListItem
+                                                key="{BranchModel>BranchID}"
+                                                text="{BranchModel>BranchID}"
+                                                additionalText="{BranchModel>Name}"
+                                            />
+                                        </m:ComboBox>
+                                        <!-- Facility Name -->
+                                        <m:Label
+                                            text="Facility Name"
+                                            required="true"
+                                        />
+                                        <m:Input
+                                            id="FD_id_FacilityName"
+                                            value="{FacilitiesModel>/FacilityName}"
+                                            placeholder="Enter Facility Name"
+                                            maxLength="60"
+                                            liveChange=".onFacilityNameChange"
+                                            valueStateText="{i18n>enterFacilityName}"
+                                            editable="{editable>/Edit}"
+                                        />
+                                        <!-- Type -->
+                                        <m:Label
+                                            text="Type"
+                                            required="true"
+                                        />
+                                        <m:ComboBox
+                                            id="FD_id_FacilityName1"
+                                            items="{FacilityType>/}"
+                                            placeholder="Enter Type"
+                                            value="{FacilitiesModel>/Type}"
+                                            change=".onFacilityTypeChange"
+                                            width="100%"
+                                            valueStateText="{i18n>enterFacilityType}"
+                                            editable="{editable>/Edit}"
+                                        >
+                                            <core:Item
+                                                key="{FacilityType>ID}"
+                                                text="{FacilityType>FacilityName}"
+                                            />
+                                        </m:ComboBox>
+                                        <!-- Price + Unit -->
+                                        <m:Label
+                                            text="Price"
+                                            required="true"
+                                        />
+                                        <m:Input
+                                            id="FD_id_Price"
+                                            value="{FacilitiesModel>/Price}"
+                                            placeholder="Enter Price"
+                                            maxLength="10"
+                                            liveChange=".onFacilityPriceChange"
+                                            valueStateText="{i18n>enterFacilityPrice}"
+                                            editable="{editable>/Edit}"
+                                        />
+                                        <m:ComboBox
+                                            id="FD_id_Rate"
+                                            items="{RateType>/}"
+                                            selectedKey="Per Day"
+                                            value="{FacilitiesModel>/UnitText}"
+                                            change=".onFacilityRateChange"
+                                            width="100%"
+                                            valueStateText="{i18n>selectRateType}"
+                                            editable="{editable>/Edit}"
+                                        >
+                                            <core:Item
+                                                key="{RateType>ID}"
+                                                text="{RateType>RateType}"
+                                            />
+                                        </m:ComboBox>
+                                        <!-- Currency -->
+                                        <m:Label
+                                            text="Currency"
+                                            required="true"
+                                        />
+                                        <m:ComboBox
+                                            id="FD_id_Currency"
+                                            selectedKey="{FacilitiesModel>/Currency}"
+                                            items="{CurrencyModel>/}"
+                                            valueStateText="Select Currency"
+                                            width="100%"
+                                            change=".onFacilitybranchChange"
+                                            placeholder="Select Currency"
+                                            editable="{editable>/Edit}"
+                                        >
+                                            <c:Item
+                                                key="{CurrencyModel>currency}"
+                                                text="{CurrencyModel>currency}"
+                                            />
+                                        </m:ComboBox>
+                                    </f:content>
+                                </f:SimpleForm>
+                            </blocks>
+                        </ObjectPageSubSection>
+                    </subSections>
+                </ObjectPageSection>
+                <ObjectPageSection
                     titleUppercase="false"
                     id="FD_id_rderSection"
-                    title="Facility Images">
-					<subSections>
-						<ObjectPageSubSection id="FD_id_ordersection">
-							<blocks>
-								    <m:HBox
-    id="FD_id_ImagesContainer"
-    justifyContent="Start"
-    alignItems="Start"
-    class="sapUiSmallMargin"
-    items="{DisplayImagesModel>/DisplayImages}"
->
-    <m:VBox
-        class="sapUiSmallMarginEnd"
-        width="150px"
-        alignItems="Center"
-        justifyContent="Center"
-    >
-        <!-- Normal Image Display -->
-        <m:Image
-            src="{DisplayImagesModel>src}"
-            width="120px"
-            height="120px"
-            press="onImagePress"
-            visible="{= ${DisplayImagesModel>isPlaceholder} === false }"
-        />
+                    title="Facility Images"
+                >
+                    <subSections>
+                        <ObjectPageSubSection id="FD_id_ordersection">
+                            <blocks>
+                                <m:HBox
+                                    id="FD_id_ImagesContainer"
+                                    wrap="Wrap"
+                                    justifyContent="Start"
+                                    alignItems="Start"
+                                    class="sapUiSmallMargin"
+                                    items="{DisplayImagesModel>/DisplayImages}"
+                                >
+                                    <m:VBox
+                                        class="sapUiSmallMarginEnd sapUiSmallMarginBottom"
+                                        width="150px"
+                                        alignItems="Center"
+                                        justifyContent="Center"
+                                    >
+                                        <!-- Normal Image Display -->
+                                        <m:Image
+                                            src="{DisplayImagesModel>src}"
+                                            width="120px"
+                                            height="120px"
+                                            press="onImagePress"
+                                            visible="{= ${DisplayImagesModel>isPlaceholder} === false }"
+                                        />
 
-        <!-- Placeholder Box (visible only when no image) -->
-        <m:VBox
-            visible="{= ${DisplayImagesModel>isPlaceholder} === true &amp;&amp; ${editable>/Edit} === true }"
-            width="120px"
-            height="120px"
-            alignItems="Center"
-            justifyContent="Center"
-          
-                     class="placeholderBox"
-        >
-            <u:FileUploader
-            icon="sap-icon://add"
-            width="120px"
-            style="Transparent"
-            tooltip="Add Image"
-            placeholder=" "
-            buttonOnly="true"
-            sameFilenameAllowed="true"
-            visible="{= ${DisplayImagesModel>isPlaceholder} === true &amp;&amp; ${editable>/Edit} === true }"
-            change=".onFileSelected"
-        />
-        </m:VBox>
+                                        <!-- Placeholder Box (visible only when no image) -->
+                                        <m:VBox
+                                            visible="{= ${DisplayImagesModel>isPlaceholder} === true &amp;&amp; ${editable>/Edit} === true }"
+                                            width="120px"
+                                            height="120px"
+                                            alignItems="Center"
+                                            justifyContent="Center"
+                                            class="placeholderBox"
+                                        >
+                                            <u:FileUploader
+                                                icon="sap-icon://add"
+                                                width="120px"
+                                                style="Transparent"
+                                                tooltip="Add Image"
+                                                placeholder=" "
+                                                buttonOnly="true"
+                                                sameFilenameAllowed="true"
+                                                visible="{= ${DisplayImagesModel>isPlaceholder} === true &amp;&amp; ${editable>/Edit} === true }"
+                                                change=".onFileSelected"
+                                            />
+                                        </m:VBox>
 
-       
-
-        <!-- File name -->
-        <m:Text
-            text="{DisplayImagesModel>fileName}"
-            textAlign="Center"
-            wrapping="true"
-            visible="{= ${DisplayImagesModel>isPlaceholder} === false }"
-        />
-
-        <!-- Delete icon -->
-        <m:Button
-            icon="sap-icon://delete"
-            type="Reject"
-            visible="{= ${editable>/Edit} === true &amp;&amp; ${DisplayImagesModel>isPlaceholder} === false }"
-            press=".onDeleteImage"
-            tooltip="Delete Image"
-            width="100%"
-        />
-    </m:VBox>
-</m:HBox>
-							</blocks>
-						</ObjectPageSubSection>
-					</subSections>
-				</ObjectPageSection>
-			</sections>
-		</ObjectPageLayout>
-		<m:footer>
-			<m:Bar id="FD_id_FooterBar">
-				<m:contentRight>
-					<m:Button
+                                        <!-- File name -->
+                                        <m:Text
+                                            text="{DisplayImagesModel>fileName}"
+                                            textAlign="Center"
+                                            wrapping="true"
+                                            visible="{= ${DisplayImagesModel>isPlaceholder} === false }"
+                                        />
+                                       
+                                        <!-- Delete icon -->
+                                        <m:Button
+                                            icon="sap-icon://delete"
+                                            type="Reject"
+                                            visible="{= ${editable>/Edit} === true &amp;&amp; ${DisplayImagesModel>isPlaceholder} === false }"
+                                            press=".onDeleteImage"
+                                            tooltip="Delete Image"
+                                            width="100%"
+                                        />
+                                    </m:VBox>
+                                </m:HBox>
+                            </blocks>
+                        </ObjectPageSubSection>
+                    </subSections>
+                </ObjectPageSection>
+            </sections>
+        </ObjectPageLayout>
+        <m:footer>
+            <m:Bar id="FD_id_FooterBar">
+                <m:contentRight>
+                    <m:Button
                         id="FD_id_editButton"
                         visible="{= !${editable>/Edit} }"
                         text="Edit"
                         type="Transparent"
                         press="BI_onEditButtonPress"
                     />
-					<m:Button
+                    <m:Button
                         id="FD_id_SaveButton"
                         visible="{=${editable>/Edit}}"
                         text="Save"
                         type="Accept"
                         press="BT_onsavebuttonpress"
                     />
-				</m:contentRight>
-			</m:Bar>
-		</m:footer>
-	</m:Page>
+                </m:contentRight>
+            </m:Bar>
+        </m:footer>
+    </m:Page>
 </mvc:View>
