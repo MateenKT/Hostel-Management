@@ -104,8 +104,8 @@
 
                 <Label text="Date" required="true"/>
                 <DatePicker id="idPaymentDate"
-                            displayFormat="yyyy-MM-dd"
-                            valueFormat="yyyy-MM-dd"
+                            displayFormat="dd/MM/yyyy"
+                            valueFormat="dd/MM/yyyy"
                             change=".onPaymentDateChange"
                             valueStateText="{i18n>selectPaymentDate}"/>
             </f:content>

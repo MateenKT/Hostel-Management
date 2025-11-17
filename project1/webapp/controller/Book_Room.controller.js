@@ -430,43 +430,53 @@ sap.ui.define([
                 })
             },
             change: function (oEv) {
-                const oSel = oEv.getSource().getSelectedItem();
-                const aPersons = oModel.getProperty("/Persons");
+    const oSel = oEv.getSource().getSelectedItem();
+    const aPersons = oModel.getProperty("/Persons");
 
-                // Clear dependents
-                aPersons[i].State = "";
-                aPersons[i].City = "";
-                aPersons[i].STDCode = "";
+    // Clear dependents
+    aPersons[i].State = "";
+    aPersons[i].City = "";
+    aPersons[i].STDCode = "";
+    aPersons[i].MobileMax = undefined; // reset
 
-                if (!oSel) {
-                    oModel.refresh(true);
-                    return;
-                }
+    if (!oSel) {
+        oModel.refresh(true);
+        return;
+    }
 
-                const oCountryObj = oSel.getBindingContext("CountryModel").getObject();
-                const sCountryCode = oCountryObj.code;
-                const sSTDCode = oCountryObj.stdCode;
+    const oCountryObj = oSel.getBindingContext("CountryModel").getObject();
+    const sCountryCode = oCountryObj.code;
+    const sSTDCode = oCountryObj.stdCode;
 
-                aPersons[i].Country = oCountryObj.countryName;
-                aPersons[i].STDCode = sSTDCode;
+    aPersons[i].Country = oCountryObj.countryName;
+    aPersons[i].STDCode = sSTDCode;
 
-                // Filter states
-                const oStateCombo = sap.ui.getCore().byId(that.createId("ID_State_" + i));
-                oStateCombo.getBinding("items").filter([
-                    new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
-                ]);
+    // Decide mobile max based on country (store on model)
+    if (oCountryObj.countryName === "India") {
+        aPersons[i].MobileMax = 10;
+    } else {
+        aPersons[i].MobileMax = 20; // or any other rule
+    }
 
-                // Set mobile length rules dynamically
-                const oMobileInput = sap.ui.getCore().byId(that.createId("ID_Mobile_" + i));
-                if (oCountryObj.countryName === "India") {
-                    oMobileInput.setMaxLength(10);
-                } else {
-                    oMobileInput.setMaxLength(20);
-                }
+    // Filter states (existing logic)
+    const oStateCombo = sap.ui.getCore().byId(that.createId("ID_State_" + i));
+    oStateCombo.getBinding("items").filter([
+        new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+    ]);
 
-                oModel.refresh(true);
-            }
-        }).addStyleClass("sapUiSmallMarginBottom"),
+    // Also set UI input maxLength for immediate UX feedback if input exists
+    const oMobileInput = sap.ui.getCore().byId(that.createId("ID_Mobile_" + i));
+    if (oMobileInput) {
+        oMobileInput.setMaxLength(aPersons[i].MobileMax);
+        // applyChanges is optional — not relied on by liveChange because we read from model
+        sap.ui.getCore().applyChanges();
+    }
+
+    // Persist change to model
+    oModel.setProperty("/Persons", aPersons);
+    oModel.refresh(true);
+}
+    }),
 
 		new sap.m.Label({
 							text: "State",
@@ -484,34 +494,29 @@ sap.ui.define([
                 })
             },
             change: function (oEv) {
-    const oSel = oEv.getSource().getSelectedItem();
-    const aPersons = oModel.getProperty("/Persons");
-    aPersons[i].State = "";
+            const oSel = oEv.getSource().getSelectedItem();
+            const aPersons = oModel.getProperty("/Persons");
+            aPersons[i].State = "";
 
-    if (!oSel) {
-        oModel.refresh(true);
-        return;
-    }
+            if (!oSel) {
+                oModel.refresh(true);
+                return;
+            }
 
-    const sStateName = oSel.getText();
-    aPersons[i].State = sStateName;
+            const sStateName = oSel.getText();
+            aPersons[i].State = sStateName;
+            const oCountryName = aPersons[i].Country;
+            const oCountryData = that.getView().getModel("CountryModel").getData();
+            const oCountryObj = oCountryData.find(x => x.countryName === oCountryName);
 
-    // Get selected country name from Persons
-    const oCountryName = aPersons[i].Country;
-
-    // ✔ FIXED – fetch CountryModel correctly
-    const oCountryData = that.getView().getModel("CountryModel").getData();
-    const oCountryObj = oCountryData.find(x => x.countryName === oCountryName);
-
-    // Filter cities
-    const oCityCombo = sap.ui.getCore().byId(that.createId("ID_City_" + i));
-    oCityCombo.getBinding("items").filter([
-        new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, sStateName),
-        new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, oCountryObj?.code)
-    ]);
-
-    oModel.refresh(true);
-}
+            // Filter cities
+            const oCityCombo = sap.ui.getCore().byId(that.createId("ID_City_" + i));
+            oCityCombo.getBinding("items").filter([
+                new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, sStateName),
+                new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, oCountryObj?.code)
+            ]);
+            oModel.refresh(true);
+        }
 		}),
 
 		new sap.m.Label({
@@ -552,30 +557,45 @@ sap.ui.define([
             value: "{HostelModel>/Persons/" + i + "/MobileNo}",
             type: "Number", maxLength: 20,
             liveChange: function (oEv) {
-                let sValue = oEv.getSource().getValue();
-                const oInput = oEv.getSource();
-                const aPersons = oModel.getProperty("/Persons");
+            const oInput = oEv.getSource();
+            let sValue = oInput.getValue() || "";
+            sValue = sValue.replace(/\D/g, ""); // allow only digits
 
-                sValue = sValue.replace(/\D/g, "");
+            const aPersons = oModel.getProperty("/Persons") || [];
+            const person = aPersons[i] || {};
+            const maxLengthFromModel = person.MobileMax || oInput.getMaxLength() || 20; // fallback
 
-                const sCountry = aPersons[i].Country;
-                const maxLength = oInput.getMaxLength();
-
-                oInput.setValue(sValue);
-                oInput.setValueState("None");
-
-                if (sCountry === "India") {
-                    if (sValue.length !== 10) {
-                        oInput.setValueState("Error");
-                        oInput.setValueStateText("Mobile No must be 10 digits");
-                    }
-                } else {
-                    if (sValue.length < 4) {
-                        oInput.setValueState("Error");
-                        oInput.setValueStateText("Mobile must be at least 4 digits");
-                    }
-                }
+            if (sValue.length > maxLengthFromModel) {
+                sValue = sValue.substring(0, maxLengthFromModel);
             }
+
+            oInput.setValue(sValue);
+            oInput.setValueState("None");
+            oInput.setValueStateText("");
+
+            const sCountry = person.Country || "";
+
+            // Country-specific validations
+            if (sCountry === "India") {
+                // exact 10 digits required
+                if (sValue.length !== 10) {
+                    oInput.setValueState("Error");
+                    oInput.setValueStateText("Mobile No must be exactly 10 digits");
+                }
+                // update model value for MobileNo
+                oModel.setProperty("/Persons/" + i + "/MobileNo", sValue);
+                return;
+            }
+
+            // Other countries: minimum 4 digits (example rule)
+            if (sValue.length < 4) {
+                oInput.setValueState("Error");
+                oInput.setValueStateText("Mobile number must be at least 4 digits");
+            }
+
+            // update model value for MobileNo
+            oModel.setProperty("/Persons/" + i + "/MobileNo", sValue);
+        }
         }),
 
 
@@ -1491,8 +1511,8 @@ oFacilityModel.refresh(true);
         utils._LCvalidateAmount(sap.ui.getCore().byId("idAmount"), "ID") &&
         utils._LCstrictValidationComboBox(sap.ui.getCore().byId("idCurrency"), "ID") &&
         utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idPaymentTypeField"), "ID") &&
-        utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idTransactionID"), "ID")
-        // utils._LCvalidateDate(sap.ui.getCore().byId("idPaymentDate"), "ID") 
+        utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idTransactionID"), "ID") &&
+        utils._LCvalidateDate(sap.ui.getCore().byId("idPaymentDate"), "ID") 
       );
 
       if (!isMandatoryValid) {
@@ -1526,7 +1546,7 @@ oFacilityModel.refresh(true);
             Amount: sap.ui.getCore().byId("idAmount").getValue(),
             PaymentType: sap.ui.getCore().byId("idPaymentTypeField").getValue(),
             BankTransactionID: sap.ui.getCore().byId("idTransactionID").getValue(),
-            Date: sap.ui.getCore().byId("idPaymentDate").getValue(),
+            Date: sap.ui.getCore().byId("idPaymentDate").getValue() ? sap.ui.getCore().byId("idPaymentDate").getValue().split("/").reverse().join("-") : "",
             Currency: sap.ui.getCore().byId("idCurrency").getValue()
           };
 
