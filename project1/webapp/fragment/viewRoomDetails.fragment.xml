@@ -4,7 +4,7 @@
 	xmlns:core="sap.ui.core" 
 	xmlns:l="sap.ui.layout" 
 	xmlns:card="sap.ui.integration.widgets">
-	<Dialog id="roomDetailID" title="Room Details" type="Message" class="sapUiContentPadding roomDetailDialog" afterClose=".onDialogAfterClose">
+	<Dialog draggable="true" resizable="true" contentHeight="auto" contentWidth="70%" id="roomDetailID" title="Room Details" type="Message" class="sapUiContentPadding" afterClose=".onDialogAfterClose">
 		<customHeader>
 			<Bar class="barheader">
 				<contentMiddle>
@@ -16,8 +16,8 @@
 			</Bar>
 		</customHeader>
 		<content>
-			<VBox width="100%" class="sapUiSmallMargin" renderType="Bare">
-				<l:Grid width="100%" hSpacing="1" vSpacing="1">
+			<VBox width="100%" class="sapUiSmallMarginTop" renderType="Bare">
+				<l:Grid width="100%" hSpacing="1" vSpacing="1" class="sapUiTinyMarginBeginEnd">
 					<l:content>
 						<VBox width="100%">
 							<layoutData>
@@ -35,16 +35,15 @@
 							<layoutData>
 								<l:GridData span="L4 M6 S12"/>
 							</layoutData>
-							<card:Card manifest="./cards/roomDetailsCard.json" class="sapUiSmallMarginTop roomDetailsCard " manifestChanges='{  "sap.card": {   "data": { "json": {  "BedType": "{HostelModel>/BedType}",  "Capacity": "{HostelModel>/Capacity}",  "ACType": "{HostelModel>/ACType}",  }   }  } }'/>
-							<HBox class="descriptionBox sapUiSmallMarginTop" alignItems="Start">
-								<core:Icon src="sap-icon://detail-view" size="1.8rem" class="descIcon"/>
-								<Text text="{HostelModel>/Description}" wrapping="true" class="descTextLarge" width="100%" />
-							</HBox>
+							<card:Card manifest="./cards/roomDetailsCard.json" class="roomDetailsCard " manifestChanges='{ "sap.card": { "data": { "json": { "BedType": "{HostelModel>/BedType}", "Capacity": "{HostelModel>/Capacity}", "ACType": "{HostelModel>/ACType}", } } } }'/>
+							<VBox class="descriptionBox sapUiSmallMarginTop" alignItems="Start">
+								<core:Icon src="sap-icon://detail-view" size="1.8rem" class="sapUiTinyMarginBegin descIcon"/>
+								<ExpandableText maxCharacters="330" text="+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.em ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecLorem caec" class="descTextLarge" />
+							</VBox>
 						</VBox>
 					</l:content>
 				</l:Grid>
-				<!-- PRICE PLANS -->
-				<HBox justifyContent="SpaceBetween" alignItems="Center" class="priceRow">
+				<HBox justifyContent="SpaceBetween" alignItems="Stretch" class="priceRow sapUiSmallMarginTop sapUiTinyMarginBeginEnd">
 					<GenericTile header="Per Day" subheader="{HostelModel>/Currency} {HostelModel>/Price}" class="defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan">
 						<customData>
 							<core:CustomData key="type" value="daily"/>
@@ -62,19 +61,25 @@
 					</GenericTile>
 					<Button text="Book Now" type="Emphasized" press=".onConfirmBooking" class="myCustomButton priceItem" />
 				</HBox>
-				<!-- FACILITIES -->
-				<Bar design="Header" class="sapUiMediumMarginTop">
+				<Bar design="Header" class="sapUiMediumMarginTop sapUiTinyMarginBeginEnd">
 					<contentMiddle>
 						<Title text="Available Facilities" class="" />
 					</contentMiddle>
 				</Bar>
-				<HBox wrap="Wrap" class="facilityCardWrap sapUiMediumMargin" items="{FacilityModel>/Facilities}">
-					<VBox class="facilityCard">
-						<Image src="{FacilityModel>Image}" class="facilityCardImg" densityAware="false" />
-						<Text text="{FacilityModel>FacilityName}" class="facilityCardTitle" />
-						<Text text="₹{FacilityModel>Price}" class="facilityCardPrice" />
-					</VBox>
-				</HBox>
+				<VBox class="facilityContainer sapUiSmallMarginTop sapUiTinyMarginBeginEnd" width="100%">
+					<HBox justifyContent="Center" visible="{FacilityModel>/loading}">
+						<BusyIndicator size="0.8rem" class="sapUiLMediumMarginTop" />
+					</HBox>
+					<HBox wrap="Wrap" id="facilityBox" class="facilityCardWrap" visible="{= !${FacilityModel>/loading} }" items="{  path: 'FacilityModel>/Facilities'  }">
+						<items>
+							<VBox class="facilityCard">
+								<Image src="{FacilityModel>Image}" class="facilityCardImg" densityAware="false" />
+								<Text text="{FacilityModel>FacilityName}" class="facilityCardTitle" />
+								<Text text="₹{FacilityModel>Price}" class="facilityCardPrice" />
+							</VBox>
+						</items>
+					</HBox>
+				</VBox>
 			</VBox>
 		</content>
 	</Dialog>

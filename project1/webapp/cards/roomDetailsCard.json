@@ -5,13 +5,13 @@
             "path": "/",
             "json": {
                 "BedType": "{HostelModel>/BedType}",
-                "Capacity":     "{HostelModel>/Capacity}",
+                "Capacity": "{HostelModel>/Capacity}",
                 "ACType": "{HostelModel>/ACType}",
                 "Description": "{HostelModel>/Description}"
             }
         },
         "header": {
-            "title": "{BedType}",
+            "title": "{HostelModel>/BedType}",
             "icon": {
                 "src": "sap-icon://bed"
             }
@@ -21,15 +21,13 @@
                 {
                     "items": [
                         {
-                            "label": "Capacity",
-                            "value": "{Capacity}",
+                            "value": "Capacity: {HostelModel>/Capacity}",
                             "icon": {
                                 "src": "sap-icon://group"
                             }
                         },
                         {
-                            "label": "Room Type",
-                            "value": "{ACType}",
+                            "value": "Room Type: {HostelModel>/ACType}",
                             "icon": {
                                 "src": "sap-icon://temperature"
                             }

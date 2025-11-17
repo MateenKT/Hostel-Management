@@ -452,6 +452,11 @@
 .customSearchBar input:-ms-input-placeholder { color: #999; font-size: 1.1em;}
 .customSearchBar input::placeholder { color: #999; font-size: 1.1em;}
 
+
+
+
+
+
 /* Facilities Section */
 .facilityDynamicBox {
     position: relative;
@@ -596,7 +601,6 @@
     align-items: center;
     text-align: center;
 }
-
 
 .bedCard {
     width: 400px;
@@ -798,13 +802,6 @@
   margin-right: 1vw;
 }
 
-.selectedTile {
-    border: 2px solid #0070f2 !important;
-    box-shadow: 0 0 10px rgba(0, 112, 242, 0.3);
-    transform: scale(1.02);
-    transition: all 0.15s ease-in-out;
-}
-
 .sapMGT {
     border-radius: 10px;
 }
@@ -814,285 +811,6 @@
   background-size: cover; 
   background-position: center;
 }
-
-
-
-
-
-
-
-
-
-.myCustomButton {
-  height: 60px !important;
-  width: 345px !important;
-  font-size: 20px !important;
-  padding: 0 !important;
-  transition: all 0.2s ease-in-out;
-}
-
-/* Inner styling */
-.myCustomButton .sapMBtnInner {
-  background-color: white !important;
-  height: 100% !important;
-  line-height: normal !important;
-  padding: 16px !important;
-  font-size: 24px !important;
-  border-radius: 8px;
-  transition: background-color 0.2s ease-in-out;
-}
-
-.myCustomButton .sapMBtnContent {
-  color: #00acc1 !important; 
-  font-size: 20px !important;
-  transition: font-size 0.2s ease-in-out;
-}
-
-/* Hover effect */
-.myCustomButton:hover .sapMBtnInner {
-  background-color: white !important;
-  box-shadow: 0 0 0.5rem #17191884 !important;
-}
-
-.myCustomButton:hover .sapMBtnContent {
-  font-size: 20px !important;
-  font-weight: bold !important;
-}
-
-@media only screen and (max-width: 600px) {
-  .myCustomButton {
-    width: 50% !important;
-    min-width: 160px !important; /* safety net */
-    font-size: 18px !important;
-  }
-
-  .myCustomButton .sapMBtnInner {
-    font-size: 18px !important;
-    padding: 12px !important;
-  }
-
-  .myCustomButton .sapMBtnContent {
-    font-size: 18px !important;
-  }
-}
-
-
-
-
-
-
-.barheader,
-.barheader .sapMBar,
-.barheader .sapMBarRight,
-.barheader .sapMBarMiddle,
-.barheader .sapMBarLeft {
-    background: linear-gradient(135deg, #00b7c7, #008b96) !important;
-    color: white !important;
-}
-
-.barheader .sapMText,
-.barheader .sapMLabel,
-.barheader .sapMBarRight button,
-.barheader .sapMBarMiddle button {
-    color: white !important;
-}
-
-.barheader .sapMBtnInner {
-    color: white !important;
-}
-
-
-/* Dialog Styling */
-.customHeaderColor .sapMBar,
-.customHeaderColor .sapMDialogScrollCont {
-    background: linear-gradient(135deg, #00b7c7, #008b96) !important;
-    color: white !important;
-}
-
-.customHeaderColor .sapMDialog {
-    border-radius: 14px !important;
-    overflow: hidden !important;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.25) !important;
-}
-
-/* Title Texts */
-.customTitleColor {
-    color: #008c9e !important;
-    font-weight: 600;
-}
-
-/* Buttons */
-.customHeaderColor .sapMBtnInner {
-    background-color: white !important;
-    color: #008c9e !important;
-    border-radius: 8px !important;
-    padding: 0.65rem 1.2rem !important;
-    font-weight: 600;
-}
-
-.customHeaderColor .sapMBtnInner:hover {
-    background-color: #e7fbff !important;
-}
-
-.sapMGT {
-    background: #ffffff !important;
-    color: #008c9e !important;
-    border-radius: 14px !important;
-    padding: 10px;
-    transition: all .25s ease;
-    
-    border: 1px solid #e0e0e0; 
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-}
-
-.sapMGT:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
-}
-
-/* Selected Tile */
-.tileSelected,
-.selectedTile {
-    background: linear-gradient(135deg, #00b7c7, #007984) !important;
-    color: white !important;
-    transform: scale(1.06);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-    border: none !important; 
-}
-
-/* Selected Tile */
-.tileSelected,
-.selectedTile {
-    background: linear-gradient(135deg, #00b7c7, #007984) !important;
-    color: white !important;
-    transform: scale(1.06);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-    border: none !important;
-}
-
-
-
-/* BIG CAROUSEL: change only this ONE height value */
-.roomCarouselImage {
-    width: 100% !important;
-    height: 500px !important;       /* ← increase height here */
-    max-height: 500px !important;   /* ← same here */
-    border-radius: 12px;
-    overflow: hidden;
-    margin: 12px auto !important;
-}
-
-/* Inner layers must follow the same height */
-.roomCarouselImage .sapMCrslInner,
-.roomCarouselImage .sapMCrslItem,
-.roomCarouselImage .sapMCrslItem img {
-    width: 100% !important;
-    height: 100% !important;        /* follows 500px from parent */
-    object-fit: cover !important;
-    border-radius: 12px;
-}
-
-/* Mobile height override */
-@media (max-width: 768px) {
-  .roomCarouselImage {
-    height: 260px !important;
-    max-height: 260px !important;
-  }
-}
-
-
-
-
-
-.noImagePlaceholder {
-    height: 250px;
-    width: 100%;
-    border-radius: 10px;
-    background: #e2f9ff;
-    color: #007c8a;
-    font-size: 1.2rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0.9;
-}
-
-
-
-
-
-
-.customHeaderColor .sapMPanelHdr {
-    background: linear-gradient(135deg, #00b7c7, #007984) !important;
-    color: white !important;
-    font-weight: 600;
-    border-radius: 8px !important;
-}
-
-.customHeaderColor .sapMCustomListItem {
-    background: rgba(255,255,255,0.1) !important;
-    padding: 8px !important;
-    border-radius: 8px;
-}
-
-.customHeaderColor .sapMCustomListItem:hover {
-    background: rgba(255,255,255,0.2) !important;
-}
-
-/* Image in facilities */
-.customHeaderColor .sapMCustomListItem img {
-    border-radius: 8px;
-    box-shadow: 0 0 8px rgba(0,0,0,0.15);
-}
-
-
-.facilityCardWrap {
-    gap: 14px;
-}
-
-
-
-.facilityCard {
-    width: 220px;               /* credit card width */
-    height: 150px;              /* compact height */
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    transition: transform .15s ease;
-}
-
-.facilityCard:hover {
-    transform: translateY(-3px);
-}
-
-.facilityCardImg {
-    width: 180px !important;
-    height: 100px !important;
-    border-radius: 8px;
-    object-fit: cover;
-}
-
-.facilityCardTitle {
-    font-size: 14px;
-    font-weight: 600;
-    text-align: center;
-    color: #333;
-}
-
-.facilityCardPrice {
-    font-size: 13px;
-    font-weight: 500;
-    color: #1a73e8;
-}
-
-
-
 .centerUPIImage {
     display: block;
     margin-left: auto;
@@ -1111,318 +829,20 @@
     border-color: #000000;
 }
 
-.roomDetailDialog {
-    max-width: 80% !important;
-    width: 80% !important;
-}
-
-.roomDetailDialog .sapMDialogSection {
-    max-width: 100% !important;
-}
-.roomDetailDialog .sapMDialogScroll,
-.roomDetailDialog .sapMDialogSection {
-    overflow-x: hidden !important;
-}
-
-.roomDetailDialog .sapMDialogScroll {
-    padding-right: 1rem !important; /* adjust to your taste */
-}
-
-
-
-
-
-/* UNSELECTED TILE (Blue Gradient) */
-.sapMGT.defaultTile,
-.sapMGTOneByHalf.defaultTile {
-    background: linear-gradient(135deg, #00b7c7, #007984) !important;
-    color: white !important;
-    border-radius: 10px !important;
-    transform: scale(1) !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-    transition: all 0.25s ease-in-out;
-}
-
-/* SELECTED TILE (White) */
-.sapMGT.selectedTile,
-.sapMGTOneByHalf.selectedTile {
-    background: #ffffff !important;
-    color: #333 !important;
-    transform: scale(1.06) !important;
-    border-radius: 10px !important;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.20) !important;
-    border: 2px solid #00b7c7 !important;
-}
-
 /* text style*/
 .boldBlueText {
   font-weight: bold;
   color: #00b7c7 !important;
 }
-
-
-/* Text color inside tiles */
-.sapMGT.defaultTile .sapMGTHdrTxt,
-.sapMGT.defaultTile .sapMGTSubHdrTxt,
-.sapMGTOneByHalf.defaultTile .sapMGTHdrTxt,
-.sapMGTOneByHalf.defaultTile .sapMGTSubHdrTxt {
-    color: white !important;
-}
-
-/* Text of selected tile (white mode) */
-.sapMGT.selectedTile .sapMGTHdrTxt,
-.sapMGT.selectedTile .sapMGTSubHdrTxt,
-.sapMGTOneByHalf.selectedTile .sapMGTHdrTxt,
-.sapMGTOneByHalf.selectedTile .sapMGTSubHdrTxt {
-    color: #333 !important;
-}
-
-
-
-
-
-
-.myBigTile * {
-    font-size: 27px !important;
-    font-weight: bold !important;
-} 
-
-
-.titleIcon {
-    margin-right: 8px;
-    color: #0a6ed1; /* optional: consistent branding */
-}
-
-
-
-
-
-
-
-
-        /* Close button specific styling */
-.barheader .sapMBarRight .sapMBtnInner {
-    background: #008b96 !important; /* solid teal */
-    border: none !important;
-    box-shadow: none !important;
-    border-radius: 6px !important;
-}
-
-/* Make the icon white and sharp */
-.barheader .sapMBarRight .sapMBtnIcon {
-    color: white !important;
-    font-size: 1.2rem !important;
-}
-
-/* Remove the translucent hover effect */
-.barheader .sapMBarRight .sapMBtn:hover .sapMBtnInner {
-    background: #007785 !important; /* slightly darker teal on hover */
-}
-
-/* Kill the gradient on the button wrapper/container */
-.barheader .sapMBarRight,
-.barheader .sapMBarRight .sapMBtn {
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
-}
-
-
-
-/* --- Room Detail Dialog Overrides --- */
-.roomDetailDialog {
-    max-width: 80% !important;
-    width: 80% !important;
-}
-
-.roomDetailDialog .sapMDialogSection {
-    max-width: 100% !important;
-}
-
-.roomDetailDialog .sapMDialogScroll,
-.roomDetailDialog .sapMDialogSection {
-    overflow-x: hidden !important;
-}
-
-.roomDetailDialog .sapMDialogScroll {
-    padding-right: 1rem !important;
-}
-
-
-
-/* Remove focus outline from Carousel root container */
-.roomCarouselImage:focus {
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-
-
-
 .centerUPIImage {
     display: block;
     margin-left: auto;
     margin-right: auto;
 }
-
-
-
 .sapUiCompFilterBar{
   background-image: url("../image/filterbackground.png"); 
   background-size: cover; 
   background-position: center;
-}
-
-/* --- Text/Labels --- */
-.customTitleColor {
-    color: #008c9e !important;
-    font-weight: 600;
-}
-
-.titleIcon {
-    margin-right: 8px;
-    color: #0a6ed1;
-}
-
-.descriptionBox {
-    background: #fafafa;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 1rem;
-}
-
-
-
-.descTextLarge {
-    display: block;              
-    text-align: justify;         
-    text-justify: inter-word;    
-    font-size: 1rem !important;
-    line-height: 1.4 !important;
-    color: #2c3e50;
-    font-weight: 500;
-    margin-left: 0.5rem;       
-}
-
-.descIcon {
-    margin-right: 0.5rem;        
-}
-
-
-/* 🔹 Increase font size inside the card */
-.roomDetailsCard .sapFCardContent, 
-.roomDetailsCard .sapMText,
-.roomDetailsCard .sapMLabel {
-  font-size: 1.2rem !important; /* adjust as needed */
-  line-height: 1.6 !important;
-}
-
-/* Optional: make title text larger */
-.roomDetailsCard .sapFCardHeaderTitle {
-  font-size: 1.4rem !important;
-  font-weight: 600 !important;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* --- BUTTON SIZE AND STYLING (COLOR CHANGED TO MATCH TILE) --- */
-.myCustomButton {
-  height: 83px !important;
-  width: 280px !important;
-  min-width: 280px !important;
-  font-size: 20px !important;
-  padding: 0 !important;
-  transition: all 0.2s ease-in-out;
-}
-
-/* Inner styling */
-.myCustomButton .sapMBtnInner {
-  background: linear-gradient(135deg, #00b6c76e, #007984a2) !important;
-  height: 100% !important;
-  line-height: normal !important; 
-  padding: 26px 10px 24px 10px !important; 
-  font-size: 20px !important;
-  border-radius: 8px;
-  transition: all 0.25s ease-in-out; 
-  text-align: center !important; 
-  border: none !important; 
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-}
-
-.myCustomButton .sapMBtnContent {
-  display: block !important; 
-  width: 100%;
-  /* CHANGED: White Text Color */
-  color: white !important; 
-  font-size: 20px !important;
-  font-weight: bold !important; 
-  transition: font-size 0.2s ease-in-out;
-  text-align: center !important; 
-}
-
-/* Hover effect */
-.myCustomButton:hover .sapMBtnInner {
-  /* Hover effect to match tile hover */
-  transform: translateY(-3px) !important; 
-  box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important;
-  background: linear-gradient(135deg, #00c6d8, #008892) !important;
-}
-
-
-/* TILE HEIGHT MATCHING BUTTON (Height: 83px) */
-.sapMGTOneByHalf.priceItem {
-    height: 83px !important; 
-    min-height: 83px !important;
-}
-
-
-
-.priceRow {
-    width: 100%;
-    gap: 20px;
-}
-
-.priceRow .priceItem {
-    flex: 1;             
-    max-width: 280px; 
-    min-width: 280px;   
-}
-/******/
-.defaultTile * {
-    font-size: 17px !important; 
-    /* font-weight: bold !important; */
-    text-align: center !important;
-    color: whitesmoke !important;
-}
-.selectedTile *{
-    font-size: 17px !important; 
-    /* font-weight: bold !important; */
-    text-align: center !important;
-    color: 2c3e50 !important;
 }
 
 /* UPI QR styling */
@@ -1468,4 +888,298 @@
 
 .paymentDialogRoot .paymentTypeGroup .sapMRbS .sapMText {
     font-weight: 600;
+}
+.centerUPIImage {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+.placeholderBox {
+    border: 2px solid black;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.placeholderBox:hover {
+    background-color: #f4f4f4;
+    border-color: #000000;
+}
+
+
+
+
+    .sapMGT {
+    background: #ffffff !important;
+    color: #008c9e !important;
+    border-radius: 14px !important;
+    padding: 10px;
+    transition: all .25s ease;
+    border: 1px solid #e0e0e0; 
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+.sapMGT:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+}
+.priceRow {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px; 
+}
+.priceRow .myCustomButton.sapMBtn,
+.sapMGTOneByHalf.priceItem {
+    height: 90px !important; 
+    min-height: 90px !important;
+}
+.priceRow .priceItem {
+    flex: 1 1 200px;
+    max-width: 280px; 
+    min-width: 180px; 
+}
+@media (min-width: 1000px) {
+    .priceRow {
+        flex-wrap: nowrap !important;
+        justify-content: center; 
+    }
+}
+.sapMGT.defaultTile,
+.sapMGTOneByHalf.defaultTile {
+    background: linear-gradient(135deg, #00b7c7, #007984) !important;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    transform: scale(1) !important;
+    border-radius: 14px !important;
+}
+.sapMGT.selectedTile,
+.sapMGTOneByHalf.selectedTile,
+.tileSelected { 
+    background: #ffffff !important; 
+    border: 2px solid #00b7c7 !important; 
+    box-shadow: 0 6px 18px rgba(0,0,0,0.20) !important; 
+    transform: scale(1.06) !important;
+    border-radius: 14px !important;
+    transition: all 0.15s ease-in-out;
+}
+.defaultTile *, .selectedTile *, .tileSelected * {
+    font-size: 17px !important; 
+    text-align: center !important;
+}
+.defaultTile * {
+    color: whitesmoke !important; 
+}
+.selectedTile *, .tileSelected * {
+    color: #2c3e50 !important;
+}
+.myCustomButton {
+    flex: 1 1 200px !important;
+    max-width: 260px !important;
+    min-width: 180px !important;
+    height: auto;
+    border-radius: 14px !important; 
+}
+.myCustomButton .sapMBtnInner {
+    background: linear-gradient(135deg, #74c7ce, #8dc8d0) !important; 
+    height: 100% !important;
+    line-height: normal !important; 
+    padding: 0 !important;
+    border-radius: 14px !important;
+    transition: all 0.25s ease-in-out; 
+    text-align: center !important; 
+    border: none !important; 
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    font-weight: 500 !important;
+}
+.myCustomButton .sapMBtnContent {
+    display: flex !important; 
+    align-items: center !important; 
+    justify-content: center !important; 
+    height: 100% !important; 
+    width: 100% !important;
+    text-align: center !important; 
+}
+.myCustomButton .sapMBtnContent,
+.myCustomButton .sapMBtnContent * {
+    font-size: 20px !important; 
+    font-weight: bold !important; 
+    color: white !important;
+}
+.myCustomButton:hover .sapMBtnInner {
+    transform: translateY(-3px) !important; 
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important;
+    background: #008892 !important; 
+}
+/* .roomDetailDialog {
+    max-width: 80% !important;
+    width: auto !important;
+}
+.roomDetailDialog .sapMDialogSection {
+    max-width: 100% !important;
+}
+.roomDetailDialog .sapMDialogScroll,
+.roomDetailDialog .sapMDialogSection {
+    overflow-x: hidden !important;
+}
+.roomDetailDialog .sapMDialogScroll {
+    padding-right: 1rem !important; 
+}
+@media (max-width: 600px) {
+    .roomDetailDialog .sapUiRespGrid {
+        padding: 0 !important;
+    }
+    .roomDetailDialog .sapUiRespGrid > .sapUiRespGridSpanS12 {
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+    .roomDetailDialog .sapUiBlockCell,
+    .roomDetailDialog .sapUiBlockContainer {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    .roomDetailDialog .sapUiSmallMargin {
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
+} */
+.barheader,
+.barheader .sapMBar,
+.barheader .sapMBarRight,
+.barheader .sapMBarMiddle,
+.barheader .sapMBarLeft {
+    background: linear-gradient(135deg, #00b7c7, #008b96) !important;
+    color: white !important;
+}
+.barheader .sapMText,
+.barheader .sapMLabel,
+.barheader button,
+.barheader .sapMBtnInner,
+.barheader .sapMBtnIcon {
+    color: white !important;
+}
+.barheader .sapMBarRight,
+.barheader .sapMBarRight .sapMBtn {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+.barheader .sapMBarRight .sapMBtnInner {
+    background: #008b96 !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 6px !important;
+}
+.barheader .sapMBarRight .sapMBtnIcon {
+    font-size: 1.2rem !important;
+}
+.barheader .sapMBarRight .sapMBtn:hover .sapMBtnInner {
+    background: #007785 !important; 
+}
+.roomCarouselImage {
+    width: 100%;
+    height: 500px !important; 
+    max-height: 500px !important; 
+    border-radius: 12px;
+    overflow: hidden; 
+    margin: 12px auto !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: height 0.3s ease;
+}
+.roomCarouselImage .sapMCrslInner,
+.roomCarouselImage .sapMCrslItem,
+.roomCarouselImage .sapMCrslItem img {
+    width: 100% !important;
+    height: 100% !important; 
+    object-fit: cover;
+}
+@media (max-width: 768px) {
+  .roomCarouselImage {
+    height: 260px !important;
+    max-height: 260px !important;
+  }
+}
+.roomCarouselImage:focus {
+    outline: none !important;
+    box-shadow: none !important;
+}
+.noImagePlaceholder {
+    height: 250px;
+    width: 100%;
+    border-radius: 10px;
+    background: #e2f9ff;
+    color: #007c8a;
+    font-size: 1.2rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.9;
+}
+.roomDetailsCard .sapFCardContent, 
+.roomDetailsCard .sapMText,
+.roomDetailsCard .sapMLabel {
+    font-size: 1.2rem !important;
+    line-height: 1.6 !important;
+}
+.roomDetailsCard .sapFCardHeaderTitle {
+    font-size: 1.4rem !important;
+    font-weight: 600 !important;
+}
+.descriptionBox {
+    background: #fafafa;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 1rem;
+}
+.descIcon {
+    margin-right: 0.5rem !important;
+    flex-shrink: 0;
+}
+.descTextLarge {
+    display: block !important;
+    width: 100% !important; 
+    text-align: justify !important; 
+    text-justify: inter-word;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+    color: #2c3e50 !important;
+    font-weight: 500!important;
+    margin-left: 0.5rem;
+    word-break: break-word !important;
+}
+.facilityCardWrap { gap: 14px; }
+.facilityContainer .facilityCard {
+    width: 220px;
+    height: 150px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    transition: transform .15s ease;
+}
+.facilityCard:hover {
+    transform: translateY(-3px);
+}
+.facilityCardImg {
+    width: 180px !important;
+    height: 100px !important;
+    border-radius: 8px;
+    object-fit: cover;
+}
+.facilityCardTitle {
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    color: #333;
+}
+.facilityCardPrice {
+    font-size: 13px;
+    font-weight: 500;
+    color: #1a73e8;
 }
