@@ -1425,21 +1425,6 @@
     color: 2c3e50 !important;
 }
 
-.paymentDialogRoot .sapMDialog {
-    border-radius: 12px !important;
-}
-
-.paymentDialogRoot .sapMDialog > .sapMDialogSection {
-    background: #ffffff !important;
-    border-radius: 12px;
-}
-
-/* Title styling */
-.paymentDialogRoot .sapMTitle {
-    font-size: 1.2rem;
-    font-weight: bold;
-}
-
 /* UPI QR styling */
 .paymentDialogRoot .UPIQRCodeBox {
     background: #ffffff;
@@ -1451,51 +1436,36 @@
     box-shadow: 0 3px 8px rgba(0,0,0,0.08);
 }
 
-/* Labels & Inputs */
-.paymentDialogRoot .sapMLabel {
-    margin-top: 0.7rem;
+.paymentDialogRoot .paymentTypeGroup .sapMRb {
+    display: inline-flex !important;    
+    align-items: center !important;      
+    gap: .5rem !important;              
+    margin: 0 !important;
+    padding: 0 !important;
+    vertical-align: middle !important;
+    height: auto !important;
+}
+
+.paymentDialogRoot .paymentTypeGroup .sapMRbB {
+    margin: 0 !important;
+    padding: 0 !important;
+    transform: translateY(0) !important;
+}
+
+.paymentDialogRoot .paymentTypeGroup .sapMRbS {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    transform: translateY(-2px) !important;
+}
+
+.paymentDialogRoot .paymentTypeGroup {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+.paymentDialogRoot .paymentTypeGroup .sapMRbS .sapMText {
     font-weight: 600;
-}
-
-.paymentDialogRoot .sapMInputBase {
-    margin-top: 0.3rem;
-}
-
-/* Buttons */
-.paymentDialogRoot .sapMBtnEmphasized > .sapMBtnInner {
-    background-color: #1976d2 !important;
-    border-color: #1976d2 !important;
-}
-
-.paymentDialogRoot .sapMBtnEmphasized > .sapMBtnInner:hover {
-    background-color: #0d47a1 !important;
-}
-
-/* Radio Buttons */
-.paymentDialogRoot .sapMRbBLabel {
-    font-weight: 600;
-}
-
-.paymentDialogRoot .sapMRbSel .sapMRbBOut {
-    border-color: #1976d2 !important;
-}
-
-.paymentDialogRoot .sapMRbSel .sapMRbBInn {
-    background-color: #1976d2 !important;
-}
-
-/* Grid spacing */
-.paymentDialogRoot .sapUiLayoutCSSGrid {
-    row-gap: 1rem !important;
-}
-
-/* Calendar date selected */
-.paymentDialogRoot .sapUiCal .sapUiCalItemSel {
-    background-color: #1976d2 !important;
-    border-color: #1976d2 !important;
-}
-
-.noBottomSpace {
-  margin-bottom: 0 !important;
-  padding-bottom: 0 !important;
 }

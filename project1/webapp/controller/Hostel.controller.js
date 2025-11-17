@@ -11,7 +11,7 @@ sap.ui.define([
 
          onInit: function () {
             this.getOwnerComponent().getRouter().getRoute("RouteHostel").attachMatched(this._onRouteMatched, this);
-            this._getBrowserLocation();
+            // this._getBrowserLocation();
         },
 
         _getBrowserLocation: function () {

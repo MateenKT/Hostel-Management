@@ -33,17 +33,15 @@
                 </HBox>
 
                 <!-- ===== PAYMENT TYPE (Radio) ===== -->
-                <Label text="Payment Type" />
+                <Label text="Payment Type" design="Bold"/>
                 <RadioButtonGroup
                     id="idPaymentTypeGroup"
                     columns="2"
                     select=".onPaymentTypeSelect"
                     selectedIndex="0"
                     class="paymentTypeGroup">
-
-                    <RadioButton text="UPI / QR Scan" />
+                    <RadioButton text="UPI" />
                     <RadioButton text="Credit / Debit Card" />
-
                 </RadioButtonGroup>
 
                 <!-- MAIN GRID -->
