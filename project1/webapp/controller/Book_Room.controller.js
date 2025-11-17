@@ -618,31 +618,47 @@ sap.ui.define([
           editable: true,
           title: "Document Upload",
           layout: "ColumnLayout",
+         
           content: [
             new sap.m.Label({
               text: "Upload ID Proof"
             }),
             new sap.ui.unified.FileUploader({
               width: "100%",
+               fileType: ["pdf", "jpg", "jpeg", "png"],
+               mimeType: ["application/pdf", "image/jpeg", "image/png"],
+               multiple: false,
               customData: [new sap.ui.core.CustomData({
                 key: "index",
                 value: i
               })],
-              change: function (oEvent) {
-                const index = parseInt(oEvent.getSource().data("index"));
-                const oFile = oEvent.getParameter("files")[0];
-                if (oFile) {
-                  const reader = new FileReader();
-                  reader.onload = function (e) {
-                    const sBase64 = e.target.result.split(",")[1];
-                    oData.Persons[index].Document = sBase64;
-                    oData.Persons[index].FileName = oFile.name;
-                    oData.Persons[index].FileType = oFile.type;
-                    oModel.refresh(true);
-                  };
-                  reader.readAsDataURL(oFile);
-                }
-              }
+            change: function (oEvent) {
+    const index = parseInt(oEvent.getSource().data("index"));
+    const oFile = oEvent.getParameter("files")[0];
+
+    if (oFile) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+           const sBase64 = e.target.result;
+
+            // Ensure array exists
+            if (!oData.Persons[index].Documents) {
+                oData.Persons[index].Documents = [];
+            }
+
+            // Push new document
+            oData.Persons[index].Documents.push({
+                FileName: oFile.name,
+                FileType: oFile.type,
+                Document: sBase64
+            });
+
+            oModel.refresh(true);
+        };
+        reader.readAsDataURL(oFile);
+    }
+}
+
             }),
 
           ]
@@ -1039,6 +1055,7 @@ let roomRentPerPerson = baseRoomRent * monthsOrYears;
     return {
       ...oPerson,
       // Facility details per person
+       Documents: oPerson.Documents || [],
       PersonFacilitiesSummary: aPersonFacilities,
       AllSelectedFacilities: aPersonFacilities,
 

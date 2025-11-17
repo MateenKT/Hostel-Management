@@ -39,11 +39,43 @@
                 <Text text="{HostelModel>City}" />
             </f:content>
         </f:SimpleForm>
+          <!-- ========================= -->
+<!-- DOCUMENT SUMMARY PER PERSON -->
+<!-- ========================= -->
+
+<Toolbar>
+    <Title text="Uploaded Documents" level="H4" />
+</Toolbar>
+
+<List
+    mode="None"
+    items="{path: 'HostelModel>Documents'}">
+
+    <CustomListItem>
+        <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMargin">
+
+            <!-- CLICKABLE FILE NAME -->
+            <Link 
+                text="{HostelModel>FileName}" 
+                press="onOpenDocumentPreview" 
+                width="200px"
+            />
+
+        </HBox>
+    </CustomListItem>
+
+</List>
+
+
+
+       
 
         <!-- Selected Facilities for THIS person -->
         <Toolbar>
             <Title text="Selected Facilities" level="H4" />
         </Toolbar>
+
+        
 
         <FlexBox
             alignItems="Start"
@@ -124,6 +156,22 @@
                 }" class="sapUiSmallMarginEnd"/>
             </HBox> -->
         </VBox>
+
+        
+         <!-- <VBox visible="{= !!${HostelModel>FileName}}">
+        <HBox>
+            <Label text="ID Proof Uploaded:" design="Bold" />
+            <Link text="{HostelModel>FileName}"
+                  target="_blank"
+                  href="{= 'data:' + ${HostelModel>FileType} + ';base64,' + ${HostelModel>Document} }"
+                  tooltip="Open/Download Attachment" />
+        </HBox>
+       
+        <Image src="{= ${HostelModel>FileType}.startsWith('image/') ? 'data:' + ${HostelModel>FileType} + ';base64,' + ${HostelModel>Document} : '' }"
+               width="180px"
+               height="auto"
+               visible="{= !!${HostelModel>Document}  ${HostelModel>FileType}.startsWith('image/') }"/>
+    </VBox> -->
 
     </Panel>
     <!-- Grand Total section -->

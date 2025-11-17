@@ -426,6 +426,7 @@ sap.ui.define([
             return {
                 Name: room.Name,
                 ACType: room.ACType,
+                 NoOfPerson: room.NoOfPerson,
                 Description: room.Description || "",
                 Price: price,
                 MonthPrice: MonthPrice,
@@ -745,6 +746,7 @@ sap.ui.define([
                 const oFullDetails = {
                     RoomNo: oSelected.RoomNo || "",
                     BedType: oSelected.Name || "",
+                   
                     ACType: oSelected.ACType || "AC",
                     Description: oSelected.Description || "No description available",
                     Price: oSelected.Price || "N/A",

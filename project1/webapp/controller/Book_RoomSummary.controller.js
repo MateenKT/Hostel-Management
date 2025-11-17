@@ -444,6 +444,67 @@ onUnitTextChange: function (oEvent) {
     // Update the correct price in dialog
     oEditModel.setProperty("/Price", oMatched.Price);
 }
+,
+// Open preview dialog and set content
+onOpenDocumentPreview: function (oEvent) {
+  const oSource = oEvent.getSource();
+  const oCtx = oSource.getBindingContext("HostelModel");
+  const oDoc = oCtx && oCtx.getObject();
+  if (!oDoc || !oDoc.Document) {
+    sap.m.MessageToast.show("No document to preview.");
+    return;
+  }
+
+  const oView = this.getView();
+
+  // Create fragment dialog (use this.createId to scope internal IDs)
+  if (!this._oDocPreviewDialog) {
+    this._oDocPreviewDialog = sap.ui.xmlfragment(
+      this.createId("DocumentPreviewDialog"), // prefix for fragment internal IDs
+      "sap.ui.com.project1.fragment.DocumentPreview",
+      this
+    );
+    oView.addDependent(this._oDocPreviewDialog);
+  }
+
+  // Get the HTML control inside the fragment
+  const oHtml = sap.ui.core.Fragment.byId(this.createId("DocumentPreviewDialog"), "pdfViewer");
+
+  // Ensure the stored Document is a full data URL:
+  // If you stored only the base64 payload earlier, create prefix here:
+  let sData = oDoc.Document || "";
+  if (!sData.startsWith("data:")) {
+    // if oDoc.FileType exists, prefix accordingly (preferred to store full data URI on upload)
+    const sType = oDoc.FileType || "application/octet-stream";
+    sData = `data:${sType};base64,${sData}`;
+  }
+
+  // Set HTML content depending on file type
+  if ((oDoc.FileType || "").indexOf("pdf") !== -1) {
+    // embed iframe for PDF
+    oHtml.setContent(`<iframe src="${sData}" width="100%" height="100%" style="border:0"></iframe>`);
+  } else if ((oDoc.FileType || "").indexOf("image") !== -1) {
+    // show image tag
+    oHtml.setContent(`<img src="${sData}" style="max-width:100%;height:auto;display:block;margin:auto" />`);
+  } else {
+    // fallback: show download link
+    oHtml.setContent(`<div style="padding:16px;">
+                        <p>Preview not supported for this file type.</p>
+                        <a href="${sData}" download="${oDoc.FileName}">Download ${oDoc.FileName}</a>
+                      </div>`);
+  }
+
+  this._oDocPreviewDialog.open();
+},
+
+// Close preview
+onClosePreview: function () {
+  if (this._oDocPreviewDialog) {
+    this._oDocPreviewDialog.close();
+  }
+},
+
+
 
 
 
