@@ -17,7 +17,6 @@
     <!-- Personal Info Section -->
     <List
         id="idPersonalSummaryList"
-        headerText="Personal Information"
         items="{
             path: 'HostelModel>/Persons'
         }"

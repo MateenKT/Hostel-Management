@@ -40,7 +40,7 @@
                                 class="sapUiSmallMarginBottom"
                             />
                             <Text
-                                text="10,000"
+                                text="{HostelModel>/FinalPrice} {HostelModel>/Currency}"
                                 class="largeTextBold"
                             />
                         </VBox>
@@ -50,7 +50,7 @@
                                 class="sapUiSmallMarginBottom"
                             />
                             <Text
-                                text="Single Bed"
+                                text="{=${HostelModel>/BedType} + ' - '  + ${HostelModel>/ACType}}"
                                 class="sapUiTinyMarginEnd largeTextBold"
                             />
                         </VBox> 
