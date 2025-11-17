@@ -1427,3 +1427,73 @@
     text-align: center !important;
     color: 2c3e50 !important;
 }
+
+.paymentDialogRoot .sapMDialog {
+    border-radius: 12px !important;
+}
+
+.paymentDialogRoot .sapMDialog > .sapMDialogSection {
+    background: #ffffff !important;
+    border-radius: 12px;
+}
+
+/* Title styling */
+.paymentDialogRoot .sapMTitle {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* UPI QR styling */
+.paymentDialogRoot .UPIQRCodeBox {
+    background: #ffffff;
+    padding: 12px;
+    border-radius: 10px;
+    width: fit-content;
+    margin: 0 auto;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+
+/* Labels & Inputs */
+.paymentDialogRoot .sapMLabel {
+    margin-top: 0.7rem;
+    font-weight: 600;
+}
+
+.paymentDialogRoot .sapMInputBase {
+    margin-top: 0.3rem;
+}
+
+/* Buttons */
+.paymentDialogRoot .sapMBtnEmphasized > .sapMBtnInner {
+    background-color: #1976d2 !important;
+    border-color: #1976d2 !important;
+}
+
+.paymentDialogRoot .sapMBtnEmphasized > .sapMBtnInner:hover {
+    background-color: #0d47a1 !important;
+}
+
+/* Radio Buttons */
+.paymentDialogRoot .sapMRbBLabel {
+    font-weight: 600;
+}
+
+.paymentDialogRoot .sapMRbSel .sapMRbBOut {
+    border-color: #1976d2 !important;
+}
+
+.paymentDialogRoot .sapMRbSel .sapMRbBInn {
+    background-color: #1976d2 !important;
+}
+
+/* Grid spacing */
+.paymentDialogRoot .sapUiLayoutCSSGrid {
+    row-gap: 1rem !important;
+}
+
+/* Calendar date selected */
+.paymentDialogRoot .sapUiCal .sapUiCalItemSel {
+    background-color: #1976d2 !important;
+    border-color: #1976d2 !important;
+}

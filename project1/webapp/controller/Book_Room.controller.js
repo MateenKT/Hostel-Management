@@ -1414,257 +1414,7 @@ oFacilityModel.refresh(true);
       oBTN.refresh(true);
       oHostelModel.refresh(true);
     },
-    onOpenProceedtoPay: function () {
-      if (!this._oPaymentDialog) {
-        this._oPaymentDialog = sap.ui.xmlfragment(
-          "sap.ui.com.project1.fragment.PaymentPage",
-          this
-        );
-        this.getView().addDependent(this._oPaymentDialog);
-      }
-
-      // Reset input fields
-      const aFields = [
-        "idBankName", "idAmount", "idPaymentTypeField", "idTransactionID",
-        "idPaymentDate", "idCurrency", "idUPIID", "idCardNumber", "idCardExpiry", "idCardCVV"
-      ];
-      aFields.forEach(id => sap.ui.getCore().byId(id)?.setValue(""));
-
-      // Default visibility (UPI)
-      sap.ui.getCore().byId("idPaymentTypeGroup").setSelectedIndex(0);
-      this._togglePaymentSections(true);
-
-      this._oPaymentDialog.open();
-    },
-
-    onPaymentTypeSelect: function (oEvent) {
-      const selectedIndex = oEvent.getSource().getSelectedIndex();
-      const isUPI = selectedIndex === 0;
-
-      this._togglePaymentSections(isUPI);
-
-      // Auto-fill Payment Type
-      const sType = isUPI ? "UPI" : "Debit/Credit Card";
-      sap.ui.getCore().byId("idPaymentTypeField").setValue(sType);
-    },
-
-    _togglePaymentSections: function (isUPI) {
-      // UPI Fields
-      sap.ui.getCore().byId("lblUPIID").setVisible(isUPI);
-      sap.ui.getCore().byId("idUPIID").setVisible(isUPI);
-      sap.ui.getCore().byId("lblUPIImage").setVisible(isUPI);
-      sap.ui.getCore().byId("idUPIImage").setVisible(isUPI);
-
-      // Card Fields
-      sap.ui.getCore().byId("lblCardNumber").setVisible(!isUPI);
-      sap.ui.getCore().byId("idCardNumber").setVisible(!isUPI);
-      sap.ui.getCore().byId("lblCardExpiry").setVisible(!isUPI);
-      sap.ui.getCore().byId("idCardExpiry").setVisible(!isUPI);
-      sap.ui.getCore().byId("lblCardCVV").setVisible(!isUPI);
-      sap.ui.getCore().byId("idCardCVV").setVisible(!isUPI);
-    },
-
-    onPaymentClose: function () {
-      if (this._oPaymentDialog) {
-        this._oPaymentDialog.close();
-      }
-
-      const aFields = [
-        "idBankName", "idAmount", "idPaymentTypeField", "idTransactionID",
-        "idPaymentDate", "idCurrency", "idUPIID", "idCardNumber", "idCardExpiry", "idCardCVV"
-      ];
-      aFields.forEach(id => sap.ui.getCore().byId(id)?.setValue(""));
-    },
-
-    onBankNameChange: function (oEvent) {
-      const oInput = oEvent.getSource();
-      utils._LCvalidateMandatoryField(oEvent);
-      if (oInput.getValue() === "") oInput.setValueState("None");
-    },
-
-    onAmountChange: function (oEvent) {
-      const oInput = oEvent.getSource();
-      utils._LCvalidateAmount(oEvent);
-      if (oInput.getValue() === "") oInput.setValueState("None");
-    },
-
-    onCurrencyChange: function (oEvent) {
-      const oInput = oEvent.getSource();
-      utils._LCstrictValidationComboBox(oEvent);
-      if (oInput.getValue() === "") oInput.setValueState("None");
-    },
-
-    onPaymentTypeChange: function (oEvent) {
-      const oInput = oEvent.getSource();
-      utils._LCvalidateMandatoryField(oEvent);
-      if (oInput.getValue() === "") oInput.setValueState("None");
-    },
-
-    onTransactionIDChange: function (oEvent) {
-      const oInput = oEvent.getSource();
-      utils._LCvalidateMandatoryField(oEvent);
-      if (oInput.getValue() === "") oInput.setValueState("None");
-    },
-
-    onChangeUPIID: function (oEvent) {
-      const oInput = oEvent.getSource();
-      utils._LCvalidateMandatoryField(oEvent);
-      if (oInput.getValue() === "") oInput.setValueState("None");
-    },
-
-    onPaymentDateChange: function (oEvent) {
-      const oInput = oEvent.getSource();
-      if (!oInput.getValue()) {
-        oInput.setValueState("Error");
-        oInput.setValueStateText("Select Payment Date");
-      } else {
-        oInput.setValueState("None");
-      }
-    },
-
-    onSubmitPress: async function () {
-      const oModel = this.getView().getModel("HostelModel");
-      const oData = oModel.getData();
-
-      // Mandatory validation
-      const isMandatoryValid = (
-        utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idUPIID"), "ID") &&
-        utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idBankName"), "ID") &&
-        utils._LCvalidateAmount(sap.ui.getCore().byId("idAmount"), "ID") &&
-        utils._LCstrictValidationComboBox(sap.ui.getCore().byId("idCurrency"), "ID") &&
-        utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idPaymentTypeField"), "ID") &&
-        utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idTransactionID"), "ID") &&
-        utils._LCvalidateDate(sap.ui.getCore().byId("idPaymentDate"), "ID") 
-      );
-
-      if (!isMandatoryValid) {
-        sap.m.MessageToast.show(this.i18nModel.getText("mandetoryFields") || "Please fill all mandatory fields.");
-        return;
-      }
-
-      try {
-        // Format payload according to your new structure
-        const formattedPayload = oData.Persons.map((p) => {
-          const bookingData = [];
-          const facilityData = [];
-
-          //  FIX: Use oData for booking fields, not individual person object
-          if (oData.StartDate) {
-            bookingData.push({
-              BookingDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
-              RentPrice: oData.GrandTotal ? oData.GrandTotal.toString() : "0",
-              RoomPrice: oData.Price,
-              NoOfPersons: oData.Person || oData.Persons.length,
-              StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
-              EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
-              Status: "New",
-              PaymentType: oData.PaymentType || "",
-              BedType: oData.RoomType
-            });
-          }
-
-          const paymentDetails = {
-            BankName: sap.ui.getCore().byId("idBankName").getValue(),
-            Amount: sap.ui.getCore().byId("idAmount").getValue(),
-            PaymentType: sap.ui.getCore().byId("idPaymentTypeField").getValue(),
-            BankTransactionID: sap.ui.getCore().byId("idTransactionID").getValue(),
-            Date: sap.ui.getCore().byId("idPaymentDate").getValue() ? sap.ui.getCore().byId("idPaymentDate").getValue().split("/").reverse().join("-") : "",
-            Currency: sap.ui.getCore().byId("idCurrency").getValue()
-          };
-
-          // Store in model temporarily
-          oData.PaymentDetails = paymentDetails;
-
-          //  Handle both object and string facility formats
-          if (p.Facilities && p.Facilities.SelectedFacilities && p.Facilities.SelectedFacilities.length > 0) {
-            p.Facilities.SelectedFacilities.forEach(fac => {
-              facilityData.push({
-                PaymentID: "",
-                FacilityName: typeof fac === 'string' ? fac : fac.FacilityName,
-                FacilitiPrice: fac.Price,
-                StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
-                EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
-                PaidStatus: "Pending"
-              });
-            });
-          }
-
-          // Return formatted entry
-          return {
-            Salutation: p.Salutation,
-            CustomerName: p.FullName,
-            UserID: p.UserID,
-            STDCode: p.StdCode,
-            MobileNo: p.MobileNo,
-            Gender: p.Gender,
-            DateOfBirth: p.DateOfBirth ? p.DateOfBirth.split("/").reverse().join("-") : "",
-            CustomerEmail: p.CustomerEmail,
-            Country: p.Country,
-            State: p.State,
-            City: p.City,
-            PermanentAddress: p.Address,
-            Documents: p.Document ?
-              [{
-                DocumentType: p.DocumentType || "ID Proof",
-                File: p.Document,
-                FileName: p.FileName || "Document",
-                FileType: p.FileType || "application/pdf"
-              }] :
-              [],
-            Booking: bookingData,
-            FacilityItems: facilityData,
-            PaymentDetails: [oData.PaymentDetails]
-          };
-        });
-
-        // Final payload structure
-        const oPayload = {
-          data: formattedPayload
-        };
-
-        // AJAX call
-        const oResponse = await this.ajaxCreateWithJQuery("HM_Customer", oPayload);
-
-        // Extract BookingDetails array
-        const aBookingDetails = oResponse.BookingDetails || [];
-
-        // Prepare message text
-        let sMessage = "Booking Successful!\n\n";
-
-        aBookingDetails.forEach((item, index) => {
-          sMessage +=
-            "Customer " + (index + 1) + ":\n" +
-            "Customer ID: " + item.CustomerID + "\n" +
-            "Booking ID: " + item.BookingID + "\n\n";
-        });
-
-        // Show success box
-        sap.m.MessageBox.success(sMessage, {
-          title: "Success",
-          actions: [sap.m.MessageBox.Action.OK],
-          onClose: function () {
-
-            // Navigate after user clicks OK
-            var oRoute = this.getOwnerComponent().getRouter();
-            oRoute.navTo("RouteHostel");
-
-            // Clear uploaded files
-            oData.Persons.forEach((_, idx) => {
-              const uploader = sap.ui.getCore().byId("idFileUploader_" + idx);
-              if (uploader) uploader.setValue("");
-            });
-
-            // Close dialog if exists
-            if (this.FCIA_Dialog) {
-              this.FCIA_Dialog.close();
-            }
-          }.bind(this)
-        });
-      } catch (err) {
-        sap.m.MessageBox.error("Error while booking: " + err);
-      }
-    },
-
+  
     onCancelPress: function () {
       var oRouter = this.getOwnerComponent().getRouter()
       oRouter.navTo("RouteHostel")
@@ -1862,12 +1612,282 @@ oFacilityModel.refresh(true);
       } else {
         oConfirmInput.setValueState("None");
       }
-    }
+    },
 
+      onOpenProceedtoPay: function() {
+        if (!this._oPaymentDialog) {
+            this._oPaymentDialog = sap.ui.xmlfragment(
+                "sap.ui.com.project1.fragment.PaymentPage",
+                this
+            );
+            this.getView().addDependent(this._oPaymentDialog);
+        }
 
+        this._clearAllPaymentFields();
 
+        sap.ui.getCore().byId("idPaymentTypeGroup").setSelectedIndex(0);
+        this._togglePaymentSections(true);
+        sap.ui.getCore().byId("idPaymentTypeField").setValue("UPI");
 
+        var oDatePicker = sap.ui.getCore().byId("idPaymentDate");
+        oDatePicker.setDateValue(new Date());
 
+        this._oPaymentDialog.open();
+    },
 
+    onPaymentTypeSelect: function(oEvent) {
+        const index = oEvent.getSource().getSelectedIndex();
+        const isUPI = index === 0;
+
+        this._togglePaymentSections(isUPI);
+        sap.ui.getCore().byId("idPaymentTypeField").setValue(isUPI ? "UPI" : "CARD");
+    },
+
+    _togglePaymentSections: function(isUPI) {
+        sap.ui.getCore().byId("idUPISection").setVisible(isUPI);
+        sap.ui.getCore().byId("idCardSection").setVisible(!isUPI);
+
+        const aFields = [
+            "idBankName", "idAmount", "idPaymentTypeField", "idTransactionID",
+            "idPaymentDate", "idCurrency", "idUPIID", "idCardNumber", "idCardExpiry", "idCardCVV"
+        ];
+        aFields.forEach(id => sap.ui.getCore().byId(id)?.setValue(""));
+    },
+
+    onAmountChange: function(oEvent) {
+        const oInput = oEvent.getSource();
+        utils._LCvalidateAmount(oEvent);
+        if (oInput.getValue() === "") oInput.setValueState("None");
+
+        const value = (oInput.getValue());
+        const total = (this.getView().getModel("HostelModel").getProperty("/GrandTotal"));
+
+        if (value > total) {
+            oInput.setValueState("Error");
+            oInput.setValueStateText("Amount cannot be greater than Grand Total");
+        } else {
+            oInput.setValueState("None");
+        }
+    },
+
+    _clearAllPaymentFields: function() {
+        [
+            "idBankName", "idAmount", "idPaymentTypeField", "idTransactionID",
+            "idPaymentDate", "idCurrency", "idUPIID", "idCardNumber",
+            "idCardExpiry", "idCardCVV"
+        ].forEach(id => {
+            const c = sap.ui.getCore().byId(id);
+            if (!c) return;
+            if (c.setValue) c.setValue("");
+            if (c.setSelectedKey) c.setSelectedKey("");
+            c.setValueState("None");
+        });
+    },
+
+    onPaymentClose: function() {
+        if (this._oPaymentDialog) {
+            this._oPaymentDialog.close();
+        }
+
+        const aFields = [
+            "idBankName", "idAmount", "idPaymentTypeField", "idTransactionID",
+            "idPaymentDate", "idCurrency", "idUPIID", "idCardNumber", "idCardExpiry", "idCardCVV"
+        ];
+        aFields.forEach(id => sap.ui.getCore().byId(id)?.setValue(""));
+    },
+
+    onBankNameChange: function(oEvent) {
+        const oInput = oEvent.getSource();
+        utils._LCvalidateMandatoryField(oEvent);
+        if (oInput.getValue() === "") oInput.setValueState("None");
+    },
+
+    onCurrencyChange: function(oEvent) {
+        const oInput = oEvent.getSource();
+        utils._LCstrictValidationComboBox(oEvent);
+        if (oInput.getValue() === "") oInput.setValueState("None");
+    },
+
+    onPaymentTypeChange: function(oEvent) {
+        const oInput = oEvent.getSource();
+        utils._LCvalidateMandatoryField(oEvent);
+        if (oInput.getValue() === "") oInput.setValueState("None");
+    },
+
+    onTransactionIDChange: function(oEvent) {
+        const oInput = oEvent.getSource();
+        utils._LCvalidateMandatoryField(oEvent);
+        if (oInput.getValue() === "") oInput.setValueState("None");
+    },
+
+    onChangeUPIID: function(oEvent) {
+        const oInput = oEvent.getSource();
+        utils._LCvalidateMandatoryField(oEvent);
+        if (oInput.getValue() === "") oInput.setValueState("None");
+    },
+
+    onPaymentDateChange: function(oEvent) {
+        const oInput = oEvent.getSource();
+        if (!oInput.getValue()) {
+            oInput.setValueState("Error");
+            oInput.setValueStateText("Select Payment Date");
+        } else {
+            oInput.setValueState("None");
+        }
+    },
+
+    onSubmitPress: async function() {
+     const oModel = this.getView().getModel("HostelModel");
+     const oData = oModel.getData();
+
+     // Mandatory validation
+     const isMandatoryValid = (
+         utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idUPIID"), "ID") &&
+         utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idBankName"), "ID") &&
+         // utils._LCvalidateAmount(sap.ui.getCore().byId("idAmount"), "ID") &&
+         utils._LCstrictValidationComboBox(sap.ui.getCore().byId("idCurrency"), "ID") &&
+         utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idPaymentTypeField"), "ID") &&
+         utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idTransactionID"), "ID") &&
+         utils._LCvalidateDate(sap.ui.getCore().byId("idPaymentDate"), "ID")
+     );
+
+     if (!isMandatoryValid) {
+         sap.m.MessageToast.show("Please fill all mandatory fields.");
+         return;
+     }
+
+     const oAmountInput = sap.ui.getCore().byId("idAmount");
+     const enteredAmount = Number(oAmountInput.getValue());
+     const grandTotal = Number(this.getView().getModel("HostelModel").getProperty("/GrandTotal"));
+
+     if (enteredAmount > grandTotal) {
+         oAmountInput.setValueState("Error");
+         oAmountInput.setValueStateText("Amount cannot be greater than Grand Total");
+         sap.m.MessageToast.show("Amount cannot be greater than Grand Total");
+         return; // STOP further processing
+     } else {
+         oAmountInput.setValueState("None");
+     }
+
+     try {
+         // Format payload according to your new structure
+         const formattedPayload = oData.Persons.map((p) => {
+             const bookingData = [];
+             const facilityData = [];
+
+             //  FIX: Use oData for booking fields, not individual person object
+             if (oData.StartDate) {
+                 bookingData.push({
+                     BookingDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
+                     RentPrice: oData.GrandTotal ? oData.GrandTotal.toString() : "0",
+                     RoomPrice: oData.Price,
+                     NoOfPersons: oData.Person || oData.Persons.length,
+                     StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
+                     EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
+                     Status: "New",
+                     PaymentType: oData.PaymentType || "",
+                     BedType: oData.RoomType
+                 });
+             }
+
+             const paymentDetails = {
+                 BankName: sap.ui.getCore().byId("idBankName").getValue(),
+                 Amount: sap.ui.getCore().byId("idAmount").getValue(),
+                 PaymentType: sap.ui.getCore().byId("idPaymentTypeField").getValue(),
+                 BankTransactionID: sap.ui.getCore().byId("idTransactionID").getValue(),
+                 Date: sap.ui.getCore().byId("idPaymentDate").getValue() ? sap.ui.getCore().byId("idPaymentDate").getValue().split("/").reverse().join("-") : "",
+                 Currency: sap.ui.getCore().byId("idCurrency").getValue()
+             };
+
+             // Store in model temporarily
+             oData.PaymentDetails = paymentDetails;
+
+             //  Handle both object and string facility formats
+             if (p.Facilities && p.Facilities.SelectedFacilities && p.Facilities.SelectedFacilities.length > 0) {
+                 p.Facilities.SelectedFacilities.forEach(fac => {
+                     facilityData.push({
+                         PaymentID: "",
+                         FacilityName: typeof fac === 'string' ? fac : fac.FacilityName,
+                         FacilitiPrice: fac.Price,
+                         StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
+                         EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
+                         PaidStatus: "Pending"
+                     });
+                 });
+             }
+
+             // Return formatted entry
+             return {
+                 Salutation: p.Salutation,
+                 CustomerName: p.FullName,
+                 UserID: p.UserID,
+                 STDCode: p.StdCode,
+                 MobileNo: p.MobileNo,
+                 Gender: p.Gender,
+                 DateOfBirth: p.DateOfBirth ? p.DateOfBirth.split("/").reverse().join("-") : "",
+                 CustomerEmail: p.CustomerEmail,
+                 Country: p.Country,
+                 State: p.State,
+                 City: p.City,
+                 PermanentAddress: p.Address,
+                 Documents: p.Document ? [{
+                     DocumentType: p.DocumentType || "ID Proof",
+                     File: p.Document,
+                     FileName: p.FileName || "Document",
+                     FileType: p.FileType || "application/pdf"
+                 }] : [],
+                 Booking: bookingData,
+                 FacilityItems: facilityData,
+                 PaymentDetails: [oData.PaymentDetails]
+             };
+         });
+
+         // Final payload structure
+         const oPayload = {
+             data: formattedPayload
+         };
+
+         // AJAX call
+         const oResponse = await this.ajaxCreateWithJQuery("HM_Customer", oPayload);
+
+         // Extract BookingDetails array
+         const aBookingDetails = oResponse.BookingDetails || [];
+
+         // Prepare message text
+         let sMessage = "Booking Successful!\n\n";
+
+         aBookingDetails.forEach((item, index) => {
+             sMessage +=
+                 "Customer " + (index + 1) + ":\n" +
+                 "Customer ID: " + item.CustomerID + "\n" +
+                 "Booking ID: " + item.BookingID + "\n\n";
+         });
+
+         // Show success box
+         sap.m.MessageBox.success(sMessage, {
+             title: "Success",
+             actions: [sap.m.MessageBox.Action.OK],
+             onClose: function() {
+
+                 // Navigate after user clicks OK
+                 var oRoute = this.getOwnerComponent().getRouter();
+                 oRoute.navTo("RouteHostel");
+
+                 // Clear uploaded files
+                 oData.Persons.forEach((_, idx) => {
+                     const uploader = sap.ui.getCore().byId("idFileUploader_" + idx);
+                     if (uploader) uploader.setValue("");
+                 });
+
+                 // Close dialog if exists
+                 if (this.FCIA_Dialog) {
+                     this.FCIA_Dialog.close();
+                 }
+             }.bind(this)
+         });
+        } catch (err) {
+            sap.m.MessageBox.error("Error while booking: " + err);
+        }
+    },
   });
 });
