@@ -40,9 +40,30 @@ sap.ui.define([
             this.getView().setModel(BedImageModel, "BedImageModel")
 
             this.BedID = oEvent.getParameter("arguments").sPath;
-            await this.refershModel(this.BedID)
+               await this._loadBranchCode()
+              await this.refershModel(this.BedID)
 
             this.Onsearch()
+        },
+           _loadBranchCode: async function () {
+             sap.ui.core.BusyIndicator.show(0);
+            try {
+                const oView = this.getView();
+
+                const oResponse = await this.ajaxReadWithJQuery("HM_Branch", {});
+
+                const aBranches = Array.isArray(oResponse?.data)
+                    ? oResponse.data
+                    : (oResponse?.data ? [oResponse.data] : []);
+
+                const oBranchModel = new sap.ui.model.json.JSONModel(aBranches);
+                oView.setModel(oBranchModel, "BranchModel");
+
+                console.log("oBranchModel:", oBranchModel.getData());
+                console.log("Branch data loaded successfully");
+            } catch (err) {
+                console.error("Error while loading branch data:", err);
+            }
         },
         Onsearch: function () {
             sap.ui.core.BusyIndicator.show(0);

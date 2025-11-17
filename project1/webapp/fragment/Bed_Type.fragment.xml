@@ -118,19 +118,19 @@
                     placeholder="Enter No Of Description"
                     liveChange="onNameInputLiveChange"
                     valueStateText="Enter Description"
-                    maxLength="100"
+                    maxLength="200"
                 />
                 <!-- Upload -->
                 <Label
                     text="Add Image"
                     required="true"
                 />
-                <HBox
-                    alignItems="Center"
+                <VBox
+                    alignItems="Start"
                     width="100%"
                     renderType="Bare"
                 >
-                    <VBox width="25%">
+                    <HBox width="25%">
                         <u:FileUploader
                             id="BT_id_FileUploader"
                             fileSizeExceed="onFileSizeExceeds"
@@ -146,11 +146,11 @@
                             uploadOnChange="false"
                             tooltip="Only JPG, PNG, or PDF files under 5MB allowed"
                         />
-                    </VBox>
+                    </HBox>
                     <!-- Tokenizer -->
-                    <VBox width="75%">
+                    <HBox width="75%">
                         <ScrollContainer
-                            height="70px"
+                            height="60px"
                             width="100%"
                             horizontal="false"
                             vertical="true"
@@ -167,8 +167,8 @@
                                 />
                             </Tokenizer>
                         </ScrollContainer>
-                    </VBox>
-                </HBox>
+                    </HBox>
+                </VBox>
             </f:content>
         </f:SimpleForm>
         <footer>

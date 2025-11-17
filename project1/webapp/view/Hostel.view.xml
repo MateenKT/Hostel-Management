@@ -171,22 +171,22 @@
                                     <!--  Branch Name -->
                                     <fb:FilterGroupItem
                                         name="Branch"
-                                        label="Branch Name"
+                                        label="City"
                                         groupName="Group1"
                                         visibleInFilterBar="true"
                                     >
                                         <fb:control>
                                             <ComboBox
                                                 id="id_Branch"
-                                                placeholder="Select Branch"
+                                                placeholder="Select City"
                                                 showClearIcon="true"
                                                 enabled="true"
                                                 items="{sBRModel>/}"
                                                 selectionChange=".onBranchSelectionChange"
                                             >
                                                 <core:ListItem
-                                                    key="{sBRModel>BranchID}"
-                                                    text="{sBRModel>Name}"
+                                                    key="{sBRModel>City}"
+                                                    text="{sBRModel>City}"
                                                 />
                                             </ComboBox>
                                         </fb:control>
@@ -194,14 +194,14 @@
                                     <!-- Area -->
                                     <fb:FilterGroupItem
                                         name="Area"
-                                        label="Area"
+                                        label="Locality"
                                         groupName="Group1"
                                         visibleInFilterBar="true"
                                     >
                                         <fb:control>
                                             <ComboBox
                                                 id="id_Area"
-                                                placeholder="Select Area"
+                                                placeholder="Select Branch"
                                                 showClearIcon="true"
                                                 enabled="false"
                                                 items="{AreaModel>/}"
@@ -256,7 +256,7 @@
                                     <VBox
                                         class="bedCard sapUiMediumMargin"
                                         visible="{VisibilityModel>Visible}">
-                                        <Carousel id="idBedImageCarousel"
+                                        <Carousel
                                 height="300px"
                                 width="100%"
                                 loop="true"
