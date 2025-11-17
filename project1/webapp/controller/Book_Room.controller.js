@@ -653,25 +653,40 @@ sap.ui.define([
           expandable: true,
           expanded: true,
           content: [
-            ...(i === 0 && iPersons > 1 ?
-              [
-                new sap.m.CheckBox({
-                  text: "For All",
-                  selected: true,
-                  select: (e) => {
-                    oData.ForBothSelected = e.getParameter("selected");
-                    if (oData.ForBothSelected && iPersons > 1) {
-                      for (let p = 1; p < iPersons; p++) {
-                        oData.Persons[p].Facilities.SelectedFacilities =
-                          oData.Persons[0].Facilities.SelectedFacilities.map(f => ({ ...f }));
-                      }
-                    }
+            ...(i === 0 && iPersons > 1 ? [
+                    new sap.m.CheckBox({
+                        text: "For All",
+                        selected: true,
+                        select: function (e) {
+                            const bSel = e.getParameter("selected");
+                            oData.ForBothSelected = bSel;
 
-                    oModel.refresh(true);
-                  }
-                })
-              ] :
-              []),
+                            if (bSel) {
+                                const firstPersonName = oData.Persons[0].PersonName;
+
+                                // Assign personName to first person facilities
+                                oData.Persons[0].Facilities.SelectedFacilities =
+                                    oData.Persons[0].Facilities.SelectedFacilities.map(f => ({
+                                        ...f,
+                                        PersonName: firstPersonName
+                                    }));
+
+                                // Copy to all persons
+                                for (let p = 1; p < iPersons; p++) {
+                                    const personName = oData.Persons[p].PersonName;
+
+                                    oData.Persons[p].Facilities.SelectedFacilities =
+                                        oData.Persons[0].Facilities.SelectedFacilities.map(f => ({
+                                            ...f,
+                                            PersonName: personName
+                                        }));
+                                }
+                            }
+
+                            oModel.refresh(true);
+                        }
+                    })
+                ] : []),
 
             new sap.m.FlexBox({
               wrap: "Wrap",
@@ -730,12 +745,19 @@ sap.ui.define([
                             }
 
                             // If "For Both" is selected, copy selected facilities to second person
-                            if (oData.ForBothSelected && iPersons > 1) {
-                              oData.Persons[1].Facilities.SelectedFacilities = aSelected.map(f => ({ ...f }));
-                            }
+                            if (oData.ForBothSelected && iPersons > 1 && i === 0) {
+                                            for (let p = 1; p < iPersons; p++) {
+                                                const personName = oData.Persons[p].PersonName;
+                                                oData.Persons[p].Facilities.SelectedFacilities =
+                                                    oData.Persons[0].Facilities.SelectedFacilities.map(f => ({
+                                                        ...f,
+                                                        PersonName: personName
+                                                    }));
+                                            }
+                                        }
 
-                            oModel.refresh(true);
-                          }
+                                        oModel.refresh(true);
+                                    }
                         }),
 
                         // Facility name overlay (hover effect)

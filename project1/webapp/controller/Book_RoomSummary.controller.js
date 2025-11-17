@@ -254,16 +254,21 @@ onEditFacilitySave: function () {
 
     // Replace the facility entry at the found index
     aFacilities[iIndex] = oUpdatedData;
-    oHostelModel.setProperty("/AllSelectedFacilities", aFacilities);
+   // After updating aFacilities and setting it globally:
+oHostelModel.setProperty("/AllSelectedFacilities", aFacilities);
 
-    // Rebuild each person's facility arrays from global list
-    const aPersons = oHostelModel.getProperty("/Persons") || [];
-    aPersons.forEach((oPerson, pIdx) => {
-        const personName = oPerson.FullName || `Person ${pIdx + 1}`;
-        const personFacs = aFacilities.filter(f => String(f.PersonName || "") === String(personName));
-        oHostelModel.setProperty(`/Persons/${pIdx}/AllSelectedFacilities`, personFacs);
-        oHostelModel.setProperty(`/Persons/${pIdx}/PersonFacilitiesSummary`, personFacs);
-    });
+// For each person, assign ONLY their facilities by deep-copying filtered entries:
+const aPersons = oHostelModel.getProperty("/Persons") || [];
+aPersons.forEach((oPerson, iPerson) => {
+    const personName = oPerson.FullName || `Person ${iPerson + 1}`;
+    // Deep-copy ONLY the facility objects for THIS person
+    const aPersonFacilities = aFacilities.filter(f => f.PersonName === personName).map(f => ({ ...f }));
+    oHostelModel.setProperty(`/Persons/${iPerson}/PersonFacilitiesSummary`, aPersonFacilities);
+    oHostelModel.setProperty(`/Persons/${iPerson}/AllSelectedFacilities`, aPersonFacilities);
+    // Optionally: assign a fresh array to Facilities.SelectedFacilities too if used elsewhere
+    oPerson.Facilities.SelectedFacilities = aPersonFacilities;
+});
+
 
     // Recalculate start/end from global facility dates (safe parse)
     const parseDDMMYYYY = s => {
