@@ -339,6 +339,11 @@ onAddFacilitySave: function () {
     this._pAddFacilityDialog.close();
 },
 
+ onNavBack: function() {
+            var oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("RouteHostel");
+        },
+
 
 
 

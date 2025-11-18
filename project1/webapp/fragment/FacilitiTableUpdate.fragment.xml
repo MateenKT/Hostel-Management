@@ -24,6 +24,7 @@
 
                 <Label text="Currency" required="true" />
                 <ComboBox
+                    enabled="false"
                     id="FU_id_Currency"
                     selectedKey="{edit>/Currency}"
                     items="{CurrencyModel>/}"

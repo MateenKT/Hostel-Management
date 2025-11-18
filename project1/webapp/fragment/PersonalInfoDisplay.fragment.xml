@@ -43,28 +43,36 @@
 <!-- DOCUMENT SUMMARY PER PERSON -->
 <!-- ========================= -->
 
-<Toolbar>
-    <Title text="Uploaded Documents" level="H4" />
-</Toolbar>
 
-<List
-    mode="None"
-    items="{path: 'HostelModel>Documents'}">
 
-    <CustomListItem>
-        <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMargin">
+<VBox 
+    visible="{= ${HostelModel>Documents}.length > 0 }"
+    class="sapUiSmallMargin">
 
-            <!-- CLICKABLE FILE NAME -->
-            <Link 
-                text="{HostelModel>FileName}" 
-                press="onOpenDocumentPreview" 
-                width="200px"
-            />
+    <Toolbar>
+        <Title text="Uploaded Documents" level="H4" />
+    </Toolbar>
 
-        </HBox>
-    </CustomListItem>
+    <List
+        mode="None"
+        items="{path: 'HostelModel>Documents'}">
 
-</List>
+        <CustomListItem>
+            <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMargin">
+
+                <Link 
+                    text="{HostelModel>FileName}" 
+                    press="onOpenDocumentPreview" 
+                    width="200px"
+                />
+
+            </HBox>
+        </CustomListItem>
+
+    </List>
+
+</VBox>
+
 
 
 
@@ -112,11 +120,11 @@
 
             <columns>
                 <Column demandPopin="true" ><Text text="Facility Name" /></Column>
-                <Column demandPopin="true"><Text text="Facility Price (₹)" /></Column>
+                <Column demandPopin="true"><Text text="Facility Price" /></Column>
                 <Column minScreenWidth="Desktop" demandPopin="true" ><Text text="Start Date" /></Column>
                 <Column demandPopin="true" minScreenWidth="Desktop"><Text text="End Date" /></Column>
                 <Column minScreenWidth="Desktop" demandPopin="true" ><Text text="Days" /></Column>
-                <Column demandPopin="true" ><Text text="Total (₹)" /></Column>
+                <Column demandPopin="true" ><Text text="Total" /></Column>
             </columns>
 
             <items>
@@ -127,7 +135,7 @@
                         <Text text="{HostelModel>StartDate}" />
                         <Text text="{HostelModel>EndDate}" />
                         <Text text="{HostelModel>TotalDays}" />
-                        <Text text="{= '₹ ' + (${HostelModel>TotalAmount}).toFixed(2) }" />
+                        <Text text="{=(${HostelModel>TotalAmount}).toFixed(2) }" />
                     </cells>
                 </ColumnListItem>
             </items>

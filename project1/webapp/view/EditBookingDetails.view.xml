@@ -16,8 +16,6 @@
             fragmentName="sap.ui.com.project1.fragment.Header"
             type="XML"
         />
-      
-    
     <VBox class="sapUiMediumMarginBottom">
       <Panel
         headerText="General Information"
