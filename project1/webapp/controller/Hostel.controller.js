@@ -960,6 +960,49 @@ _getLocationName: function (lat, lng) {
 
 
 
+        _LoadAmenities: async function () {
+            const oAmenityModel = new sap.ui.model.json.JSONModel({
+                loading: true,
+                Amenities: []
+            });
+
+            // this.getView().setModel(oAmenityModel, "AmenityModel");
+            this._oRoomDetailFragment.setModel(oAmenityModel, "AmenityModel");
+
+
+            try {
+                let data = await this.ajaxReadWithJQuery("HM_HostelFeatures", "");
+                console.log("HM_HostelFeatures:", data);
+
+                let aAmenities = (data && data.data) ? data.data : [];
+
+                // Fallback
+                if (!aAmenities.length) {
+                    aAmenities = [{
+                        FacilityName: "No amenities found",
+                        Description: "",
+                        Photo1: "",
+                        Photo2: ""
+                    }];
+                }
+
+                oAmenityModel.setProperty("/Amenities", aAmenities);
+
+            } catch (e) {
+                console.error("Amenity load error:", e);
+            } finally {
+                oAmenityModel.setProperty("/loading", false);
+                console.log("Loading flag:", oAmenityModel.getProperty("/loading"));
+            }
+        },
+
+
+
+        onRoomDetailOpened: function () {
+            console.log("Dialog fully opened. Now loading amenities...");
+            this._LoadAmenities();
+        },
+
         onImageLoadError: function (oEvent) {
             const oImage = oEvent.getSource();
             const sFallback = sap.ui.require.toUrl("sap/ui/com/project1/image/no-image.png");

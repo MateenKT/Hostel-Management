@@ -3,8 +3,9 @@
 	xmlns:m="sap.m" 
 	xmlns:core="sap.ui.core" 
 	xmlns:l="sap.ui.layout" 
+	xmlns:f="sap.f"
 	xmlns:card="sap.ui.integration.widgets">
-	<Dialog draggable="true" resizable="true" contentHeight="auto" contentWidth="70%" id="roomDetailID" title="Room Details" type="Message" class="sapUiContentPadding" afterClose=".onDialogAfterClose">
+	<Dialog draggable="true" afterOpen=".onRoomDetailOpened" resizable="true" contentHeight="auto" contentWidth="70%" id="roomDetailID" title="Room Details" type="Message" class="sapUiContentPadding" afterClose=".onDialogAfterClose">
 		<customHeader>
 			<Bar class="barheader">
 				<contentMiddle>
@@ -43,42 +44,44 @@
 						</VBox>
 					</l:content>
 				</l:Grid>
-				<HBox justifyContent="SpaceBetween" alignItems="Stretch" class="priceRow sapUiSmallMarginTop sapUiTinyMarginBeginEnd">
-					<GenericTile header="Per Day" subheader="{HostelModel>/Currency} {HostelModel>/Price}" class="defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%">
-						<layoutData>
-							<FlexItemData growFactor="1" />
-						</layoutData>
-						<customData>
-							<core:CustomData key="type" value="daily"/>
-						</customData>
-					</GenericTile>
-					<GenericTile header="Per Month" subheader="{HostelModel>/Currency} {HostelModel>/MonthPrice}" class=" defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%">
-						<layoutData>
-							<FlexItemData growFactor="1" />
-						</layoutData>
-						<customData>
-							<core:CustomData key="type" value="monthly"/>
-						</customData>
-					</GenericTile>
-					<GenericTile header="Per Year" subheader="{HostelModel>/Currency} {HostelModel>/YearPrice}" class=" defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%">
-						<layoutData>
-							<FlexItemData growFactor="1" />
-						</layoutData>
-						<customData>
-							<core:CustomData key="type" value="yearly"/>
-						</customData>
-					</GenericTile>
-					<Button text="Book Now" type="Emphasized" press=".onConfirmBooking" class="myCustomButton priceItem" width="100%">
-						<layoutData>
-							<FlexItemData growFactor="1" />
-						</layoutData>
-					</Button>
-				</HBox>
-				<Bar design="Header" class="sapUiMediumMarginTop sapUiTinyMarginBeginEnd">
+				<!-- <HBox justifyContent="SpaceBetween" alignItems="Stretch" class="priceRow sapUiSmallMarginTop sapUiTinyMarginBeginEnd"><GenericTile header="Per Day" subheader="{HostelModel>/Currency} {HostelModel>/Price}" class="defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%"><layoutData><FlexItemData growFactor="1" /></layoutData><customData><core:CustomData key="type" value="daily"/></customData></GenericTile><GenericTile header="Per Month" subheader="{HostelModel>/Currency} {HostelModel>/MonthPrice}" class=" defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%"><layoutData><FlexItemData growFactor="1" /></layoutData><customData><core:CustomData key="type" value="monthly"/></customData></GenericTile><GenericTile header="Per Year" subheader="{HostelModel>/Currency} {HostelModel>/YearPrice}" class=" defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%"><layoutData><FlexItemData growFactor="1" /></layoutData><customData><core:CustomData key="type" value="yearly"/></customData></GenericTile><GenericTile header="Book Now" subheader="" class="defaultTile priceItem bookNowTile" frameType="OneByHalf" press=".onConfirmBooking" width="100%"><layoutData><FlexItemData growFactor="1" /></layoutData><customData><core:CustomData key="type" value="booknow"/></customData></GenericTile></HBox> -->
+				<l:Grid width="100%" defaultSpan="L3 M6 S12" hSpacing="1" vSpacing="1" class="priceGrid sapUiTinyMarginBeginEnd sapUiSmallMarginTop">
+					<l:content>
+						<GenericTile header="Per Day" subheader="{HostelModel>/Currency} {HostelModel>/Price}" class="defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%">
+							<customData>
+								<core:CustomData key="type" value="daily"/>
+							</customData>
+						</GenericTile>
+						<GenericTile header="Per Month" subheader="{HostelModel>/Currency} {HostelModel>/MonthPrice}" class="defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%">
+							<customData>
+								<core:CustomData key="type" value="monthly"/>
+							</customData>
+						</GenericTile>
+						<GenericTile header="Per Year" subheader="{HostelModel>/Currency} {HostelModel>/YearPrice}" class="defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%">
+							<customData>
+								<core:CustomData key="type" value="yearly"/>
+							</customData>
+						</GenericTile>
+						<!-- BOOK NOW TILE -->
+						<GenericTile header="Book Now" class="defaultTile priceItem bookNowTile" frameType="OneByHalf" press=".onConfirmBooking" width="100%">
+							<customData>
+								<core:CustomData key="type" value="booknow"/>
+							</customData>
+						</GenericTile>
+					</l:content>
+				</l:Grid>
+				<!-- <Bar design="Header" class="sapUiMediumMarginTop sapUiTinyMarginBeginEnd">
 					<contentMiddle>
-						<Title text="Available Facilities" class="" />
+						<Title text="Available Facilities" />
 					</contentMiddle>
 				</Bar>
+
+
+
+
+
+
+
 				<VBox class="facilityContainer sapUiSmallMarginTop sapUiTinyMarginBeginEnd" width="100%">
 					<HBox justifyContent="Center" visible="{FacilityModel>/loading}">
 						<BusyIndicator size="0.8rem" class="sapUiLMediumMarginTop" />
@@ -92,7 +95,68 @@
 							</VBox>
 						</items>
 					</HBox>
-				</VBox>
+				</VBox> -->
+
+<!-- Facilities header -->
+<!-- Facilities header -->
+<Bar design="Header" class="sapUiMediumMarginTop">
+	<contentMiddle>
+		<Title text="Available Facilities" />
+	</contentMiddle>
+</Bar>
+<!-- Loading -->
+<HBox justifyContent="Center" visible="{FacilityModel>/loading}">
+	<BusyIndicator size="0.8rem" />
+</HBox>
+<!-- Responsive grid built from a List -->
+<List id="facilityList" class="facilityList" items="{FacilityModel>/Facilities}" visible="{= !${FacilityModel>/loading} }" inset="false">
+	<items>
+		<CustomListItem type="Inactive" class="facilityListItem">
+			<VBox class="facilityCard">
+				<Image src="{FacilityModel>Image}" class="facilityCardImg" densityAware="false" />
+				<Text text="{FacilityModel>FacilityName}" class="facilityCardTitle" />
+				<Text text="₹{FacilityModel>Price}" class="facilityCardPrice" />
+			</VBox>
+		</CustomListItem>
+	</items>
+</List>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<Bar design="Header" class="sapUiMediumMarginTop sapUiTinyMarginBeginEnd">
+	<contentMiddle>
+		<Title text="Amenities" />
+	</contentMiddle>
+</Bar>
+<!-- Loading -->
+<HBox justifyContent="Center" visible="{AmenityModel>/loading}">
+	<BusyIndicator size="0.8rem" />
+</HBox>
+<!-- Amenities (Old UI5 Compatible Grid) -->
+<HBox wrap="Wrap" class="amenityFlex sapUiTinyMarginBeginEnd" visible="{= !${AmenityModel>/loading} }" items="{AmenityModel>/Amenities}">
+	<items>
+		<VBox class="facilityCard">
+			<!-- <Image src="{AmenityModel>Phot	o1}" class="facilityCardImg" densityAware="false" /> -->
+			<Image src="{= ${AmenityModel>Photo1} ? 'data:image/jpeg;base64,' + ${AmenityModel>Photo1} : '' }" />
+			<Text text="{AmenityModel>FacilityName}" class="facilityCardTitle" />
+			<Text text="{AmenityModel>Description}" class="facilityCardPrice" />
+		</VBox>
+	</items>
+</HBox>
+				
 			</VBox>
 		</content>
 	</Dialog>

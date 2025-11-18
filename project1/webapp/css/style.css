@@ -1150,67 +1150,244 @@
     word-break: break-word !important;
 }
 .facilityCardWrap { gap: 14px; }
-.facilityContainer .facilityCard {
-    width: 220px;
-    height: 150px;
+
+
+/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
+
+.bookNowTile {
+    background: linear-gradient(135deg, #74c7ce, #008c9e) !important;
+    color: white !important;
+    border-radius: 14px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    transition: all .25s ease;
+    height: 90px !important;
+}
+
+.bookNowTile:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important;
+}
+
+.bookNowTile * {
+    font-size: 20px !important;
+    font-weight: bold !important;
+    color: white !important;
+}
+/* Make all tiles identical height */
+.priceRow .sapMGT,
+.priceRow .sapMGT.OneByHalf,
+.priceRow .priceItem,
+.bookNowTile {
+    height: 90px !important;
+    min-height: 90px !important;
+}
+
+/* Fix internal container spacing of the Book Now tile */
+.bookNowTile .sapMGTContent {
+    padding-top: 12px !important;
+    padding-bottom: 12px !important;
+}
+
+
+
+/* Remove SAP's default padding */
+.bookNowTile .sapMGTContent,
+.bookNowTile .sapMGTHdrTxt {
+    padding: 0 !important;
+}
+
+/* Force the internal container to stretch fully */
+.bookNowTile .sapMGTContent {
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+}
+
+/* Target the actual header text */
+.bookNowTile .sapMGTHdrTxt > .sapMText {
+    line-height: 1.8 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    align-self: center !important;
+}
+
+
+@media (max-width: 768px) {
+
+    /* --- TILE SIZE + RADIUS --- */
+    .priceRow .sapMGT,
+    .priceRow .priceItem,
+    .bookNowTile {
+        height: 64px !important;
+        min-height: 64px !important;
+        border-radius: 10px !important;
+    }
+
+    /* Reduce tile spacing */
+    .priceRow {
+        gap: 10px !important;
+        margin-top: 10px !important;
+    }
+
+    /* --- TEXT SIZING --- */
+    .priceRow .sapMGT * {
+        font-size: 13px !important;
+        line-height: 15px !important;
+    }
+
+    .bookNowTile * {
+        font-size: 15px !important;
+        line-height: 16px !important;
+    }
+
+    /* Fix header/subheader spacing inside tiles */
+    .sapMGTHdrTxt {
+        margin-top: -3px !important;
+    }
+
+    /* --- DIALOG FULL-SCREEN ON MOBILE --- */
+    #roomDetailID,
+    #roomDetailID.sapMDialog {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100% !important;
+        max-height: 100% !important;
+        border-radius: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* --- CAROUSEL REDUCE HEIGHT --- */
+    .roomCarouselImage {
+        height: 200px !important;
+        max-height: 200px !important;
+    }
+
+    /* --- FACILITY CARD REDUCE SIZE --- */
+    .facilityCard {
+        width: 150px !important;
+        height: 120px !important;
+        border-radius: 10px !important;
+    }
+
+    .facilityCardImg {
+        height: 70px !important;
+    }
+}
+
+
+/* ======================================================== */
+/* Turn the list into a grid */
+.facilityList .sapMListUl {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
+    gap: 16px !important;
+
+    padding: 0 !important;        /* Remove SAP default left/right padding */
+    margin: 0 !important;
+}
+
+/* Each card cell */
+.facilityListItem {
+    padding: 0 !important;
+    margin: 0 !important;
+    list-style: none !important;
+
+    width: calc(25% - 16px) !important; /* 4 columns desktop */
+}
+
+/* Facility Card */
+.facilityCard {
+    width: 100% !important;
     background: #ffffff;
     border-radius: 12px;
-    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-    padding: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    transition: transform .15s ease;
+    gap: 8px;
 }
-.facilityCard:hover {
-    transform: translateY(-3px);
-}
+
+/* Image */
 .facilityCardImg {
-    width: 180px !important;
-    height: 100px !important;
+    width: 100% !important;
+    height: 110px !important;
+    object-fit: cover !important;
     border-radius: 8px;
-    object-fit: cover;
 }
+
+/* Text styling */
 .facilityCardTitle {
-    font-size: 14px;
     font-weight: 600;
+    font-size: 14px;
     text-align: center;
-    color: #333;
 }
 .facilityCardPrice {
+    color: #0b75d1;
+    font-weight: 600;
     font-size: 13px;
-    font-weight: 500;
-    color: #1a73e8;
+}
+
+/* TABLET */
+@media (max-width: 1024px) {
+    .facilityListItem {
+        width: calc(33.33% - 16px) !important; /* 3 columns */
+    }
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+    .facilityListItem {
+        width: calc(50% - 16px) !important; /* 2 columns */
+    }
+    .facilityCardImg {
+        height: 80px !important;
+    }
+}
+
+/* SMALL PHONES */
+@media (max-width: 420px) {
+    .facilityListItem {
+        width: 100% !important; /* single column */
+    }
 }
 
 
-/* Optional: make it look like a tag/badge */
-.bedCardAreaTag {
-    display: inline-block;
-    background-color: #f3f3f3;
-    padding: 4px 10px;
-    border-radius: 8px;
-    font-size: 13px;
-    color: #444;
-    margin-top: 6px;
+
+/* =======================================88 */
+.amenityFlex {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 14px !important;
+    justify-content: flex-start;
+    width: 100%;
+    padding: 0 6px;
 }
 
-.imageWrapper {
-    position: relative;
+.amenityFlex > .sapMVBox {
+    width: calc(25% - 14px); /* 4 columns desktop */
 }
 
-.areaTagBox {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background:#00acc1; /* blue tag */
-    padding: 4px 10px;
-    border-radius: 12px;
-    color: white;
-    font-size: 0.75rem;
-    font-weight: bold;
-    z-index: 10;
+@media (max-width: 1024px) {
+    .amenityFlex > .sapMVBox {
+        width: calc(33.333% - 14px); /* 3 columns tablet */
+    }
 }
+
+@media (max-width: 768px) {
+    .amenityFlex > .sapMVBox {
+        width: calc(50% - 14px); /* 2 columns mobile */
+    }
+}
+
+@media (max-width: 420px) {
+    .amenityFlex > .sapMVBox {
+        width: 100%; /* 1 column small phone */
+    }
+}
+ 
+
 
 
