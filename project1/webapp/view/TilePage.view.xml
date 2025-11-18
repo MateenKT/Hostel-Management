@@ -96,7 +96,7 @@
                                                 />
                                             </TileContent>
                                         </GenericTile>
-                                             <GenericTile
+                                             <!-- <GenericTile
                                             visible="true"
                                             class="sapUiMediumMargin"
                                             header="Maintain Data"
@@ -107,7 +107,21 @@
                                                     src="sap-icon://cancel-maintenance"
                                                 />
                                             </TileContent>
-                                        </GenericTile>									
+                                        </GenericTile>	 -->
+                                        
+                                    <GenericTile
+                                            visible="true"
+                                            class="sapUiMediumMargin"
+                                            header="Branch Details"
+                                            press="TileV_onpressBranchdata"
+                                        >
+                                           <TileContent unit="Manage Branch Data">
+                                                <ImageContent
+                                                    src="sap-icon://cancel-maintenance"
+                                                />
+                                            </TileContent>
+                                        </GenericTile>	
+
                                     </layout:HorizontalLayout>
                                 </ux:blocks>
                             </ux:ObjectPageSubSection>

@@ -171,6 +171,13 @@
             "TargetFacilitiesDetails"
           ]
         },
+         {
+           "name": "RouteBranchData",
+          "pattern": "BranchData",
+          "target": [
+            "TargetBranchData"
+          ]
+        },
         {
            "name": "RouteMaintainData",
           "pattern": "MaintainData",
@@ -264,6 +271,13 @@
           "viewId": "FacilitiesDetails",
           "viewName": "FacilitiesDetails"
         },
+         "TargetBranchData": {
+            "viewType": "XML",
+            "transition": "slide",
+            "clearControlAggregation": false,
+            "viewId": "BranchData",
+            "viewName": "BranchData"
+          },
         "TargetMaintainData": {
           "viewType": "XML",
           "transition": "slide",

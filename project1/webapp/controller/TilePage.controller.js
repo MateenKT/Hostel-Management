@@ -55,6 +55,10 @@ sap.ui.define([
           TileV_onpressmaintaindata:function(){
                 var oRouter = this.getOwnerComponent().getRouter();
                oRouter.navTo("RouteMaintainData");
-        }
+        },
+        TileV_onpressBranchdata:function(){
+            var oRouter = this.getOwnerComponent().getRouter();
+           oRouter.navTo("RouteBranchData");
+    }
     })
 })

@@ -33,18 +33,14 @@
     },
     {
         "ID": 9,
-        "FacilityName": "Dining Area"
-    },
-    {
-        "ID": 10,
         "FacilityName": "24/7 Power Backup"
     },
     {
-        "ID": 11,
+        "ID": 10,
         "FacilityName": "Study Room"
     },
     {
-        "ID": 12,
+        "ID": 11,
         "FacilityName": "Locker Facilities"
     }
 ]
