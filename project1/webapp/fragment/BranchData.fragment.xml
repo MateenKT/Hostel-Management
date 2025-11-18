@@ -27,7 +27,7 @@
                     required="true"
                 />
                 <Input
-                    id="idBranch"
+                    id="BD_idBranch"
                     value="{MDmodel>/BranchID}"
                     placeholder="Enter Branch Code"
                     maxLength="60"
@@ -40,7 +40,7 @@
                     required="true"
                 />
                 <Input
-                    id="idBName"
+                    id="BD_idBName"
                     value="{MDmodel>/Name}"
                     placeholder="Enter Branch Name"
                     maxLength="60"
@@ -52,7 +52,7 @@
                     required="true"
                 />
                 <Input
-                    id="idAddress"
+                    id="BD_idAddress"
                     value="{MDmodel>/Address}"
                     placeholder="Enter Address"
                     maxLength="60"
@@ -64,7 +64,7 @@
                     required="true"
                 />
                 <Input
-                    id="idPin"
+                    id="BD_idPin"
                     value="{MDmodel>/Pincode}"
                     placeholder="Enter Pincode"
                     maxLength="10"
@@ -72,24 +72,93 @@
                     valueStateText="Enter Pincode"
                 />
                 <Label
-                    text="Contact Number"
+                    text="Country"
                     required="true"
                 />
-                <Input
-                    id="idPhone"
-                    value="{MDmodel>/Contact}"
-                    placeholder="Enter Contact Number"
-                    maxLength="10"
-                    liveChange="onPhoneInputLiveChange"
-                    valueStateText="Enter Contact Number"
+                <ComboBox
+                    id="MC_id_Country"
+                    change="MC_onChangeCountry"
+                    valueStateText="{i18n>expValStaCountry}"
+                    items="{path:'CountryModel>/',length:1000}"
+                    selectedKey="{MDmodel>/country}"
+                    showSecondaryValues="true"
+                >
+                    <core:ListItem
+                        key="{CountryModel>countryName}"
+                        text="{CountryModel>countryName}"
+                        additionalText="{CountryModel>code}"
+                    />
+                </ComboBox>
+
+                <Label
+                    text="State"
+                    required="true"
                 />
+                <ComboBox
+                    id="MC_id_State"
+                    change="MC_onChangeState"
+                    valueStateText="{i18n>expValStaState}"
+                    items="{path:'StateModel>/',length:1000}"
+                    selectedKey="{MDmodel>/state}"
+                    showSecondaryValues="true"
+                >
+                    <core:ListItem
+                        key="{StateModel>stateName}"
+                        text="{StateModel>stateName}"
+                    />
+                </ComboBox>
+
+                <Label
+                    text="City"
+                    required="true"
+                />
+                <ComboBox
+                    id="MC_id_City"
+                    change="MC_onChangeCity"
+                    valueStateText="{i18n>combovalueState}"
+                    items="{path:'CityModel>/',length:1000}"
+                    selectedKey="{MDmodel>/baseLocation}"
+                    value="{MDmodel>/baseLocation}"
+                    showSecondaryValues="true"
+                >
+                    <core:ListItem
+                        key="{CityModel>cityName}"
+                        text="{CityModel>cityName}"
+                        additionalText="{CityModel>branchCode}"
+                    />
+                </ComboBox>
+
+                <Label text="Mobile Number" />
+                <HBox
+                    width="100%"
+                    justifyContent="Start"
+                    alignItems="Center"
+                >
+                    <VBox width="22%">
+                        <Input
+                            id="MC_id_codeModel"
+                            value="{MDmodel>/stdCode}"
+                            editable="false"
+                        />
+                    </VBox>
+                    <VBox width="78%">
+                        <Input
+                            value="{MDmodel>/Contact}"
+                            id="BD_idPhone"
+                            placeholder="Enter Contact Number"
+                            maxLength="10"
+                            liveChange="MC_ValidateMobileNo"
+                            valueStateText="Enter Contact Number"
+                        />
+                    </VBox>
+                </HBox>
             </f:content>
         </f:SimpleForm>
         <footer>
             <Toolbar>
                 <ToolbarSpacer />
                 <Button
-                    id="MD_id_saveButoon"
+                    id="BD_id_saveButoon"
                     text="Save"
                     press="MD_onSaveButtonPress"
                 />
@@ -101,4 +170,4 @@
             </Toolbar>
         </footer>
     </Dialog>
-</c:FragmentDefinition> 
+</c:FragmentDefinition>

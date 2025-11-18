@@ -4,22 +4,34 @@ sap.ui.define([
     "sap/ui/export/Spreadsheet",
     "sap/m/MessageToast",
     "../utils/validation"
-], function(BaseController, MessageBox, Spreadsheet, MessageToast, utils) {
+], function (BaseController, MessageBox, Spreadsheet, MessageToast, utils) {
     "use strict";
     return BaseController.extend("sap.ui.com.project1.controller.Branch", {
-        onInit: function() {
+        onInit: function () {
             this.getOwnerComponent().getRouter().getRoute("RouteBranchData").attachMatched(this._onRouteMatched, this);
         },
 
-        _onRouteMatched: function() {
+        _onRouteMatched: function () {
             this.i18nModel = this.getView().getModel("i18n").getResourceBundle();
-
+            const omodel = new sap.ui.model.json.JSONModel({
+                url: "https://rest.kalpavrikshatechnologies.com/",
+                headers: {
+                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
+                    "Content-Type": "application/json",
+                }
+            });
+            this.getOwnerComponent().setModel(omodel, "LoginModel");
             const oMDmodel = new sap.ui.model.json.JSONModel({
                 BranchID: "",
                 Name: "",
                 Address: "",
                 Pincode: "",
-                Contact: ""
+                Contact: "",
+                stdCode: "",
+                country: "",
+                state: "",
+                City: "",
             });
             this.getView().setModel(oMDmodel, "MDmodel");
             var oeditable = new sap.ui.model.json.JSONModel({
@@ -29,7 +41,7 @@ sap.ui.define([
             this.Onsearch();
         },
 
-        Onsearch: function() {
+        Onsearch: function () {
             sap.ui.core.BusyIndicator.show(0);
             this.ajaxReadWithJQuery("HM_Branch", "").then((oData) => {
                 var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
@@ -39,12 +51,12 @@ sap.ui.define([
             })
         },
 
-        MD_onPressClear: function() {
+        MD_onPressClear: function () {
             this.getView().byId("MD_id_BranchCode").setSelectedKey("")
             this.getView().byId("MD_id_Pincode").setSelectedKey("")
         },
 
-        MD_onSearch: function() {
+        MD_onSearch: function () {
             var oView = this.getView();
             var oTable = oView.byId("id_MD_Table");
             var oBinding = oTable.getBinding("items");
@@ -69,36 +81,36 @@ sap.ui.define([
             oBinding.filter(oCombinedFilter);
         },
 
-        createTableSheet: function() {
+        createTableSheet: function () {
             return [{
-                    label: "Branch Code",
-                    property: "BranchID",
-                    type: "string"
-                },
-                {
-                    label: "Branch Name",
-                    property: "Name",
-                    type: "string"
-                },
-                {
-                    label: "Address",
-                    property: "Address",
-                    type: "string"
-                },
-                {
-                    label: "Pincode",
-                    property: "Pincode",
-                    type: "string"
-                },
-                {
-                    label: "Contact Number",
-                    property: "Contact",
-                    type: "string"
-                }
+                label: "Branch Code",
+                property: "BranchID",
+                type: "string"
+            },
+            {
+                label: "Branch Name",
+                property: "Name",
+                type: "string"
+            },
+            {
+                label: "Address",
+                property: "Address",
+                type: "string"
+            },
+            {
+                label: "Pincode",
+                property: "Pincode",
+                type: "string"
+            },
+            {
+                label: "Contact Number",
+                property: "Contact",
+                type: "string"
+            }
             ]
         },
 
-        MD_onDownload: function() {
+        MD_onDownload: function () {
             const oModel = this.byId("id_MD_Table").getModel("mainModel").getData();
             if (!oModel || oModel.length === 0) {
                 MessageToast.show("No data available to download.");
@@ -129,7 +141,7 @@ sap.ui.define([
             });
         },
 
-        MD_AddButtonPress: function() {
+        MD_AddButtonPress: function () {
             this.byId("id_MD_Table").removeSelections();
             var oView = this.getView();
             oView.getModel("editableModel").setProperty("/isEdit", false);
@@ -151,16 +163,19 @@ sap.ui.define([
             }
         },
 
-        MD_onSaveButtonPress: async function() {
+        MD_onSaveButtonPress: async function () {
             var oView = this.getView();
             var oFacilitiesModel = oView.getModel("MDmodel");
             var Payload = oFacilitiesModel.getData();
             var isMandatoryValid = (
-                utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("idBranch")), "ID") &&
-                utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("idBName")), "ID") &&
-                utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("idAddress")), "ID") &&
-                utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("idPin")), "ID") &&
-                utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("idPhone")), "ID")
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("BD_idBranch")), "ID") &&
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("BD_idBName")), "ID") &&
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("BD_idAddress")), "ID") &&
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("BD_idPin")), "ID") &&
+                utils._LCstrictValidationComboBox(sap.ui.getCore().byId(oView.createId("MC_id_Country")), "ID") &&
+                utils._LCstrictValidationComboBox(sap.ui.getCore().byId(oView.createId("MC_id_State")), "ID") &&
+                utils._LCstrictValidationComboBox(sap.ui.getCore().byId(oView.createId("MC_id_City")), "ID") &&
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("MC_id_codeModel")), "ID")
 
             );
 
@@ -174,8 +189,11 @@ sap.ui.define([
                 Name: Payload.Name,
                 Address: Payload.Address,
                 Pincode: Payload.Pincode,
-                Contact: Payload.Contact
-
+                Contact: Payload.Contact,
+                STD: Payload.stdCode,
+                Country: Payload.country,
+                State: Payload.state,
+                City: Payload.City
             };
             sap.ui.core.BusyIndicator.show(0);
             try {
@@ -219,16 +237,16 @@ sap.ui.define([
             }
         },
 
-        onNavBack: function() {
+        onNavBack: function () {
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("TilePage");
         },
-        onHome: function() {
+        onHome: function () {
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("RouteHostel");
         },
 
-        MD_onCancelButtonPress: function() {
+        MD_onCancelButtonPress: function () {
             var oView = this.getView();
 
             // Clear all data on close
@@ -249,7 +267,7 @@ sap.ui.define([
             this.oDialog.close();
         },
 
-        _resetFacilityValueStates: function() {
+        _resetFacilityValueStates: function () {
             var oView = this.getView();
             var aFields = [
                 "idBranch",
@@ -259,7 +277,7 @@ sap.ui.define([
                 "idPhone"
             ];
 
-            aFields.forEach(function(sId) {
+            aFields.forEach(function (sId) {
                 var oField = sap.ui.getCore().byId(oView.createId(sId));
                 if (oField && oField.setValueState) {
                     oField.setValueState("None");
@@ -267,37 +285,37 @@ sap.ui.define([
             });
         },
 
-        onPhoneInputLiveChange: function(oEvent) {
+        onPhoneInputLiveChange: function (oEvent) {
             var oInput = oEvent.getSource();
             utils._LCvalidateMobileNumber(oEvent);
             if (oInput.getValue() === "") oInput.setValueState("None");
         },
 
-        onPinInputLiveChange: function(oEvent) {
+        onPinInputLiveChange: function (oEvent) {
             var oInput = oEvent.getSource();
             utils._LCvalidatePinCode(oEvent);
             if (oInput.getValue() === "") oInput.setValueState("None");
         },
 
-        onAddressInputLiveChange: function(oEvent) {
+        onAddressInputLiveChange: function (oEvent) {
             var oInput = oEvent.getSource();
             utils._LCvalidateMandatoryField(oEvent);
             if (oInput.getValue() === "") oInput.setValueState("None");
         },
 
-        onNameInputLiveChange: function(oEvent) {
+        onNameInputLiveChange: function (oEvent) {
             var oInput = oEvent.getSource();
             utils._LCvalidateName(oEvent);
             if (oInput.getValue() === "") oInput.setValueState("None");
         },
 
-        onBNameInputLiveChange: function(oEvent) {
+        onBNameInputLiveChange: function (oEvent) {
             var oInput = oEvent.getSource();
             utils._LCvalidateMandatoryField(oEvent);
             if (oInput.getValue() === "") oInput.setValueState("None");
         },
 
-        MD_DeleteRow: function() {
+        MD_DeleteRow: function () {
             var oTable = this.byId("id_MD_Table");
             var oSelectedItem = oTable.getSelectedItem();
 
@@ -312,37 +330,37 @@ sap.ui.define([
 
             sap.m.MessageBox.confirm(
                 `Are you sure you want to delete the Branch ${oData.Name}?`, {
-                    icon: sap.m.MessageBox.Icon.WARNING,
-                    title: "Confirm Deletion",
-                    actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO],
-                    emphasizedAction: sap.m.MessageBox.Action.NO,
-                    onClose: async function(sAction) {
-                        if (sAction === sap.m.MessageBox.Action.YES) {
-                            try {
-                                sap.ui.core.BusyIndicator.show(0);
-                                await that.ajaxDeleteWithJQuery("HM_Branch", {
-                                    filters: {
-                                        BranchID: oData.BranchID
-                                    }
-                                });
-                                sap.m.MessageToast.show("Branch deleted successfully!");
-                                await that.Onsearch(); // refresh table data
-                            } catch (err) {
-                                console.error("Delete failed:", err);
-                                sap.m.MessageBox.error("Error while deleting Branch. Please try again.");
-                            } finally {
-                                sap.ui.core.BusyIndicator.hide();
-                                oTable.removeSelections(true);
-                            }
-                        } else if (sAction === sap.m.MessageBox.Action.NO) {
+                icon: sap.m.MessageBox.Icon.WARNING,
+                title: "Confirm Deletion",
+                actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO],
+                emphasizedAction: sap.m.MessageBox.Action.NO,
+                onClose: async function (sAction) {
+                    if (sAction === sap.m.MessageBox.Action.YES) {
+                        try {
+                            sap.ui.core.BusyIndicator.show(0);
+                            await that.ajaxDeleteWithJQuery("HM_Branch", {
+                                filters: {
+                                    BranchID: oData.BranchID
+                                }
+                            });
+                            sap.m.MessageToast.show("Branch deleted successfully!");
+                            await that.Onsearch(); // refresh table data
+                        } catch (err) {
+                            console.error("Delete failed:", err);
+                            sap.m.MessageBox.error("Error while deleting Branch. Please try again.");
+                        } finally {
+                            sap.ui.core.BusyIndicator.hide();
                             oTable.removeSelections(true);
                         }
+                    } else if (sAction === sap.m.MessageBox.Action.NO) {
+                        oTable.removeSelections(true);
                     }
                 }
+            }
             );
         },
 
-        MD_UpdateTableRow: function() {
+        MD_UpdateTableRow: function () {
             var oView = this.getView();
             var oTable = this.byId("id_MD_Table");
             var oSelected = oTable.getSelectedItem();
@@ -354,16 +372,114 @@ sap.ui.define([
 
             var oContext = oSelected.getBindingContext("mainModel");
             var oData = oContext.getObject();
+            const aAllStates = this.getOwnerComponent().getModel("StateModel").getData();
+            const aFilteredStates = aAllStates.filter(s => s.countryCode === oData.countryCode);
+            this.getView().setModel(new sap.ui.model.json.JSONModel(aFilteredStates), "FilteredStateModel");
+
+            const aAllCities = this.getOwnerComponent().getModel("CityModel").getData();
+            const aFilteredCities = aAllCities.filter(c =>
+                c.stateName === oData.state && c.countryCode === oData.countryCode
+            );
+            this.getView().setModel(new sap.ui.model.json.JSONModel(aFilteredCities), "FilteredCityModel");
 
             if (!this.oDialog) {
                 this.oDialog = sap.ui.xmlfragment(oView.getId(), "sap.ui.com.project1.fragment.BranchData", this);
                 oView.addDependent(this.oDialog);
             }
             var oMDmodel = oView.getModel("MDmodel");
-            oMDmodel.setData(Object.assign({}, oData));
-            this.isEdit = true;
+            oMDmodel.setData({
+                BranchID: oData.BranchID,
+                Name: oData.Name,
+                Address: oData.Address,
+                Pincode: oData.Pincode,
+                Contact: oData.Contact,
+                stdCode: oData.STD,
+                country: oData.Country,
+                state: oData.State,
+                City: oData.City
+            }); this.isEdit = true;
             this._resetFacilityValueStates();
             this.oDialog.open();
+        },
+
+        MC_onChangeCountry: function (oEvent) {
+            const oView = this.getView();
+            const oModel = oView.getModel("MDmodel");
+
+            const oItem = oEvent.getSource().getSelectedItem();
+            const oStateCB = sap.ui.getCore().byId(oView.createId("MC_id_State"));
+            const oCityCB = sap.ui.getCore().byId(oView.createId("MC_id_City"));
+            const oStd = sap.ui.getCore().byId(oView.createId("MC_id_codeModel"));
+
+            // RESET
+            oModel.setProperty("/state", "");
+            oModel.setProperty("/city", "");
+            oStateCB?.getBinding("items")?.filter([]);
+            oCityCB?.getBinding("items")?.filter([]);
+            oStd?.setValue("");
+
+            if (!oItem) return;
+
+            const sCountryName = oItem.getText();
+            const sCountryCode = oItem.getAdditionalText();
+
+            // set country
+            oModel.setProperty("/country", sCountryName);
+
+            // get std code
+            const aCountryData = this.getOwnerComponent().getModel("CountryModel").getData();
+            const oCountryObj = aCountryData.find(c => c.countryName === sCountryName);
+            oModel.setProperty("/stdCode", oCountryObj?.stdCode || "");
+            oStd?.setValue(oCountryObj?.stdCode || "");
+
+            // Filter states by countryCode
+            oStateCB.getBinding("items")?.filter([
+                new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+            ]);
+        },
+
+        MC_onChangeState: function (oEvent) {
+            const oView = this.getView();
+            const oModel = oView.getModel("MDmodel");
+
+            const oItem = oEvent.getSource().getSelectedItem();
+            const oCityCB = sap.ui.getCore().byId(oView.createId("MC_id_City"));
+            const oCountryCB = sap.ui.getCore().byId(oView.createId("MC_id_Country"));
+
+            // reset city
+            oModel.setProperty("/city", "");
+            oCityCB?.getBinding("items")?.filter([]);
+
+            if (!oItem) {
+                oModel.setProperty("/state", "");
+                return;
+            }
+
+            const sStateName = oItem.getKey();
+            const sCountryCode = oCountryCB.getSelectedItem()?.getAdditionalText();
+
+            oModel.setProperty("/state", sStateName);
+
+            // Filter cities by state + country
+            oCityCB.getBinding("items")?.filter([
+                new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, sStateName),
+                new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+            ]);
+        },
+
+        MC_onChangeCity: function (oEvent) {
+            const oView = this.getView();
+            const oModel = oView.getModel("MDmodel");
+
+            const oItem = oEvent.getSource().getSelectedItem();
+
+            if (!oItem) {
+                oModel.setProperty("/city", "");
+                return;
+            }
+
+            const sCityName = oItem.getKey();
+            oModel.setProperty("/city", sCityName);
         },
     })
 });

@@ -3,20 +3,20 @@
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
-        xmlns:fb="sap.ui.comp.filterbar"
+    xmlns:fb="sap.ui.comp.filterbar"
     displayBlock="true"
     height="100%"
     busyIndicatorDelay="0"
 >
     <Page showHeader="true">
-     <headerContent>
+        <headerContent>
             <core:Fragment
                 fragmentName="sap.ui.com.project1.fragment.Header"
                 type="XML"
             />
         </headerContent>
         <content>
-         <fb:FilterBar
+            <fb:FilterBar
                 id="MD_id_Filterbar"
                 persistencyKey="myPersKey"
                 useToolbar="false"
@@ -75,33 +75,42 @@
                 sticky="ColumnHeaders,HeaderToolbar"
                 mode="SingleSelectLeft"
                 width="auto"
+                growing="true"
+                growingThreshold="100"
+                selectionChange="MC_onTableSelectionChange"
+                alternateRowColors="true"
                 class="sapUiResponsiveMargin"
                 items="{path: 'mainModel>/'}"
             >
                 <headerToolbar>
                     <OverflowToolbar>
-                        <Title text="Branch Details ({= ${mainModel>/}.length})" />
+                        <Title
+                            text="Branch Details ({= ${mainModel>/}.length})"
+                        />
                         <ToolbarSpacer />
                         <Button
                             text="Add"
                             press="MD_AddButtonPress"
                             type="Accept"
+                            id="MC_id_AddCustomer"
                         />
                         <Button
                             text="Edit"
                             press="MD_UpdateTableRow"
                             type="Ghost"
+                            id="MC_id_EditCustomer"
                         />
                         <Button
                             text="Delete"
                             press="MD_DeleteRow"
                             type="Reject"
+                            id="MC_id_DeleteCustomer"
                         />
                         <Button
-                        press="MD_onDownload"
-                        type="Transparent"
-                        text="Download"
-                    />
+                            press="MD_onDownload"
+                            type="Transparent"
+                            text="Download"
+                        />
                     </OverflowToolbar>
                 </headerToolbar>
 
@@ -130,6 +139,15 @@
                     >
                         <Text text="Contact Number" />
                     </Column>
+                    <Column>
+                        <Text text="Country"/>
+                    </Column>
+                    <Column>
+                        <Text text="State" />
+                    </Column>
+                    <Column>
+                        <Text text="City" />
+                    </Column>
                 </columns>
 
                 <items>
@@ -139,11 +157,14 @@
                             <Text text="{mainModel>Name}" />
                             <Text text="{mainModel>Address}" />
                             <Text text="{mainModel>Pincode}" />
-                            <Text text="{mainModel>Contact}" />
+                            <Text text="{mainModel>STD} {mainModel>Contact}"/> 
+                            <Text text="{mainModel>Country}"/>
+                            <Text text="{mainModel>State}" />
+                            <Text text="{mainModel>City}" />
                         </cells>
                     </ColumnListItem>
                 </items>
             </Table>
         </content>
     </Page>
-</mvc:View> 
+</mvc:View>

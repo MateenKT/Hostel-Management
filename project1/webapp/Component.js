@@ -34,7 +34,7 @@
                     this._fetchCommonData("City", "CityModel");                   
                     this._fetchCommonData("State", "StateModel");
                     this._fetchCommonData("Country", "CountryModel");
-                    
+                    this._fetchCommonData("BaseLocation", "BaseLocationModel");
                 },
                 _fetchCommonData: async function (entityName, modelName, filter = "") {
                 // If already loaded, skip
