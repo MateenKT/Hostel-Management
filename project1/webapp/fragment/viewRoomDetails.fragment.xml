@@ -38,28 +38,41 @@
 							<card:Card manifest="./cards/roomDetailsCard.json" class="roomDetailsCard " manifestChanges='{ "sap.card": { "data": { "json": { "BedType": "{HostelModel>/BedType}", "Capacity": "{HostelModel>/Capacity}", "ACType": "{HostelModel>/ACType}", } } } }'/>
 							<VBox class="descriptionBox sapUiSmallMarginTop" alignItems="Start">
 								<core:Icon src="sap-icon://detail-view" size="1.8rem" class="sapUiTinyMarginBegin descIcon"/>
-								<ExpandableText maxCharacters="330" text="+Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.em ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecLorem caec" class="descTextLarge" />
+								<ExpandableText maxCharacters="330" text="{HostelModel>/Description}" class="descTextLarge" />
 							</VBox>
 						</VBox>
 					</l:content>
 				</l:Grid>
 				<HBox justifyContent="SpaceBetween" alignItems="Stretch" class="priceRow sapUiSmallMarginTop sapUiTinyMarginBeginEnd">
-					<GenericTile header="Per Day" subheader="{HostelModel>/Currency} {HostelModel>/Price}" class="defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan">
+					<GenericTile header="Per Day" subheader="{HostelModel>/Currency} {HostelModel>/Price}" class="defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%">
+						<layoutData>
+							<FlexItemData growFactor="1" />
+						</layoutData>
 						<customData>
 							<core:CustomData key="type" value="daily"/>
 						</customData>
 					</GenericTile>
-					<GenericTile header="Per Month" subheader="{HostelModel>/Currency} {HostelModel>/MonthPrice}" class=" defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan">
+					<GenericTile header="Per Month" subheader="{HostelModel>/Currency} {HostelModel>/MonthPrice}" class=" defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%">
+						<layoutData>
+							<FlexItemData growFactor="1" />
+						</layoutData>
 						<customData>
 							<core:CustomData key="type" value="monthly"/>
 						</customData>
 					</GenericTile>
-					<GenericTile header="Per Year" subheader="{HostelModel>/Currency} {HostelModel>/YearPrice}" class=" defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan">
+					<GenericTile header="Per Year" subheader="{HostelModel>/Currency} {HostelModel>/YearPrice}" class=" defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%">
+						<layoutData>
+							<FlexItemData growFactor="1" />
+						</layoutData>
 						<customData>
 							<core:CustomData key="type" value="yearly"/>
 						</customData>
 					</GenericTile>
-					<Button text="Book Now" type="Emphasized" press=".onConfirmBooking" class="myCustomButton priceItem" />
+					<Button text="Book Now" type="Emphasized" press=".onConfirmBooking" class="myCustomButton priceItem" width="100%">
+						<layoutData>
+							<FlexItemData growFactor="1" />
+						</layoutData>
+					</Button>
 				</HBox>
 				<Bar design="Header" class="sapUiMediumMarginTop sapUiTinyMarginBeginEnd">
 					<contentMiddle>
