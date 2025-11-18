@@ -56,9 +56,18 @@
         <ColumnListItem>
             <cells>
                 <Text text="{HostelModel>FullName}" />
-                <Text text="{path:'HostelModel>TotalFacilityPrice',formatter: '.Formatter.formatCurrency'}" />
-                <Text text="{path:'HostelModel>RoomRentPerPerson',formatter: '.Formatter.formatCurrency'}" />
-                <Text text="{ path:'HostelModel>GrandTotal',formatter: '.Formatter.formatCurrency'}" />
+                <Text text="{parts: [
+        'HostelModel>TotalFacilityPrice',
+        'HostelModel>/Currency'
+    ],formatter: '.Formatter.formatCurrency'}" />
+                <Text text="{parts: [
+        'HostelModel>RoomRentPerPerson',
+        'HostelModel>/Currency'
+    ],formatter: '.Formatter.formatCurrency'}" />
+                <Text text="{ parts: [
+        'HostelModel>GrandTotal',
+        'HostelModel>/Currency'
+    ],formatter: '.Formatter.formatCurrency'}" />
             </cells>
         </ColumnListItem>
     </items>
@@ -70,7 +79,10 @@
             <HBox justifyContent="End" class="sapUiSmallMarginTop">
                 <Label text="Total Cost:" design="Bold" class="sapUiSmallMarginEnd"/>
                 <Text text="{
-                    path: 'HostelModel>/OverallTotalCost',
+                  parts: [
+        'HostelModel>/OverallTotalCost',
+        'HostelModel>/Currency'
+    ],
                     formatter: '.Formatter.formatCurrency'
                 }" class="sapUiSmallMarginEnd"/>
               

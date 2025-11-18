@@ -49,7 +49,7 @@
     items="{
         path: 'HostelModel>/NoOfPersonsList'
     }"
->
+>   
     <core:Item key="{HostelModel>key}" text="{HostelModel>text}" />
 </Select>
                 <!-- Site Contact -->

@@ -23,7 +23,9 @@ sap.ui.define([
         this._oLoggedInUser = {}; // fallback
       }
       let oHostelModel = sap.ui.getCore().getModel("HostelModel");
-
+      if (!oHostelModel.getProperty("/SelectedMonths")) {
+    oHostelModel.setProperty("/SelectedMonths", "1");
+  }
       if (!oHostelModel) {
         // If not found, create a fallback model
         oHostelModel = new JSONModel({
@@ -39,7 +41,7 @@ sap.ui.define([
           FinalPrice: "",
           SelectedPriceType: "",
           Capacity: "",
-          StopPriceRecalculateByPerson:false
+          StopPriceRecalculateByPerson:false,
         });
         sap.ui.getCore().setModel(oHostelModel, "HostelModel");
       }
@@ -608,7 +610,8 @@ sap.ui.define([
             new sap.m.TextArea({
               value: "{HostelModel>/Persons/" + i + "/Address}",
               placeholder: "Enter Permanent Address",
-              rows: 3
+              rows: 3,
+              maxLength:100
             })
           ]
         });
@@ -658,7 +661,6 @@ sap.ui.define([
         reader.readAsDataURL(oFile);
     }
 }
-
             }),
 
           ]
@@ -749,6 +751,7 @@ sap.ui.define([
                             if (bAlreadySelected) {
                               const idx = aSelected.findIndex(f => f.FacilityName === oFacilityObj.FacilityName);
                               aSelected.splice(idx, 1);
+                            
                               oCard.removeStyleClass("serviceCardSelected");
                             } else {
                               aSelected.push({
@@ -759,6 +762,7 @@ sap.ui.define([
                                 Currency: oFacilityObj.Currency,
                                 UnitText: oFacilityObj.UnitText
                               });
+                              
                               oCard.addStyleClass("serviceCardSelected");
                             }
 
@@ -773,7 +777,7 @@ sap.ui.define([
                                                     }));
                                             }
                                         }
-
+  this.updateFacilityVisibility();
                                         oModel.refresh(true);
                                     }
                         }),
@@ -820,6 +824,14 @@ sap.ui.define([
 oFacilityModel.refresh(true);
       oModel.refresh(true);
     },
+    updateFacilityVisibility: function () {
+    const oModel = this.getView().getModel("HostelModel");
+    const aAll = oModel.getProperty("/AllSelectedFacilities") || [];
+
+    oModel.setProperty("/HasFacilities", aAll.length > 0);
+    oModel.refresh(true);
+}
+,
     _checkMandatoryFields: function () {
       const oModel = this.getView().getModel("HostelModel");
       const aPersons = oModel.getProperty("/Persons") || [];
@@ -922,12 +934,12 @@ oFacilityModel.refresh(true);
 //     }
     // ,
     onDialogNextButton: async function () {
-      //     if (this._iSelectedStepIndex === 1) {
-      //     if (!this._checkMandatoryFields()) {
-      //         sap.m.MessageToast.show("Please fill all mandatory personal details before proceeding.");
-      //         return; // STOP navigation
-      //     }
-      // }
+          if (this._iSelectedStepIndex === 1) {
+          if (!this._checkMandatoryFields()) {
+              sap.m.MessageToast.show("Please fill all mandatory personal details before proceeding.");
+              return; // STOP navigation
+          }
+      }
       this._iSelectedStepIndex = this._oWizard.getSteps().indexOf(this._oSelectedStep);
       this.oNextStep = this._oWizard.getSteps()[this._iSelectedStepIndex + 1];
       if (this._oSelectedStep && !this._oSelectedStep.bLast) {
@@ -1299,10 +1311,11 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
       const oView = this.getView();
 
       const oHostelModel = oView.getModel("HostelModel");
-oHostelModel.setProperty("/StopPriceRecalculate", true);
+      oHostelModel.setProperty("/StopPriceRecalculate", true);
       const sStartDate = oView.byId("idStartDate1")?.getValue() || "";
       const iSelectedNumber = parseInt(oEvent.getSource().getSelectedKey() || "1", 10);
       const sDuration = oHostelModel.getProperty("/SelectedPriceType");  // daily / monthly / yearly
+     oHostelModel.setProperty("/SelectedMonths", iSelectedNumber.toString());
 
       if (!sStartDate) {
         sap.m.MessageToast.show("Please select Start Date first.");
@@ -1850,7 +1863,6 @@ oHostelModel.setProperty("/StopPriceRecalculate", true);
      const isMandatoryValid = (
          utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idUPIID"), "ID") &&
          utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idBankName"), "ID") &&
-         // utils._LCvalidateAmount(sap.ui.getCore().byId("idAmount"), "ID") &&
          utils._LCstrictValidationComboBox(sap.ui.getCore().byId("idCurrency"), "ID") &&
          utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idPaymentTypeField"), "ID") &&
          utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idTransactionID"), "ID") &&
@@ -1892,7 +1904,7 @@ oHostelModel.setProperty("/StopPriceRecalculate", true);
                      EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
                      Status: "New",
                      PaymentType: oData.SelectedPriceType || "",
-                     BedType: oData.BedType,
+                     BedType: `${oData.BedType} - ${oData.ACType}`,
                      BranchCode:oData.BranchCode
                  });
              }
@@ -2277,8 +2289,11 @@ resetAllBookingData: function () {
         TotalDays: oTotals.TotalDays,
         AllSelectedFacilities: oTotals.AllSelectedFacilities,
         TotalFacilityPrice: oTotals.TotalFacilityPrice,
-        GrandTotal: oTotals.GrandTotal
+        GrandTotal: oTotals.GrandTotal,
+        HasFacilities: oTotals.AllSelectedFacilities.length > 0
     };
+    // oFullCustomerData.HasFacilities = oTotals.AllSelectedFacilities.length > 0;
+
 
     // Set model & Navigate
     var oHostelModel = new JSONModel(oFullCustomerData);
@@ -2433,11 +2448,15 @@ onSelectionChange: function (oEvent) {
         sap.m.MessageToast.show("Room Type changed to " + oSelectedBedType.BedTypeName);
     }
 },
+ onProfileDialogClose: function () {
+            this._oProfileDialog.close()
+        },
   onCancelPress: function () {
             this.resetAllBookingData()
       var oRouter = this.getOwnerComponent().getRouter()
       oRouter.navTo("RouteHostel")
     },
+
 
   });
 });

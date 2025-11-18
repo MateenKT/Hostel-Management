@@ -20,7 +20,7 @@
                <Label text="Room Type" />
                             <Text id="idRoomType2" text="{HostelModel>/BedType}"  />
                             <Label text="Rent Price" /> 
-                            <Text id="idPrice3" text="{HostelModel>/FinalPrice}"   />
+                            <Text id="idPrice3" text="{HostelModel>/FinalPrice} {HostelModel>/Currency}"   />
                 
                  <Label text="Payment Method" />
                             <Text text="{HostelModel>/SelectedPriceType}"/>

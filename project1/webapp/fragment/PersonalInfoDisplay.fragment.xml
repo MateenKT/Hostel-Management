@@ -56,7 +56,6 @@
     <List
         mode="None"
         items="{path: 'HostelModel>Documents'}">
-
         <CustomListItem>
             <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMargin">
 
@@ -73,22 +72,15 @@
 
 </VBox>
 
-
-
-
-       
-
         <!-- Selected Facilities for THIS person -->
-        <Toolbar>
-            <Title text="Selected Facilities" level="H4" />
+        <Toolbar visible="{HostelModel>/HasFacilities}">
+            <Title text="Selected Facilities" level="H4" visible="{HostelModel>/HasFacilities}"/>
         </Toolbar>
-
-        
-
         <FlexBox
             alignItems="Start"
             justifyContent="Start"
             class="sapUiSmallMarginTop"
+            visible="{HostelModel>/HasFacilities}"
             items="{
                 path: 'HostelModel>PersonFacilitiesSummary'
             }">
@@ -104,6 +96,7 @@
         <!-- Booking Details for THIS person -->
         <Table id="idFacilitySummaryTable"
             class="sapUiSmallMarginTop"
+            visible="{HostelModel>/HasFacilities}"
             items="{
                 path: 'HostelModel>AllSelectedFacilities'
             }"
@@ -135,19 +128,21 @@
                         <Text text="{HostelModel>StartDate}" />
                         <Text text="{HostelModel>EndDate}" />
                         <Text text="{HostelModel>TotalDays}" />
-                        <Text text="{=(${HostelModel>TotalAmount}).toFixed(2) } {HostelModel>Currency}" />
+                        <Text text="{= ${HostelModel>TotalAmount}.toFixed(2) + ' ' + ${HostelModel>/Currency} }" />
                     </cells>
                 </ColumnListItem>
             </items>
         </Table>
 
         <!-- Totals for THIS person (NOTE: all RELATIVE, no leading "/") -->
-        <VBox class="sapUiSmallMarginTop">
+        <VBox class="sapUiSmallMarginTop" visible="{HostelModel>/HasFacilities}">
             <HBox justifyContent="End" class="sapUiSmallMarginTop">
                 <Label text="Total Facility Cost:" design="Bold" class="sapUiSmallMarginEnd"/>
                 <Text text="{
-                    path: 'HostelModel>TotalFacilityPrice',
-                    formatter: '.Formatter.formatCurrency'
+                   parts: [
+        'HostelModel>TotalFacilityPrice',
+        'HostelModel>/Currency'
+    ], formatter: '.Formatter.formatCurrency'
                 }" class="sapUiSmallMarginEnd"/>
               
             </HBox>
