@@ -21,12 +21,9 @@
                 <f:ResponsiveGridLayout />
             </f:layout>
         </f:Form>
-
-        <Bar
-            design="Auto"
-            titleAlignment="None"
-        >
-            <contentRight>
+        <footer>
+            <Toolbar>
+                <ToolbarSpacer />
                 <Button
                     id="MD_id_submitButoon"
                     text="Save"
@@ -42,7 +39,7 @@
                     text="Cancel"
                     press="MD_onCancelButtonPress"
                 />
-            </contentRight>
-        </Bar>
+            </Toolbar>
+        </footer>
     </Dialog>
 </c:FragmentDefinition>
