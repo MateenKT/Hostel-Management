@@ -231,6 +231,7 @@ sap.ui.define([
                 return;
             }
 
+            delete cleanedData.countryCode;
             let oPayload = { data: cleanedData };
             sap.ui.core.BusyIndicator.show(0);
             that.ajaxCreateWithJQuery(this.sTitle, oPayload).then(async (res) => {
