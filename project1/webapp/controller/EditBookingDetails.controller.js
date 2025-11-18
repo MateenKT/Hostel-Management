@@ -82,11 +82,12 @@ sap.ui.define([
                 RentPrice: oData.GrandTotal ? oData.GrandTotal.toString() : "0",
                 RoomPrice: oData.RoomPrice || "0",
                 NoOfPersons: oData.noofperson || 1,
+                Customerid:oData.CustomerId,
                 StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
                 EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
                 Status: "Updated",
                 PaymentType: oData.PaymentType || "",
-                BedType: oData.RoomType || ""
+                BedType: oData.BedType || ""
             }];
 
             //  Build Facility data
@@ -119,6 +120,7 @@ sap.ui.define([
                 Salutation: oData.Salutation || "",
                 CustomerName: oData.FullName || "",
                 UserID: oData.UserID || "",
+                CustomerID: oData.CustomerID || "",
                 STDCode: oData.STDCode || "",
                 MobileNo: oData.MobileNo || "",
                 Gender: oData.Gender || "",
@@ -134,10 +136,15 @@ sap.ui.define([
             }];
 
             //  Final payload structure
-            const oPayload = { data: personData };
-
+            const oPayload = personData;
+            var custid = bookingData[0].Customerid
             // --- AJAX CALL (Update to backend) ---
-            await this.ajaxUpdateWithJQuery("HM_Customer", oPayload);
+            await this.ajaxUpdateWithJQuery("HM_Customer",{
+                data:oPayload,
+                filters:{
+                    CustomerID:custid
+                }
+            });
             sap.m.MessageToast.show("Booking details updated successfully!");
 
         } catch (err) {

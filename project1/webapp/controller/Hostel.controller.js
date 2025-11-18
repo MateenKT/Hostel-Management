@@ -1484,9 +1484,6 @@ _getLocationName: function (lat, lng) {
                     Address: response.PermanentAddress
 
                 })
-
-
-
                 );
                 // Combine all bookings from all customers
                 const aAllBookings = aCustomers.flatMap(customer =>
@@ -1564,7 +1561,7 @@ _getLocationName: function (lat, lng) {
 
                 //  Section model (default = booking if available)
                 const oSectionModel = new JSONModel({
-                    selectedSection: aBookingData.length ? "devices" : "profile"
+                    selectedSection: aBookingData.length ? "profile" : "devices"
                 });
                 this._oProfileDialog.setModel(oSectionModel, "profileSectionModel");
 
@@ -1912,6 +1909,7 @@ _getLocationName: function (lat, lng) {
                 PaymentType: oBookingData.paymenytype,
                 StartDate: oBookingData.Startdate,
                 EndDate: oBookingData.EndDate || "",
+                CustomerId:oBookingData.cutomerid,
                 TotalDays: oTotals.TotalDays,
                 AllSelectedFacilities: oTotals.AllSelectedFacilities,
                 TotalFacilityPrice: oTotals.TotalFacilityPrice,

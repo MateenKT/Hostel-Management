@@ -22,7 +22,11 @@
         expandable="false"
         class="customPanelHeader"
     >
-    <Button text="Edit" press="onPressEditSave" />
+    <HBox justifyContent="End" 
+            width="100%">
+     <Button text="Edit" press="onPressEditSave" />
+    </HBox>
+   
         <f:SimpleForm
         id="idGeneralForm"
             editable="true"
@@ -34,7 +38,7 @@
             <f:content>
                 <!-- Booking Details -->
                 <core:Title text="{i18n>bookingDetailsTitle}" />
-               <Label text="Desired Room Type" required="true" />
+               <Label text="Room Type" required="true" />
         <Text text="{HostelModel>/RoomType}" visible="{= !${viewModel>/editMode} }" />
      <ComboBox
     id="idBedTypeCombo"
@@ -52,8 +56,8 @@
         
                             
                             <Label text="Price" required="true" />
-                            <Text  text="{HostelModel>/RoomPrice}"  visible="{= !${viewModel>/editMode} }"  />
-                            <Input value="{HostelModel>/RoomPrice}" visible="{viewModel>/editMode}"  />
+                            <Text  text="{HostelModel>/RoomPrice}"   />
+                           
                 
                  <Label text="Payment Method" required="true" />
                             <Text text="{HostelModel>/PaymentType}" visible="{= !${viewModel>/editMode} }"/>
@@ -180,7 +184,7 @@
             <Text text="Facility Name" />
         </Column>
         <Column>
-            <Text text="Facility Price (₹)" />
+            <Text text="Facility Price" />
         </Column>
         <Column>
             <Text text="Start Date" />
@@ -192,7 +196,7 @@
             <Text text="Days" />
         </Column>
         <Column>
-            <Text text="Total (₹)" />
+            <Text text="Total" />
         </Column>
     </columns>
 
@@ -203,15 +207,14 @@
                 <Text text="{HostelModel>FacilityName}" />
                 <Text text="{HostelModel>Price}" />
                 <Text text="{
-                    path: 'HostelModel>StartDate',
-                    formatter: '.Formatter.formatDate'
+                    path: 'HostelModel>StartDate'
                 }" />
                 <Text text="{
                     path: 'HostelModel>EndDate',
                      formatter: '.Formatter.formatDate'
                 }" />
                 <Text text="{HostelModel>TotalDays}" />
-               <Text text="{= '₹ ' + (${HostelModel>Price} * ${HostelModel>TotalDays}).toFixed(2) }" />
+               <Text text="{=(${HostelModel>Price} * ${HostelModel>TotalDays}).toFixed(2) }" />
             </cells>
         </ColumnListItem>
     </items>
