@@ -215,6 +215,21 @@ sap.ui.define([
                 cleanedData.Photo2Name = this._imageData?.img2name || cleanedData.Photo2Name || null;
                 cleanedData.Photo2Type = this._imageData?.img2type || cleanedData.Photo2Type || null;
             }
+            let valid = true;
+
+            valid &= utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_BranchID") });
+            valid &= utils._LCvalidateName({ getSource: () => sap.ui.getCore().byId("MD_Field_Name") });
+            valid &= utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_Address") });
+            valid &= utils._LCvalidatePinCode({ getSource: () => sap.ui.getCore().byId("MD_Field_Pincode") });
+            valid &= utils._LCvalidateMobileNumber({ getSource: () => sap.ui.getCore().byId("MD_Field_Contact") });
+            valid &= utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_Country") });
+            valid &= utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_State") });
+            valid &= utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_City") });
+
+            if (!valid) {
+                sap.m.MessageToast.show("Please correct highlighted fields");
+                return;
+            }
 
             let oPayload = { data: cleanedData };
             sap.ui.core.BusyIndicator.show(0);
@@ -392,7 +407,6 @@ sap.ui.define([
             }
 
             this._imageData = { img1: null, img2: null };
-
             var oContainerDyn = new FormContainer({ title: "" });
             let that = this;
 
@@ -400,10 +414,10 @@ sap.ui.define([
 
                 let oInputControl;
                 if (that.sTitle === "HM_Branch") {
-
                     if (sField === "Country") {
                         oInputControl = new sap.m.ComboBox({
                             selectedKey: "{formModel>/Country}",
+                            id: "MD_Field_Country",
                             showSecondaryValues: true,
                             width: "100%",
                             items: {
@@ -444,6 +458,7 @@ sap.ui.define([
                     } else if (sField === "State") {
                         oInputControl = new sap.m.ComboBox({
                             selectedKey: "{formModel>/State}",
+                            id: "MD_Field_State",
                             width: "100%",
                             items: {
                                 path: "FilteredStateModel>/",
@@ -468,6 +483,7 @@ sap.ui.define([
                     else if (sField === "City") {
                         oInputControl = new sap.m.ComboBox({
                             selectedKey: "{formModel>/City}",
+                            id: "MD_Field_City",
                             width: "100%",
                             items: {
                                 path: "FilteredCityModel>/",
@@ -488,44 +504,51 @@ sap.ui.define([
                     else {
                         if (sField === "BranchID") {
                             oInputControl = new sap.m.Input({
+                                id: "MD_Field_BranchID",
                                 value: "{formModel>/BranchID}",
                                 maxLength: 10,
-                                liveChange: function (e) {
-                                    let v = e.getParameter("value");
-                                    e.getSource().setValue(v.replace(/[^a-zA-Z0-9]/g, ""));
+                                liveChange: function (oEvent) {
+                                    utils._LCvalidateMandatoryField(oEvent);
                                 }
                             });
                         }
                         else if (sField === "Name") {
                             oInputControl = new sap.m.Input({
+                                id: "MD_Field_Name",
                                 value: "{formModel>/Name}",
-                                maxLength: 60
+                                maxLength: 60,
+                                liveChange: function (oEvent) {
+                                    utils._LCvalidateName(oEvent);
+                                }
                             });
                         }
                         else if (sField === "Address") {
                             oInputControl = new sap.m.Input({
+                                id: "MD_Field_Address",
                                 value: "{formModel>/Address}",
-                                maxLength: 100
+                                maxLength: 100,
+                                liveChange: function (oEvent) {
+                                    utils._LCvalidateMandatoryField(oEvent);
+                                }
                             });
                         }
                         else if (sField === "Pincode") {
                             oInputControl = new sap.m.Input({
+                                id: "MD_Field_Pincode",
                                 value: "{formModel>/Pincode}",
                                 maxLength: 6,
-                                liveChange: function (e) {
-                                    let v = e.getParameter("value");
-                                    e.getSource().setValue(v.replace(/\D/g, ""));
+                                liveChange: function (oEvent) {
+                                    utils._LCvalidatePinCode(oEvent);
                                 }
                             });
                         }
-
                         else if (sField === "Contact") {
                             oInputControl = new sap.m.Input({
+                                id: "MD_Field_Contact",
                                 value: "{formModel>/Contact}",
                                 maxLength: 10,
-                                liveChange: function (e) {
-                                    let v = e.getParameter("value");
-                                    e.getSource().setValue(v.replace(/\D/g, ""));
+                                liveChange: function (oEvent) {
+                                    utils._LCvalidateMobileNumber(oEvent);
                                 }
                             });
                         }
@@ -709,8 +732,22 @@ sap.ui.define([
                         resultfinak.data.Photo2Name = this._imageData.img2name || resultfinak.data.Photo2Name || null;
                         resultfinak.data.Photo2Type = this._imageData.img2type || resultfinak.data.Photo2Type || null;
                     }
+                    let valid = true;
+                    valid &= utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_BranchID") });
+                    valid &= utils._LCvalidateName({ getSource: () => sap.ui.getCore().byId("MD_Field_Name") });
+                    valid &= utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_Address") });
+                    valid &= utils._LCvalidatePinCode({ getSource: () => sap.ui.getCore().byId("MD_Field_Pincode") });
+                    valid &= utils._LCvalidateMobileNumber({ getSource: () => sap.ui.getCore().byId("MD_Field_Contact") });
 
-                    this.getBusyDialog();
+                    valid &= utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_Country") });
+                    valid &= utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_State") });
+                    valid &= utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_City") });
+
+                    if (!valid) {
+                        sap.m.MessageToast.show("Please correct highlighted fields");
+                        return;
+                    }
+                    sap.ui.core.BusyIndicator.show(0);
                     that.ajaxUpdateWithJQuery(this.sTitle, resultfinak).then(async (res) => {
                         let oModel = that.getView().getModel("dataModel");
                         that.MD_onCancelButtonPress();
@@ -720,7 +757,7 @@ sap.ui.define([
                         sap.m.MessageToast.show("Data updated successfully");
                     })
                         .catch((error) => {
-                            that.closeBusyDialog();
+                            sap.ui.core.BusyIndicator.hide();
                             sap.m.MessageToast.show("Update failed");
                             that.MD_onCancelButtonPress();
                         });
