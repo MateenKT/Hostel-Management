@@ -57,6 +57,8 @@ _getLocationName: function (lat, lng) {
             console.log("Country:", country);
 
             console.log("Full Location:", `${city}, ${state}, ${country}`);
+
+            this.City=city
         },
         error: (err) => {
             console.error("Reverse geocoding failed", err);
@@ -366,7 +368,7 @@ _getLocationName: function (lat, lng) {
         //     }
         // },
 
-     _loadFilteredData: async function (Scity, sBranchCode, sACType) {
+  _loadFilteredData: async function (Scity, sBranchCode, sACType) {
 
     if (sACType === "All") {
         sACType = "";
@@ -376,7 +378,6 @@ _getLocationName: function (lat, lng) {
 
         const oView = this.getView();
 
-    
         let aBranchCodes = [];
 
         if (Scity && !sBranchCode) {
@@ -386,7 +387,7 @@ _getLocationName: function (lat, lng) {
             });
 
             aBranchCodes = (Array.isArray(aBranches.data) ? aBranches.data : [aBranches.data])
-                .map(branch => branch.BranchID); // MULTIPLE CODES BASED ON CITY
+                .map(branch => branch.BranchID);
         }
 
         else if (Scity && sBranchCode) {
@@ -397,7 +398,7 @@ _getLocationName: function (lat, lng) {
             aBranchCodes = [sBranchCode];
         }
 
-   
+
         const response = await this.ajaxReadWithJQuery("HM_BedType", {
             BranchCode: JSON.stringify(aBranchCodes)
         });
@@ -411,15 +412,14 @@ _getLocationName: function (lat, lng) {
             );
         }
 
- 
+
         if (sBranchCode && sBranchCode.trim() !== "") {
-            // Case: City + Branch → filter only single branch
             matchedRooms = matchedRooms.filter(
                 room =>
                     room.BranchCode?.toLowerCase() === sBranchCode.toLowerCase()
             );
         } else {
-            // Case: Only City → filter by ALL branch codes of the city
+
             matchedRooms = matchedRooms.filter(
                 room =>
                     aBranchCodes
@@ -428,14 +428,18 @@ _getLocationName: function (lat, lng) {
             );
         }
 
-    
+
         const oRoomDetailsModel = oView.getModel("RoomCountModel");
         const oCustomerModel = oView.getModel("CustomerModel");
 
         const roomDetails = oRoomDetailsModel.getData()?.Rooms || [];
         const customerData = oCustomerModel.getData() || [];
 
-    
+     
+        const oBranchModel = oView.getModel("sBRModel");
+        const aBranchData = oBranchModel?.getData() || [];
+
+
         const convertBase64ToImage = (base64String, fileType) => {
             if (!base64String) return "./image/Fallback.png";
             let sBase64 = base64String.replace(/\s/g, "");
@@ -444,7 +448,8 @@ _getLocationName: function (lat, lng) {
                     const decoded = atob(sBase64);
                     if (decoded.startsWith("iVB")) sBase64 = decoded;
                 }
-            } catch (e) {}
+            } catch (e) { }
+
             const mimeType = fileType || "image/jpeg";
             if (sBase64.startsWith("data:image")) return sBase64;
             return `data:${mimeType};base64,${sBase64}`;
@@ -452,6 +457,7 @@ _getLocationName: function (lat, lng) {
 
 
         const aBedTypes = matchedRooms.map(room => {
+
             const matchingRooms = roomDetails.filter(
                 rd =>
                     rd.BranchCode?.toLowerCase() === room.BranchCode?.toLowerCase() &&
@@ -486,21 +492,28 @@ _getLocationName: function (lat, lng) {
             const isFull = totalBooked >= totalCapacity && totalCapacity > 0;
             const isVisible = !isFull && price.trim() !== "";
 
+            
+            const oBranchInfo = aBranchData.find(b =>
+                b.BranchID?.toLowerCase() === room.BranchCode?.toLowerCase()
+            );
+
+            const sArea = oBranchInfo?.Address || "";
+
             const aImages = [];
             for (let i = 1; i <= 5; i++) {
                 const base64 = room[`Photo${i}`];
                 const type = room[`Photo${i}Type`];
                 if (base64) {
                     aImages.push({
-                        src: convertBase64ToImage(base64, type)
+                        src: convertBase64ToImage(base64, type),
+                        Area:sArea
                     });
                 }
             }
-
             return {
                 Name: room.Name,
                 ACType: room.ACType,
-                 NoOfPerson: room.NoOfPerson,
+                NoOfPerson: room.NoOfPerson,
                 Description: room.Description || "",
                 Price: price,
                 MonthPrice: MonthPrice,
@@ -512,7 +525,7 @@ _getLocationName: function (lat, lng) {
             };
         });
 
-  
+
         oView.setModel(
             new sap.ui.model.json.JSONModel({ BedTypes: aBedTypes }),
             "VisibilityModel"
@@ -523,6 +536,7 @@ _getLocationName: function (lat, lng) {
         sap.m.MessageToast.show("Failed to load bed type data.");
     }
 },
+
         onSelectPricePlan: function (oEvent) {
             const oTile = oEvent.getSource();
             const sType = oTile.data("type"); // "daily", "monthly", or "yearly"
@@ -1004,11 +1018,22 @@ _getLocationName: function (lat, lng) {
                 await this.CustomerDetails();
                 await this._loadBranchCode();
                 await this.onReadcallforRoom();
-                await this._loadFilteredData("Kalaburagi","", "");
+                // await this._loadFilteredData("Kalaburagi","", "");
 
                 const oBRModel = oView.getModel("sBRModel");
                 const oModelData = oBRModel.getData();
-                const aFiltered = oModelData.filter(item => item.City === "Kalaburagi");
+                // const aFiltered = oModelData.filter(item => item.City === "Kalaburagi");
+
+                const aFiltered = oModelData.filter(item => item.City === this.City);
+
+
+                if(aFiltered.length===0){
+                await this._loadFilteredData("Kalaburagi","", "");
+
+                }else{
+                await this._loadFilteredData(this.City,"", "");
+
+                }
 
                 oView.setModel(new sap.ui.model.json.JSONModel(aFiltered), "AreaModel");
                 oView.byId("id_Area").setEnabled(true);

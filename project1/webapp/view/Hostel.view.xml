@@ -265,15 +265,27 @@
                                             showPageIndicator="false"
                                             backgroundDesign="Transparent"
                                             pages="{VisibilityModel>Images}"
+                                        
                                         >
                                             <pages>
-                                                <Image
-                                                    src="{VisibilityModel>src}"
-                                                    width="100%"
-                                                    height="300px"
-                                                    class="bedCardImage"
-                                                    decorative="false"
-                                                />
+                                                <VBox class="imageWrapper">
+                                                    <!-- Area Tag inside Image -->
+                                                    <HBox class="areaTagBox">
+                                                        <Text
+                                                          text="{VisibilityModel>Area}"
+
+                                                        />
+                                                    </HBox>
+
+                                                    <!-- Image -->
+                                                    <Image
+                                                        src="{VisibilityModel>src}"
+                                                        width="100%"
+                                                        height="300px"
+                                                        class="bedCardImage"
+                                                        decorative="false"
+                                                    />
+                                                </VBox>
                                             </pages>
                                         </Carousel>
                                         <VBox
@@ -293,6 +305,10 @@
                                                 text="{= ${VisibilityModel>Currency} + ${VisibilityModel>Price}}"
                                                 class="bedCardPrice sapUiSmallMarginTop"
                                             />
+                                            <!-- <Text
+                                                text="{= 'Area: ' + ${VisibilityModel>Area} }"
+                                                class="bedCardAreaTag"
+                                            /> -->
                                             <HBox
                                                 justifyContent="Center"
                                                 alignItems="Center"
