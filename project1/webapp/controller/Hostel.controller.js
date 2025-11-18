@@ -81,8 +81,8 @@ _getLocationName: function (lat, lng) {
 
             // 2️⃣ Disable controls initially
             this.byId("id_Branch").setEnabled(true);
-            this.byId("id_Area");
-            this.byId("id_Roomtype");
+            this.byId("id_Area").setEnabled(true);
+            this.byId("id_Roomtype").setEnabled(true);
 
             // 3️⃣ Hide avatar initially
             const oAvatar = oView.byId("ProfileAvatar");
@@ -1727,7 +1727,7 @@ _getLocationName: function (lat, lng) {
 
             // 🔹 Make Area and Room Type non-editable
             if (oAreaTypeCombo) oAreaTypeCombo.setEnabled(false);
-            if (oRoomTypeCombo) oRoomTypeCombo;
+            if (oRoomTypeCombo) oRoomTypeCombo.setEnabled(true);
         },
 
         onAfterRendering: function () {
@@ -1975,7 +1975,7 @@ _getLocationName: function (lat, lng) {
             if (oSelectedItem) {
                 oRoomType.setEnabled(true);
             } else {
-                oRoomType.setEnabled(false);
+                oRoomType.setEnabled(true);
             }
         },
 

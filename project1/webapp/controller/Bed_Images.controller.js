@@ -41,9 +41,10 @@ sap.ui.define([
 
             this.BedID = oEvent.getParameter("arguments").sPath;
                await this._loadBranchCode()
-              await this.refershModel(this.BedID)
+             
 
-            this.Onsearch()
+             await  this.Onsearch()
+             await this.refershModel(this.BedID)
         },
            _loadBranchCode: async function () {
              sap.ui.core.BusyIndicator.show(0);
@@ -73,7 +74,7 @@ sap.ui.define([
                 var model = new sap.ui.model.json.JSONModel(oFCIAerData);
                 this.getView().setModel(model, "BedDetails")
 
-                sap.ui.core.BusyIndicator.hide();
+                // sap.ui.core.BusyIndicator.hide();
 
             })
         },
@@ -292,8 +293,10 @@ sap.ui.define([
                 } else {
                     await this.ajaxCreateWithJQuery("HM_BedType", { data: payloadWithoutID });
                 }
-
+             sap.ui.core.BusyIndicator.show(0);
                 await this.Onsearch();
+                        sap.ui.core.BusyIndicator.hide();
+
                 sap.m.MessageToast.show("Bed saved successfully.");
                 this.ARD_Dialog.close();
 
