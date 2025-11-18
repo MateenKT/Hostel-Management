@@ -127,7 +127,7 @@
                         <Text text="{HostelModel>StartDate}" />
                         <Text text="{HostelModel>EndDate}" />
                         <Text text="{HostelModel>TotalDays}" />
-                        <Text text="{= '₹ ' + (${HostelModel>Price} * ${HostelModel>TotalDays}).toFixed(2) }" />
+                        <Text text="{= '₹ ' + (${HostelModel>TotalAmount}).toFixed(2) }" />
                     </cells>
                 </ColumnListItem>
             </items>

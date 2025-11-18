@@ -13,7 +13,9 @@ sap.ui.define([
   return BaseController.extend("sap.ui.com.project1.controller.Book_Room", {
     Formatter: Formatter,
     onInit: function () {
-
+       this.getOwnerComponent().getRouter().getRoute("RouteBookRoom").attachMatched(this._onRouteMatched, this);
+    },
+    _onRouteMatched: function(){
       const oUserModel = sap.ui.getCore().getModel("LoginModel");
       if (oUserModel) {
         this._oLoggedInUser = oUserModel.getData();
@@ -132,7 +134,14 @@ sap.ui.define([
       const oToday = new Date();
       // Strip time (set hours to 0) to avoid timezone offset issues
       oToday.setHours(0, 0, 0, 0);
-      oHostelModel.setProperty("/TodayDate", oToday)
+      oHostelModel.setProperty("/TodayDate", oToday);
+      this.oWizard = this.byId("TC_id_wizard");
+      this.oWizard.discardProgress(this.byId("TC_id_stepGeneralInfo"));
+      this.oWizard.goToStep(this.byId("TC_id_stepGeneralInfo"));
+      this.oWizard.getSteps()[0].setValidated(true);
+      this.oWizard.getSteps()[1].setValidated(false);
+      this.oWizard.getSteps()[2].setValidated(false);
+  
     },
     Roomdetails: async function () {
       try {
@@ -994,7 +1003,7 @@ oFacilityModel.refresh(true);
       }
     },
 
-   TC_onDialogNextButton: function () {
+    TC_onDialogNextButton: function () {
   const oView = this.getView();
 
   // Keep summary price bound
@@ -1041,10 +1050,14 @@ let roomRentPerPerson = baseRoomRent * monthsOrYears;
   if (!totals) return;
 
   const aUpdatedPersons = aPersons.map((oPerson, iIndex) => {
-    const personName = oPerson.FullName || `Person ${iIndex + 1}`;
+    //const personName = oPerson.FullName || `Person ${iIndex + 1}`;
     const aPersonFacilities = (totals.AllSelectedFacilities || []).filter(
-      f => f.PersonName === personName
+      f => f.ID === iIndex
     );
+
+    const totalAmount = aPersonFacilities.reduce((sum, facility) => {
+        return sum + (facility.TotalAmount || 0);
+    }, 0);
 
     const facilityTotal = aPersonFacilities.reduce((sum, f) => {
       const iPrice = parseFloat(f.Price) || 0;
@@ -1060,13 +1073,13 @@ let roomRentPerPerson = baseRoomRent * monthsOrYears;
       AllSelectedFacilities: aPersonFacilities,
 
       // Per-person facility cost
-      TotalFacilityPrice: facilityTotal,
+      TotalFacilityPrice: totalAmount,
 
       // Per-person room rent (now uses the safely-declared variable)
       RoomRentPerPerson: roomRentPerPerson,
 
       // Per-person total
-      GrandTotal: roomRentPerPerson + facilityTotal,
+      GrandTotal: roomRentPerPerson + totalAmount,
 
       TotalDays: iDays
     };
@@ -1086,55 +1099,85 @@ let roomRentPerPerson = baseRoomRent * monthsOrYears;
 ,
     // Separated calculation function
     calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
-      const oStartDate = this._parseDate(sStartDate);
-      const oEndDate = this._parseDate(sEndDate);
-      const diffTime = oEndDate - oStartDate;
-      const iDays = Math.ceil(diffTime / (1000 * 3600 * 24));
+  const oStartDate = this._parseDate(sStartDate);
+  const oEndDate = this._parseDate(sEndDate);
+  const diffTime = oEndDate - oStartDate;
+  const iDays = Math.ceil(diffTime / (1000 * 3600 * 24));
 
-      if (iDays <= 0) {
-        sap.m.MessageToast.show("End Date must be after Start Date");
-        return null;
+  if (iDays <= 0) {
+    sap.m.MessageToast.show("End Date must be after Start Date");
+    return null;
+  }
+
+  // Calculate Months & Years also
+  const iMonths =
+    (oEndDate.getFullYear() - oStartDate.getFullYear()) * 12 +
+    (oEndDate.getMonth() - oStartDate.getMonth()) ||
+    1;
+
+  const iYears = oEndDate.getFullYear() - oStartDate.getFullYear() || 1;
+
+  let totalFacilityPrice = 0;
+  let aAllFacilities = [];
+
+  aPersons.forEach((oPerson, iIndex) => {
+    const aFacilities = oPerson.Facilities?.SelectedFacilities || [];
+
+    aFacilities.forEach((f) => {
+      const fPrice = parseFloat(f.Price || 0);
+      let fTotal = 0;
+      switch ((f.UnitText || "").toLowerCase()) {
+        case "per day":
+          fTotal = fPrice * iDays;
+          break;
+
+        case "per month":
+        case "month":
+          fTotal = fPrice * (iMonths <= 0 ? 1 : iMonths);
+          break;
+
+        case "per year":
+        case "year":
+          fTotal = fPrice * (iYears <= 0 ? 1 : iYears);
+          break;
+
+        default:
+          // Default = per day
+          fTotal = fPrice * iDays;
+          break;
       }
 
-      let totalFacilityPricePerDay = 0;
-      let aAllFacilities = [];
+      totalFacilityPrice += fTotal;
 
-      aPersons.forEach((oPerson, iIndex) => {
-        const aFacilities = oPerson.Facilities?.SelectedFacilities || [];
-        aFacilities.forEach((f) => {
-          const fPrice = parseFloat(f.Price || 0);
-          totalFacilityPricePerDay += fPrice;
-          const fTotal = fPrice * iDays;
-
-          aAllFacilities.push({
-            ID: iIndex,
-            PersonName: oPerson.FullName || `Person ${iIndex + 1}`,
-            FacilityName: f.FacilityName,
-            Price: fPrice,
-            StartDate: sStartDate,
-            EndDate: sEndDate,
-            TotalDays: iDays,
-            TotalAmount: fTotal,
-            Image: f.Image,
-            Currency: f.Currency,
-            UnitText: f.UnitText
-          });
-        });
-      });
-
-      const totalFacilityPrice = totalFacilityPricePerDay * iDays;
-      const grandTotal = totalFacilityPrice + Number(roomRentPrice || 0);
-
-      return {
+      aAllFacilities.push({
+        ID: iIndex,
+        PersonName: oPerson.FullName || `Person ${iIndex + 1}`,
+        FacilityName: f.FacilityName,
+        Price: fPrice,
+        StartDate: sStartDate,
+        EndDate: sEndDate,
         TotalDays: iDays,
-        TotalFacilityPrice: totalFacilityPrice,
-        GrandTotal: grandTotal,
-        AllSelectedFacilities: aAllFacilities
-      };
-    }
+        TotalMonths: iMonths,
+        TotalYears: iYears,
+        TotalAmount: fTotal,
+        Image: f.Image,
+        Currency: f.Currency,
+        UnitText: f.UnitText
+      });
+    });
+  });
 
-    ,
+  const grandTotal = totalFacilityPrice + Number(roomRentPrice || 0);
 
+  return {
+    TotalDays: iDays,
+    TotalMonths: iMonths,
+    TotalYears: iYears,
+    TotalFacilityPrice: totalFacilityPrice,
+    GrandTotal: grandTotal,
+    AllSelectedFacilities: aAllFacilities
+  };
+},
     // Helper function to parse date
     _parseDate: function (sDate) {
       const aParts = sDate.split("/");
