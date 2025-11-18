@@ -351,113 +351,106 @@ aPersons[oUpdatedData.ID].AllSelectedFacilities[iIndex] = oUpdatedData; // Examp
             return `${day}/${month}/${year}`;
         },
 
-           calculateTotals: function (aPersons,roomRentPrice) {
-            // const oStartDate = this._parseDate(sStartDate);
-            // const oEndDate = this._parseDate(sEndDate);
-            // const diffTime = oEndDate - oStartDate;
-            // const iDays = Math.ceil(diffTime / (1000 * 3600 * 24));
+         calculateTotals: function (aPersons, roomRentPrice) {
 
-            // if (iDays <= 0) {
-            //     sap.m.MessageToast.show("End Date must be after Start Date");
-            //     return null;
-            // }
+    let totalFacilityPrice = 0;
+    let aAllFacilities = [];
 
-            // // Calculate Months & Years also
-            // const iMonths =
-            //     (oEndDate.getFullYear() - oStartDate.getFullYear()) * 12 +
-            //     (oEndDate.getMonth() - oStartDate.getMonth()) ||
-            //     1;
+    aPersons.forEach((oPerson, iIndex) => {
+        const aFacilities = oPerson.AllSelectedFacilities || [];
+        var personFacilities = [];
 
-            // const iYears = oEndDate.getFullYear() - oStartDate.getFullYear() || 1;
+        aFacilities.forEach((f) => {
 
-            let totalFacilityPrice = 0;
-            let aAllFacilities = [];
+            // 🟢 Facility-wise Start & End Date
+            const fStartDate = this._parseDate(f.StartDate);
+            const fEndDate = this._parseDate(f.EndDate);
 
-            aPersons.forEach((oPerson, iIndex) => {
-            const aFacilities = oPerson.AllSelectedFacilities || [];
-            var personFacilities = [];
-            aFacilities.forEach((f) => {
+            const diff = fEndDate - fStartDate;
 
-                // 🟢 Facility-wise dates
-                const fStartDate = this._parseDate(f.StartDate);
-                const fEndDate = this._parseDate(f.EndDate);
+            // 🟢 Calculate Hours & Days
+            const fHours = Math.ceil(diff / (1000 * 60 * 60));   // ⭐ NEW
+            const fDays = Math.ceil(diff / (1000 * 3600 * 24));
 
-                const diff = fEndDate - fStartDate;
-                const fDays = Math.ceil(diff / (1000 * 3600 * 24));
+            if (fHours <= 0) {
+                sap.m.MessageToast.show("Facility End Date must be after Start Date");
+                return;
+            }
 
-                if (fDays <= 0) {
-                    sap.m.MessageToast.show("Facility End Date must be after Start Date");
-                    return;
-                }
+            // 🟢 Calculate Months & Years for THAT facility
+            const fMonths =
+                (fEndDate.getFullYear() - fStartDate.getFullYear()) * 12 +
+                (fEndDate.getMonth() - fStartDate.getMonth()) || 1;
 
-                // 🟢 Calculate Months & Years for THAT facility
-                const fMonths =
-                    (fEndDate.getFullYear() - fStartDate.getFullYear()) * 12 +
-                    (fEndDate.getMonth() - fStartDate.getMonth()) || 1;
+            const fYears = fEndDate.getFullYear() - fStartDate.getFullYear() || 1;
 
-                const fYears = fEndDate.getFullYear() - fStartDate.getFullYear() || 1;
+            // 🟢 Price calculation based on UnitText
+            const fPrice = parseFloat(f.Price || 0);
+            let fTotal = 0;
 
-                // 🟢 Price calculation based on UnitText
-                const fPrice = parseFloat(f.Price || 0);
-                let fTotal = 0;
+            switch ((f.UnitText || "").toLowerCase()) {
 
-                switch ((f.UnitText || "").toLowerCase()) {
-                    case "per day":
-                        fTotal = fPrice * fDays;
-                        break;
+                case "per hour":      // ⭐ NEW
+                case "hour":
+                    fTotal = fPrice * fHours;
+                    break;
 
-                    case "per month":
-                    case "month":
-                        fTotal = fPrice * (fMonths <= 0 ? 1 : fMonths);
-                        break;
+                case "per day":
+                case "day":
+                    fTotal = fPrice * fDays;
+                    break;
 
-                    case "per year":
-                    case "year":
-                        fTotal = fPrice * (fYears <= 0 ? 1 : fYears);
-                        break;
+                case "per month":
+                case "month":
+                    fTotal = fPrice * (fMonths <= 0 ? 1 : fMonths);
+                    break;
 
-                    default:
-                        fTotal = fPrice * fDays;
-                        break;
-                }
+                case "per year":
+                case "year":
+                    fTotal = fPrice * (fYears <= 0 ? 1 : fYears);
+                    break;
 
-                totalFacilityPrice += fTotal;
+                default:
+                    // Default: per day
+                    fTotal = fPrice * fDays;
+                    break;
+            }
 
-                var data = {
-                    ID: iIndex,
-                    PersonName: oPerson.FullName || `Person ${iIndex + 1}`,
-                    FacilityName: f.FacilityName,
-                    Price: fPrice,
-                    StartDate: f.StartDate,   // 🟢 facility-wise
-                    EndDate: f.EndDate,       // 🟢 facility-wise
-                    TotalDays: fDays,
-                    TotalMonths: fMonths,
-                    TotalYears: fYears,
-                    TotalAmount: fTotal,
-                    Image: f.Image,
-                    Currency: f.Currency,
-                    UnitText: f.UnitText
-                }
+            totalFacilityPrice += fTotal;
 
-                aAllFacilities.push(data);
-                personFacilities.push(data);
-            });
+            var data = {
+                ID: iIndex,
+                PersonName: oPerson.FullName || `Person ${iIndex + 1}`,
+                FacilityName: f.FacilityName,
+                Price: fPrice,
+                StartDate: f.StartDate,
+                EndDate: f.EndDate,
+                TotalHours: fHours,      // ⭐ NEW
+                TotalDays: fDays,
+                TotalMonths: fMonths,
+                TotalYears: fYears,
+                TotalAmount: fTotal,
+                Image: f.Image,
+                Currency: f.Currency,
+                UnitText: f.UnitText
+            };
 
-            oPerson.AllSelectedFacilities = personFacilities;
+            aAllFacilities.push(data);
+            personFacilities.push(data);
         });
 
+        oPerson.AllSelectedFacilities = personFacilities;
+    });
 
-            const grandTotal = totalFacilityPrice + Number(roomRentPrice || 0);
+    const grandTotal = totalFacilityPrice + Number(roomRentPrice || 0);
 
-            return {
-                // TotalDays: iDays,
-                // TotalMonths: iMonths,
-                // TotalYears: iYears,
-                TotalFacilityPrice: totalFacilityPrice,
-                GrandTotal: grandTotal,
-                AllSelectedFacilities: aAllFacilities
-            };
-            },
+    return {
+        TotalFacilityPrice: totalFacilityPrice,
+        GrandTotal: grandTotal,
+        AllSelectedFacilities: aAllFacilities
+    };
+},
+
        _parseDate: function (sDate) {
 
     // If already a Date object → return as-is

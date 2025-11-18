@@ -1100,22 +1100,22 @@ let roomRentPerPerson = baseRoomRent * monthsOrYears;
 }
 ,
     // Separated calculation function
-    calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
+calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
   const oStartDate = this._parseDate(sStartDate);
   const oEndDate = this._parseDate(sEndDate);
   const diffTime = oEndDate - oStartDate;
-  const iDays = Math.ceil(diffTime / (1000 * 3600 * 24));
 
-  if (iDays <= 0) {
+  const iDays = Math.ceil(diffTime / (1000 * 3600 * 24));
+  const diffHours = Math.ceil(diffTime / (1000 * 60 * 60)); // ⭐ NEW: Total Hours
+
+  if (iDays <= 0 && diffHours <= 0) {
     sap.m.MessageToast.show("End Date must be after Start Date");
     return null;
   }
 
-  // Calculate Months & Years also
   const iMonths =
     (oEndDate.getFullYear() - oStartDate.getFullYear()) * 12 +
-    (oEndDate.getMonth() - oStartDate.getMonth()) ||
-    1;
+    (oEndDate.getMonth() - oStartDate.getMonth()) || 1;
 
   const iYears = oEndDate.getFullYear() - oStartDate.getFullYear() || 1;
 
@@ -1128,7 +1128,13 @@ let roomRentPerPerson = baseRoomRent * monthsOrYears;
     aFacilities.forEach((f) => {
       const fPrice = parseFloat(f.Price || 0);
       let fTotal = 0;
+
       switch ((f.UnitText || "").toLowerCase()) {
+        case "per hour":          // ⭐ NEW
+        case "hour":
+          fTotal = fPrice * diffHours;
+          break;
+
         case "per day":
           fTotal = fPrice * iDays;
           break;
@@ -1144,7 +1150,6 @@ let roomRentPerPerson = baseRoomRent * monthsOrYears;
           break;
 
         default:
-          // Default = per day
           fTotal = fPrice * iDays;
           break;
       }
@@ -1158,6 +1163,7 @@ let roomRentPerPerson = baseRoomRent * monthsOrYears;
         Price: fPrice,
         StartDate: sStartDate,
         EndDate: sEndDate,
+        TotalHours: diffHours,       // ⭐ NEW
         TotalDays: iDays,
         TotalMonths: iMonths,
         TotalYears: iYears,
@@ -1172,6 +1178,7 @@ let roomRentPerPerson = baseRoomRent * monthsOrYears;
   const grandTotal = totalFacilityPrice + Number(roomRentPrice || 0);
 
   return {
+    TotalHours: diffHours,           // ⭐ NEW
     TotalDays: iDays,
     TotalMonths: iMonths,
     TotalYears: iYears,
@@ -1180,6 +1187,7 @@ let roomRentPerPerson = baseRoomRent * monthsOrYears;
     AllSelectedFacilities: aAllFacilities
   };
 },
+
     // Helper function to parse date
     _parseDate: function (sDate) {
       const aParts = sDate.split("/");
