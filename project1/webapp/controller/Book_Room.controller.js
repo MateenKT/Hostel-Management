@@ -277,61 +277,52 @@ sap.ui.define([
                 }),
                 new sap.m.CheckBox({
                   id: that.createId("IDSelfCheck_" + i),
-                  select: function (oEvent) {
-                    const oView = sap.ui.getCore().byId("idBookRoomView") || that.getView();
-                    const oModel = oView.getModel("HostelModel");
-                    const aPersons = oModel.getProperty("/Persons") || [];
+                 select: function (oEvent) {
+    const oView = that.getView();
+    const oModel = oView.getModel("HostelModel");
+    const aPersons = oModel.getProperty("/Persons") || [];
+    const bSelected = oEvent.getParameter("selected");
 
-                    if (aPersons.length === 0) {
-                      sap.m.MessageToast.show("Please add personal information first.");
-                      return;
-                    }
+    const oLoginModel = sap.ui.getCore().getModel("LoginModel");
+    const oUser = oLoginModel ? oLoginModel.getData() : null;
 
-                    const bSelected = oEvent.getParameter("selected");
-
-                    // Access login model data
-                    const oLoginModel = sap.ui.getCore().getModel("LoginModel");
-                    const oUser = oLoginModel ? oLoginModel.getData() : null;
-
-  if (bSelected) {
-    if (!oUser || !oUser.UserID) {
-      
-      // Lazy-load fragment if not already created
-      if (!that._oLoginAlertDialog) {
-        that._oLoginAlertDialog = sap.ui.xmlfragment(
-          that.createId("LoginAlertDialog"),
-          "sap.ui.com.project1.fragment.SignInSignup", // Change to your dialog fragment path
-          that
-        );
-        oView.addDependent(that._oLoginAlertDialog);
-      }
-      that._oLoginAlertDialog.open();
-	  			                                     sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signInusername").setValue("").setValueState("None");
+    if (bSelected) {
+        // No login yet → open dialog
+        if (!oUser || !oUser.UserID) {
+            if (!that._oLoginAlertDialog) {
+                that._oLoginAlertDialog = sap.ui.xmlfragment(
+                    that.createId("LoginAlertDialog"),
+                    "sap.ui.com.project1.fragment.SignInSignup",
+                    that
+                );
+                oView.addDependent(that._oLoginAlertDialog);
+            }
+            that._oLoginAlertDialog.open();
+              sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signInusername").setValue("").setValueState("None");
 				                                     sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signinPassword").setValue("").setValueState("None");
 				                                     sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signInuserid").setValue("").setValueState("None");
 													   sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signupvisible").setVisible(false)
+            oEvent.getSource().setSelected(false);
+            return;
+        }
 
-                        // Uncheck the checkbox since login data is missing
-                        oEvent.getSource().setSelected(false);
-                        return;
-                      }
+        // Already logged in → auto-fill
+        aPersons[0].FullName = oUser.UserName || "";
+        aPersons[0].CustomerEmail = oUser.EmailID || "";
+        aPersons[0].MobileNo = oUser.MobileNo || "";
+        aPersons[0].UserID = oUser.UserID || "";
 
-                      // Fill first person data from login user info
-                      aPersons[0].FullName = oUser.UserName || "";
-                      aPersons[0].CustomerEmail = oUser.EmailID || "";
-                      aPersons[0].MobileNo = oUser.MobileNo || "";
-                      aPersons[0].UserID = oUser.UserID || "";
+    } else {
+        // Only clear if user unchecks manually
+        aPersons[0].FullName = "";
+        aPersons[0].CustomerEmail = "";
+        aPersons[0].MobileNo = "";
+        aPersons[0].UserID = "";
+    }
 
-  }else {
-    // Clear first person data when unchecked
-    aPersons[0].FullName = "";
-    aPersons[0].CustomerEmail = "";
-    aPersons[0].MobileNo = "";
-    aPersons[0].UserID = "";
-  }
+    oModel.refresh(true);
+}
 
-                    oModel.refresh(true);
-                  }
                 })
               ] :
               []),
@@ -861,64 +852,75 @@ oFacilityModel.refresh(true);
     onDialogClose: function () {
       this._oLoginAlertDialog.close()
     },
-    onSignIn: async function () {
-      const oLoginModel = this.getView().getModel("LoginModel");
+//     onSignIn: async function () {
+//       const oLoginModel = this.getView().getModel("LoginModel");
 
-      // Access the fragment inputs safely
-      const sUserId = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInuserid")?.getValue();
-      const sUserName = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInusername")?.getValue();
-      const sPassword = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signinPassword")?.getValue();
+//       // Access the fragment inputs safely
+//       const sUserId = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInuserid")?.getValue();
+//       const sUserName = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInusername")?.getValue();
+//       const sPassword = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signinPassword")?.getValue();
 
-      // Basic validation
-      if (!sUserId || !sUserName || !sPassword) {
-        sap.m.MessageToast.show("Please fill in all fields.");
-        return;
-      }
+//       // Basic validation
+//       if (!sUserId || !sUserName || !sPassword) {
+//         sap.m.MessageToast.show("Please fill in all fields.");
+//         return;
+//       }
 
-      try {
-        const oResponse = await this.ajaxReadWithJQuery("HM_Login", "");
-        const aUsers = oResponse?.commentData || [];
+//       try {
+//         const oResponse = await this.ajaxReadWithJQuery("HM_Login", "");
+//         const aUsers = oResponse?.commentData || [];
 
-        const oMatchedUser = aUsers.find(user =>
-          user.UserID === sUserId &&
-          user.UserName === sUserName &&
-          (user.Password === sPassword || user.Password === btoa(sPassword))
-        );
+//         const oMatchedUser = aUsers.find(user =>
+//           user.UserID === sUserId &&
+//           user.UserName === sUserName &&
+//           (user.Password === sPassword || user.Password === btoa(sPassword))
+//         );
 
-        if (!oMatchedUser) {
-          sap.m.MessageToast.show("Invalid credentials. Please try again.");
-          return;
-        }
+//         if (!oMatchedUser) {
+//           sap.m.MessageToast.show("Invalid credentials. Please try again.");
+//           return;
+//         }
 
-        oLoginModel.setProperty("/EmployeeID", oMatchedUser.UserID);
-        oLoginModel.setProperty("/EmployeeName", oMatchedUser.UserName);
-        oLoginModel.setProperty("/EmailID", oMatchedUser.EmailID);
-        oLoginModel.setProperty("/Role", oMatchedUser.Role);
-        oLoginModel.setProperty("/BranchCode", oMatchedUser.BranchCode || "");
-        oLoginModel.setProperty("/MobileNo", oMatchedUser.MobileNo || "");
+//         oLoginModel.setProperty("/EmployeeID", oMatchedUser.UserID);
+//         oLoginModel.setProperty("/EmployeeName", oMatchedUser.UserName);
+//         oLoginModel.setProperty("/EmailID", oMatchedUser.EmailID);
+//         oLoginModel.setProperty("/Role", oMatchedUser.Role);
+//         oLoginModel.setProperty("/BranchCode", oMatchedUser.BranchCode || "");
+//         oLoginModel.setProperty("/MobileNo", oMatchedUser.MobileNo || "");
 
-        if (oMatchedUser.Role === "Customer") {
-          const oUserModel = new sap.ui.model.json.JSONModel(oMatchedUser);
-          sap.ui.getCore().setModel(oUserModel, "LoginModel");
+//        // After successful login
+// if (oMatchedUser.Role === "Customer") {
 
-          // Clear input fields
-          sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInusername").setValue("");
-          sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signinPassword").setValue("");
+//     const oHostelModel = this.getView().getModel("HostelModel");
+//     const aPersons = oHostelModel.getProperty("/Persons");
 
-          // Close dialog
-          if (this._oLoginAlertDialog) this._oLoginAlertDialog.close();
+//     // Ensure Persons array exists
+//     if (aPersons && aPersons.length > 0) {
 
-          sap.m.MessageToast.show("Login successful!");
-        } else {
-          sap.m.MessageToast.show("Invalid credentials.");
-        }
+//         // Fill Person 1 details
+//         aPersons[0].FullName = oMatchedUser.UserName || "";
+//         aPersons[0].CustomerEmail = oMatchedUser.EmailID || "";
+//         aPersons[0].MobileNo = oMatchedUser.MobileNo || "";
+//         aPersons[0].UserID = oMatchedUser.UserID || "";
 
-      } catch (err) {
-        console.error("Login Error:", err);
-        sap.m.MessageToast.show("Failed to fetch login data: " + err);
-      }
-    }
-    ,
+//         oHostelModel.refresh(true);
+
+//         // Auto-check the "Fill Yourself" checkbox
+//         const oCheck = sap.ui.getCore().byId(this.createId("IDSelfCheck_0"));
+//         if (oCheck) {
+//             oCheck.setSelected(true);
+//         }
+//     }
+// } else {
+//           sap.m.MessageToast.show("Invalid credentials.");
+//         }
+
+//       } catch (err) {
+//         console.error("Login Error:", err);
+//         sap.m.MessageToast.show("Failed to fetch login data: " + err);
+//       }
+//     }
+    // ,
     onDialogNextButton: async function () {
       //     if (this._iSelectedStepIndex === 1) {
       //     if (!this._checkMandatoryFields()) {
@@ -1553,14 +1555,29 @@ oHostelModel.setProperty("/StopPriceRecalculate", true);
 
         // Handle UI visibility based on role
         const oView = this.getView();
-        if (oMatchedUser.Role === "Customer") {
-          this._oLoggedInUser = oMatchedUser;
-          sap.ui.getCore().setModel(new sap.ui.model.json.JSONModel(oMatchedUser), "LoginModel");
+       if (oMatchedUser.Role === "Customer") {
 
-          oView.byId("loginButton")?.setVisible(false);
-          oView.byId("ProfileAvatar")?.setVisible(true);
+    const oHostelModel = this.getView().getModel("HostelModel");
+    const aPersons = oHostelModel.getProperty("/Persons");
 
-        } else if (oMatchedUser.Role === "Admin" || oMatchedUser.Role === "Employee") {
+    // Ensure Persons array exists
+    if (aPersons && aPersons.length > 0) {
+
+        // Fill Person 1 details
+        aPersons[0].FullName = oMatchedUser.UserName || "";
+        aPersons[0].CustomerEmail = oMatchedUser.EmailID || "";
+        aPersons[0].MobileNo = oMatchedUser.MobileNo || "";
+        aPersons[0].UserID = oMatchedUser.UserID || "";
+
+        oHostelModel.refresh(true);
+
+        // Auto-check the "Fill Yourself" checkbox
+        const oCheck = sap.ui.getCore().byId(this.createId("IDSelfCheck_0"));
+        if (oCheck) {
+            oCheck.setSelected(true);
+        }
+    }
+} else if (oMatchedUser.Role === "Admin" || oMatchedUser.Role === "Employee") {
           this.getOwnerComponent().getRouter().navTo("TilePage");
         } else {
           sap.m.MessageToast.show("Invalid credentials. Please try again.");
@@ -1927,27 +1944,239 @@ oHostelModel.setProperty("/StopPriceRecalculate", true);
          sap.m.MessageBox.success(sMessage, {
              title: "Success",
              actions: [sap.m.MessageBox.Action.OK],
-             onClose: function() {
+          onClose: function () {
 
-                 // Navigate after user clicks OK
-                 var oRoute = this.getOwnerComponent().getRouter();
-                 oRoute.navTo("RouteHostel");
+    // Navigate to hostel page
+    var oRoute = this.getOwnerComponent().getRouter();
+    oRoute.navTo("RouteHostel");
 
-                 // Clear uploaded files
-                 oData.Persons.forEach((_, idx) => {
-                     const uploader = sap.ui.getCore().byId("idFileUploader_" + idx);
-                     if (uploader) uploader.setValue("");
-                 });
-
-                 // Close dialog if exists
-                 if (this.FCIA_Dialog) {
-                     this.FCIA_Dialog.close();
-                 }
-             }.bind(this)
+     setTimeout(function () {
+      this.resetAllBookingData()
+        this.openProfileDialog();
+    }.bind(this), 500);
+    // --- SHOW AVATAR AUTOMATICALLY ---
+    const oAvatar = sap.ui.getCore().byId("ProfileAvatar");
+    if (oAvatar) {
+        oAvatar.setVisible(true);   
+    }
+}.bind(this)
          });
         } catch (err) {
             sap.m.MessageBox.error("Error while booking: " + err);
         }
     },
+    openProfileDialog: function () {
+
+    // if (!this._oProfileDialog) {
+    //     this._oProfileDialog = sap.ui.xmlfragment(
+    //         this.createId("profileDialog"),
+    //         "sap.ui.com.project1.fragment.ManageProfile", // your fragment path
+    //         this
+    //     );
+    //     this.getView().addDependent(this._oProfileDialog);
+    // }
+
+    // this._oProfileDialog.open();
+    this.onPressAvatar()
+},
+       onPressAvatar: async function () {
+            const oUser = this._oLoggedInUser || {};
+            const sPhoto = "./image.jpg";
+
+            try {
+                const sUserID = oUser.UserID || "";
+                if (!sUserID) {
+                    sap.m.MessageToast.show("User not logged in.");
+                    return;
+                }
+                const filter = {
+                    UserID: sUserID
+                };
+                //  Fetch only the logged-in user's data
+                const response = await this.ajaxReadWithJQuery("HM_Customer", filter);
+
+                console.log("HM_Customer Response:", response);
+
+                // Handle correct structure
+                const aCustomers = response?.commentData || response?.Customers || response?.value || [];
+
+                if (!Array.isArray(aCustomers) || aCustomers.length === 0) {
+                    sap.m.MessageToast.show("No customer data found for this user.");
+                    return;
+                }
+
+                const aCustomerDetails = aCustomers.flatMap(response => ({
+                    city: response.City,
+                    country: response.Country,
+                    customerID: response.CustomerID,
+                    salutation: response.Salutation,
+                    customerName: response.CustomerName,
+                    mobileno: response.MobileNo,
+                    stdCode: response.STDCode,
+                    state: response.State,
+                    countryCode: response.CountryCode,
+                    customerEmail: response.CustomerEmail,
+                    DOB: response.DateOfBirth,
+                    gender: response.Gender,
+                    Address: response.PermanentAddress
+
+                })
+
+
+
+                );
+                // Combine all bookings from all customers
+                const aAllBookings = aCustomers.flatMap(customer =>
+                    Array.isArray(customer.Bookings) ? customer.Bookings : []
+                );
+                const aAllFacilitis = aCustomers.flatMap(customer =>
+                    Array.isArray(customer.FaciltyItems) ? customer.FaciltyItems : []
+                );
+
+                if (aAllBookings.length === 0) {
+                    sap.m.MessageToast.show("No booking history found.");
+                }
+
+                // Map booking data
+                const aBookingData = aAllBookings.map(booking => ({
+                    Startdate: booking.StartDate
+                        ? new Date(booking.StartDate
+                        ).toLocaleDateString("en-GB") : "N/A",
+                    EndDate: booking.EndDate
+                        ? new Date(booking.EndDate
+                        ).toLocaleDateString("en-GB") : "N/A",
+                    room: booking.BedType || "N/A",
+                    amount: booking.RentPrice || "N/A",
+                    status: booking.Status || "N/A",
+                    cutomerid: booking.CustomerID,
+                    branchCode: booking.BranchCode,
+                    noofperson: booking.NoOfPersons,
+                    grandTotal: booking.RentPrice,
+                    paymenytype: booking.PaymentType,
+                    RoomPrice: booking.RoomPrice
+
+                }));
+                const aFacilitiData = aAllFacilitis.map(faciliti => ({
+                    startdate: faciliti.StartDate ? new Date(faciliti.StartDate).toLocaleDateString("en-GB") : "N/A",
+                    bookingid: faciliti.BookingID,
+                    enddate: faciliti.EndDate,
+                    customerid: faciliti.CustomerID || "N/A",
+                    facilitiname: faciliti.FacilityName || "N/A",
+                    facilitiId: faciliti.FacilityID,
+                    facilitiPrice: faciliti.FacilitiPrice || "N/A",
+                    status: faciliti.PaidStatus || "N/A"
+                }));
+
+                //  Load fragment if not already loaded
+                if (!this._oProfileDialog) {
+                    const oDialog = await sap.ui.core.Fragment.load({
+                        name: "sap.ui.com.project1.fragment.ManageProfile",
+                        controller: this
+                    });
+                    this._oProfileDialog = oDialog;
+                    this.getView().addDependent(oDialog);
+                }
+
+                //  Create and bind the Profile Model
+                const oProfileModel = new JSONModel({
+                    photo: sPhoto,
+                    initials: oUser.UserName ? oUser.UserName.charAt(0).toUpperCase() : "",
+                    name: oUser.UserName || "",
+                    email: oUser.EmailID || "",
+                    phone: oUser.MobileNo || "",
+                    bookings: aBookingData,
+                    facility: aFacilitiData,
+                    aCustomers: aCustomerDetails
+                });
+                this._oProfileDialog.setModel(oProfileModel, "profileData");
+
+                //  Menu model (for tab switch)
+                const oMenuModel = new JSONModel({
+                    items: [
+                        { title: "My Profile", icon: "sap-icon://employee", key: "profile" },
+                        { title: "Booking History", icon: "sap-icon://history", key: "devices" }
+                    ]
+                });
+                this._oProfileDialog.setModel(oMenuModel, "profileMenuModel");
+
+                //  Section model (default = booking if available)
+                const oSectionModel = new JSONModel({
+                    selectedSection: aBookingData.length ? "devices" : "profile"
+                });
+                this._oProfileDialog.setModel(oSectionModel, "profileSectionModel");
+
+                //  Open the dialog
+                this._oProfileDialog.open();
+
+            } catch (error) {
+                console.error("Profile data load failed:", error);
+                sap.m.MessageToast.show("Error fetching profile details.");
+            }
+        },
+resetAllBookingData: function () {
+
+    const oHostelModel = this.getView().getModel("HostelModel");
+
+    // ---- RESET MODEL COMPLETELY ----
+    oHostelModel.setData({
+        Persons: [],
+        SelectedPerson: "",
+        SelectedMonths: "",
+        SelectedPriceType: "",
+        StartDate: "",
+        EndDate: "",
+        Price: "",
+        FinalPrice: "",
+        GrandTotal: "",
+        TotalFacilityPrice: "",
+        TotalDays: "",
+        OverallTotalCost: "",
+        ForBothSelected: false,
+        Facilities: [],
+        Documents: [],
+        PaymentDetails: {}
+    });
+
+    oHostelModel.refresh(true);
+
+
+    // ---- RESET UI ELEMENTS ----
+    // Personal container (remove all generated forms)
+    const oVBox = this.getView().byId("idPersonalContainer1");
+    if (oVBox) {
+        oVBox.destroyItems();
+    }
+
+    // Clear room type, branch, UPI, bank, amount etc
+    const clearIds = [
+        "GI_Roomtype", "idStartDate1", "idEndDate1", "idUPIID",
+        "idBankName", "idAmount", "idPaymentTypeField", "idTransactionID",
+        "idPaymentDate", "idCurrency"
+    ];
+
+    clearIds.forEach(id => {
+        const ctrl = sap.ui.getCore().byId(id) || this.getView().byId(id);
+        if (ctrl?.setValue) ctrl.setValue("");
+        if (ctrl?.setSelectedKey) ctrl.setSelectedKey("");
+    });
+
+    // Reset summary page text fields
+    const summaryFields = ["idPrice3", "idGrandTotal", "idTotalDays"];
+    summaryFields.forEach(id => {
+        const fld = this.getView().byId(id);
+        if (fld?.setText) fld.setText("");
+    });
+
+    // ---- RESET WIZARD (IF USING) ----
+    const oWizard = this.byId("BookRoomWizard");
+    if (oWizard) {
+        oWizard.discardProgress(oWizard.getSteps()[0]);
+        oWizard.goToStep(oWizard.getSteps()[0]);
+    }
+
+    console.log("✔ All booking data fully reset!");
+}
+
+
   });
 });

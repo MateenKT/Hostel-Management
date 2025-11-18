@@ -16,40 +16,7 @@
             fragmentName="sap.ui.com.project1.fragment.Header"
             type="XML"
         />
-        <content>
-
-         <VBox class="sapUiSmallMargin">
-                    <Title
-                        text="Hostel Boking"
-                        class="boldBlackText"
-                    />
-
-                    <!-- Booking Status and Price -->
-                    <HBox class="sapUiSmallMarginTop">
-                        <VBox>
-                            <Text
-                                text="Room Price"
-                                class="sapUiSmallMarginBottom"
-                            />
-                            <Text
-                                text="{}"
-                                class="largeTextBold"
-                            />
-                        </VBox>
-                        <VBox class="sapUiMediumMarginBegin">
-                            <Text
-                                text="Bed Type"
-                                class="sapUiSmallMarginBottom"
-                            />
-                            <Text
-                                text="{}"
-                                class="sapUiTinyMarginEnd largeTextBold"
-                            />
-                        </VBox>
-                    </HBox>
-                </VBox>
-        
-        </content>
+      
     
     <VBox class="sapUiMediumMarginBottom">
       <Panel
@@ -57,7 +24,7 @@
         expandable="false"
         class="customPanelHeader"
     >
-    <Button text="Edit" press="onPressEditSave"/>
+    <Button text="Edit" press="onPressEditSave" />
         <f:SimpleForm
         id="idGeneralForm"
             editable="true"
