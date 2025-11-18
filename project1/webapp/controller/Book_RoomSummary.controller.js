@@ -298,6 +298,7 @@ aPersons.forEach((oPerson, iPerson) => {
 
     // room rent: use per-person rent stored in /FinalPrice (per person) OR /FinalPriceTotal as needed
     const perPersonRent = parseFloat(oHostelModel.getProperty("/FinalPrice")) || parseFloat(oHostelModel.getProperty("/Price")) || 0;
+    
 
     const totals = this.calculateTotals(aPersons, sStart, sEnd, perPersonRent);
     if (totals) {
@@ -314,11 +315,19 @@ aPersons.forEach((oPerson, iPerson) => {
             const days = parseFloat(f.TotalDays) || 0;
             return sum + (price * days);
         }, 0);
+
         oHostelModel.setProperty(`/Persons/${idx}/TotalFacilityPrice`, facTotal);
         oHostelModel.setProperty(`/Persons/${idx}/RoomRentPerPerson`, perPersonRent);
         oHostelModel.setProperty(`/Persons/${idx}/GrandTotal`, facTotal + perPersonRent);
     });
+let overallTotalCost = 0;
 
+aPersons.forEach(p => {
+    const gt = parseFloat(p.GrandTotal) || 0;
+    overallTotalCost += gt;
+});
+
+oHostelModel.setProperty("/OverallTotalCost", overallTotalCost);
     // Refresh bindings (table)
     const oTable = this._oSelectedTable || oView.byId("idFacilitySummaryTable");
     if (oTable) {

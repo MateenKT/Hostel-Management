@@ -141,7 +141,7 @@ sap.ui.define([
       this.oWizard.getSteps()[0].setValidated(true);
       this.oWizard.getSteps()[1].setValidated(false);
       this.oWizard.getSteps()[2].setValidated(false);
-  
+      // this.resetAllBookingData()
     },
     Roomdetails: async function () {
       try {
@@ -1863,7 +1863,7 @@ oHostelModel.setProperty("/StopPriceRecalculate", true);
                      EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
                      Status: "New",
                      PaymentType: oData.PaymentType || "",
-                     BedType: oData.RoomType
+                     BedType: oData.BedType
                  });
              }
 
@@ -2022,8 +2022,6 @@ oHostelModel.setProperty("/StopPriceRecalculate", true);
 
                 })
 
-
-
                 );
                 // Combine all bookings from all customers
                 const aAllBookings = aCustomers.flatMap(customer =>
@@ -2113,6 +2111,7 @@ oHostelModel.setProperty("/StopPriceRecalculate", true);
                 sap.m.MessageToast.show("Error fetching profile details.");
             }
         },
+
 resetAllBookingData: function () {
 
     const oHostelModel = this.getView().getModel("HostelModel");
