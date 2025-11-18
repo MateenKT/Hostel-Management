@@ -214,60 +214,51 @@ sap.ui.define([
                 cleanedData.Photo2 = this._imageData?.img2 || cleanedData.Photo2 || null;
                 cleanedData.Photo2Name = this._imageData?.img2name || cleanedData.Photo2Name || null;
                 cleanedData.Photo2Type = this._imageData?.img2type || cleanedData.Photo2Type || null;
-            }
-            let valid = true;
 
-            // Validate BranchID
-            if (!utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_BranchID") })) {
-                sap.m.MessageToast.show("Please correct BRANCHID");
-                return;
+                if (!cleanedData.Photo1) {
+                    sap.m.MessageToast.show("Please upload Photo 1");
+                    try { sap.ui.getCore().byId("imageUpload1").focus(); } catch (e) { }
+                    return;
+                }
+                if (!cleanedData.Photo2) {
+                    sap.m.MessageToast.show("Please upload Photo 2");
+                    try { sap.ui.getCore().byId("imageUpload2").focus(); } catch (e) { }
+                    return;
+                }
             }
-
-            // Validate Name
-            if (!utils._LCvalidateName({ getSource: () => sap.ui.getCore().byId("MD_Field_Name") })) {
-                sap.m.MessageToast.show("Please correct NAME");
-                return;
-            }
-
-            // Validate Address
-            if (!utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_Address") })) {
-                sap.m.MessageToast.show("Please correct ADDRESS");
-                return;
-            }
-
-            // Validate Pincode
-            if (!utils._LCvalidatePinCode({ getSource: () => sap.ui.getCore().byId("MD_Field_Pincode") })) {
-                sap.m.MessageToast.show("Please correct PINCODE");
-                return;
-            }
-
-            // Validate Country
-            if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_Country") })) {
-                sap.m.MessageToast.show("Please select COUNTRY");
-                return;
-            }
-
-            // Validate State
-            if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_State") })) {
-                sap.m.MessageToast.show("Please select STATE");
-                return;
-            }
-
-            // Validate City
-            if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_City") })) {
-                sap.m.MessageToast.show("Please select CITY");
-                return;
-            }
-
-            // Validate Contact
-            if (!utils._LCvalidateMobileNumber({ getSource: () => sap.ui.getCore().byId("MD_Field_Contact") })) {
-                sap.m.MessageToast.show("Please correct CONTACT");
-                return;
-            }
-
-            if (!valid) {
-                sap.m.MessageToast.show("Please correct highlighted fields");
-                return;
+            if (this.sTitle === "HM_Branch") {
+                if (!utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_BranchID") })) {
+                    sap.m.MessageToast.show("Please correct BRANCHID");
+                    return;
+                }
+                if (!utils._LCvalidateName({ getSource: () => sap.ui.getCore().byId("MD_Field_Name") })) {
+                    sap.m.MessageToast.show("Please correct NAME");
+                    return;
+                }
+                if (!utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_Address") })) {
+                    sap.m.MessageToast.show("Please correct ADDRESS");
+                    return;
+                }
+                if (!utils._LCvalidatePinCode({ getSource: () => sap.ui.getCore().byId("MD_Field_Pincode") })) {
+                    sap.m.MessageToast.show("Please correct PINCODE");
+                    return;
+                }
+                if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_Country") })) {
+                    sap.m.MessageToast.show("Please select COUNTRY");
+                    return;
+                }
+                if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_State") })) {
+                    sap.m.MessageToast.show("Please select STATE");
+                    return;
+                }
+                if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_City") })) {
+                    sap.m.MessageToast.show("Please select CITY");
+                    return;
+                }
+                if (!utils._LCvalidateMobileNumber({ getSource: () => sap.ui.getCore().byId("MD_Field_Contact") })) {
+                    sap.m.MessageToast.show("Please correct CONTACT");
+                    return;
+                }
             }
 
             delete cleanedData.countryCode
@@ -344,6 +335,31 @@ sap.ui.define([
             if (u2 && u2.setValue) { try { u2.setValue(""); u2.destroy(); } catch (e) { } }
         },
 
+        _removeHostelImage: function (index) {
+            try {
+                var formModel = this.oUpdatePass.getModel("formModel");
+                if (index === 1) {
+                    this._imageData.img1 = null;
+                    this._imageData.img1name = null;
+                    this._imageData.img1type = null;
+                    formModel.setProperty("/Photo1", null);
+                    formModel.setProperty("/Photo1Name", null);
+                    formModel.setProperty("/Photo1Type", null);
+                } else {
+                    this._imageData.img2 = null;
+                    this._imageData.img2name = null;
+                    this._imageData.img2type = null;
+                    formModel.setProperty("/Photo2", null);
+                    formModel.setProperty("/Photo2Name", null);
+                    formModel.setProperty("/Photo2Type", null);
+                }
+                try {
+                    var up = sap.ui.getCore().byId(index === 1 ? "imageUpload1" : "imageUpload2");
+                    if (up && up.setValue) up.setValue("");
+                } catch (e) { }
+            } catch (e) { }
+        },
+
         commonFiledInput: function () {
             let getModel = this.getView().getModel("dataModel");
             let aData = getModel && getModel.getData ? getModel.getData() : [];
@@ -384,14 +400,25 @@ sap.ui.define([
                 oContainer.addFormElement(new FormElement({
                     label: new sap.m.Label({ text: "Add Image 1 *" }),
                     fields: [
-                        new sap.m.Image({
-                            src: "{= ${formModel>/Photo1} ? 'data:' + (${formModel>/Photo1Type} || 'image/*') + ';base64,' + ${formModel>/Photo1} : '' }",
-                            width: "10rem",
-                            visible: "{= ${formModel>/Photo1} ? true : false }"
-                        }),
-                        new sap.ui.unified.FileUploader({
-                            id: "imageUpload1",
-                            change: this._onImageSelect.bind(this, 1)
+                        new sap.m.HBox({
+                            items: [
+                                new sap.m.Image({
+                                    src: "{= ${formModel>/Photo1} ? 'data:' + (${formModel>/Photo1Type} || 'image/*') + ';base64,' + ${formModel>/Photo1} : '' }",
+                                    width: "10rem",
+                                    visible: "{= ${formModel>/Photo1} ? true : false }",
+                                    id: "HF_Image1_Preview"
+                                }),
+                                new sap.m.Button({
+                                    icon: "sap-icon://decline",
+                                    type: "Transparent",
+                                    tooltip: "Remove Image 1",
+                                    press: function () { this._removeHostelImage(1); }.bind(this)
+                                }),
+                                new sap.ui.unified.FileUploader({
+                                    id: "imageUpload1",
+                                    change: this._onImageSelect.bind(this, 1)
+                                })
+                            ]
                         })
                     ]
                 }));
@@ -399,14 +426,25 @@ sap.ui.define([
                 oContainer.addFormElement(new FormElement({
                     label: new sap.m.Label({ text: "Add Image 2 *" }),
                     fields: [
-                        new sap.m.Image({
-                            src: "{= ${formModel>/Photo2} ? 'data:' + (${formModel>/Photo2Type} || 'image/*') + ';base64,' + ${formModel>/Photo2} : '' }",
-                            width: "10rem",
-                            visible: "{= ${formModel>/Photo2} ? true : false }"
-                        }),
-                        new sap.ui.unified.FileUploader({
-                            id: "imageUpload2",
-                            change: this._onImageSelect.bind(this, 2)
+                        new sap.m.HBox({
+                            items: [
+                                new sap.m.Image({
+                                    src: "{= ${formModel>/Photo2} ? 'data:' + (${formModel>/Photo2Type} || 'image/*') + ';base64,' + ${formModel>/Photo2} : '' }",
+                                    width: "10rem",
+                                    visible: "{= ${formModel>/Photo2} ? true : false }",
+                                    id: "HF_Image2_Preview"
+                                }),
+                                new sap.m.Button({
+                                    icon: "sap-icon://decline",
+                                    type: "Transparent",
+                                    tooltip: "Remove Image 2",
+                                    press: function () { this._removeHostelImage(2); }.bind(this)
+                                }),
+                                new sap.ui.unified.FileUploader({
+                                    id: "imageUpload2",
+                                    change: this._onImageSelect.bind(this, 2)
+                                })
+                            ]
                         })
                     ]
                 }));
@@ -461,7 +499,7 @@ sap.ui.define([
                             showSecondaryValues: true,
                             width: "100%",
                             items: {
-                                path: "CountryModel>/", valueStateText:"Select Country",
+                                path: "CountryModel>/", valueStateText: "Select Country",
                                 length: 1000, showSecondaryValues: true,
                                 template: new sap.ui.core.ListItem({
                                     key: "{CountryModel>countryName}",
@@ -472,12 +510,16 @@ sap.ui.define([
                             selectionChange: function (oEvent) {
                                 const formModel = that.oUpdatePass.getModel("formModel");
                                 const selectedItem = oEvent.getParameter("selectedItem");
+                                oEvent.getSource().setValueState("None");
 
                                 if (!selectedItem) {
                                     formModel.setProperty("/Country", "");
                                     formModel.setProperty("/STD", "");
                                     formModel.setProperty("/State", "");
                                     formModel.setProperty("/City", "");
+                                    formModel.setProperty("/countryCode", "");
+                                    that.getView().setModel(new JSONModel([]), "FilteredStateModel");
+                                    that.getView().setModel(new JSONModel([]), "FilteredCityModel");
                                     return;
                                 }
 
@@ -492,14 +534,15 @@ sap.ui.define([
 
                                 that._filterStatesByCountryCode(countryObj.code);
                                 that.getView().setModel(new sap.ui.model.json.JSONModel([]), "FilteredCityModel");
-
+                                sap.ui.getCore().byId("MD_Field_State").setValueState("None");
+                                sap.ui.getCore().byId("MD_Field_City").setValueState("None");
                             }
                         });
                     } else if (sField === "State") {
                         oInputControl = new sap.m.ComboBox({
                             selectedKey: "{formModel>/State}",
                             id: "MD_Field_State",
-                            valueStateText:"Select State",
+                            valueStateText: "Select State",
                             width: "100%",
                             items: {
                                 path: "FilteredStateModel>/",
@@ -511,11 +554,23 @@ sap.ui.define([
                             selectionChange: function (oEvent) {
                                 let selStateName = oEvent.getSource().getSelectedKey();
                                 const formModel = that.oUpdatePass.getModel("formModel");
-                                formModel.setProperty("/State", selStateName);
+                                oEvent.getSource().setValueState("None");
+                                // formModel.setProperty("/State", selStateName);
                                 let cCode = formModel.getProperty("/countryCode");
+                                if (!cCode) {
+                                    let selCountry = formModel.getProperty("/Country");
+                                    let countries = that.getView().getModel("CountryModel").getData();
+                                    let found = countries.find(c => c.countryName === selCountry);
+                                    if (found) {
+                                        cCode = found.code;
+                                        formModel.setProperty("/countryCode", cCode);
+                                    }
+                                }
+                                formModel.setProperty("/State", selStateName);
+                                formModel.setProperty("/City", "");
 
                                 that._filterCitiesByState(selStateName, cCode);
-                                formModel.setProperty("/City", "");
+                                sap.ui.getCore().byId("MD_Field_City").setValueState("None");
 
                             }
                         });
@@ -525,13 +580,16 @@ sap.ui.define([
                             selectedKey: "{formModel>/City}",
                             id: "MD_Field_City",
                             width: "100%",
-                            valueStateText:"Select City",
+                            valueStateText: "Select City",
                             items: {
                                 path: "FilteredCityModel>/",
                                 template: new sap.ui.core.ListItem({
                                     key: "{FilteredCityModel>cityName}",
                                     text: "{FilteredCityModel>cityName}"
                                 })
+                            },
+                            selectionChange: function (oEvent) {
+                                oEvent.getSource().setValueState("None");
                             }
                         });
                     }
@@ -548,9 +606,18 @@ sap.ui.define([
                                 id: "MD_Field_BranchID",
                                 value: "{formModel>/BranchID}",
                                 maxLength: 10,
-                                valueStateText:"Please correct BRANCHID",
+                                valueStateText: "Enter Branch ID",
                                 liveChange: function (oEvent) {
-                                    utils._LCvalidateMandatoryField(oEvent);
+                                    let val = oEvent.getParameter("value");
+                                    let input = oEvent.getSource();
+
+                                    if (val.trim() === "") {
+                                        input.setValueState("Error");
+                                        input.setValueStateText("Branch ID cannot be empty");
+                                    } else {
+                                        input.setValueState("None");
+                                        input.setValueStateText("");
+                                    }
                                 }
                             });
                         }
@@ -559,7 +626,7 @@ sap.ui.define([
                                 id: "MD_Field_Name",
                                 value: "{formModel>/Name}",
                                 maxLength: 60,
-                                valueStateText:"Enter Name",
+                                valueStateText: "Enter Name",
                                 liveChange: function (oEvent) {
                                     utils._LCvalidateName(oEvent);
                                 }
@@ -570,7 +637,7 @@ sap.ui.define([
                                 id: "MD_Field_Address",
                                 value: "{formModel>/Address}",
                                 maxLength: 100,
-                                valueStateText:"Enter Address",
+                                valueStateText: "Enter Address",
                                 liveChange: function (oEvent) {
                                     utils._LCvalidateMandatoryField(oEvent);
                                 }
@@ -581,7 +648,7 @@ sap.ui.define([
                                 id: "MD_Field_Pincode",
                                 value: "{formModel>/Pincode}",
                                 maxLength: 6,
-                                valueStateText:"Enter Pincode",
+                                valueStateText: "Enter Pincode",
                                 liveChange: function (oEvent) {
                                     utils._LCvalidatePinCode(oEvent);
                                 }
@@ -590,7 +657,7 @@ sap.ui.define([
                         else if (sField === "Contact") {
                             oInputControl = new sap.m.Input({
                                 id: "MD_Field_Contact",
-                                valueStateText:"Enter Contact Number",
+                                valueStateText: "Enter Contact Number",
                                 value: "{formModel>/Contact}",
                                 maxLength: 10,
                                 liveChange: function (oEvent) {
@@ -618,19 +685,38 @@ sap.ui.define([
             oForm.addFormContainer(oContainerDyn);
 
             try {
-                let selCountry = this.getView().getModel("formModel").getProperty("/Country") || "";
+                let formModel = this.oUpdatePass.getModel("formModel");
+
+                let selCountry = formModel.getProperty("/Country");
+                let selState = formModel.getProperty("/State");
+                let selCity = formModel.getProperty("/City");
+                this.getView().setModel(new JSONModel([]), "FilteredStateModel");
+                this.getView().setModel(new JSONModel([]), "FilteredCityModel");
+
                 if (selCountry) {
+
                     let allCountries = this.getView().getModel("CountryModel").getData();
-                    let cObj = allCountries.find(c => c.countryName === selCountry);
-                    if (cObj) {
-                        let code = cObj.code;
-                        this.getView().getModel("formModel").setProperty("/countryCode", code);
-                        this._filterStatesByCountryCode(code);
+                    let matched = allCountries.find(c => c.countryName === selCountry);
+
+                    if (matched) {
+                        formModel.setProperty("/countryCode", matched.code);
+
+                        this._filterStatesByCountryCode(matched.code);
                     }
-                    let selState = this.getView().getModel("formModel").getProperty("/State");
-                    if (selState) this._filterCitiesByState(selState);
+
+                    if (selState) {
+                        this._filterCitiesByState(
+                            selState,
+                            formModel.getProperty("/countryCode")
+                        );
+                    }
+                    if (selCity) {
+                        formModel.setProperty("/City", selCity);
+                    }
                 }
-            } catch (e) { }
+            } catch (e) {
+                console.error("Prefill error:", e);
+            }
         },
 
         _filterStatesByCountryCode: function (countryCode) {
@@ -733,7 +819,7 @@ sap.ui.define([
             var aSelectedItem = this.oTable.getSelectedItem();
 
             if (!aSelectedItem) {
-                sap.m.MessageToast.show(that.i18nModel.getText("selectRowUpdate"));
+                sap.m.MessageToast.show(that.i18nModel.getText("Select Row to Edit"));
                 return;
             }
             let oData = aSelectedItem.getBindingContext("dataModel").getObject();
@@ -769,6 +855,7 @@ sap.ui.define([
                         data: { ...myfragmentData },
                         filters: filters,
                     };
+
                     if (this.sTitle === "HM_HostelFeatures") {
                         resultfinak.data.Photo1 = this._imageData.img1 || resultfinak.data.Photo1 || null;
                         resultfinak.data.Photo1Name = this._imageData.img1name || resultfinak.data.Photo1Name || null;
@@ -777,52 +864,46 @@ sap.ui.define([
                         resultfinak.data.Photo2 = this._imageData.img2 || resultfinak.data.Photo2 || null;
                         resultfinak.data.Photo2Name = this._imageData.img2name || resultfinak.data.Photo2Name || null;
                         resultfinak.data.Photo2Type = this._imageData.img2type || resultfinak.data.Photo2Type || null;
-                    }
-                    let valid = true;
-                    // Validate BranchID
-                    if (!utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_BranchID") })) {
-                        return;
+
+                        if (!resultfinak.data.Photo1) {
+                            sap.m.MessageToast.show("Please upload Photo 1");
+                            try { sap.ui.getCore().byId("imageUpload1").focus(); } catch (e) { }
+                            return;
+                        }
+                        if (!resultfinak.data.Photo2) {
+                            sap.m.MessageToast.show("Please upload Photo 2");
+                            try { sap.ui.getCore().byId("imageUpload2").focus(); } catch (e) { }
+                            return;
+                        }
                     }
 
-                    // Validate Name
-                    if (!utils._LCvalidateName({ getSource: () => sap.ui.getCore().byId("MD_Field_Name") })) {
-                        return;
+                    if (this.sTitle === "HM_Branch") {
+                        if (!utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_BranchID") })) {
+                            return;
+                        }
+                        if (!utils._LCvalidateName({ getSource: () => sap.ui.getCore().byId("MD_Field_Name") })) {
+                            return;
+                        }
+                        if (!utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_Address") })) {
+                            return;
+                        }
+                        if (!utils._LCvalidatePinCode({ getSource: () => sap.ui.getCore().byId("MD_Field_Pincode") })) {
+                            return;
+                        }
+                        if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_Country") })) {
+                            return;
+                        }
+                        if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_State") })) {
+                            return;
+                        }
+                        if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_City") })) {
+                            return;
+                        }
+                        if (!utils._LCvalidateMobileNumber({ getSource: () => sap.ui.getCore().byId("MD_Field_Contact") })) {
+                            return;
+                        }
                     }
 
-                    // Validate Address
-                    if (!utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_Address") })) {
-                        return;
-                    }
-
-                    // Validate Pincode
-                    if (!utils._LCvalidatePinCode({ getSource: () => sap.ui.getCore().byId("MD_Field_Pincode") })) {
-                        return;
-                    }
-
-                    // Validate Country
-                    if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_Country") })) {
-                        return;
-                    }
-
-                    // Validate State
-                    if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_State") })) {
-                        return;
-                    }
-
-                    // Validate City
-                    if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_City") })) {
-                        return;
-                    }
-
-                    // Validate Contact
-                    if (!utils._LCvalidateMobileNumber({ getSource: () => sap.ui.getCore().byId("MD_Field_Contact") })) {
-                        return;
-                    }
-
-                    if (!valid) {
-                        sap.m.MessageToast.show("Please correct highlighted fields");
-                        return;
-                    }
                     sap.ui.core.BusyIndicator.show(0);
                     that.ajaxUpdateWithJQuery(this.sTitle, resultfinak).then(async (res) => {
                         let oModel = that.getView().getModel("dataModel");
@@ -847,7 +928,7 @@ sap.ui.define([
             var aSelectedItems = this.oTable.getSelectedItems();
 
             if (aSelectedItems.length === 0) {
-                sap.m.MessageToast.show(that.i18nModel.getText("selctRowtoDelete"));
+                sap.m.MessageToast.show(that.i18nModel.getText("Select Row to Delete"));
                 return;
             }
             sap.m.MessageBox.confirm("Are you sure you want to delete the selected record?", {
@@ -876,7 +957,7 @@ sap.ui.define([
                                         const tableUpdateData = await that.ajaxReadWithJQuery(that.sTitle, "");
                                         oModel.setData(tableUpdateData.data);
                                         that.closeBusyDialog();
-                                        sap.m.MessageToast.show(that.i18nModel.getText("dataDelteSucces"));
+                                        sap.m.MessageToast.show(that.i18nModel.getText("Data Deleted Successfully"));
                                     });
                                 }
                             }
