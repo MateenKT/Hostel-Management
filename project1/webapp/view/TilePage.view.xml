@@ -112,12 +112,25 @@
                                     <GenericTile
                                             visible="true"
                                             class="sapUiMediumMargin"
-                                            header="Branch Details"
+                                            header="Manage Branch Details"
                                             press="TileV_onpressBranchdata"
                                         >
-                                           <TileContent unit="Manage Branch Data">
+                                           <TileContent unit="Branch Details">
                                                 <ImageContent
-                                                    src="sap-icon://cancel-maintenance"
+                                                    src="sap-icon://building"
+                                                />
+                                            </TileContent>
+                                        </GenericTile>	
+
+                                         <GenericTile
+                                            visible="true"
+                                            class="sapUiMediumMargin"
+                                            header="Maintain Hostel Features"
+                                            press="TileV_onpresshostelfeatures"
+                                        >
+                                           <TileContent unit="Hostel Features">
+                                                <ImageContent
+                                                    src="sap-icon://home-share"
                                                 />
                                             </TileContent>
                                         </GenericTile>	

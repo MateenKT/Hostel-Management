@@ -178,6 +178,13 @@
             "TargetBranchData"
           ]
         },
+         {
+           "name": "RouteHostelFeatures",
+          "pattern": "HostelFeatures",
+          "target": [
+            "TargetHostelFeatures"
+          ]
+        },
         {
            "name": "RouteMaintainData",
           "pattern": "MaintainData",
@@ -278,6 +285,13 @@
             "viewId": "BranchData",
             "viewName": "BranchData"
           },
+          "TargetHostelFeatures": {
+              "viewType": "XML",
+              "transition": "slide",
+              "clearControlAggregation": false,
+              "viewId": "HostelFeatures",
+              "viewName": "HostelFeatures"
+            },
         "TargetMaintainData": {
           "viewType": "XML",
           "transition": "slide",

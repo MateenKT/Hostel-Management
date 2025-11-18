@@ -1,0 +1,393 @@
+sap.ui.define([
+    "./BaseController",
+    "../utils/validation"
+], function(BaseController, utils) {
+    "use strict";
+    return BaseController.extend("sap.ui.com.project1.controller.HostelFeatures", {
+        onInit: function() {
+            this.getOwnerComponent().getRouter().getRoute("RouteHostelFeatures").attachMatched(this._onRouteMatched, this);
+        },
+
+        _onRouteMatched: function() {
+            this.i18nModel = this.getView().getModel("i18n").getResourceBundle();
+            // Main form model
+            this.getView().setModel(new sap.ui.model.json.JSONModel({
+                FacilityName: "",
+                Description: "",
+                ID: ""
+            }), "HostelFeaturesModel");
+
+            // Upload model
+            this.getView().setModel(new sap.ui.model.json.JSONModel({
+                Photo1: "",
+                Photo1Type: "",
+                Photo1Name: ""
+            }), "UploadModel");
+
+            // Token model
+            this.getView().setModel(new sap.ui.model.json.JSONModel({
+                tokens: []
+            }), "tokenModel");
+
+            this.Onsearch();
+        },
+
+        HM_AddHostelFeature: function() {
+            const oView = this.getView();
+
+            if (!this.ARD_Dialog) {
+                this.ARD_Dialog = sap.ui.xmlfragment(oView.getId(),
+                    "sap.ui.com.project1.fragment.HostelFeatures", this);
+                oView.addDependent(this.ARD_Dialog);
+            }
+
+            oView.getModel("HostelFeaturesModel").setData({
+                FacilityName: "",
+                Description: "",
+                ID: ""
+            });
+
+            oView.getModel("UploadModel").setData({
+                Photo1: "",
+                Photo1Type: "",
+                Photo1Name: ""
+            });
+
+            oView.getModel("tokenModel").setData({
+                tokens: []
+            });
+
+            this._resetFacilityValueStates();
+            this.ARD_Dialog.open();
+        },
+
+        HM_EditHostelFeature: function() {
+            const oTable = this.byId("HF_HostelFeatureTable");
+            const oSelected = oTable.getSelectedItem();
+
+            if (!oSelected) {
+                return sap.m.MessageToast.show("Please select a record to edit.");
+            }
+
+            const oData = oSelected.getBindingContext("HostelFeatures").getObject();
+
+            if (!this.ARD_Dialog) {
+                this.ARD_Dialog = sap.ui.xmlfragment(this.getView().getId(),
+                    "sap.ui.com.project1.fragment.HostelFeatures", this);
+                this.getView().addDependent(this.ARD_Dialog);
+            }
+
+            this.getView().getModel("HostelFeaturesModel").setData(oData);
+
+            // Load image into upload model
+            this.getView().getModel("UploadModel").setData({
+                Photo1: oData.Photo1 || "",
+                Photo1Type: oData.Photo1Type || "",
+                Photo1Name: oData.Photo1Name || ""
+            });
+
+            // Add existing file to tokens
+            const aTokens = oData.Photo1Name ? [{
+                key: oData.Photo1Name,
+                text: oData.Photo1Name
+            }] : [];
+
+            this.getView().getModel("tokenModel").setData({
+                tokens: aTokens
+            });
+
+            this._resetFacilityValueStates();
+            this.ARD_Dialog.open();
+        },
+
+        HF_onCancelButtonPress: function() {
+            this.ARD_Dialog.close();
+            this.byId("HF_HostelFeatureTable").removeSelections(true);
+        },
+
+        onNameInputLiveChange: function(oEvent) {
+            var oInput = oEvent.getSource();
+            utils._LCvalidateMandatoryField(oEvent);
+            if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
+        },
+
+        onFacilityNameChange: function(oEvent) {
+            var oInput = oEvent.getSource();
+            utils._LCvalidateMandatoryField(oEvent);
+            if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
+        },
+
+        HF_onsavebuttonpress: async function() {
+            const oView = this.getView();
+            const oHostelFeaturesModel = oView.getModel("HostelFeaturesModel");
+            const Payload = oHostelFeaturesModel.getData();
+            const oUpload = oView.getModel("UploadModel").getData();
+            const aHostelData = oView.getModel("HostelFeatures").getData();
+            
+            //  Mandatory field validation
+            var isMandatoryValid = (
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("HFF_id_FacilityName")), "ID") &&
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("HFF_id_Description")), "ID")
+            );
+
+            if (!isMandatoryValid) {
+                sap.m.MessageToast.show(this.i18nModel.getText("mandetoryFields"));
+                return;
+            }
+
+            if (!oUpload.Photo1Name) {
+                return sap.m.MessageBox.error("Please upload at least one image.");
+            }
+
+             //  Duplicate check
+            var bDuplicate = aHostelData.some(function(facility) {
+                if (Payload.ID && facility.ID === Payload.ID) return false; // Skip comparing the same record during update
+                return (
+                    facility.FacilityName.trim().toLowerCase() === Payload.FacilityName.trim().toLowerCase() 
+                );
+            });
+
+            if (bDuplicate) {
+                sap.m.MessageToast.show("Facility with the same name already exists!");
+                return;
+            }
+            sap.ui.core.BusyIndicator.show(0);
+            try {
+                const oPayload = {
+                    FacilityName: Payload.FacilityName,
+                    Description: Payload.Description,
+                    Photo1: oUpload.Photo1,
+                    Photo1Type: oUpload.Photo1Type,
+                    Photo1Name: oUpload.Photo1Name
+                };
+
+                if (Payload.ID) {
+                    // UPDATE
+                    await this.ajaxUpdateWithJQuery("HM_HostelFeatures", {
+                        data: {
+                            ID: Payload.ID,
+                            ...oPayload
+                        },
+                        filters: {
+                            ID: Payload.ID
+                        }
+                    });
+
+                    sap.m.MessageToast.show("Facility updated successfully!");
+                } else {
+                    // CREATE
+                    await this.ajaxCreateWithJQuery("HM_HostelFeatures", {
+                        data: oPayload
+                    });
+
+                    sap.m.MessageToast.show("Facility added successfully!");
+                }
+
+                this.ARD_Dialog.close();
+                await this.Onsearch();
+            } catch (err) {
+                sap.ui.core.BusyIndicator.hide();
+                sap.m.MessageToast.show(err.message);
+            } finally {
+                sap.ui.core.BusyIndicator.hide();
+            }
+        },
+
+        onFacilityFileChange: function(oEvent) {
+            const oFile = oEvent.getParameter("files")[0];
+            if (!oFile) return;
+            const oReader = new FileReader();
+            oReader.onload = (e) => {
+                const base64 = e.target.result.split(",")[1];
+
+                this.getView().getModel("UploadModel").setData({
+                    Photo1: base64,
+                    Photo1Type: oFile.type,
+                    Photo1Name: oFile.name
+                });
+
+                this.getView().getModel("tokenModel").setData({
+                    tokens: [{
+                        key: oFile.name,
+                        text: oFile.name
+                    }]
+                });
+            };
+            oReader.readAsDataURL(oFile);
+        },
+
+        onTokenDelete: function(oEvent) {
+            this.getView().getModel("UploadModel").setData({
+                Photo1: "",
+                Photo1Type: "",
+                Photo1Name: ""
+            });
+            this.getView().getModel("tokenModel").setData({
+                tokens: []
+            });
+        },
+
+        Onsearch: function() {
+            sap.ui.core.BusyIndicator.show(0);
+            this.ajaxReadWithJQuery("HM_HostelFeatures", "").then((oData) => {
+                    const arr = Array.isArray(oData.data) ? oData.data : [oData.data];
+                    this.getView().setModel(new sap.ui.model.json.JSONModel(arr), "HostelFeatures");
+                }).catch(err => sap.m.MessageToast.show(err.message))
+                .finally(() => sap.ui.core.BusyIndicator.hide());
+        },
+
+        HM_DeleteHostelFeature: async function() {
+            var oTable = this.byId("HF_HostelFeatureTable");
+            var aSelectedItems = oTable.getSelectedItems();
+
+            if (aSelectedItems.length === 0) {
+                sap.m.MessageToast.show("Please select at least one record to delete.");
+                return;
+            }
+
+            var that = this;
+
+            // Build facility names for confirmation message
+            var sNames = aSelectedItems.map(item => {
+                var oData = item.getBindingContext("HostelFeatures").getObject();
+                return oData.FacilityName;
+            }).join(", ");
+
+            sap.m.MessageBox.confirm(
+                `Are you sure you want to delete the selected Hostel Features: ${sNames}?`, {
+                    icon: sap.m.MessageBox.Icon.WARNING,
+                    title: "Confirm Deletion",
+                    actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO],
+                    emphasizedAction: sap.m.MessageBox.Action.NO,
+                    onClose: async function(sAction) {
+                        if (sAction === sap.m.MessageBox.Action.YES) {
+                            try {
+                                sap.ui.core.BusyIndicator.show(0);
+
+                                // Collect all delete promises
+                                const aDeletePromises = aSelectedItems.map(async (item) => {
+                                    var oData = item.getBindingContext("HostelFeatures").getObject();
+                                    await that.ajaxDeleteWithJQuery("HM_HostelFeatures", {
+                                        filters: {
+                                            ID: oData.ID
+                                        }
+                                    });
+                                });
+
+                                // Wait for all deletions to complete
+                                await Promise.all(aDeletePromises);
+
+                                sap.m.MessageToast.show("Hostel Feature deleted successfully!");
+                                await that.Onsearch(); // refresh table
+                            } catch (err) {
+                                console.error("Delete failed:", err);
+                                sap.m.MessageBox.error("Error while deleting Hostel Feature. Please try again.");
+                            } finally {
+                                sap.ui.core.BusyIndicator.hide();
+                                oTable.removeSelections(true);
+                            }
+                        } else {
+                            oTable.removeSelections(true);
+                        }
+                    }
+                }
+            );
+        },
+
+        _resetFacilityValueStates: function() {
+            ["HFF_id_FacilityName", "HFF_id_Description"].forEach(id => {
+                const oField = this.byId(id);
+                if (oField) oField.setValueState("None");
+            });
+        },
+
+        FC_onSearch: function() {
+            var oView = this.getView();
+            var oTable = oView.byId("HF_HostelFeatureTable");
+            var oBinding = oTable.getBinding("items");
+
+            var sCustomerName = oView.byId("HF_id_FacilityName").getSelectedKey() || oView.byId("HF_id_FacilityName").getValue();
+            var aFilters = [];
+            if (sCustomerName) {
+                aFilters.push(new sap.ui.model.Filter("FacilityName", sap.ui.model.FilterOperator.Contains, sCustomerName));
+            }
+            var oCombinedFilter = new sap.ui.model.Filter({
+                filters: aFilters,
+                and: true
+            });
+            oBinding.filter(oCombinedFilter);
+        },
+
+        FC_onPressClear: function() {
+            this.getView().byId("HF_id_FacilityName").setSelectedKey("")
+        },
+
+        onNavBack: function() {
+            var oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("TilePage");
+        },
+
+        onHome: function() {
+            var oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("RouteHostel");
+        },
+
+        HF_viewroom: function(oEvent) {
+            var oContext = oEvent.getSource().getBindingContext("HostelFeatures");
+            var oData = oContext.getObject();
+
+            if (!oData.Photo1 || !oData.Photo1.length) {
+                sap.m.MessageBox.error("No document found for this room!");
+                return;
+            }
+
+            var sBase64 = oData.Photo1;
+
+            if (!sBase64) {
+                sap.m.MessageBox.error("No document found for this room!");
+                return;
+            }
+
+            sBase64 = sBase64.replace(/\s/g, "");
+
+            try {
+                if (!sBase64.startsWith("iVB") && !sBase64.startsWith("data:image")) {
+                    var decoded = atob(sBase64);
+                    if (decoded.startsWith("iVB")) {
+                        sBase64 = decoded;
+                    }
+                }
+            } catch (e) {
+                console.error("Base64 decode failed:", e);
+            }
+
+            if (!sBase64.startsWith("data:image")) {
+                sBase64 = "data:image/jpeg;base64," + sBase64;
+            }
+
+            var oImage = new sap.m.Image({
+                src: sBase64,
+                width: "100%",
+                height: "auto"
+            });
+
+            var oDialog = new sap.m.Dialog({
+                title: "View Document",
+                contentWidth: "400px",
+                contentHeight: "350px",
+                verticalScrolling: true,
+                content: [oImage],
+                endButton: new sap.m.Button({
+                    text: "Close",
+                    press: function() {
+                        oDialog.close();
+                    }
+                }),
+                afterClose: function() {
+                    oDialog.destroy();
+                }
+            });
+            oDialog.open();
+        },
+    });
+});
