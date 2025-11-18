@@ -1,4 +1,3 @@
-<!-- fragment: sap.ui.com.project1.fragment.MaintainData (replace existing) -->
 <c:FragmentDefinition
     xmlns="sap.m"
     xmlns:c="sap.ui.core"
@@ -31,7 +30,7 @@
                 />
                 <Button
                     id="MD_id_saveButoon"
-                    text="{i18n>save}"
+                    text="Save"
                     press="MD_onUpdateButtonPress"
                 />
 

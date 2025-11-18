@@ -228,35 +228,27 @@ sap.ui.define([
             }
             if (this.sTitle === "HM_Branch") {
                 if (!utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_BranchID") })) {
-                    sap.m.MessageToast.show("Please correct BRANCHID");
                     return;
                 }
                 if (!utils._LCvalidateName({ getSource: () => sap.ui.getCore().byId("MD_Field_Name") })) {
-                    sap.m.MessageToast.show("Please correct NAME");
                     return;
                 }
                 if (!utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_Address") })) {
-                    sap.m.MessageToast.show("Please correct ADDRESS");
                     return;
                 }
                 if (!utils._LCvalidatePinCode({ getSource: () => sap.ui.getCore().byId("MD_Field_Pincode") })) {
-                    sap.m.MessageToast.show("Please correct PINCODE");
                     return;
                 }
                 if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_Country") })) {
-                    sap.m.MessageToast.show("Please select COUNTRY");
                     return;
                 }
                 if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_State") })) {
-                    sap.m.MessageToast.show("Please select STATE");
                     return;
                 }
                 if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_City") })) {
-                    sap.m.MessageToast.show("Please select CITY");
                     return;
                 }
                 if (!utils._LCvalidateMobileNumber({ getSource: () => sap.ui.getCore().byId("MD_Field_Contact") })) {
-                    sap.m.MessageToast.show("Please correct CONTACT");
                     return;
                 }
             }
@@ -448,7 +440,6 @@ sap.ui.define([
                         })
                     ]
                 }));
-
                 oForm.addFormContainer(oContainer);
                 return;
             }
@@ -496,6 +487,7 @@ sap.ui.define([
                         oInputControl = new sap.m.ComboBox({
                             selectedKey: "{formModel>/Country}",
                             id: "MD_Field_Country",
+                            required: true,
                             showSecondaryValues: true,
                             width: "100%",
                             items: {
@@ -542,6 +534,7 @@ sap.ui.define([
                         oInputControl = new sap.m.ComboBox({
                             selectedKey: "{formModel>/State}",
                             id: "MD_Field_State",
+                            required: true,
                             valueStateText: "Select State",
                             width: "100%",
                             items: {
@@ -579,6 +572,7 @@ sap.ui.define([
                         oInputControl = new sap.m.ComboBox({
                             selectedKey: "{formModel>/City}",
                             id: "MD_Field_City",
+                            required: true,
                             width: "100%",
                             valueStateText: "Select City",
                             items: {
@@ -606,8 +600,11 @@ sap.ui.define([
                                 id: "MD_Field_BranchID",
                                 value: "{formModel>/BranchID}",
                                 maxLength: 10,
+                                required: true,
+                                editable: !that.oPayload,
                                 valueStateText: "Enter Branch ID",
                                 liveChange: function (oEvent) {
+                                    if (that.oPayload) { return; }
                                     let val = oEvent.getParameter("value");
                                     let input = oEvent.getSource();
 
@@ -624,6 +621,7 @@ sap.ui.define([
                         else if (sField === "Name") {
                             oInputControl = new sap.m.Input({
                                 id: "MD_Field_Name",
+                                required: true,
                                 value: "{formModel>/Name}",
                                 maxLength: 60,
                                 valueStateText: "Enter Name",
@@ -635,6 +633,7 @@ sap.ui.define([
                         else if (sField === "Address") {
                             oInputControl = new sap.m.Input({
                                 id: "MD_Field_Address",
+                                required: true,
                                 value: "{formModel>/Address}",
                                 maxLength: 100,
                                 valueStateText: "Enter Address",
@@ -646,6 +645,7 @@ sap.ui.define([
                         else if (sField === "Pincode") {
                             oInputControl = new sap.m.Input({
                                 id: "MD_Field_Pincode",
+                                required: true,
                                 value: "{formModel>/Pincode}",
                                 maxLength: 6,
                                 valueStateText: "Enter Pincode",
@@ -657,6 +657,7 @@ sap.ui.define([
                         else if (sField === "Contact") {
                             oInputControl = new sap.m.Input({
                                 id: "MD_Field_Contact",
+                                required: true,
                                 valueStateText: "Enter Contact Number",
                                 value: "{formModel>/Contact}",
                                 maxLength: 10,
@@ -851,8 +852,11 @@ sap.ui.define([
                     keys.forEach((k) => {
                         filters[k] = this.oPayload ? this.oPayload[k] : myfragmentData[k];
                     });
+                    let updatedData = { ...myfragmentData };
+                    delete updatedData.BranchID;
+                    delete updatedData.countryCode;
                     let resultfinak = {
-                        data: { ...myfragmentData },
+                        data: updatedData,
                         filters: filters,
                     };
 
@@ -878,8 +882,10 @@ sap.ui.define([
                     }
 
                     if (this.sTitle === "HM_Branch") {
-                        if (!utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_BranchID") })) {
-                            return;
+                        if (!this.oPayload) {
+                            if (!utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_BranchID") })) {
+                                return;
+                            }
                         }
                         if (!utils._LCvalidateName({ getSource: () => sap.ui.getCore().byId("MD_Field_Name") })) {
                             return;
@@ -910,7 +916,7 @@ sap.ui.define([
                         that.MD_onCancelButtonPress();
                         const tableUpdateData = await that.ajaxReadWithJQuery(that.sTitle, "");
                         oModel.setData(tableUpdateData.data);
-                        that.closeBusyDialog();
+                        sap.ui.core.BusyIndicator.hide();
                         sap.m.MessageToast.show("Data updated successfully");
                     })
                         .catch((error) => {
@@ -935,7 +941,7 @@ sap.ui.define([
                 title: "Confirm Deletion",
                 onClose: function (oAction) {
                     if (oAction === sap.m.MessageBox.Action.OK) {
-                        that.getBusyDialog();
+                        sap.ui.core.BusyIndicator.show(0);
                         aSelectedItems.forEach(function (oItem) {
                             var oContext = oItem.getBindingContext("dataModel");
                             var oRowData = oContext.getObject();
@@ -956,7 +962,7 @@ sap.ui.define([
                                         let oModel = that.getView().getModel("dataModel");
                                         const tableUpdateData = await that.ajaxReadWithJQuery(that.sTitle, "");
                                         oModel.setData(tableUpdateData.data);
-                                        that.closeBusyDialog();
+                                        sap.ui.core.BusyIndicator.hide();
                                         sap.m.MessageToast.show(that.i18nModel.getText("Data Deleted Successfully"));
                                     });
                                 }
