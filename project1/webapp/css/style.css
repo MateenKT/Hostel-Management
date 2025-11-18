@@ -660,7 +660,32 @@
     color: #00acc1 !important;
     font-weight: bold;
 }
+ .bedCardAreaTag {
+    display: inline-block;
+    background-color: #f3f3f3;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #444;
+    margin-top: 6px;
+}
 
+.imageWrapper {
+    position: relative;
+}
+
+.areaTagBox {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background:#00acc1; /* blue tag */
+    padding: 4px 10px;
+    border-radius: 12px;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+    z-index: 10;
+}
 /* Carousel Container */
 .HostelFacilityCarousel {
   border-radius: 0.6rem;
@@ -1455,3 +1480,5 @@
         margin: 0 10px;
     }
 }
+
+
