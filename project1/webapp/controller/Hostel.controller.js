@@ -11,7 +11,7 @@ sap.ui.define([
 
          onInit: function () {
             this.getOwnerComponent().getRouter().getRoute("RouteHostel").attachMatched(this._onRouteMatched, this);
-            // this._getBrowserLocation();
+            this._getBrowserLocation();
         },
 
         _getBrowserLocation: function () {
@@ -1004,17 +1004,17 @@ _getLocationName: function (lat, lng) {
                 await this.CustomerDetails();
                 await this._loadBranchCode();
                 await this.onReadcallforRoom();
-                await this._loadFilteredData("Kalaburgi","", "");
+                await this._loadFilteredData("Kalaburagi","", "");
 
                 const oBRModel = oView.getModel("sBRModel");
                 const oModelData = oBRModel.getData();
-                const aFiltered = oModelData.filter(item => item.City === "Kalaburgi");
+                const aFiltered = oModelData.filter(item => item.City === "Kalaburagi");
 
                 oView.setModel(new sap.ui.model.json.JSONModel(aFiltered), "AreaModel");
                 oView.byId("id_Area").setEnabled(true);
 
                 // Default selections
-                this.byId("id_Branch").setSelectedKey("Kalaburgi");
+                this.byId("id_Branch").setSelectedKey("Kalaburagi");
                 oView.byId("id_Area").setEnabled(true).setSelectedKey("");
                 oView.byId("id_Roomtype").setEnabled(true).setSelectedKey("All");
                 sap.ui.core.BusyIndicator.hide(); // Hide busy indicator

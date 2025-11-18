@@ -283,10 +283,11 @@
                                                 text="{= ${VisibilityModel>Name} + ' (' + ${VisibilityModel>ACType} + ')' }"
                                                 class="bedCardTitle"
                                             />
-                                            <Text
+                                            <ExpandableText
                                                 text="{VisibilityModel>Description}"
                                                 class="bedCardDesc"
                                                 wrapping="true"
+                                                maxCharacters="105"
                                             />
                                             <Text
                                                 text="{= ${VisibilityModel>Currency} + ${VisibilityModel>Price}}"

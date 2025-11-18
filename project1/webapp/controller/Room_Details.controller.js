@@ -655,7 +655,7 @@ sap.ui.define([
                     actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
                     onClose: async function(sAction) {
                         if (sAction === sap.m.MessageBox.Action.OK) {
-                            sap.ui.core.BusyIndicator.show(0);
+                        
 
                             try {
                                 // Create delete requests for all selected rooms
@@ -678,23 +678,23 @@ sap.ui.define([
                                         }
                                     });
                                 });
-
+                                sap.ui.core.BusyIndicator.show(0);
                                 // Wait for all deletions to finish
                                 await Promise.all(deletePromises);
 
-                                sap.m.MessageToast.show("Selected room(s) deleted successfully!");
 
                                 // Refresh table + bed details after delete
-                               
+                                 
+                                await this.BedTypedetails();
                                 await this.Onsearch();
-                                this.BedTypedetails();
-                                 sap.ui.core.BusyIndicator.hide();
+                                sap.m.MessageToast.show("Selected room(s) deleted successfully!");
+
+                                //  sap.ui.core.BusyIndicator.hide();
 
                             } catch (error) {
                                 console.error("Delete failed:", error);
                                 sap.m.MessageBox.error("Error while deleting room(s). Please try again.");
                             } finally {
-                                sap.ui.core.BusyIndicator.hide();
                                 table.removeSelections(true);
                             }
                         }

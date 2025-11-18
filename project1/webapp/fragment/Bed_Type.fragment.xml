@@ -118,7 +118,7 @@
                     placeholder="Enter No Of Description"
                     liveChange="onNameInputLiveChange"
                     valueStateText="Enter Description"
-                    maxLength="200"
+                    maxLength="150"
                 />
                 <!-- Upload -->
                 <Label

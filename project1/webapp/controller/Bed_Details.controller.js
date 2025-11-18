@@ -273,15 +273,26 @@ sap.ui.define([
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("RouteHostel");
         },
-        Onsearch: function() {
-            this.ajaxReadWithJQuery("HM_BedType", "").then((oData) => {
-                var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
-                var model = new sap.ui.model.json.JSONModel(oFCIAerData);
-                this.getView().setModel(model, "BedDetails")
-                this._populateUniqueFilterValues(oFCIAerData);
-                    sap.ui.core.BusyIndicator.hide();
-            })
-        },
+     Onsearch: function () {
+    sap.ui.core.BusyIndicator.show(0);  // <-- Show here also (optional but safe)
+    
+    return this.ajaxReadWithJQuery("HM_BedType", "")
+        .then((oData) => {
+            const oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
+            const model = new sap.ui.model.json.JSONModel(oFCIAerData);
+
+            this.getView().setModel(model, "BedDetails");
+            this._populateUniqueFilterValues(oFCIAerData);
+        })
+        .catch((err) => {
+            console.error("Error in search", err);
+            sap.m.MessageBox.error("Failed to load bed details.");
+        })
+        .finally(() => {
+            sap.ui.core.BusyIndicator.hide();   // <-- Always executed
+        });
+},
+
         _populateUniqueFilterValues: function(data) {
             let uniqueValues = {
                 PO_id_CustomerName: new Set(),
@@ -396,8 +407,9 @@ sap.ui.define([
                                 // Wait for all deletions to complete
                                 await Promise.all(deletePromises);
 
+                               await this.Onsearch();
                                 sap.m.MessageToast.show("Selected bed(s) deleted successfully!");
-                                this.Onsearch();
+
                             } catch (error) {
                                 console.error("Delete failed:", error);
                                 sap.m.MessageBox.error("Error while deleting bed(s). Please try again.");
