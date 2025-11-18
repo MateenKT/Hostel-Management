@@ -10,11 +10,8 @@
 >
     <Page showHeader="true">
         <headerContent>
-            <core:Fragment
-                fragmentName="sap.ui.com.project1.fragment.Header"
-                type="XML"
-            />
-        </headerContent>
+			<core:Fragment fragmentName="sap.ui.com.project1.fragment.Header" type="XML"/>
+		</headerContent>
         <content>
             <fb:FilterBar
                 id="MD_id_Filterbar"

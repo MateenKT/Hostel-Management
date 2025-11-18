@@ -193,7 +193,7 @@ sap.ui.define([
                 STD: Payload.stdCode,
                 Country: Payload.country,
                 State: Payload.state,
-                City: Payload.City
+                City: Payload.baseLocation
             };
             sap.ui.core.BusyIndicator.show(0);
             try {
@@ -212,7 +212,6 @@ sap.ui.define([
                     }
                 }
                 if (this.isEdit && Payload.BranchID) {
-                    // Update record using ID in URL
                     await this.ajaxUpdateWithJQuery("HM_Branch", {
                         data: oData,
                         filters: {
@@ -221,7 +220,6 @@ sap.ui.define([
                     });
                     sap.m.MessageToast.show("Branch updated successfully!");
                 } else {
-                    // Create record
                     await this.ajaxCreateWithJQuery("HM_Branch", {
                         data: oData
                     });

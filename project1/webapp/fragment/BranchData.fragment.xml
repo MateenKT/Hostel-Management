@@ -78,6 +78,7 @@
                 <ComboBox
                     id="MC_id_Country"
                     change="MC_onChangeCountry"
+                    placeholder="Enter Country"
                     valueStateText="{i18n>expValStaCountry}"
                     items="{path:'CountryModel>/',length:1000}"
                     selectedKey="{MDmodel>/country}"
@@ -97,6 +98,7 @@
                 <ComboBox
                     id="MC_id_State"
                     change="MC_onChangeState"
+                    placeholder="Enter State"
                     valueStateText="{i18n>expValStaState}"
                     items="{path:'StateModel>/',length:1000}"
                     selectedKey="{MDmodel>/state}"
@@ -116,6 +118,7 @@
                     id="MC_id_City"
                     change="MC_onChangeCity"
                     valueStateText="{i18n>combovalueState}"
+                    placeholder="Enter City"
                     items="{path:'CityModel>/',length:1000}"
                     selectedKey="{MDmodel>/baseLocation}"
                     value="{MDmodel>/baseLocation}"
