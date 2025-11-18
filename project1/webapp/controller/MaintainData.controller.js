@@ -217,21 +217,60 @@ sap.ui.define([
             }
             let valid = true;
 
-            valid &= utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_BranchID") });
-            valid &= utils._LCvalidateName({ getSource: () => sap.ui.getCore().byId("MD_Field_Name") });
-            valid &= utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_Address") });
-            valid &= utils._LCvalidatePinCode({ getSource: () => sap.ui.getCore().byId("MD_Field_Pincode") });
-            valid &= utils._LCvalidateMobileNumber({ getSource: () => sap.ui.getCore().byId("MD_Field_Contact") });
-            valid &= utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_Country") });
-            valid &= utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_State") });
-            valid &= utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_City") });
+            // Validate BranchID
+            if (!utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_BranchID") })) {
+                sap.m.MessageToast.show("Please correct BRANCHID");
+                return;
+            }
+
+            // Validate Name
+            if (!utils._LCvalidateName({ getSource: () => sap.ui.getCore().byId("MD_Field_Name") })) {
+                sap.m.MessageToast.show("Please correct NAME");
+                return;
+            }
+
+            // Validate Address
+            if (!utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_Address") })) {
+                sap.m.MessageToast.show("Please correct ADDRESS");
+                return;
+            }
+
+            // Validate Pincode
+            if (!utils._LCvalidatePinCode({ getSource: () => sap.ui.getCore().byId("MD_Field_Pincode") })) {
+                sap.m.MessageToast.show("Please correct PINCODE");
+                return;
+            }
+
+            // Validate Country
+            if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_Country") })) {
+                sap.m.MessageToast.show("Please select COUNTRY");
+                return;
+            }
+
+            // Validate State
+            if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_State") })) {
+                sap.m.MessageToast.show("Please select STATE");
+                return;
+            }
+
+            // Validate City
+            if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_City") })) {
+                sap.m.MessageToast.show("Please select CITY");
+                return;
+            }
+
+            // Validate Contact
+            if (!utils._LCvalidateMobileNumber({ getSource: () => sap.ui.getCore().byId("MD_Field_Contact") })) {
+                sap.m.MessageToast.show("Please correct CONTACT");
+                return;
+            }
 
             if (!valid) {
                 sap.m.MessageToast.show("Please correct highlighted fields");
                 return;
             }
 
-            delete cleanedData.countryCode;
+            delete cleanedData.countryCode
             let oPayload = { data: cleanedData };
             sap.ui.core.BusyIndicator.show(0);
             that.ajaxCreateWithJQuery(this.sTitle, oPayload).then(async (res) => {
@@ -422,7 +461,7 @@ sap.ui.define([
                             showSecondaryValues: true,
                             width: "100%",
                             items: {
-                                path: "CountryModel>/",
+                                path: "CountryModel>/", valueStateText:"Select Country",
                                 length: 1000, showSecondaryValues: true,
                                 template: new sap.ui.core.ListItem({
                                     key: "{CountryModel>countryName}",
@@ -460,6 +499,7 @@ sap.ui.define([
                         oInputControl = new sap.m.ComboBox({
                             selectedKey: "{formModel>/State}",
                             id: "MD_Field_State",
+                            valueStateText:"Select State",
                             width: "100%",
                             items: {
                                 path: "FilteredStateModel>/",
@@ -470,7 +510,6 @@ sap.ui.define([
                             },
                             selectionChange: function (oEvent) {
                                 let selStateName = oEvent.getSource().getSelectedKey();
-
                                 const formModel = that.oUpdatePass.getModel("formModel");
                                 formModel.setProperty("/State", selStateName);
                                 let cCode = formModel.getProperty("/countryCode");
@@ -486,6 +525,7 @@ sap.ui.define([
                             selectedKey: "{formModel>/City}",
                             id: "MD_Field_City",
                             width: "100%",
+                            valueStateText:"Select City",
                             items: {
                                 path: "FilteredCityModel>/",
                                 template: new sap.ui.core.ListItem({
@@ -508,6 +548,7 @@ sap.ui.define([
                                 id: "MD_Field_BranchID",
                                 value: "{formModel>/BranchID}",
                                 maxLength: 10,
+                                valueStateText:"Please correct BRANCHID",
                                 liveChange: function (oEvent) {
                                     utils._LCvalidateMandatoryField(oEvent);
                                 }
@@ -518,6 +559,7 @@ sap.ui.define([
                                 id: "MD_Field_Name",
                                 value: "{formModel>/Name}",
                                 maxLength: 60,
+                                valueStateText:"Enter Name",
                                 liveChange: function (oEvent) {
                                     utils._LCvalidateName(oEvent);
                                 }
@@ -528,6 +570,7 @@ sap.ui.define([
                                 id: "MD_Field_Address",
                                 value: "{formModel>/Address}",
                                 maxLength: 100,
+                                valueStateText:"Enter Address",
                                 liveChange: function (oEvent) {
                                     utils._LCvalidateMandatoryField(oEvent);
                                 }
@@ -538,6 +581,7 @@ sap.ui.define([
                                 id: "MD_Field_Pincode",
                                 value: "{formModel>/Pincode}",
                                 maxLength: 6,
+                                valueStateText:"Enter Pincode",
                                 liveChange: function (oEvent) {
                                     utils._LCvalidatePinCode(oEvent);
                                 }
@@ -546,6 +590,7 @@ sap.ui.define([
                         else if (sField === "Contact") {
                             oInputControl = new sap.m.Input({
                                 id: "MD_Field_Contact",
+                                valueStateText:"Enter Contact Number",
                                 value: "{formModel>/Contact}",
                                 maxLength: 10,
                                 liveChange: function (oEvent) {
@@ -734,15 +779,45 @@ sap.ui.define([
                         resultfinak.data.Photo2Type = this._imageData.img2type || resultfinak.data.Photo2Type || null;
                     }
                     let valid = true;
-                    valid &= utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_BranchID") });
-                    valid &= utils._LCvalidateName({ getSource: () => sap.ui.getCore().byId("MD_Field_Name") });
-                    valid &= utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_Address") });
-                    valid &= utils._LCvalidatePinCode({ getSource: () => sap.ui.getCore().byId("MD_Field_Pincode") });
-                    valid &= utils._LCvalidateMobileNumber({ getSource: () => sap.ui.getCore().byId("MD_Field_Contact") });
+                    // Validate BranchID
+                    if (!utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_BranchID") })) {
+                        return;
+                    }
 
-                    valid &= utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_Country") });
-                    valid &= utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_State") });
-                    valid &= utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_City") });
+                    // Validate Name
+                    if (!utils._LCvalidateName({ getSource: () => sap.ui.getCore().byId("MD_Field_Name") })) {
+                        return;
+                    }
+
+                    // Validate Address
+                    if (!utils._LCvalidateMandatoryField({ getSource: () => sap.ui.getCore().byId("MD_Field_Address") })) {
+                        return;
+                    }
+
+                    // Validate Pincode
+                    if (!utils._LCvalidatePinCode({ getSource: () => sap.ui.getCore().byId("MD_Field_Pincode") })) {
+                        return;
+                    }
+
+                    // Validate Country
+                    if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_Country") })) {
+                        return;
+                    }
+
+                    // Validate State
+                    if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_State") })) {
+                        return;
+                    }
+
+                    // Validate City
+                    if (!utils._LCstrictValidationComboBox({ getSource: () => sap.ui.getCore().byId("MD_Field_City") })) {
+                        return;
+                    }
+
+                    // Validate Contact
+                    if (!utils._LCvalidateMobileNumber({ getSource: () => sap.ui.getCore().byId("MD_Field_Contact") })) {
+                        return;
+                    }
 
                     if (!valid) {
                         sap.m.MessageToast.show("Please correct highlighted fields");
