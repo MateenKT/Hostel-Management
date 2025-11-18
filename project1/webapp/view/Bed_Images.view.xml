@@ -148,7 +148,7 @@
                                             placeholder="Enter No Of Description"
                                             liveChange="onNameInputLiveChange"
                                             valueStateText="Enter Description"
-                                            maxLength="100"
+                                            maxLength="150"
                                             editable="{editable>/Edit}"
                                         />
                                     </f:content>

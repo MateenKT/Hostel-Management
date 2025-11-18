@@ -135,7 +135,7 @@ sap.ui.define([
                 // File validation
                 var Attachment = oView.getModel("tokenModel").getData();
                 if (!Attachment.tokens || Attachment.tokens.length === 0) {
-                    return sap.m.MessageBox.error(this.i18nModel.getText("uploadFile"));
+                    return sap.m.MessageToast.show("Please upload at least one image.");
                 }
 
                 if (attachments.length === 0) {

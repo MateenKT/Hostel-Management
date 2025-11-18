@@ -81,7 +81,7 @@ _getLocationName: function (lat, lng) {
 
             // 2️⃣ Disable controls initially
             this.byId("id_Branch").setEnabled(true);
-            this.byId("id_Area").setEnabled(false);
+            this.byId("id_Area");
             this.byId("id_Roomtype");
 
             // 3️⃣ Hide avatar initially
@@ -1004,7 +1004,7 @@ _getLocationName: function (lat, lng) {
                 await this.CustomerDetails();
                 await this._loadBranchCode();
                 await this.onReadcallforRoom();
-                await this._loadFilteredData("Kalaburgi","KLB01", "");
+                await this._loadFilteredData("Kalaburgi","", "");
 
                 const oBRModel = oView.getModel("sBRModel");
                 const oModelData = oBRModel.getData();
@@ -1015,7 +1015,7 @@ _getLocationName: function (lat, lng) {
 
                 // Default selections
                 this.byId("id_Branch").setSelectedKey("Kalaburgi");
-                oView.byId("id_Area").setEnabled(true).setSelectedKey("KLB01");
+                oView.byId("id_Area").setEnabled(true).setSelectedKey("");
                 oView.byId("id_Roomtype").setEnabled(true).setSelectedKey("All");
                 sap.ui.core.BusyIndicator.hide(); // Hide busy indicator
             } catch (error) {
@@ -1980,24 +1980,27 @@ _getLocationName: function (lat, lng) {
         },
 
         // 🔹 Search logic remains same
-        onSearchRooms: function () {
-            const oBranchCombo = this.byId("id_Area");   // Area Combo
-            const oBranchcity = this.byId("id_Branch").getSelectedItem().getKey();   // Area Combo
+       onSearchRooms: async function () {
+    const oBranchCombo = this.byId("id_Area");   // Area Combo
+    const oBranchcity = this.byId("id_Branch").getSelectedItem()?.getKey();
 
-            const oACTypeCombo = this.byId("id_Roomtype");
+    const oACTypeCombo = this.byId("id_Roomtype");
 
-            const oSelectedBranchItem = oBranchCombo.getSelectedItem();
-            const sSelectedBranch = oSelectedBranchItem?.getKey(); // BranchID from AreaModel
+    const oSelectedBranchItem = oBranchCombo.getSelectedItem();
+    const sSelectedBranch = oSelectedBranchItem?.getKey(); // BranchID from AreaModel
 
-            const sSelectedACType = oACTypeCombo?.getSelectedKey();
+    const sSelectedACType = oACTypeCombo?.getSelectedKey();
 
-            // if (!sSelectedBranch) {
-            //     sap.m.MessageToast.show("Please select a location first.");
-            //     return;
-            // }
+    sap.ui.core.BusyIndicator.show(0);
 
-            this._loadFilteredData(oBranchcity, sSelectedBranch, sSelectedACType);
-        },
+    try {
+        await this._loadFilteredData(oBranchcity, sSelectedBranch, sSelectedACType);
+    } catch (e) {
+        console.error("Error loading data:", e);
+    } finally {
+        sap.ui.core.BusyIndicator.hide();
+    }
+},
 
 
         onBookNow: function (oEvent) {

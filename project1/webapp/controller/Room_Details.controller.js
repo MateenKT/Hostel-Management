@@ -260,9 +260,22 @@ sap.ui.define([
             var oView = this.getView();
             var sBranchCode = oEvent.getParameter("selectedItem").getKey();
 
+
             // Models
             var oBedTypeModel = oView.getModel("BedTypeModel");
             var oRoomDetailsModel = oView.getModel("RoomDetailsModel");
+                var oCurrencyModel = oView.getModel("BranchModel").getData();
+
+           var Currency= oCurrencyModel.find((item)=>{
+               return item.BranchID===sBranchCode
+            })
+
+            if(Currency.Country==="India")
+                {
+                this.byId("FO_id_Currency").setSelectedKey("INR")
+                }
+            
+
 
             // Get all bed types (from a backup copy)
             var aAllBedTypes = this._aAllBedTypes || oBedTypeModel.getProperty("/");
@@ -296,6 +309,8 @@ sap.ui.define([
             // Reset UI selections
             var oBedTypeCombo = oView.byId("idBedType");
             oBedTypeCombo.setSelectedKey("").setVisible(true);
+
+        
         },
 
 
@@ -670,8 +685,10 @@ sap.ui.define([
                                 sap.m.MessageToast.show("Selected room(s) deleted successfully!");
 
                                 // Refresh table + bed details after delete
+                               
                                 await this.Onsearch();
                                 this.BedTypedetails();
+                                 sap.ui.core.BusyIndicator.hide();
 
                             } catch (error) {
                                 console.error("Delete failed:", error);
@@ -686,6 +703,8 @@ sap.ui.define([
             );
         },
         Onsearch: function() {
+                                         sap.ui.core.BusyIndicator.show(0);
+
             $.ajax({
                 url: "https://rest.kalpavrikshatechnologies.com/HM_Rooms",
                 method: "GET",
