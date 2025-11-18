@@ -98,17 +98,14 @@
 				</VBox> -->
 
 <!-- Facilities header -->
-<!-- Facilities header -->
-<Bar design="Header" class="sapUiMediumMarginTop">
+<!-- <Bar design="Header" class="sapUiMediumMarginTop">
 	<contentMiddle>
 		<Title text="Available Facilities" />
 	</contentMiddle>
 </Bar>
-<!-- Loading -->
 <HBox justifyContent="Center" visible="{FacilityModel>/loading}">
 	<BusyIndicator size="0.8rem" />
 </HBox>
-<!-- Responsive grid built from a List -->
 <List id="facilityList" class="facilityList" items="{FacilityModel>/Facilities}" visible="{= !${FacilityModel>/loading} }" inset="false">
 	<items>
 		<CustomListItem type="Inactive" class="facilityListItem">
@@ -119,13 +116,50 @@
 			</VBox>
 		</CustomListItem>
 	</items>
-</List>
+</List> -->
+
+<!-- Facilities header -->
+<!-- <Bar design="Header" class="sapUiMediumMarginTop">
+	<contentMiddle>
+		<Title text="Available Facilities" />
+	</contentMiddle>
+</Bar>
+<HBox justifyContent="Center" visible="{FacilityModel>/loading}">
+	<BusyIndicator size="0.8rem" />
+</HBox>
+<FlexBox
+	id="facilityBox"
+	class="facilityCardWrap"
+	visible="{= !${FacilityModel>/loading} }"
+	items="{path: 'FacilityModel>/Facilities'}"
+	wrap="Wrap"
+	justifyContent="Start">
+	<VBox class="facilityCard sapUiSmallMargin">
+		<Image src="{FacilityModel>Image}" class="facilityCardImg" densityAware="false" />
+		<Text text="{FacilityModel>FacilityName}" class="facilityCardTitle" />
+		<Text text="₹{FacilityModel>Price}" class="facilityCardPrice" />
+	</VBox>
+</FlexBox> -->
 
 
-
-
-
-
+<!-- Facilities Header -->
+<Bar design="Header" class="sapUiMediumMarginTop">
+	<contentMiddle>
+		<Title text="Available Facilities" />
+	</contentMiddle>
+</Bar>
+<!-- Loading -->
+<HBox justifyContent="Center" visible="{FacilityModel>/loading}">
+	<BusyIndicator size="0.8rem" />
+</HBox>
+<!-- REAL Responsive Grid -->
+<FlexBox id="facilityBox" class="facilityCardWrap" visible="{= !${FacilityModel>/loading} }" items="{path: 'FacilityModel>/Facilities'}" wrap="Wrap" justifyContent="Center">
+	<VBox class="facilityCard">
+		<Image src="{FacilityModel>Image}" class="facilityCardImg" densityAware="false" />
+		<Text text="{FacilityModel>FacilityName}" class="facilityCardTitle" />
+		<Text text="₹{FacilityModel>Price}" class="facilityCardPrice" />
+	</VBox>
+</FlexBox>
 
 
 
@@ -146,13 +180,12 @@
 	<BusyIndicator size="0.8rem" />
 </HBox>
 <!-- Amenities (Old UI5 Compatible Grid) -->
-<HBox wrap="Wrap" class="amenityFlex sapUiTinyMarginBeginEnd" visible="{= !${AmenityModel>/loading} }" items="{AmenityModel>/Amenities}">
+<HBox class="amenityGrid" wrap="Wrap" items="{AmenityModel>/Amenities}">
 	<items>
-		<VBox class="facilityCard">
-			<!-- <Image src="{AmenityModel>Phot	o1}" class="facilityCardImg" densityAware="false" /> -->
-			<Image src="{= ${AmenityModel>Photo1} ? 'data:image/jpeg;base64,' + ${AmenityModel>Photo1} : '' }" />
-			<Text text="{AmenityModel>FacilityName}" class="facilityCardTitle" />
-			<Text text="{AmenityModel>Description}" class="facilityCardPrice" />
+		<VBox class="amenityCard">
+			<Image src="{AmenityModel>ImageSrc}" class="amenityImage" />
+			<Text text="{AmenityModel>FacilityName}" class="amenityTitle" />
+			<Text text="{AmenityModel>Description}" class="amenityDesc" />
 		</VBox>
 	</items>
 </HBox>

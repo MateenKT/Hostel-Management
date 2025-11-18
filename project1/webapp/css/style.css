@@ -1149,11 +1149,15 @@
     margin-left: 0.5rem;
     word-break: break-word !important;
 }
-.facilityCardWrap { gap: 14px; }
+/* .facilityCardWrap { gap: 14px; } */
 
 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------*/
-
+.facilityCardWrap {
+    display: flex;
+    gap: 22px;
+    padding: 20px;
+}
 .bookNowTile {
     background: linear-gradient(135deg, #74c7ce, #008c9e) !important;
     color: white !important;
@@ -1263,7 +1267,7 @@
         max-height: 200px !important;
     }
 
-    /* --- FACILITY CARD REDUCE SIZE --- */
+    /* --- FACILITY CARD REDUCE SIZE ---
     .facilityCard {
         width: 150px !important;
         height: 120px !important;
@@ -1272,122 +1276,182 @@
 
     .facilityCardImg {
         height: 70px !important;
-    }
+    } */
 }
 
 
 /* ======================================================== */
-/* Turn the list into a grid */
-.facilityList .sapMListUl {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    justify-content: flex-start !important;
-    gap: 16px !important;
-
-    padding: 0 !important;        /* Remove SAP default left/right padding */
-    margin: 0 !important;
+/* LIST OUTER WRAPPER */
+.facilityList {
+  box-sizing: border-box;
+  padding: 10px 24px;   /* breathing room so shadows are not cut */
 }
 
-/* Each card cell */
+/* TURN THE UL INTO A FLEX GRID */
+.facilityList .sapMListUl {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  justify-content: center !important;
+  gap: 22px !important;
+  margin: 0 !important;
+  padding: 12px 16px !important;
+}
+
+/* GRID CELL */
 .facilityListItem {
+    flex: 0 0 calc((100% - 66px) / 4) !important;
+    max-width: calc((100% - 66px) / 4) !important;
     padding: 0 !important;
     margin: 0 !important;
-    list-style: none !important;
-
-    width: calc(25% - 16px) !important; /* 4 columns desktop */
+    overflow: visible !important;
+    box-sizing: border-box;
+}
+.facilityList .sapMListUl > li {
+    overflow: visible !important;
+    background: transparent !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+/* THE CARD */
+.facilityCard {
+    flex: 0 1 calc((100% - 66px) / 4);
+    max-width: calc((100% - 66px) / 4);
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    padding: 16px;
+    text-align: center;
+    transition: .2s ease;
 }
 
-/* Facility Card */
-.facilityCard {
-    width: 100% !important;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+.facilityCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+}
+
+
+
+
+
+.facilityCardImg {
+    width: 100%;
+    height: 150px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+
+/* TITLE + PRICE */
+.facilityCardTitle,
+.facilityCardPrice {
+  width: 100%;
+  text-align: center;   /* <-- FIXES YOUR PROBLEM */
+}
+
+.facilityCardTitle {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.facilityCardPrice {
+  font-size: 14px;
+  font-weight: 600;
+  color: #0070c9;
+}
+
+/* 🎯 TABLET (3 per row) */
+@media (max-width: 1024px) {
+  .facilityListItem {
+    flex: 0 0 31% !important;
+    max-width: 31% !important;
+  }
+  .facilityCardImg {
+    height: 120px !important;
+  }
+}
+
+/* 🎯 MOBILE (2 per row) */
+@media (max-width: 768px) {
+  .facilityListItem {
+    flex: 0 0 47% !important;
+    max-width: 47% !important;
+  }
+  .facilityCardImg {
+    height: 100px !important;
+  }
+  .facilityCard {
     padding: 12px;
+  }
+}
+
+/* 🎯 SMALL PHONES (1 per row) */
+@media (max-width: 420px) {
+  .facilityListItem {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+  }
+  .facilityCardImg {
+    height: 90px !important;
+  }
+}
+
+/* =======================================88 */
+/* GRID WRAPPER */
+.amenityGrid {
+    justify-content: center;
+    gap: 20px;
+    padding: 10px;
+}
+
+/* CARD */
+.amenityCard {
+    width: 320px;
+    padding: 20px;
+    border-radius: 15px;
+    background: white;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-}
-
-/* Image */
-.facilityCardImg {
-    width: 100% !important;
-    height: 110px !important;
-    object-fit: cover !important;
-    border-radius: 8px;
-}
-
-/* Text styling */
-.facilityCardTitle {
-    font-weight: 600;
-    font-size: 14px;
     text-align: center;
-}
-.facilityCardPrice {
-    color: #0b75d1;
-    font-weight: 600;
-    font-size: 13px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;   /* smooth hover */
 }
 
-/* TABLET */
-@media (max-width: 1024px) {
-    .facilityListItem {
-        width: calc(33.33% - 16px) !important; /* 3 columns */
-    }
+/* HOVER EFFECT */
+.amenityCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.22);
 }
 
-/* MOBILE */
-@media (max-width: 768px) {
-    .facilityListItem {
-        width: calc(50% - 16px) !important; /* 2 columns */
-    }
-    .facilityCardImg {
-        height: 80px !important;
-    }
-}
-
-/* SMALL PHONES */
-@media (max-width: 420px) {
-    .facilityListItem {
-        width: 100% !important; /* single column */
-    }
-}
-
-
-
-/* =======================================88 */
-.amenityFlex {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    gap: 14px !important;
-    justify-content: flex-start;
+/* IMAGE */
+.amenityImage {
     width: 100%;
-    padding: 0 6px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 10px;
 }
 
-.amenityFlex > .sapMVBox {
-    width: calc(25% - 14px); /* 4 columns desktop */
+/* TITLE */
+.amenityTitle {
+    font-weight: bold;
+    margin-top: 10px;
+    font-size: 1.1rem;
+    color: #004b82;
 }
 
-@media (max-width: 1024px) {
-    .amenityFlex > .sapMVBox {
-        width: calc(33.333% - 14px); /* 3 columns tablet */
+/* DESCRIPTION */
+.amenityDesc {
+    color: #0066cc;
+    margin-top: 5px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* MOBILE RESPONSIVE */
+@media(max-width: 600px) {
+    .amenityCard {
+        width: 100%;
+        margin: 0 10px;
     }
 }
-
-@media (max-width: 768px) {
-    .amenityFlex > .sapMVBox {
-        width: calc(50% - 14px); /* 2 columns mobile */
-    }
-}
-
-@media (max-width: 420px) {
-    .amenityFlex > .sapMVBox {
-        width: 100%; /* 1 column small phone */
-    }
-}
- 
-
-
-

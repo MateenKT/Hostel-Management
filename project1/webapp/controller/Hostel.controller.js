@@ -961,39 +961,34 @@ _getLocationName: function (lat, lng) {
 
 
         _LoadAmenities: async function () {
-            const oAmenityModel = new sap.ui.model.json.JSONModel({
+            const oModel = new sap.ui.model.json.JSONModel({
                 loading: true,
                 Amenities: []
             });
 
-            // this.getView().setModel(oAmenityModel, "AmenityModel");
-            this._oRoomDetailFragment.setModel(oAmenityModel, "AmenityModel");
-
+            this._oRoomDetailFragment.setModel(oModel, "AmenityModel");
 
             try {
-                let data = await this.ajaxReadWithJQuery("HM_HostelFeatures", "");
-                console.log("HM_HostelFeatures:", data);
+                let resp = await this.ajaxReadWithJQuery("HM_HostelFeatures", "");
+                let list = resp?.data || [];
 
-                let aAmenities = (data && data.data) ? data.data : [];
+                // Convert base64 → proper data URL
+                list = list.map(item => {
+                    return {
+                        ...item,
+                        ImageSrc: item.Photo1
+                            ? "data:image/jpeg;base64," + item.Photo1
+                            : ""
+                    };
+                });
 
-                // Fallback
-                if (!aAmenities.length) {
-                    aAmenities = [{
-                        FacilityName: "No amenities found",
-                        Description: "",
-                        Photo1: "",
-                        Photo2: ""
-                    }];
-                }
+                oModel.setProperty("/Amenities", list);
 
-                oAmenityModel.setProperty("/Amenities", aAmenities);
-
-            } catch (e) {
-                console.error("Amenity load error:", e);
-            } finally {
-                oAmenityModel.setProperty("/loading", false);
-                console.log("Loading flag:", oAmenityModel.getProperty("/loading"));
+            } catch (err) {
+                console.error("Amenity load error:", err);
             }
+
+            oModel.setProperty("/loading", false);
         },
 
 
