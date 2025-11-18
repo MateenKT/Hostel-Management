@@ -119,10 +119,17 @@
                 </ComboBox>
 
                 <!-- Upload -->
-                <Label text="Add Image" required="true" />
-                <HBox alignItems="Center" width="100%" renderType="Bare">
-                    <VBox width="25%">
-                        <u:FileUploader
+                <Label
+                    text="Add Image"
+                    required="true"
+                />
+                <VBox
+                    alignItems="Start"
+                    width="100%"
+                    renderType="Bare"
+                >
+                    <HBox width="25%">
+                         <u:FileUploader
                             id="fileUploader"
                             fileSizeExceed="onFileSizeExceeds"
                             maximumFileSize="5MB"
@@ -137,12 +144,11 @@
                             uploadOnChange="false"
                             tooltip="Only JPG, PNG, or PDF files under 5MB allowed"
                         />
-                    </VBox>
-
+                    </HBox>
                     <!-- Tokenizer -->
-                    <VBox width="75%">
+                    <HBox width="75%">
                         <ScrollContainer
-                            height="70px"
+                            height="60px"
                             width="100%"
                             horizontal="false"
                             vertical="true"
@@ -156,8 +162,8 @@
                                 <Token key="{tokenModel>key}" text="{tokenModel>text}" />
                             </Tokenizer>
                         </ScrollContainer>
-                    </VBox>
-                </HBox>
+                    </HBox>
+                </VBox>
             </f:content>
         </f:SimpleForm>
         <!-- Footer -->
