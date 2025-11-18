@@ -1125,6 +1125,10 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
     const aFacilities = oPerson.Facilities?.SelectedFacilities || [];
 
     aFacilities.forEach((f) => {
+      var faciliti =  oPerson.AllSelectedFacilities?.filter(d =>  d.FacilityName === f.FacilityName);
+      if(faciliti?.length>0){
+        aAllFacilities.push(faciliti[0])
+      }else{
       const fPrice = parseFloat(f.Price || 0);
       let fTotal = 0;
 
@@ -1171,6 +1175,7 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
         Currency: f.Currency,
         UnitText: f.UnitText
       });
+    }
     });
   });
 
@@ -1215,6 +1220,22 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
       const iSelectedMonths = parseInt(oHostelModel.getProperty("/SelectedMonths") || 1, 10);
 
       let bAllFilled = sPaymentType && sPerson && sStartDate && sEndDate;
+      if (sStartDate) {
+        var date = this._parseDate(sStartDate);
+        let oStart = new Date(date);
+    
+        // Add 1 day in LOCAL timezone
+        oStart.setDate(oStart.getDate() + 1);
+    
+        // Convert to yyyy-MM-dd WITHOUT timezone conversion
+        const sMinEndDate = [
+            oStart.getFullYear(),
+            String(oStart.getMonth() + 1).padStart(2, "0"),
+            String(oStart.getDate()).padStart(2, "0")
+        ].join("-");
+    
+        oEndDatePicker.setMinDate(new Date(sMinEndDate));
+    }
 
       // ✅ Auto-calculate End Date if plan is "monthly" and Start Date selected
       if (oEvent.getSource().getId().includes("idStartDate1") && sStartDate && sPaymentType === "monthly") {
@@ -1444,6 +1465,8 @@ oHostelModel.setProperty("/StopPriceRecalculate", true);
       // ⭐ DAILY → user selects end date manually
       if (sSelectedKey === "daily") {
         oBTN.setProperty("/Month", false);
+        oHostelModel.setProperty("/StartDate","");
+        oHostelModel.setProperty("/EndDate","");
         oEndDatePicker.setEditable(true);
         return;
       }

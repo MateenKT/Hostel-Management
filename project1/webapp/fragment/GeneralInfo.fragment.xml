@@ -93,7 +93,6 @@
     valueFormat="dd/MM/yyyy"
     displayFormat="dd/MM/yyyy"
     change="onFieldValidation"
-    minDate="{path: 'HostelModel>/StartDate', formatter: '.Formatter.minDate'}"
     width="100%"
     editable="false"
 />

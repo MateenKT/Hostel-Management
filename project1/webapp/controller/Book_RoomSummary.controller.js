@@ -96,12 +96,30 @@ onEditFacilityDetails: function () {
     // Set minDate on datepickers to not allow earlier than existing start (if any)
     const sStart = oFacilityData.StartDate || oFacilityData.StartDateText || "";
     const oMinDate = this._parsePossibleDateString(sStart);
-    if (oMinDate && !isNaN(oMinDate.getTime())) {
-        const oStartPicker = sap.ui.core.Fragment.byId(this.getView().getId(), "editStartDate");
-        const oEndPicker = sap.ui.core.Fragment.byId(this.getView().getId(), "editEndDate");
-        if (oStartPicker) oStartPicker.setMinDate(oMinDate);
-        if (oEndPicker) oEndPicker.setMinDate(oMinDate);
+      if (sStart) {
+        var date = this._parseDate(sStart);
+        let oStart = new Date(date);
+    
+        // Add 1 day in LOCAL timezone
+        oStart.setDate(oStart.getDate() + 1);
+    
+        // Convert to yyyy-MM-dd WITHOUT timezone conversion
+        const sMinEndDate = [
+            oStart.getFullYear(),
+            String(oStart.getMonth() + 1).padStart(2, "0"),
+            String(oStart.getDate()).padStart(2, "0")
+        ].join("-");
+    
+        //oEndDatePicker.setMinDate(new Date(sMinEndDate));
+         const oEndPicker = sap.ui.core.Fragment.byId(this.getView().getId(), "editEndDate");
+         oEndPicker.setMinDate(new Date(sMinEndDate));
     }
+    // if (oMinDate && !isNaN(oMinDate.getTime())) {
+    //     const oStartPicker = sap.ui.core.Fragment.byId(this.getView().getId(), "editStartDate");
+    //     const oEndPicker = sap.ui.core.Fragment.byId(this.getView().getId(), "editEndDate");
+    //    // if (oStartPicker) oStartPicker.setMinDate(oMinDate);
+    //     if (oEndPicker) oEndPicker.setMinDate(oMinDate);
+    // }
 },
         _parsePossibleDateString: function (s) {
             if (!s) return null;
@@ -188,6 +206,25 @@ onEditFacilityDetails: function () {
             // --- Calculate days ---
             const iDays = Math.ceil((oEnd - oStart) / (1000 * 60 * 60 * 24)) ;  // inclusive
             oEditModel.setProperty("/TotalDays", iDays);
+
+        if (sStart && !oEvent.getParameter("id").includes("editEndDate")) {
+        //var date = this._parseDate(sStart);
+        let oStart = new Date(sStart);
+    
+        // Add 1 day in LOCAL timezone
+        oStart.setDate(oStart.getDate() + 1);
+    
+        // Convert to yyyy-MM-dd WITHOUT timezone conversion
+        const sMinEndDate = [
+            oStart.getFullYear(),
+            String(oStart.getMonth() + 1).padStart(2, "0"),
+            String(oStart.getDate()).padStart(2, "0")
+        ].join("-");
+    
+        //oEndDatePicker.setMinDate(new Date(sMinEndDate));
+         const oEndPicker = sap.ui.core.Fragment.byId(this.getView().getId(), "editEndDate");
+         oEndPicker.setMinDate(new Date(sMinEndDate));
+    }
         },
 
         // Utility function to format date
@@ -222,9 +259,7 @@ onEditFacilitySave: function () {
     }
 
     // Attempt 1: use stored index (if it looks valid)
-    let iIndex = (typeof this._oSelectedIndex === "number" && this._oSelectedIndex >= 0 && this._oSelectedIndex < aFacilities.length)
-        ? this._oSelectedIndex
-        : -1;
+    let iIndex =  this._oSelectedIndex ;
 
     // Attempt 2: if index invalid, find by identity (FacilityID + PersonName + StartDate + EndDate)
     if (iIndex === -1 && this._oSelectedFacility) {
