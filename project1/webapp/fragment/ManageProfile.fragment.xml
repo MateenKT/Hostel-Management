@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout">
-  <Dialog id="profileDialog" horizontalScrolling="false" verticalScrolling="true" contentWidth="560px" contentHeight="550px" class="profile-dialog-bg" xmlns:f="sap.ui.layout.form" stretch="true">
+  <Dialog id="profileDialog" horizontalScrolling="false" verticalScrolling="true" contentWidth="560px" contentHeight="550px" class="profile-dialog-bg"  stretch="true" 	xmlns:w="sap.ui.integration.widgets" xmlns:f="sap.f"  xmlns:layout="sap.ui.layout">
   <customHeader>
     <Bar>
       <contentMiddle>
@@ -11,19 +11,21 @@
     </Bar> 
   </customHeader>
     <VBox>
-      <!-- Header with background -->
-      <HBox class="sapUiLargeMarginTop" width="100%">
 
-        <!-- Avatar Section -->
-        <VBox justifyContent="Center" alignItems="Center" >
-            <Avatar 
-                src="{profileData>/photo}" 
-                initials="{profileData>/initials}" 
-                displaySize="XL"
-                class="profile-avatar"/>
-        </VBox>
+     <!-- Header Section -->
+<HBox class="sapUiLargeMarginTop" width="100%" justifyContent="SpaceBetween" alignItems="Center">
 
-        <!-- Two-column details section -->
+    <!-- LEFT SIDE: Avatar + Profile Details -->
+    <HBox width="75%" alignItems="Center">
+
+        <!-- Avatar -->
+        <Avatar 
+            src="{profileData>/photo}" 
+            initials="{profileData>/initials}" 
+            displaySize="XL"
+            class="sapUiSmallMarginBegin"/>
+
+        <!-- Profile Details -->
         <VBox width="100%" class="sapUiSmallMarginBegin">
 
             <l:Grid
@@ -73,26 +75,82 @@
         </VBox>
 
     </HBox>
-      <VBox>
-  <HBox height="100%">
-   
-    <Text text="Booking History"/>
+
+    <!-- RIGHT SIDE: Logout Button -->
+    <VBox width="25%" alignItems="End">
+        <Button text="Log Out" press="Onpresslogout" type="Reject" />
+    </VBox>
+
+</HBox>
+
+    
+        <Text text="Booking History" class="sapUiSmallMarginTop sapUiSmallMarginBegin"/>
+  <HBox height="100%" renderType="Bare" width="100%">
+  
      <IconTabBar
 		id="idIconTabBarFiori2"
 		expanded="{device>/isNoPhone}"
-		class="sapUiResponsiveContentPadding">
+		class="sapUiResponsiveContentPadding sapUiSmallMarginTop">
 		<items>
 			<IconTabFilter
-				text="Upcomming"
-				key="upcomming"
-				>
-				<Text text="Upcomming goes here ..." />
-			</IconTabFilter>
+    text="Upcoming"
+    key="upcoming">
+
+    <layout:Grid defaultSpan="XL6 L6 M12 S12" vSpacing="1" hSpacing="1"
+                 class="sapUiResponsiveMargin sapUiTinyMargin">
+
+        <VBox width="100%" class="sapUiMediumMargin">
+
+            <f:Card class="sapUiTinyMargin">
+                <f:header>
+                    <Toolbar class="customdashboard">
+                        <Title text="Upcoming Booking" level="H5" wrapping="true" class="Dashboardtitle"/>
+                        <ToolbarSpacer/>
+                    </Toolbar>
+                </f:header>
+
+                <f:content>
+
+                    <VBox class="sapUiSmallMargin">
+
+                        <!-- START / END DATE ROW -->
+                        <HBox class="sapUiSmallMarginBottom">
+                            <VBox width="50%">
+                                <Label text="Start Date" />
+                                <Text text="{profileData>/upcoming/startDate}" />
+                            </VBox>
+
+                            <VBox width="50%" class="sapUiSmallMarginBegin">
+                                <Label text="End Date" />
+                                <Text text="{profileData>/upcoming/endDate}" />
+                            </VBox>
+                        </HBox>
+
+                        <!-- AMOUNT ROW -->
+                        <HBox>
+                            <VBox width="50%">
+                                <Label text="Amount" />
+                                <Text text="{profileData>/upcoming/amount}" />
+                            </VBox>
+                        </HBox>
+
+                    </VBox>
+
+                </f:content>
+
+            </f:Card>
+
+        </VBox>
+
+    </layout:Grid>
+
+</IconTabFilter>
+
+
 			<IconTabFilter
 				text="Complete Booking"
-				key="completebooking"
-				count="43">
-				<Text text="Complete Booking  go here ..." />
+				key="completebooking">
+			
         <Table items="{profileData>/bookings}" mode="SingleSelectLeft" id="IdProfileaTable">
         <headerToolbar>
             <Toolbar>
@@ -100,7 +158,7 @@
                 <Button 
                     text="Edit"
                     icon="sap-icon://edit"
-                    press="onEditBooking"
+                    press="onProfileLogout"
                     type="Emphasized"/>
             </Toolbar>
         </headerToolbar>
@@ -137,7 +195,7 @@
    
    
   </HBox>
-</VBox>
+
 
     </VBox>
   </Dialog>

@@ -39,14 +39,19 @@
                     />
                 </ComboBox>
 
-               <Label text="How many Month/Year"  visible="{= ${edit>/UnitText} !== 'Per Day' &amp;&amp; ${edit>/UnitText} !== 'Per Hour' }" />
+              <Label 
+    text="How many Month/Year"  
+    visible="{= ${edit>/UnitText} !== 'Per Day' &amp;&amp; ${edit>/UnitText} !== 'Per Hour' }" 
+/>
 
 <Select
-    selectedKey="{= ${edit>/UnitText} === 'Per Month' 
-                    ? ${edit>/TotalMonths} 
-                    : ${edit>/TotalYears} }"
-    change="onMonthSelectionChange"
+    width="100%"
     visible="{= ${edit>/UnitText} !== 'Per Day' &amp;&amp; ${edit>/UnitText} !== 'Per Hour' }"
+    selectedKey="{
+        = ${edit>/UnitText} === 'Per Month' 
+            ? ${edit>/TotalMonths} 
+            : ${edit>/TotalYears}
+    }"
 >
     <core:Item key="1" text="1" />
     <core:Item key="2" text="2" />
@@ -61,6 +66,7 @@
     <core:Item key="11" text="11" />
     <core:Item key="12" text="12" />
 </Select>
+
 
                 <Label text="Start Date" />
                 <DatePicker id="editStartDate" value="{edit>/StartDate}" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd" change="onEditDateChange" />

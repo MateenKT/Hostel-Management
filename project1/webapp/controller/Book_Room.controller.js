@@ -871,75 +871,7 @@ oFacilityModel.refresh(true);
     onDialogClose: function () {
       this._oLoginAlertDialog.close()
     },
-//     onSignIn: async function () {
-//       const oLoginModel = this.getView().getModel("LoginModel");
 
-//       // Access the fragment inputs safely
-//       const sUserId = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInuserid")?.getValue();
-//       const sUserName = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInusername")?.getValue();
-//       const sPassword = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signinPassword")?.getValue();
-
-//       // Basic validation
-//       if (!sUserId || !sUserName || !sPassword) {
-//         sap.m.MessageToast.show("Please fill in all fields.");
-//         return;
-//       }
-
-//       try {
-//         const oResponse = await this.ajaxReadWithJQuery("HM_Login", "");
-//         const aUsers = oResponse?.commentData || [];
-
-//         const oMatchedUser = aUsers.find(user =>
-//           user.UserID === sUserId &&
-//           user.UserName === sUserName &&
-//           (user.Password === sPassword || user.Password === btoa(sPassword))
-//         );
-
-//         if (!oMatchedUser) {
-//           sap.m.MessageToast.show("Invalid credentials. Please try again.");
-//           return;
-//         }
-
-//         oLoginModel.setProperty("/EmployeeID", oMatchedUser.UserID);
-//         oLoginModel.setProperty("/EmployeeName", oMatchedUser.UserName);
-//         oLoginModel.setProperty("/EmailID", oMatchedUser.EmailID);
-//         oLoginModel.setProperty("/Role", oMatchedUser.Role);
-//         oLoginModel.setProperty("/BranchCode", oMatchedUser.BranchCode || "");
-//         oLoginModel.setProperty("/MobileNo", oMatchedUser.MobileNo || "");
-
-//        // After successful login
-// if (oMatchedUser.Role === "Customer") {
-
-//     const oHostelModel = this.getView().getModel("HostelModel");
-//     const aPersons = oHostelModel.getProperty("/Persons");
-
-//     // Ensure Persons array exists
-//     if (aPersons && aPersons.length > 0) {
-
-//         // Fill Person 1 details
-//         aPersons[0].FullName = oMatchedUser.UserName || "";
-//         aPersons[0].CustomerEmail = oMatchedUser.EmailID || "";
-//         aPersons[0].MobileNo = oMatchedUser.MobileNo || "";
-//         aPersons[0].UserID = oMatchedUser.UserID || "";
-
-//         oHostelModel.refresh(true);
-
-//         // Auto-check the "Fill Yourself" checkbox
-//         const oCheck = sap.ui.getCore().byId(this.createId("IDSelfCheck_0"));
-//         if (oCheck) {
-//             oCheck.setSelected(true);
-//         }
-//     }
-// } else {
-//           sap.m.MessageToast.show("Invalid credentials.");
-//         }
-
-//       } catch (err) {
-//         console.error("Login Error:", err);
-//         sap.m.MessageToast.show("Failed to fetch login data: " + err);
-//       }
-//     }
-    // ,
     _checkMandatoryFields: function () {
     const oModel = this.getView().getModel("HostelModel");
     const aPersons = oModel.getProperty("/Persons") || [];
@@ -1032,8 +964,6 @@ oFacilityModel.refresh(true);
               this.onNoOfPersonSelect();
             }
           } catch (e) {
-            // safe fallback: call without event
-            this.onNoOfPersonSelect();
           }
           this._LoadFacilities()
           break;
