@@ -1779,7 +1779,7 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
         if (oInput.getValue() === "") oInput.setValueState("None");
 
         const value = (oInput.getValue());
-        const total = (this.getView().getModel("HostelModel").getProperty("/GrandTotal"));
+        const total = (this.getView().getModel("HostelModel").getProperty("/OverallTotalCost"));
 
         if (value > total) {
             oInput.setValueState("Error");
@@ -1876,7 +1876,7 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
 
      const oAmountInput = sap.ui.getCore().byId("idAmount");
      const enteredAmount = Number(oAmountInput.getValue());
-     const grandTotal = Number(this.getView().getModel("HostelModel").getProperty("/GrandTotal"));
+     const grandTotal = Number(this.getView().getModel("HostelModel").getProperty("/OverallTotalCost"));
 
      if (enteredAmount > grandTotal) {
          oAmountInput.setValueState("Error");

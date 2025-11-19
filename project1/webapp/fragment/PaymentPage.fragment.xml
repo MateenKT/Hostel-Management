@@ -29,7 +29,7 @@
                 <!-- ===== GRAND TOTAL ===== -->
                 <HBox>
                     <Label text="Grand Total :" class="sapUiTinyMargin" />
-                    <Text text="{ path: 'HostelModel>/GrandTotal', formatter: '.Formatter.formatCurrency' }" />
+                    <Text text="{parts: ['HostelModel>/OverallTotalCost','HostelModel>/Currency'],formatter: '.Formatter.formatCurrency'}"/>
                 </HBox>
 
                 <!-- ===== PAYMENT TYPE (Radio) ===== -->
