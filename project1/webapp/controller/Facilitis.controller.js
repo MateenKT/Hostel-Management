@@ -291,8 +291,6 @@ sap.ui.define([
                     aAttachments = aAttachments.filter(file => file.filename !== sKey);
                 });
             }
-
-            // Update models
             oTokenModel.setProperty("/tokens", aTokens);
             oUploaderData.setProperty("/attachments", aAttachments);
         },

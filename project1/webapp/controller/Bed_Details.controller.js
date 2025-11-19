@@ -206,15 +206,26 @@ sap.ui.define([
 
             let aTokens = oModel.getProperty("/tokens") || [];
             let aAttachments = oUploaderData.getProperty("/attachments") || [];
+            const oListItem = oEvent.getParameter("listItem");
+            if (oListItem) {
+                const oCtx = oListItem.getBindingContext("UploaderData");
+                const sFileName = oCtx.getProperty("filename");
+
+                aAttachments = aAttachments.filter(file => file.filename !== sFileName);
+                aTokens = aTokens.filter(token => token.key !== sFileName);
+            }
             const aDeletedTokens = oEvent.getParameter("tokens");
-            aDeletedTokens.forEach((oDeletedToken) => {
-                const sKey = oDeletedToken.getKey();
-                aTokens = aTokens.filter(token => token.key !== sKey);
-                aAttachments = aAttachments.filter(file => file.filename !== sKey);
-            });
+            if (aDeletedTokens) {
+                aDeletedTokens.forEach((oDeletedToken) => {
+                    const sKey = oDeletedToken.getKey();
+                    aTokens = aTokens.filter(token => token.key !== sKey);
+                    aAttachments = aAttachments.filter(file => file.filename !== sKey);
+                });
+            }
             oModel.setProperty("/tokens", aTokens);
             oUploaderData.setProperty("/attachments", aAttachments);
         },
+        
         onFacilityFileChange: function (oEvent) {
             const oFiles = oEvent.getParameter("files");
             if (!oFiles || oFiles.length === 0) return;
