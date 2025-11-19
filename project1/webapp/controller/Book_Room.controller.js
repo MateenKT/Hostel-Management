@@ -2018,15 +2018,15 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
     var oRoute = this.getOwnerComponent().getRouter();
     oRoute.navTo("RouteHostel");
 
-    //  setTimeout(function () {
-    //   this.resetAllBookingData()
-    //     this.openProfileDialog();
-    // }.bind(this), 500);
-    // // --- SHOW AVATAR AUTOMATICALLY ---
-    // const oAvatar = sap.ui.getCore().byId("ProfileAvatar");
-    // if (oAvatar) {
-    //     oAvatar.setVisible(true);   
-    // }
+     setTimeout(function () {
+      this.resetAllBookingData()
+        this.openProfileDialog();
+    }.bind(this), 500);
+    // --- SHOW AVATAR AUTOMATICALLY ---
+    const oAvatar = sap.ui.getCore().byId("ProfileAvatar");
+    if (oAvatar) {
+        oAvatar.setVisible(true);   
+    }
 }.bind(this)
          });
         } catch (err) {
