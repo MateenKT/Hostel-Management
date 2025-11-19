@@ -10,7 +10,11 @@
         id="FacilitiesDialog"
         title="Add facilities"
         type="Message"
-        class="sapUiContentPadding"  resizable="true" draggable="true" contentHeight="auto" contentWidth="40%"
+        class="sapUiContentPadding"
+        resizable="true"
+        draggable="true"
+        contentWidth="40%"
+        contentHeight="auto"
     >
         <f:SimpleForm
             editable="true"
@@ -25,7 +29,10 @@
         >
             <f:content>
                 <!-- Branch Code -->
-                <Label text="Branch Code" required="true" />
+                <Label
+                    text="Branch Code"
+                    required="true"
+                />
                 <ComboBox
                     id="idRoomType123"
                     placeholder="Select branch Code"
@@ -33,7 +40,6 @@
                     items="{BranchModel>/}"
                     showSecondaryValues="true"
                     change=".onFacilitybranchChange"
-                    valueStateText="{i18n>selectBranchCode}"
                 >
                     <core:ListItem
                         key="{BranchModel>BranchID}"
@@ -43,26 +49,26 @@
                 </ComboBox>
 
                 <!-- Facility Name -->
-                <Label text="Facility Name" required="true" />
+                <Label
+                    text="Facility Name"
+                    required="true"
+                />
                 <Input
                     id="idFacilityName"
                     value="{FacilitiesModel>/FacilityName}"
                     placeholder="Enter Facility Name"
-                    maxLength="60"
-                    liveChange=".onFacilityNameChange"
-                    valueStateText="{i18n>enterFacilityName}"
                 />
 
                 <!-- Type -->
-                <Label text="Type" required="true" />
+                <Label
+                    text="Type"
+                    required="true"
+                />
                 <ComboBox
                     id="idFacilityName1"
                     items="{FacilityType>/}"
-                    placeholder="Enter Type"
                     value="{FacilitiesModel>/Type}"
-                    change=".onFacilityTypeChange"
-                    width="100%"
-                    valueStateText="{i18n>enterFacilityType}"
+                    placeholder="Enter Type"
                 >
                     <core:Item
                         key="{FacilityType>ID}"
@@ -71,27 +77,23 @@
                 </ComboBox>
 
                 <!-- Price + Unit -->
-                <Label text="Price" required="true" />
-                <HBox width="100%" justifyContent="Start" alignItems="Center">
+                <Label
+                    text="Price"
+                    required="true"
+                />
+                <HBox width="100%">
                     <VBox width="50%">
                         <Input
                             id="FO_id_Price"
-                            value="{FacilitiesModel>/Price}"
                             placeholder="Enter Price"
-                            maxLength="10"
-                            liveChange=".onFacilityPriceChange"
-                            valueStateText="{i18n>enterFacilityPrice}"
+                            value="{FacilitiesModel>/Price}"
                         />
                     </VBox>
                     <VBox width="50%">
                         <ComboBox
                             id="FO_id_Rate"
                             items="{RateType>/}"
-                            selectedKey="Per Day"
                             value="{FacilitiesModel>/UnitText}"
-                            change=".onFacilityRateChange"
-                            width="100%"
-                            valueStateText="{i18n>selectRateType}"
                         >
                             <core:Item
                                 key="{RateType>ID}"
@@ -102,14 +104,14 @@
                 </HBox>
 
                 <!-- Currency -->
-                <Label text="Currency" required="true" />
+                <Label
+                    text="Currency"
+                    required="true"
+                />
                 <ComboBox
                     id="FL_id_Currency"
                     selectedKey="{FacilitiesModel>/Currency}"
                     items="{CurrencyModel>/}"
-                    valueStateText="Select Currency"
-                    width="100%"
-                    change=".onFacilitybranchChange"
                     placeholder="Select Currency"
                 >
                     <c:Item
@@ -117,72 +119,71 @@
                         text="{CurrencyModel>currency}"
                     />
                 </ComboBox>
-
-                <!-- Upload -->
-                <Label
-                    text="Add Image"
-                    required="true"
-                />
-                <VBox
-                    alignItems="Start"
+                <Label />
+                <Label />
+                <Table
+                    id="id_AttachmentTable"
+                    items="{UploaderData>/attachments}"
+                    mode="Delete"
+                    delete="onTokenDelete"
                     width="100%"
-                    renderType="Bare"
+                    popinLayout="Block"
                 >
-                    <HBox width="25%">
-                         <u:FileUploader
-                            id="fileUploader"
-                            fileSizeExceed="onFileSizeExceeds"
-                            maximumFileSize="5MB"
-                            typeMissmatch="onFileTypeMissmatch"
-                            fileType="jpg,jpeg,png"
-                            change="onFacilityFileChange"
-                            buttonOnly="true"
-                            sameFilenameAllowed="true"
-                            iconFirst="true"
-                            buttonText="Upload Images"
-                            multiple="true"
-                            uploadOnChange="false"
-                            tooltip="Only JPG, PNG, or PDF files under 5MB allowed"
-                        />
-                    </HBox>
-                    <!-- Tokenizer -->
-                    <HBox width="75%">
-                        <ScrollContainer
-                            height="60px"
-                            width="100%"
-                            horizontal="false"
-                            vertical="true"
-                        >
-                            <Tokenizer
-                                id="idTokenList"
+                    <headerToolbar>
+                        <OverflowToolbar>
+                            <HBox
                                 width="100%"
-                                tokenDelete="onTokenDelete"
-                                tokens="{tokenModel>/tokens}"
+                                justifyContent="Start"
                             >
-                                <Token key="{tokenModel>key}" text="{tokenModel>text}" />
-                            </Tokenizer>
-                        </ScrollContainer>
-                    </HBox>
-                </VBox>
+                                <u:FileUploader
+                                    id="id_fileUploader"
+                                    buttonOnly="true"
+                                    buttonText="Upload Images"
+                                    fileType="jpg,jpeg,png"
+                                    multiple="true"
+                                    change="onFacilityFileChange"
+                                />
+                            </HBox>
+                        </OverflowToolbar>
+                    </headerToolbar>
+
+                    <columns>
+                        <Column>
+                            <Text text="File Name" />
+                        </Column>
+                        <Column hAlign="Center">
+                            <Text text="File Type" />
+                        </Column>
+                        <Column hAlign="Center">
+                            <Text text="File Size" />
+                        </Column>
+                    </columns>
+
+                    <items>
+                        <ColumnListItem>
+                            <cells>
+                                <Text text="{UploaderData>filename}" />
+                                <Text text="{UploaderData>fileType}" />
+                                <Text text="{UploaderData>size}" />
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
             </f:content>
         </f:SimpleForm>
-        <!-- Footer -->
+
         <footer>
             <Toolbar>
                 <ToolbarSpacer />
                 <Button
                     text="Save"
-                    press="FD_onsavebuttonpress"
                     type="Accept"
-                    id="FO_id_saveButton"
-                    class="marginRight"
+                    press="FD_onsavebuttonpress"
                 />
                 <Button
                     text="Cancel"
-                    press="FD_onCancelButtonPress"
                     type="Reject"
-                    id="FD_id_CancelButton"
-                    class="marginRight"
+                    press="FD_onCancelButtonPress"
                 />
             </Toolbar>
         </footer>

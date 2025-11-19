@@ -13,15 +13,15 @@ sap.ui.define([
 
         _onRouteMatched: function () {
             this.i18nModel = this.getView().getModel("i18n").getResourceBundle();
-            // const omodel = new sap.ui.model.json.JSONModel({
-            //     url: "https://rest.kalpavrikshatechnologies.com/",
-            //     headers: {
-            //         name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-            //         password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
-            //         "Content-Type": "application/json",
-            //     }
-            // });
-            // this.getOwnerComponent().setModel(omodel, "LoginModel");
+            const omodel = new sap.ui.model.json.JSONModel({
+                url: "https://rest.kalpavrikshatechnologies.com/",
+                headers: {
+                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
+                    "Content-Type": "application/json",
+                }
+            });
+            this.getOwnerComponent().setModel(omodel, "LoginModel");
             const oMDmodel = new sap.ui.model.json.JSONModel({
                 BranchID: "",
                 Name: "",
@@ -106,7 +106,22 @@ sap.ui.define([
                 label: "Contact Number",
                 property: "Contact",
                 type: "string"
-            }
+            },
+            {
+                label: "Country",
+                property: "Country",
+                type: "string"
+            },
+            {
+                label: "State",
+                property: "State",
+                type: "string"
+            },
+            {
+                label: "City",
+                property: "City",
+                type: "string"
+            },
             ]
         },
 
@@ -270,13 +285,13 @@ sap.ui.define([
                 const aMainData = oView.getModel("mainModel").getData() || [];
                 if (!this.isEdit) {
                     const isDuplicate = aMainData.some(item =>
-                        item.BranchID === oData.BranchID && item.Pincode === oData.Pincode
+                        item.BranchID === oData.BranchID
                     );
 
                     if (isDuplicate) {
                         sap.ui.core.BusyIndicator.hide();
                         sap.m.MessageBox.error(
-                            "A branch with the same Branch ID and Pincode already exists. Please use unique values."
+                            "A branch with the same Branch ID already exists. Please use unique values."
                         );
                         return;
                     }
@@ -501,48 +516,48 @@ sap.ui.define([
         },
 
         _applyCountryStateCityFilters: function () {
-                const oModel = this.getView().getModel("MDmodel");
-                const oCountryCB = this.byId("MC_id_Country");
-                const oStateCB = this.byId("MC_id_State");
-                const oSourceCB = this.byId("MC_id_City");;
+            const oModel = this.getView().getModel("MDmodel");
+            const oCountryCB = this.byId("MC_id_Country");
+            const oStateCB = this.byId("MC_id_State");
+            const oSourceCB = this.byId("MC_id_City");;
 
-                const sCountry = oModel.getProperty("/country");     // e.g. "Australia"
-                const sState = oModel.getProperty("/state");       // e.g. "Queensland"
-                const sSource = oModel.getProperty("/baseLocation");      // e.g. "Bongaree"
+            const sCountry = oModel.getProperty("/country");     // e.g. "Australia"
+            const sState = oModel.getProperty("/state");       // e.g. "Queensland"
+            const sSource = oModel.getProperty("/baseLocation");      // e.g. "Bongaree"
 
-                // Reset all filters
-                oStateCB.getBinding("items")?.filter([]);
-                oSourceCB.getBinding("items")?.filter([]);
+            // Reset all filters
+            oStateCB.getBinding("items")?.filter([]);
+            oSourceCB.getBinding("items")?.filter([]);
 
-                if (sCountry) {
-                    // Find countryCode by name
-                    const aCountryData = this.getView().getModel("CountryModel").getData();
-                    const oCountryObj = aCountryData.find(c => c.countryName === sCountry);
+            if (sCountry) {
+                // Find countryCode by name
+                const aCountryData = this.getView().getModel("CountryModel").getData();
+                const oCountryObj = aCountryData.find(c => c.countryName === sCountry);
 
-                    if (oCountryObj) {
-                        const sCountryCode = oCountryObj.code;
+                if (oCountryObj) {
+                    const sCountryCode = oCountryObj.code;
 
-                        // Filter States by Country
-                        oStateCB.getBinding("items")?.filter([
+                    // Filter States by Country
+                    oStateCB.getBinding("items")?.filter([
+                        new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+                    ]);
+
+                    if (sState) {
+                        // Filter Cities by State + Country
+                        const aFilters = [
+                            new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, sState),
                             new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
-                        ]);
-
-                        if (sState) {
-                            // Filter Cities by State + Country
-                            const aFilters = [
-                                new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, sState),
-                                new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
-                            ];
-                            oSourceCB.getBinding("items")?.filter(aFilters);
-                        }
+                        ];
+                        oSourceCB.getBinding("items")?.filter(aFilters);
                     }
                 }
+            }
 
-                // Ensure values are set back in UI
-                oCountryCB.setValue(sCountry || "");
-                oStateCB.setValue(sState || "");
-                oSourceCB.setValue(sSource || "");
-            },
+            // Ensure values are set back in UI
+            oCountryCB.setValue(sCountry || "");
+            oStateCB.setValue(sState || "");
+            oSourceCB.setValue(sSource || "");
+        },
 
         MC_onChangeCountry: function (oEvent) {
             const oView = this.getView();
