@@ -86,9 +86,10 @@ sap.ui.define([
             });
 
             var aControls = this.ARD_Dialog.findAggregatedObjects(true, function(oControl) {
-                return oControl instanceof sap.m.Input ||
+             return oControl instanceof sap.m.Input ||
                     oControl instanceof sap.m.ComboBox ||
-                    oControl instanceof sap.m.Select;
+                    oControl instanceof sap.m.Select ||
+                    oControl instanceof sap.m.TextArea;
             });
 
             aControls.forEach(function(oControl) {
@@ -112,6 +113,20 @@ sap.ui.define([
                 utils._LCvalidateMandatoryField(oView.byId("id_Description"), "ID")
             ) {
 
+                 var Attachment = oView.getModel("tokenModel").getData();
+                if (!Attachment.tokens || Attachment.tokens.length === 0) {
+                    return sap.m.MessageToast.show("Please upload at least one image.");
+                }
+
+                if (attachments.length === 0) {
+                    sap.m.MessageBox.error("Please upload at least one image.");
+                    return;
+                }
+                if (attachments.length > 5) {
+                    sap.m.MessageBox.error("You can upload a maximum of 5 images only.");
+                    return;
+                }
+
                 var aBedDetails = oView.getModel("BedDetails").getData();
                 var bDuplicate = aBedDetails.some(function(bed) {
                     // skip the same record in edit mode
@@ -133,19 +148,7 @@ sap.ui.define([
                 }
 
                 // File validation
-                var Attachment = oView.getModel("tokenModel").getData();
-                if (!Attachment.tokens || Attachment.tokens.length === 0) {
-                    return sap.m.MessageToast.show("Please upload at least one image.");
-                }
-
-                if (attachments.length === 0) {
-                    sap.m.MessageBox.error("Please upload at least one image.");
-                    return;
-                }
-                if (attachments.length > 5) {
-                    sap.m.MessageBox.error("You can upload a maximum of 5 images only.");
-                    return;
-                }
+               
 
                const oData = {
                     data: {

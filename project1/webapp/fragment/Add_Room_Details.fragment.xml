@@ -38,8 +38,8 @@
                 >
                     <core:ListItem
                         key="{BranchModel>BranchID}"
-                        text="{BranchModel>BranchID}"
-                        additionalText="{BranchModel>Name}"
+                        text="{BranchModel>BranchID} - {BranchModel>Name}"
+                        additionalText="{BranchModel>City}"
                     />
                 </ComboBox>
 

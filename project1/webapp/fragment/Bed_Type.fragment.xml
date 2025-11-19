@@ -89,7 +89,7 @@
                 <Input
                     id="idR"
                     value="{BedModel>/NoOfPerson}"
-                    placeholder="Enter No Of Beds"
+                    placeholder="Enter No Of Person"
                     liveChange="onNameInputLiveChange"
                     type="Number"
                     valueStateText="Enter No of person"
@@ -102,7 +102,7 @@
                 <Input
                     id="id_MaxBeds"
                     value="{BedModel>/MaxBeds}"
-                    placeholder="Enter No Of Beds"
+                    placeholder="Enter No Of Room"
                     liveChange="onNameInputLiveChange"
                     type="Number"
                     valueStateText="Enter Max no of Beds"
@@ -115,7 +115,7 @@
                 <TextArea
                     id="id_Description"
                     value="{BedModel>/Description}"
-                    placeholder="Enter No Of Description"
+                    placeholder="Enter Description"
                     liveChange="onNameInputLiveChange"
                     valueStateText="Enter Description"
                     maxLength="150"

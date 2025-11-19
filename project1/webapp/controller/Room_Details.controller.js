@@ -482,7 +482,10 @@ sap.ui.define([
             ,
 
         AR_onCancelButtonPress: function() {
+          
             this.AR_Dialog.close();
+              var table = this.byId("id_ARD_Table");
+             table.removeSelections(true);
         },
         onNavBack: function() {
             var oRouter = this.getOwnerComponent().getRouter();
