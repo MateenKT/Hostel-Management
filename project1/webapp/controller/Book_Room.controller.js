@@ -649,25 +649,32 @@ sap.ui.define([
     if (oFile) {
         const reader = new FileReader();
         reader.onload = function (e) {
-           const sBase64 = e.target.result;
+            const sBase64 = e.target.result;
 
-            // Ensure array exists
-            if (!oData.Persons[index].Documents) {
-                oData.Persons[index].Documents = [];
+            // Always overwrite old document
+            oData.Persons[index].Documents = [];
+
+            // Auto-thumbnail logic
+            let sThumbnail = sBase64;
+            if (oFile.type === "application/pdf") {
+                sThumbnail = "sap-icon://pdf-attachment";
             }
 
             // Push new document
             oData.Persons[index].Documents.push({
                 FileName: oFile.name,
                 FileType: oFile.type,
-                Document: sBase64
+                Document: sBase64,
+                Thumbnail: sThumbnail
             });
 
             oModel.refresh(true);
         };
+
         reader.readAsDataURL(oFile);
     }
 }
+
             }),
 
           ]
@@ -837,8 +844,7 @@ oFacilityModel.refresh(true);
 
     oModel.setProperty("/HasFacilities", aAll.length > 0);
     oModel.refresh(true);
-}
-,
+},
     _checkMandatoryFields: function () {
       const oModel = this.getView().getModel("HostelModel");
       const aPersons = oModel.getProperty("/Persons") || [];
@@ -963,16 +969,16 @@ oFacilityModel.refresh(true);
 }
 ,
     onDialogNextButton: async function () {
-        if (this._iSelectedStepIndex === 1) {
-    const aMissing = this._checkMandatoryFields();
+//         if (this._iSelectedStepIndex === 1) {
+//     const aMissing = this._checkMandatoryFields();
 
-    if (aMissing.length > 0) {
-        sap.m.MessageBox.error(
-            "Please fill the following mandatory fields:\n\n" + aMissing.join("\n")
-        );
-        return; // STOP navigation
-    }
-}
+//     if (aMissing.length > 0) {
+//         sap.m.MessageBox.error(
+//             "Please fill the following mandatory fields:\n\n" + aMissing.join("\n")
+//         );
+//         return; // STOP navigation
+//     }
+// }
 
       this._iSelectedStepIndex = this._oWizard.getSteps().indexOf(this._oSelectedStep);
       this.oNextStep = this._oWizard.getSteps()[this._iSelectedStepIndex + 1];
@@ -1342,55 +1348,54 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
     }
     ,
     onMonthSelectionChange: function (oEvent) {
-      const oView = this.getView();
+    const oView = this.getView();
+    const oHostelModel = oView.getModel("HostelModel");
 
-      const oHostelModel = oView.getModel("HostelModel");
-      oHostelModel.setProperty("/StopPriceRecalculate", true);
-      const sStartDate = oView.byId("idStartDate1")?.getValue() || "";
-      const iSelectedNumber = parseInt(oEvent.getSource().getSelectedKey() || "1", 10);
-      const sDuration = oHostelModel.getProperty("/SelectedPriceType");  // daily / monthly / yearly
-     oHostelModel.setProperty("/SelectedMonths", iSelectedNumber.toString());
+    oHostelModel.setProperty("/StopPriceRecalculate", true);
 
-      if (!sStartDate) {
+    const sStartDate = oView.byId("idStartDate1")?.getValue() || "";
+    const iSelectedNumber = parseInt(oEvent.getSource().getSelectedKey() || "1", 10);
+    const sDuration = oHostelModel.getProperty("/SelectedPriceType"); 
+
+    oHostelModel.setProperty("/SelectedMonths", iSelectedNumber.toString());
+
+    if (!sStartDate) {
         sap.m.MessageToast.show("Please select Start Date first.");
         return;
-      }
+    }
 
-      const oStart = this._parseDate(sStartDate);
-      if (!(oStart instanceof Date) || isNaN(oStart)) {
+    const oStart = this._parseDate(sStartDate);
+    if (!(oStart instanceof Date) || isNaN(oStart)) {
         sap.m.MessageToast.show("Invalid Start Date.");
         return;
-      }
+    }
 
-      let iDaysToAdd = 0;
+    let oEnd = new Date(oStart);
 
-      // ⭐ APPLY LOGIC BASED ON BOOKING DURATION
-      switch (sDuration) {
+    // REAL DATE LOGIC
+    switch (sDuration) {
+
         case "monthly":
-          iDaysToAdd = iSelectedNumber * 30; // per month logic
-          break;
+            // Add exact number of months respecting Feb, 30/31 days
+            oEnd.setMonth(oEnd.getMonth() + iSelectedNumber);
+            break;
 
         case "yearly":
-          iDaysToAdd = iSelectedNumber * 365; // per year logic
-          break;
+            // Add exact years (handles leap years automatically)
+            oEnd.setFullYear(oEnd.getFullYear() + iSelectedNumber);
+            break;
 
         case "daily":
-          sap.m.MessageToast.show("Duration is per day. No month/year selection needed.");
-          return;
-      }
-
-      // Calculate End Date
-      const oEnd = new Date(oStart);
-      oEnd.setDate(oStart.getDate() + iDaysToAdd);
-
-      const sEndDate = this._formatDateToDDMMYYYY(oEnd);
-
-      // Update model + Field
-      oHostelModel.setProperty("/EndDate", sEndDate);
-      oView.byId("idEndDate1")?.setValue(sEndDate);
+            sap.m.MessageToast.show("Duration is per day. No month/year selection needed.");
+            return;
     }
-    ,
 
+    const sEndDate = this._formatDateToDDMMYYYY(oEnd);
+
+    oHostelModel.setProperty("/EndDate", sEndDate);
+    oView.byId("idEndDate1")?.setValue(sEndDate);
+}
+,
     _formatDateToDDMMYYYY: function (oDate) {
       if (!(oDate instanceof Date)) return "";
       const dd = String(oDate.getDate()).padStart(2, "0");
@@ -1517,6 +1522,22 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
         oEndDatePicker.setEditable(true);
         return;
       }
+          if (sSelectedKey === "monthly") {
+          oBTN.setProperty("/Month", true);
+          oHostelModel.setProperty("/SelectedMonths","1");
+          oHostelModel.setProperty("/StartDate","");
+          oHostelModel.setProperty("/EndDate","");
+          oEndDatePicker.setEditable(false); 
+          return;
+        }
+        if (sSelectedKey === "yearly") {
+          oBTN.setProperty("/Month", true);
+          oHostelModel.setProperty("/SelectedMonths","1");
+          oHostelModel.setProperty("/StartDate","");
+          oHostelModel.setProperty("/EndDate","");
+          oEndDatePicker.setEditable(false);
+          return;
+        }
 
       //  MONTHLY or YEARLY → need “How Many Month/Year”
       oBTN.setProperty("/Month", true);
@@ -2010,9 +2031,9 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
 
          aBookingDetails.forEach((item, index) => {
              sMessage +=
-                 "Customer :" +  (index + 1) +"\n"+
-                 "Customer ID: " + item.CustomerID + "\n" +
-                 "Booking ID: " + item.BookingID + "\n\n";
+                //  "Customer :" +  (index + 1) +"\n"+
+                //  "Customer ID: " + item.CustomerID + "\n" +
+                 "Booking ID: " + item.BookingID;
          });
 
          // Show success box

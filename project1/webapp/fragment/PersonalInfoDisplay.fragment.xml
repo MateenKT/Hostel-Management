@@ -45,7 +45,7 @@
 
 
 
-<VBox 
+<VBox
     visible="{= ${HostelModel>Documents}.length > 0 }"
     class="sapUiSmallMargin">
 
@@ -53,22 +53,33 @@
         <Title text="Uploaded Documents" level="H4" />
     </Toolbar>
 
-    <List
-        mode="None"
-        items="{path: 'HostelModel>Documents'}">
-        <CustomListItem>
-            <HBox justifyContent="SpaceBetween" alignItems="Center" class="sapUiSmallMargin">
+    <!-- Wrap cards like facility layout -->
+    <FlexBox
+        wrap="Wrap"
+        justifyContent="Start"
+        class="sapUiSmallMarginTop"
+        alignItems="Start"
+        items="{
+            path: 'HostelModel>Documents'
+        }">
 
-                <Link 
-                    text="{HostelModel>FileName}" 
-                    press="onOpenDocumentPreview" 
-                    width="200px"
-                />
+        <VBox
+            width="200px"
+            height="200px"
+            class="serviceCard"
+            alignItems="Center"
+            justifyContent="Center">
 
-            </HBox>
-        </CustomListItem>
+            <!-- Image / PDF Thumbnail -->
+            <Image
+                src="{HostelModel>Thumbnail}"
+                width="180px"
+                height="140px"
+                densityAware="false"
+                press="onOpenDocumentPreview" />
+        </VBox>
 
-    </List>
+    </FlexBox>
 
 </VBox>
 
