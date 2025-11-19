@@ -35,6 +35,8 @@
                     this._fetchCommonData("State", "StateModel");
                     this._fetchCommonData("Country", "CountryModel");
                     this._fetchCommonData("BaseLocation", "BaseLocationModel");
+                    this._fetchCommonData("HM_Branch", "sBRModel");
+
                 },
                 _fetchCommonData: async function (entityName, modelName, filter = "") {
                 // If already loaded, skip

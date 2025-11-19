@@ -369,174 +369,7 @@ _getLocationName: function (lat, lng) {
         //     }
         // },
 
-  _loadFilteredData: async function (Scity, sBranchCode, sACType) {
 
-    if (sACType === "All") {
-        sACType = "";
-    }
-
-    try {
-
-        const oView = this.getView();
-
-        let aBranchCodes = [];
-
-        if (Scity && !sBranchCode) {
-
-            const aBranches = await this.ajaxReadWithJQuery("HM_Branch", {
-                City: Scity
-            });
-
-            aBranchCodes = (Array.isArray(aBranches.data) ? aBranches.data : [aBranches.data])
-                .map(branch => branch.BranchID);
-        }
-
-        else if (Scity && sBranchCode) {
-            aBranchCodes = [sBranchCode];
-        }
-
-        else if (!Scity && sBranchCode) {
-            aBranchCodes = [sBranchCode];
-        }
-
-
-        const response = await this.ajaxReadWithJQuery("HM_BedType", {
-            BranchCode: JSON.stringify(aBranchCodes)
-        });
-
-        let matchedRooms = response?.data?.data || [];
-
-
-        if (sACType) {
-            matchedRooms = matchedRooms.filter(
-                room => room.ACType?.toLowerCase() === sACType.toLowerCase()
-            );
-        }
-
-
-        if (sBranchCode && sBranchCode.trim() !== "") {
-            matchedRooms = matchedRooms.filter(
-                room =>
-                    room.BranchCode?.toLowerCase() === sBranchCode.toLowerCase()
-            );
-        } else {
-
-            matchedRooms = matchedRooms.filter(
-                room =>
-                    aBranchCodes
-                        .map(code => code.toLowerCase())
-                        .includes(room.BranchCode?.toLowerCase())
-            );
-        }
-
-
-        const oRoomDetailsModel = oView.getModel("RoomCountModel");
-        const oCustomerModel = oView.getModel("CustomerModel");
-
-        const roomDetails = oRoomDetailsModel.getData()?.Rooms || [];
-        const customerData = oCustomerModel.getData() || [];
-
-     
-        const oBranchModel = oView.getModel("sBRModel");
-        const aBranchData = oBranchModel?.getData() || [];
-
-
-        const convertBase64ToImage = (base64String, fileType) => {
-            if (!base64String) return "./image/Fallback.png";
-            let sBase64 = base64String.replace(/\s/g, "");
-            try {
-                if (!sBase64.startsWith("iVB") && !sBase64.startsWith("data:image")) {
-                    const decoded = atob(sBase64);
-                    if (decoded.startsWith("iVB")) sBase64 = decoded;
-                }
-            } catch (e) { }
-
-            const mimeType = fileType || "image/jpeg";
-            if (sBase64.startsWith("data:image")) return sBase64;
-            return `data:${mimeType};base64,${sBase64}`;
-        };
-
-
-        const aBedTypes = matchedRooms.map(room => {
-
-            const matchingRooms = roomDetails.filter(
-                rd =>
-                    rd.BranchCode?.toLowerCase() === room.BranchCode?.toLowerCase() &&
-                    rd.BedTypeName?.trim().toLowerCase() ===
-                    (room.Name?.trim().toLowerCase() +
-                        " - " +
-                        room.ACType?.trim().toLowerCase())
-            );
-
-            const firstRoom = matchingRooms[0];
-
-            const price = firstRoom?.Price ? " " + firstRoom.Price : "";
-            const MonthPrice = firstRoom?.MonthPrice ? " " + firstRoom.MonthPrice : "";
-            const YearPrice = firstRoom?.YearPrice ? " " + firstRoom.YearPrice : "";
-            const Currency = firstRoom?.Currency ? " " + firstRoom.Currency : "";
-
-            let totalBooked = 0;
-            let totalCapacity = 0;
-
-            matchingRooms.forEach(rm => {
-                totalCapacity += rm.NoofPerson || 0;
-                const bookedCount = customerData.filter(cust =>
-                    cust.Bookings?.some(bk =>
-                        bk.BranchCode?.toLowerCase() === rm.BranchCode?.toLowerCase() &&
-                        bk.RoomNo?.toLowerCase() === rm.RoomNo?.toLowerCase() &&
-                        bk.BedType?.trim().toLowerCase() === rm.BedTypeName?.trim().toLowerCase()
-                    )
-                ).length;
-                totalBooked += bookedCount;
-            });
-
-            const isFull = totalBooked >= totalCapacity && totalCapacity > 0;
-            const isVisible = !isFull && price.trim() !== "";
-
-            
-            const oBranchInfo = aBranchData.find(b =>
-                b.BranchID?.toLowerCase() === room.BranchCode?.toLowerCase()
-            );
-
-            const sArea = oBranchInfo?.Address || "";
-
-            const aImages = [];
-            for (let i = 1; i <= 5; i++) {
-                const base64 = room[`Photo${i}`];
-                const type = room[`Photo${i}Type`];
-                if (base64) {
-                    aImages.push({
-                        src: convertBase64ToImage(base64, type),
-                        Area:sArea
-                    });
-                }
-            }
-            return {
-                Name: room.Name,
-                ACType: room.ACType,
-                NoOfPerson: room.NoOfPerson,
-                Description: room.Description || "",
-                Price: price,
-                MonthPrice: MonthPrice,
-                YearPrice: YearPrice,
-                Currency: Currency,
-                BranchCode: room.BranchCode,
-                Images: aImages,
-                Visible: isVisible
-            };
-        });
-
-
-        oView.setModel(
-            new sap.ui.model.json.JSONModel({ BedTypes: aBedTypes }),
-            "VisibilityModel"
-        );
-
-    } catch (err) {
-        console.error("Error loading data:", err);
-        sap.m.MessageToast.show("Failed to load bed type data.");
-    }
-},
 
         onSelectPricePlan: function (oEvent) {
             const oTile = oEvent.getSource();
@@ -1032,9 +865,6 @@ _getLocationName: function (lat, lng) {
             this._clearRoomDetailDialog();
         },
 
-
-
-
         onTabSelect: async function (oEvent) {
             var oItem = oEvent.getParameter("item");
             const sKey = oItem.getKey();
@@ -1050,43 +880,40 @@ _getLocationName: function (lat, lng) {
         },
 
         _loadRoomsPageData: async function () {
-            const oView = this.getView();
-            try {
-                sap.ui.core.BusyIndicator.show(0); // Show busy indicator immediately
-                //  await this.BedTypedetails(); 
-                await this.CustomerDetails();
-                await this._loadBranchCode();
-                await this.onReadcallforRoom();
-                // await this._loadFilteredData("Kalaburagi","", "");
 
-                const oBRModel = oView.getModel("sBRModel");
-                const oModelData = oBRModel.getData();
-                // const aFiltered = oModelData.filter(item => item.City === "Kalaburagi");
+    const oContainer = this.byId("idBedTypeFlex"); 
+    oContainer.setBusy(true);
 
-                const aFiltered = oModelData.filter(item => item.City === this.City);
+    try {
+        // await this.CustomerDetails();
+        // await this._loadBranchCode();
+        await this.onReadcallforRoom();
 
+        const oBRModel = this.getView().getModel("sBRModel");
+        const oModelData = oBRModel.getData();
 
-                if(aFiltered.length===0){
-                await this._loadFilteredData("Kalaburagi","", "");
+        const aFiltered = oModelData.filter(item => item.City === this.City);
 
-                }else{
-                await this._loadFilteredData(this.City,"", "");
+        if (aFiltered.length === 0) {
+            await this._loadFilteredData("Kalaburagi", "", "");
+        } else {
+            await this._loadFilteredData(this.City, "", "");
+        }
 
-                }
+        this.getView().setModel(new JSONModel(aFiltered), "AreaModel");
 
-                oView.setModel(new sap.ui.model.json.JSONModel(aFiltered), "AreaModel");
-                oView.byId("id_Area").setEnabled(true);
+        // Default selections
+        this.byId("id_Branch").setSelectedKey("Kalaburagi");
+        this.byId("id_Area").setEnabled(true).setSelectedKey("");
+        this.byId("id_Roomtype").setEnabled(true).setSelectedKey("All");
 
-                // Default selections
-                this.byId("id_Branch").setSelectedKey("Kalaburagi");
-                oView.byId("id_Area").setEnabled(true).setSelectedKey("");
-                oView.byId("id_Roomtype").setEnabled(true).setSelectedKey("All");
-                sap.ui.core.BusyIndicator.hide(); // Hide busy indicator
-            } catch (error) {
-                sap.ui.core.BusyIndicator.hide(); // Hide busy indicator
-                console.error("❌ Error while loading Rooms data:", error);
-            }
-        },
+    } catch (error) {
+        console.error("Error loading Rooms:", error);
+    } finally {
+        oContainer.setBusy(false);
+    }
+}
+,
 
         onpressFilter: function () {
             var oView = this.getView();
@@ -2042,25 +1869,190 @@ _getLocationName: function (lat, lng) {
         },
 
         // 🔹 Search logic remains same
-       onSearchRooms: async function () {
-    const oBranchCombo = this.byId("id_Area");   // Area Combo
+     onSearchRooms: async function () {
+    const oContainer = this.byId("idBedTypeFlex"); 
+    oContainer.setBusy(true); // 🔥 Only this part becomes busy
+
     const oBranchcity = this.byId("id_Branch").getSelectedItem()?.getKey();
-
-    const oACTypeCombo = this.byId("id_Roomtype");
-
-    const oSelectedBranchItem = oBranchCombo.getSelectedItem();
-    const sSelectedBranch = oSelectedBranchItem?.getKey(); // BranchID from AreaModel
-
-    const sSelectedACType = oACTypeCombo?.getSelectedKey();
-
-    sap.ui.core.BusyIndicator.show(0);
+    const oBranchCombo = this.byId("id_Area");
+    const sSelectedBranch = oBranchCombo.getSelectedItem()?.getKey();
+    const sSelectedACType = this.byId("id_Roomtype")?.getSelectedKey();
 
     try {
         await this._loadFilteredData(oBranchcity, sSelectedBranch, sSelectedACType);
     } catch (e) {
-        console.error("Error loading data:", e);
+        console.error("Error:", e);
     } finally {
-        sap.ui.core.BusyIndicator.hide();
+        oContainer.setBusy(false); // 🔥 Stop busy only for this area
+    }
+},
+
+  _loadFilteredData: async function (Scity, sBranchCode, sACType) {
+
+    if (sACType === "All") {
+        sACType = "";
+    }
+
+    try {
+
+        const oView = this.getView();
+
+        let aBranchCodes = [];
+
+        if (Scity && !sBranchCode) {
+
+            const aBranches = await this.ajaxReadWithJQuery("HM_Branch", {
+                City: Scity
+            });
+
+            aBranchCodes = (Array.isArray(aBranches.data) ? aBranches.data : [aBranches.data])
+                .map(branch => branch.BranchID);
+        }
+
+        else if (Scity && sBranchCode) {
+            aBranchCodes = [sBranchCode];
+        }
+
+        else if (!Scity && sBranchCode) {
+            aBranchCodes = [sBranchCode];
+        }
+
+
+        const response = await this.ajaxReadWithJQuery("HM_BedType", {
+            BranchCode: JSON.stringify(aBranchCodes)
+        });
+
+        let matchedRooms = response?.data?.data || [];
+
+
+        if (sACType) {
+            matchedRooms = matchedRooms.filter(
+                room => room.ACType?.toLowerCase() === sACType.toLowerCase()
+            );
+        }
+
+
+        if (sBranchCode && sBranchCode.trim() !== "") {
+            matchedRooms = matchedRooms.filter(
+                room =>
+                    room.BranchCode?.toLowerCase() === sBranchCode.toLowerCase()
+            );
+        } else {
+
+            matchedRooms = matchedRooms.filter(
+                room =>
+                    aBranchCodes
+                        .map(code => code.toLowerCase())
+                        .includes(room.BranchCode?.toLowerCase())
+            );
+        }
+
+
+        const oRoomDetailsModel = oView.getModel("RoomCountModel");
+        // const oCustomerModel = oView.getModel("CustomerModel");
+
+        const roomDetails = oRoomDetailsModel.getData()?.Rooms || [];
+        // const customerData = oCustomerModel.getData() || [];
+
+     
+        const oBranchModel = oView.getModel("sBRModel");
+        const aBranchData = oBranchModel?.getData() || [];
+
+
+        const convertBase64ToImage = (base64String, fileType) => {
+            if (!base64String) return "./image/Fallback.png";
+            let sBase64 = base64String.replace(/\s/g, "");
+            try {
+                if (!sBase64.startsWith("iVB") && !sBase64.startsWith("data:image")) {
+                    const decoded = atob(sBase64);
+                    if (decoded.startsWith("iVB")) sBase64 = decoded;
+                }
+            } catch (e) { }
+
+            const mimeType = fileType || "image/jpeg";
+            if (sBase64.startsWith("data:image")) return sBase64;
+            return `data:${mimeType};base64,${sBase64}`;
+        };
+
+
+        const aBedTypes = matchedRooms.map(room => {
+
+            const matchingRooms = roomDetails.filter(
+                rd =>
+                    rd.BranchCode?.toLowerCase() === room.BranchCode?.toLowerCase() &&
+                    rd.BedTypeName?.trim().toLowerCase() ===
+                    (room.Name?.trim().toLowerCase() +
+                        " - " +
+                        room.ACType?.trim().toLowerCase())
+            );
+
+            const firstRoom = matchingRooms[0];
+
+            const price = firstRoom?.Price ? " " + firstRoom.Price : "";
+            const MonthPrice = firstRoom?.MonthPrice ? " " + firstRoom.MonthPrice : "";
+            const YearPrice = firstRoom?.YearPrice ? " " + firstRoom.YearPrice : "";
+            const Currency = firstRoom?.Currency ? " " + firstRoom.Currency : "";
+
+            let totalBooked = 0;
+            let totalCapacity = 0;
+
+            // matchingRooms.forEach(rm => {
+            //     totalCapacity += rm.NoofPerson || 0;
+            //     const bookedCount = customerData.filter(cust =>
+            //         cust.Bookings?.some(bk =>
+            //             bk.BranchCode?.toLowerCase() === rm.BranchCode?.toLowerCase() &&
+            //             bk.RoomNo?.toLowerCase() === rm.RoomNo?.toLowerCase() &&
+            //             bk.BedType?.trim().toLowerCase() === rm.BedTypeName?.trim().toLowerCase()
+            //         )
+            //     ).length;
+            //     totalBooked += bookedCount;
+            // });
+
+            // const isFull = totalBooked >= totalCapacity && totalCapacity > 0;
+            // const isVisible = !isFull && price.trim() !== "";
+
+            
+            const oBranchInfo = aBranchData.find(b =>
+                b.BranchID?.toLowerCase() === room.BranchCode?.toLowerCase()
+            );
+
+            const sArea = oBranchInfo?.Address || "";
+
+            const aImages = [];
+            for (let i = 1; i <= 5; i++) {
+                const base64 = room[`Photo${i}`];
+                const type = room[`Photo${i}Type`];
+                if (base64) {
+                    aImages.push({
+                        src: convertBase64ToImage(base64, type),
+                        Area:sArea
+                    });
+                }
+            }
+            return {
+                Name: room.Name,
+                ACType: room.ACType,
+                NoOfPerson: room.NoOfPerson,
+                Description: room.Description || "",
+                Price: price,
+                MonthPrice: MonthPrice,
+                YearPrice: YearPrice,
+                Currency: Currency,
+                BranchCode: room.BranchCode,
+                Images: aImages
+                // Visible: isVisible
+            };
+        });
+
+
+        oView.setModel(
+            new sap.ui.model.json.JSONModel({ BedTypes: aBedTypes }),
+            "VisibilityModel"
+        );
+
+    } catch (err) {
+        console.error("Error loading data:", err);
+        sap.m.MessageToast.show("Failed to load bed type data.");
     }
 },
 

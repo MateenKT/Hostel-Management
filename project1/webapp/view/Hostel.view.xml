@@ -148,13 +148,7 @@
                                 />
                             </l:Grid>
                         </ScrollContainer>
-                        <ScrollContainer
-                            height="100%"
-                            horizontal="true"
-                            vertical="true"
-                            focusable="true"
-                            class="sapUiContentPadding"
-                        >
+                      
                             <fb:FilterBar
                                 id="filterbar"
                                 persistencyKey="myPersKey"
@@ -166,6 +160,8 @@
                                 afterVariantLoad="IA_.onAfterVariantLoad"
                                 showFilterConfiguration="false"
                                 filterContainerWidth="auto"
+                                 class="sapUiContentPadding HostelRooms sapUiTinyMargin"
+                                 busyIndicatorDelay="0"
                             >
                                 <fb:filterGroupItems>
                                     <!--  Branch Name -->
@@ -252,6 +248,7 @@
                                 justifyContent="SpaceAround"
                                 alignItems="Start"
                                 items="{path: 'VisibilityModel>/BedTypes'}"
+                                busyIndicatorDelay="0"
                             >
                                 <items>
                                     <VBox
@@ -295,26 +292,21 @@
                                                 text="{= ${VisibilityModel>Name} + ' (' + ${VisibilityModel>ACType} + ')' }"
                                                 class="bedCardTitle"
                                             />
-                                            <ExpandableText
+                                            <Text
                                                 text="{VisibilityModel>Description}"
                                                 class="bedCardDesc"
-                                                wrapping="true"
-                                                maxCharacters="105"
                                             />
                                             <Text
                                                 text="{= ${VisibilityModel>Currency} + ${VisibilityModel>Price}}"
                                                 class="bedCardPrice sapUiSmallMarginTop"
                                             />
-                                            <!-- <Text
-                                                text="{= 'Area: ' + ${VisibilityModel>Area} }"
-                                                class="bedCardAreaTag"
-                                            /> -->
                                             <HBox
                                                 justifyContent="Center"
                                                 alignItems="Center"
                                             >
                                                 <Button
-                                                    text="{= ${VisibilityModel>Visible} ? 'View Details' : 'Occupied' }"
+                                                    text="View Details"
+
                                                     type="Default"
                                                     press=".viewDetails"
                                                     enabled="{VisibilityModel>Visible}"
@@ -325,7 +317,7 @@
                                     </VBox>
                                 </items>
                             </FlexBox>
-                        </ScrollContainer>
+                       
                         <!-- </l:Grid> -->
                     </Page>
                     <ScrollContainer
