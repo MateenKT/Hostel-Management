@@ -3,7 +3,8 @@
 	xmlns:m="sap.m" 
 	xmlns:core="sap.ui.core" 
 	xmlns:l="sap.ui.layout" 
-	xmlns:f="sap.f"
+	xmlns:f="sap.f" 
+	xmlns:et="sap.m" 
 	xmlns:card="sap.ui.integration.widgets">
 	<Dialog draggable="true" afterOpen=".onRoomDetailOpened" resizable="true" contentHeight="auto" contentWidth="70%" id="roomDetailID" title="Room Details" type="Message" class="sapUiContentPadding" afterClose=".onDialogAfterClose">
 		<customHeader>
@@ -17,7 +18,7 @@
 			</Bar>
 		</customHeader>
 		<content>
-			<VBox width="100%" class="sapUiSmallMarginTop" renderType="Bare">
+			<VBox width="100%" class="roomTopAligned"  renderType="Bare">
 				<l:Grid width="100%" hSpacing="1" vSpacing="1" class="sapUiTinyMarginBeginEnd">
 					<l:content>
 						<VBox width="100%">
@@ -32,19 +33,20 @@
 						</VBox>
 					</l:content>
 					<l:content>
-						<VBox width="100%">
+						<VBox width="100%" class="roomTopAligned" >
 							<layoutData>
 								<l:GridData span="L4 M6 S12"/>
 							</layoutData>
 							<card:Card manifest="./cards/roomDetailsCard.json" class="roomDetailsCard " manifestChanges='{ "sap.card": { "data": { "json": { "BedType": "{HostelModel>/BedType}", "Capacity": "{HostelModel>/Capacity}", "ACType": "{HostelModel>/ACType}", } } } }'/>
 							<VBox class="descriptionBox sapUiSmallMarginTop" alignItems="Start">
-								<core:Icon src="sap-icon://detail-view" size="1.8rem" class="sapUiTinyMarginBegin descIcon"/>
+								<core:Icon src="sap-icon://ui-notifications" size="1.5rem" class="sapUiTinyMarginBegin descIcon"/>
 								<ExpandableText maxCharacters="330" text="{HostelModel>/Description}" class="descTextLarge" />
 							</VBox>
+
+							<!-- sap-icon://along-stacked-chart  -->
 						</VBox>
 					</l:content>
 				</l:Grid>
-				<!-- <HBox justifyContent="SpaceBetween" alignItems="Stretch" class="priceRow sapUiSmallMarginTop sapUiTinyMarginBeginEnd"><GenericTile header="Per Day" subheader="{HostelModel>/Currency} {HostelModel>/Price}" class="defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%"><layoutData><FlexItemData growFactor="1" /></layoutData><customData><core:CustomData key="type" value="daily"/></customData></GenericTile><GenericTile header="Per Month" subheader="{HostelModel>/Currency} {HostelModel>/MonthPrice}" class=" defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%"><layoutData><FlexItemData growFactor="1" /></layoutData><customData><core:CustomData key="type" value="monthly"/></customData></GenericTile><GenericTile header="Per Year" subheader="{HostelModel>/Currency} {HostelModel>/YearPrice}" class=" defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%"><layoutData><FlexItemData growFactor="1" /></layoutData><customData><core:CustomData key="type" value="yearly"/></customData></GenericTile><GenericTile header="Book Now" subheader="" class="defaultTile priceItem bookNowTile" frameType="OneByHalf" press=".onConfirmBooking" width="100%"><layoutData><FlexItemData growFactor="1" /></layoutData><customData><core:CustomData key="type" value="booknow"/></customData></GenericTile></HBox> -->
 				<l:Grid width="100%" defaultSpan="L3 M6 S12" hSpacing="1" vSpacing="1" class="priceGrid sapUiTinyMarginBeginEnd sapUiSmallMarginTop">
 					<l:content>
 						<GenericTile header="Per Day" subheader="{HostelModel>/Currency} {HostelModel>/Price}" class="defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%">
@@ -70,126 +72,44 @@
 						</GenericTile>
 					</l:content>
 				</l:Grid>
-				<!-- <Bar design="Header" class="sapUiMediumMarginTop sapUiTinyMarginBeginEnd">
+				<!-- Facilities Header -->
+				<Bar design="Header" class="sapUiMediumMarginTop">
 					<contentMiddle>
 						<Title text="Available Facilities" />
 					</contentMiddle>
 				</Bar>
-
-
-
-
-
-
-
-				<VBox class="facilityContainer sapUiSmallMarginTop sapUiTinyMarginBeginEnd" width="100%">
-					<HBox justifyContent="Center" visible="{FacilityModel>/loading}">
-						<BusyIndicator size="0.8rem" class="sapUiLMediumMarginTop" />
-					</HBox>
-					<HBox wrap="Wrap" id="facilityBox" class="facilityCardWrap" visible="{= !${FacilityModel>/loading} }" items="{  path: 'FacilityModel>/Facilities'  }">
-						<items>
-							<VBox class="facilityCard">
-								<Image src="{FacilityModel>Image}" class="facilityCardImg" densityAware="false" />
-								<Text text="{FacilityModel>FacilityName}" class="facilityCardTitle" />
-								<Text text="₹{FacilityModel>Price}" class="facilityCardPrice" />
-							</VBox>
-						</items>
-					</HBox>
-				</VBox> -->
-
-<!-- Facilities header -->
-<!-- <Bar design="Header" class="sapUiMediumMarginTop">
-	<contentMiddle>
-		<Title text="Available Facilities" />
-	</contentMiddle>
-</Bar>
-<HBox justifyContent="Center" visible="{FacilityModel>/loading}">
-	<BusyIndicator size="0.8rem" />
-</HBox>
-<List id="facilityList" class="facilityList" items="{FacilityModel>/Facilities}" visible="{= !${FacilityModel>/loading} }" inset="false">
-	<items>
-		<CustomListItem type="Inactive" class="facilityListItem">
-			<VBox class="facilityCard">
-				<Image src="{FacilityModel>Image}" class="facilityCardImg" densityAware="false" />
-				<Text text="{FacilityModel>FacilityName}" class="facilityCardTitle" />
-				<Text text="₹{FacilityModel>Price}" class="facilityCardPrice" />
-			</VBox>
-		</CustomListItem>
-	</items>
-</List> -->
-
-<!-- Facilities header -->
-<!-- <Bar design="Header" class="sapUiMediumMarginTop">
-	<contentMiddle>
-		<Title text="Available Facilities" />
-	</contentMiddle>
-</Bar>
-<HBox justifyContent="Center" visible="{FacilityModel>/loading}">
-	<BusyIndicator size="0.8rem" />
-</HBox>
-<FlexBox
-	id="facilityBox"
-	class="facilityCardWrap"
-	visible="{= !${FacilityModel>/loading} }"
-	items="{path: 'FacilityModel>/Facilities'}"
-	wrap="Wrap"
-	justifyContent="Start">
-	<VBox class="facilityCard sapUiSmallMargin">
-		<Image src="{FacilityModel>Image}" class="facilityCardImg" densityAware="false" />
-		<Text text="{FacilityModel>FacilityName}" class="facilityCardTitle" />
-		<Text text="₹{FacilityModel>Price}" class="facilityCardPrice" />
-	</VBox>
-</FlexBox> -->
-
-
-<!-- Facilities Header -->
-<Bar design="Header" class="sapUiMediumMarginTop">
-	<contentMiddle>
-		<Title text="Available Facilities" />
-	</contentMiddle>
-</Bar>
-<!-- Loading -->
-<HBox justifyContent="Center" visible="{FacilityModel>/loading}">
-	<BusyIndicator size="0.8rem" />
-</HBox>
-<!-- REAL Responsive Grid -->
-<FlexBox id="facilityBox" class="facilityCardWrap" visible="{= !${FacilityModel>/loading} }" items="{path: 'FacilityModel>/Facilities'}" wrap="Wrap" justifyContent="Center">
-	<VBox class="facilityCard">
-		<Image src="{FacilityModel>Image}" class="facilityCardImg" densityAware="false" />
-		<Text text="{FacilityModel>FacilityName}" class="facilityCardTitle" />
-		<Text text="₹{FacilityModel>Price}" class="facilityCardPrice" />
-	</VBox>
-</FlexBox>
-
-
-
-
-
-
-
-
-
-
-<Bar design="Header" class="sapUiMediumMarginTop sapUiTinyMarginBeginEnd">
-	<contentMiddle>
-		<Title text="Amenities" />
-	</contentMiddle>
-</Bar>
-<!-- Loading -->
-<HBox justifyContent="Center" visible="{AmenityModel>/loading}">
-	<BusyIndicator size="0.8rem" />
-</HBox>
-<!-- Amenities (Old UI5 Compatible Grid) -->
-<HBox class="amenityGrid" wrap="Wrap" items="{AmenityModel>/Amenities}">
-	<items>
-		<VBox class="amenityCard">
-			<Image src="{AmenityModel>ImageSrc}" class="amenityImage" />
-			<Text text="{AmenityModel>FacilityName}" class="amenityTitle" />
-			<Text text="{AmenityModel>Description}" class="amenityDesc" />
-		</VBox>
-	</items>
-</HBox>
-				
+				<HBox justifyContent="Center" visible="{FacilityModel>/loading}">
+					<BusyIndicator size="0.8rem" />
+				</HBox>
+				<!-- REAL Responsive Grid -->
+				<HBox class="facilityGrid" wrap="Wrap" items="{FacilityModel>/Facilities}">
+					<items>
+						<VBox class="unifiedCard">
+							<Image src="{FacilityModel>Image}" class="unifiedCardImg" />
+							<Text text="{FacilityModel>FacilityName}" class="unifiedCardTitle" />
+							<Text text="₹{FacilityModel>Price}" class="unifiedCardText" />
+						</VBox>
+					</items>
+				</HBox>
+				<Bar design="Header" class="sapUiMediumMarginTop sapUiTinyMarginBeginEnd">
+					<contentMiddle>
+						<Title text="Amenities" />
+					</contentMiddle>
+				</Bar>
+				<!-- Loading -->
+				<HBox justifyContent="Center" visible="{AmenityModel>/loading}">
+					<BusyIndicator size="0.8rem" />
+				</HBox>
+				<!-- Amenities (Old UI5 Compatible Grid) -->
+				<HBox class="facilityGrid" wrap="Wrap" items="{AmenityModel>/Amenities}">
+					<items>
+						<VBox class="unifiedCard">
+							<Image src="{AmenityModel>ImageSrc}" class="unifiedCardImg" />
+							<Text text="{AmenityModel>FacilityName}" class="unifiedCardTitle" />
+							<ExpandableText text="{AmenityModel>Description}" maxCharacters="100" class="amenityDesc expandableAmenityText" />
+						</VBox>
+					</items>
+				</HBox>
 			</VBox>
 		</content>
 	</Dialog>

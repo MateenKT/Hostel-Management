@@ -931,10 +931,11 @@
     border-color: #000000;
 }
 
+/* //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// */
 
 
 
-    .sapMGT {
+.sapMGT {
     background: #ffffff !important;
     color: #008c9e !important;
     border-radius: 14px !important;
@@ -947,128 +948,6 @@
     transform: translateY(-3px);
     box-shadow: 0 6px 18px rgba(0,0,0,0.18);
 }
-.priceRow {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 20px; 
-}
-.priceRow .myCustomButton.sapMBtn,
-.sapMGTOneByHalf.priceItem {
-    height: 90px !important; 
-    min-height: 90px !important;
-}
-.priceRow .priceItem {
-    flex: 1 1 200px;
-    max-width: 280px; 
-    min-width: 180px; 
-}
-@media (min-width: 1000px) {
-    .priceRow {
-        flex-wrap: nowrap !important;
-        justify-content: center; 
-    }
-}
-.sapMGT.defaultTile,
-.sapMGTOneByHalf.defaultTile {
-    background: linear-gradient(135deg, #00b7c7, #007984) !important;
-    border: none !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-    transform: scale(1) !important;
-    border-radius: 14px !important;
-}
-.sapMGT.selectedTile,
-.sapMGTOneByHalf.selectedTile,
-.tileSelected { 
-    background: #ffffff !important; 
-    border: 2px solid #00b7c7 !important; 
-    box-shadow: 0 6px 18px rgba(0,0,0,0.20) !important; 
-    transform: scale(1.06) !important;
-    border-radius: 14px !important;
-    transition: all 0.15s ease-in-out;
-}
-.defaultTile *, .selectedTile *, .tileSelected * {
-    font-size: 17px !important; 
-    text-align: center !important;
-}
-.defaultTile * {
-    color: whitesmoke !important; 
-}
-.selectedTile *, .tileSelected * {
-    color: #2c3e50 !important;
-}
-.myCustomButton {
-    flex: 1 1 200px !important;
-    max-width: 260px !important;
-    min-width: 180px !important;
-    height: auto;
-    border-radius: 14px !important; 
-}
-.myCustomButton .sapMBtnInner {
-    background: linear-gradient(135deg, #74c7ce, #8dc8d0) !important; 
-    height: 100% !important;
-    line-height: normal !important; 
-    padding: 0 !important;
-    border-radius: 14px !important;
-    transition: all 0.25s ease-in-out; 
-    text-align: center !important; 
-    border: none !important; 
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-    font-weight: 500 !important;
-}
-.myCustomButton .sapMBtnContent {
-    display: flex !important; 
-    align-items: center !important; 
-    justify-content: center !important; 
-    height: 100% !important; 
-    width: 100% !important;
-    text-align: center !important; 
-}
-.myCustomButton .sapMBtnContent,
-.myCustomButton .sapMBtnContent * {
-    font-size: 20px !important; 
-    font-weight: bold !important; 
-    color: white !important;
-}
-.myCustomButton:hover .sapMBtnInner {
-    transform: translateY(-3px) !important; 
-    box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important;
-    background: #008892 !important; 
-}
-/* .roomDetailDialog {
-    max-width: 80% !important;
-    width: auto !important;
-}
-.roomDetailDialog .sapMDialogSection {
-    max-width: 100% !important;
-}
-.roomDetailDialog .sapMDialogScroll,
-.roomDetailDialog .sapMDialogSection {
-    overflow-x: hidden !important;
-}
-.roomDetailDialog .sapMDialogScroll {
-    padding-right: 1rem !important; 
-}
-@media (max-width: 600px) {
-    .roomDetailDialog .sapUiRespGrid {
-        padding: 0 !important;
-    }
-    .roomDetailDialog .sapUiRespGrid > .sapUiRespGridSpanS12 {
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-    .roomDetailDialog .sapUiBlockCell,
-    .roomDetailDialog .sapUiBlockContainer {
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-    .roomDetailDialog .sapUiSmallMargin {
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-} */
 .barheader,
 .barheader .sapMBar,
 .barheader .sapMBarRight,
@@ -1174,14 +1053,83 @@
     margin-left: 0.5rem;
     word-break: break-word !important;
 }
-/* .facilityCardWrap { gap: 14px; } */
-
-
-/*--------------------------------------------------------------------------------------------------------------------------------------------------*/
-.facilityCardWrap {
-    display: flex;
-    gap: 22px;
-    padding: 20px;
+.priceGrid .sapUiRespGridSpan,
+.priceGrid .sapUiRespGridSpanXL,
+.priceGrid .sapUiRespGridSpanL,
+.priceGrid .sapUiRespGridSpanM,
+.priceGrid .sapUiRespGridSpanS {
+    overflow: visible !important;
+}
+.sapMGT.defaultTile,
+.sapMGTOneByHalf.defaultTile {
+    background: linear-gradient(135deg, #00b7c7, #007984) !important;
+    border: none !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+    transform: scale(1) !important;
+    border-radius: 14px !important;
+}
+.sapMGT.selectedTile,
+.sapMGTOneByHalf.selectedTile,
+.tileSelected { 
+    background: #ffffff !important; 
+    border: 2px solid #00b7c7 !important; 
+    box-shadow: 0 6px 18px rgba(0,0,0,0.20) !important; 
+    transform: scale(1.06) !important;
+    border-radius: 14px !important;
+    transition: all 0.15s ease-in-out;
+}
+.defaultTile *, .selectedTile *, .tileSelected * {
+    font-size: 17px !important; 
+    text-align: center !important;
+}
+.defaultTile * {
+    color: whitesmoke !important; 
+}
+.selectedTile *, .tileSelected * {
+    color: #2c3e50 !important;
+}
+.defaultTile,
+.bookNowTile {
+    transition: all 0.14s ease-out !important;
+    transform: scale(1) !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.10) !important;
+        height: 90px !important;
+    min-height: 90px !important;
+    overflow: hidden !important; 
+    }
+    .defaultTile .sapMGTContent,
+.bookNowTile .sapMGTContent {
+    padding: 8px 0 !important;     
+    margin: 0 !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important; 
+    align-items: center !important;
+}
+.defaultTile,
+.bookNowTile,
+.defaultTile .sapMGT,
+.bookNowTile .sapMGT {
+    overflow: visible !important;
+}
+.defaultTile .sapMGTHdrTxt,
+.bookNowTile .sapMGTHdrTxt {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.2 !important;
+}
+.defaultTile:hover,
+.bookNowTile:hover {
+    transform: translateY(-1px) scale(1.005) !important; 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.12) !important;   
+}
+.priceRow .sapMGT,
+.priceRow .sapMGT.OneByHalf,
+.priceRow .priceItem,
+.bookNowTile {
+    height: 90px !important;
+    min-height: 90px !important;
 }
 .bookNowTile {
     background: linear-gradient(135deg, #74c7ce, #008c9e) !important;
@@ -1191,294 +1139,172 @@
     transition: all .25s ease;
     height: 90px !important;
 }
-
 .bookNowTile:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 18px rgba(0,0,0,0.25) !important;
 }
-
 .bookNowTile * {
     font-size: 20px !important;
     font-weight: bold !important;
     color: white !important;
 }
-/* Make all tiles identical height */
-.priceRow .sapMGT,
-.priceRow .sapMGT.OneByHalf,
-.priceRow .priceItem,
-.bookNowTile {
-    height: 90px !important;
-    min-height: 90px !important;
-}
-
-/* Fix internal container spacing of the Book Now tile */
 .bookNowTile .sapMGTContent {
     padding-top: 12px !important;
     padding-bottom: 12px !important;
 }
-
-
-
-/* Remove SAP's default padding */
 .bookNowTile .sapMGTContent,
 .bookNowTile .sapMGTHdrTxt {
     padding: 0 !important;
 }
-
-/* Force the internal container to stretch fully */
 .bookNowTile .sapMGTContent {
     height: 100% !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
 }
-
-/* Target the actual header text */
 .bookNowTile .sapMGTHdrTxt > .sapMText {
     line-height: 1.8 !important;
     padding: 0 !important;
     margin: 0 !important;
     align-self: center !important;
 }
-
-
+.bookNowTile .sapMGTHdrTxt .sapMText {
+    font-size: 17px !important;
+    font-weight: bold !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+.facilityGrid {
+    padding: 20px;
+    gap: 20px !important;     
+}
+.facilityCard .facilityCardPrice,
+.facilityGrid .facilityCardPrice,
+#facilityGrid .facilityCardPrice {
+    color: #0070c9 !important;   
+    font-weight: 600;
+}
+.unifiedCard {
+    flex: 0 0 calc((100% - 66px) / 4);
+    max-width: calc((100% - 66px) / 4);
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+    transition: 0.2s ease;
+    text-align: center;
+}
+.unifiedCard:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(0,0,0,0.22);
+}
+.unifiedCardImg {
+    width: 100%;
+    height: 150px !important;
+    object-fit: cover;
+    border-radius: 10px;
+}
+.unifiedCardTitle {
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 8px;
+    color: #2c3e50;
+}
+.unifiedCardText {
+    font-size: 14px;
+    line-height: 1.35;
+    color: #0070c9;
+    margin-top: 6px;
+}
+.amenityDesc {
+    font-size: 14px;
+    line-height: 1.35;
+    color: #0070c9 !important;     
+    margin-top: 6px;
+}
+.expandableAmenityText .sapMLnk {
+    color: #000 !important;     
+}
+@media (max-width: 1024px) {
+  .unifiedCard {
+    flex: 0 0 31%;
+    max-width: 31%;
+  }
+}
 @media (max-width: 768px) {
-
-    /* --- TILE SIZE + RADIUS --- */
+  .unifiedCard {
+    flex: 0 0 47%;
+    max-width: 47%;
+  }
+}
+@media (max-width: 420px) {
+  .unifiedCard {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+@media (max-width: 768px) {
+     .roomTopAligned {
+    margin-top: 6px !important;
+  }
     .priceRow .sapMGT,
     .priceRow .priceItem,
     .bookNowTile {
-        height: 64px !important;
-        min-height: 64px !important;
+        height: 72px !important;  
+        min-height: 72px !important;
         border-radius: 10px !important;
     }
-
-    /* Reduce tile spacing */
+    .bookNowTile .sapMGTContent {
+        justify-content: center !important;
+        align-items: center !important;
+    }
     .priceRow {
         gap: 10px !important;
         margin-top: 10px !important;
     }
-
-    /* --- TEXT SIZING --- */
     .priceRow .sapMGT * {
         font-size: 13px !important;
         line-height: 15px !important;
     }
-
     .bookNowTile * {
         font-size: 15px !important;
         line-height: 16px !important;
     }
-
-    /* Fix header/subheader spacing inside tiles */
     .sapMGTHdrTxt {
         margin-top: -3px !important;
     }
 
-    /* --- DIALOG FULL-SCREEN ON MOBILE --- */
-    #roomDetailID,
-    #roomDetailID.sapMDialog {
+
+   /* Dialog height always full */
+    #roomDetailID.sapMDialog,
+    #roomDetailID {
         width: 100% !important;
         max-width: 100% !important;
         height: 100% !important;
-        max-height: 100% !important;
+        max-height: 94% !important;
         border-radius: 0 !important;
         margin: 0 !important;
     }
 
-    /* --- CAROUSEL REDUCE HEIGHT --- */
+    #roomDetailID .sapMDialogScroll {
+        height: calc(100vh - 60px) !important;  
+        max-height: calc(100vh - 60px) !important;
+        overflow-y: auto !important;
+        padding-bottom: 16px !important; /* small safe padding */
+    }
     .roomCarouselImage {
         height: 200px !important;
         max-height: 200px !important;
     }
-
-    /* --- FACILITY CARD REDUCE SIZE ---
-    .facilityCard {
-        width: 150px !important;
-        height: 120px !important;
-        border-radius: 10px !important;
-    }
-
-    .facilityCardImg {
-        height: 70px !important;
-    } */
+    #roomDetailID .sapMDialogSection {
+    /* overflow-y: auto !important; */
+            padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
 }
 
-
-/* ======================================================== */
-/* LIST OUTER WRAPPER */
-.facilityList {
-  box-sizing: border-box;
-  padding: 10px 24px;   /* breathing room so shadows are not cut */
 }
 
-/* TURN THE UL INTO A FLEX GRID */
-.facilityList .sapMListUl {
-  display: flex !important;
-  flex-wrap: wrap !important;
-  justify-content: center !important;
-  gap: 22px !important;
-  margin: 0 !important;
-  padding: 12px 16px !important;
+.roomTopAligned {
+    margin-top: 12px !important;
 }
-
-/* GRID CELL */
-.facilityListItem {
-    flex: 0 0 calc((100% - 66px) / 4) !important;
-    max-width: calc((100% - 66px) / 4) !important;
-    padding: 0 !important;
-    margin: 0 !important;
-    overflow: visible !important;
-    box-sizing: border-box;
-}
-.facilityList .sapMListUl > li {
-    overflow: visible !important;
-    background: transparent !important;
-    padding: 0 !important;
-    margin: 0 !important;
-}
-/* THE CARD */
-.facilityCard {
-    flex: 0 1 calc((100% - 66px) / 4);
-    max-width: calc((100% - 66px) / 4);
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-    padding: 16px;
-    text-align: center;
-    transition: .2s ease;
-}
-
-.facilityCard:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.22);
-}
-
-
-
-
-
-.facilityCardImg {
-    width: 100%;
-    height: 150px;
-    border-radius: 8px;
-    object-fit: cover;
-}
-
-
-/* TITLE + PRICE */
-.facilityCardTitle,
-.facilityCardPrice {
-  width: 100%;
-  text-align: center;   /* <-- FIXES YOUR PROBLEM */
-}
-
-.facilityCardTitle {
-  font-size: 15px;
-  font-weight: 600;
-}
-
-.facilityCardPrice {
-  font-size: 14px;
-  font-weight: 600;
-  color: #0070c9;
-}
-
-/* 🎯 TABLET (3 per row) */
-@media (max-width: 1024px) {
-  .facilityListItem {
-    flex: 0 0 31% !important;
-    max-width: 31% !important;
-  }
-  .facilityCardImg {
-    height: 120px !important;
-  }
-}
-
-/* 🎯 MOBILE (2 per row) */
-@media (max-width: 768px) {
-  .facilityListItem {
-    flex: 0 0 47% !important;
-    max-width: 47% !important;
-  }
-  .facilityCardImg {
-    height: 100px !important;
-  }
-  .facilityCard {
-    padding: 12px;
-  }
-}
-
-/* 🎯 SMALL PHONES (1 per row) */
-@media (max-width: 420px) {
-  .facilityListItem {
-    flex: 0 0 100% !important;
-    max-width: 100% !important;
-  }
-  .facilityCardImg {
-    height: 90px !important;
-  }
-}
-
-/* =======================================88 */
-/* GRID WRAPPER */
-.amenityGrid {
-    justify-content: center;
-    gap: 20px;
-    padding: 10px;
-}
-
-/* CARD */
-.amenityCard {
-    width: 320px;
-    padding: 20px;
-    border-radius: 15px;
-    background: white;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;   /* smooth hover */
-}
-
-/* HOVER EFFECT */
-.amenityCard:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 24px rgba(0,0,0,0.22);
-}
-
-/* IMAGE */
-.amenityImage {
-    width: 100%;
-    height: 180px;
-    object-fit: cover;
-    border-radius: 10px;
-    margin-bottom: 10px;
-}
-
-/* TITLE */
-.amenityTitle {
-    font-weight: bold;
-    margin-top: 10px;
-    font-size: 1.1rem;
-    color: #004b82;
-}
-
-/* DESCRIPTION */
-.amenityDesc {
-    color: #0066cc;
-    margin-top: 5px;
-    font-size: 0.9rem;
-    line-height: 1.4;
-}
-
-/* MOBILE RESPONSIVE */
-@media(max-width: 600px) {
-    .amenityCard {
-        width: 100%;
-        margin: 0 10px;
-    }
-}
-
 
