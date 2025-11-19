@@ -791,7 +791,7 @@ sap.ui.define([
                                                     }));
                                             }
                                         }
-  this.updateFacilityVisibility();
+ 
                                         oModel.refresh(true);
                                     }
                         }),
@@ -838,13 +838,7 @@ sap.ui.define([
 oFacilityModel.refresh(true);
       oModel.refresh(true);
     },
-    updateFacilityVisibility: function () {
-    const oModel = this.getView().getModel("HostelModel");
-    const aAll = oModel.getProperty("/AllSelectedFacilities") || [];
-
-    oModel.setProperty("/HasFacilities", aAll.length > 0);
-    oModel.refresh(true);
-},
+  
     _checkMandatoryFields: function () {
       const oModel = this.getView().getModel("HostelModel");
       const aPersons = oModel.getProperty("/Persons") || [];

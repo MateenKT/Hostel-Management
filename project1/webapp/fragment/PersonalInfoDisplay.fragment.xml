@@ -84,14 +84,14 @@
 </VBox>
 
         <!-- Selected Facilities for THIS person -->
-        <Toolbar visible="{HostelModel>/HasFacilities}">
-            <Title text="Selected Facilities" level="H4" visible="{HostelModel>/HasFacilities}"/>
+        <Toolbar >
+            <Title text="Selected Facilities" level="H4" />
         </Toolbar>
         <FlexBox
             alignItems="Start"
             justifyContent="Start"
             class="sapUiSmallMarginTop"
-            visible="{HostelModel>/HasFacilities}"
+         
             items="{
                 path: 'HostelModel>PersonFacilitiesSummary'
             }">
@@ -107,7 +107,7 @@
         <!-- Booking Details for THIS person -->
         <Table id="idFacilitySummaryTable"
             class="sapUiSmallMarginTop"
-            visible="{HostelModel>/HasFacilities}"
+         
             items="{
                 path: 'HostelModel>AllSelectedFacilities'
             }"

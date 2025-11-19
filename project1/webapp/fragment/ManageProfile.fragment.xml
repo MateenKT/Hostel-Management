@@ -12,77 +12,88 @@
   </customHeader>
     <VBox>
       <!-- Header with background -->
-      <HBox class="profile-header-bg" width="100%">
-        <VBox justifyContent="Center" alignItems="Start" width="100%">
-          <HBox alignItems="Center" class="sapUiMediumMargin">
-            <Avatar src="{profileData>/photo}" initials="{profileData>/initials}" displaySize="XL" class="profile-avatar"/>
-            <VBox alignItems="Start" class="sapUiSmallMarginBegin">
-              <Title text="{profileData>/name}" level="H2"/>
-              <HBox>
-                <Text text="{profileData>/phone}" class="profile-contact-text" />
-                <Text text="  |  " />
-                <Text text="{profileData>/email}" class="profile-contact-text" />
-              </HBox>
-            </VBox>
-          </HBox>
-        </VBox> 
-      </HBox>
+      <HBox class="sapUiLargeMarginTop" width="100%">
+
+        <!-- Avatar Section -->
+        <VBox justifyContent="Center" alignItems="Center" >
+            <Avatar 
+                src="{profileData>/photo}" 
+                initials="{profileData>/initials}" 
+                displaySize="XL"
+                class="profile-avatar"/>
+        </VBox>
+
+        <!-- Two-column details section -->
+        <VBox width="100%" class="sapUiSmallMarginBegin">
+
+            <l:Grid
+                defaultSpan="L6 M6 S12"
+                width="100%"
+                hSpacing="2"
+                vSpacing="2">
+
+                <!-- LEFT COLUMN -->
+                <VBox>
+                    <HBox>
+                        <Label text="Name :" />
+                        <Text text="{profileData>/name}" class="profile-contact-text" />
+                    </HBox>
+
+                    <HBox>
+                        <Label text="DOB :" />
+                        <Text text="{profileData>/dob}" class="profile-contact-text" />
+                    </HBox>
+
+                    <HBox>
+                        <Label text="Gender :" />
+                        <Text text="{profileData>/gender}" class="profile-contact-text" />
+                    </HBox>
+                </VBox>
+
+                <!-- RIGHT COLUMN -->
+                <VBox>
+                    <HBox>
+                        <Label text="Mobile :" />
+                        <Text text="{profileData>/phone}" class="profile-contact-text" />
+                    </HBox>
+
+                    <HBox>
+                        <Label text="Email :" />
+                        <Text text="{profileData>/email}" class="profile-contact-text" />
+                    </HBox>
+
+                    <HBox>
+                        <Label text="Address :" />
+                        <Text text="{profileData>/address}" class="profile-contact-text" />
+                    </HBox>
+                </VBox>
+
+            </l:Grid>
+
+        </VBox>
+
+    </HBox>
       <VBox>
   <HBox height="100%">
-    <!-- Sidebar list (Keep as is) -->
-    <VBox width="200px" class="profile-sidebar">
-      <List mode="None" noDataText="" items="{profileMenuModel>/items}" showSeparators="None" itemPress=".SectionPress">
-        <StandardListItem title="{profileMenuModel>title}" icon="{profileMenuModel>icon}" type="Active"/>
-      </List>
-    </VBox>
-    <!-- Main Profile Content -->
-    <VBox class="sapUiContentPadding" width="100%" height="100%">
-      <!-- My Profile Section (visible if section is 'profile') -->
-      <VBox visible="{= ${profileSectionModel>/selectedSection} === 'profile' }">
-        <Title text="General Information" level="H3"/>
-          <Toolbar>
-                                <ToolbarSpacer />
-                                <Button
-                                    text="{= ${saveModel>/isEditMode} ? 'Save' : 'Edit' }"
-                                    icon="sap-icon://edit"
-                                    press="onFormEdit"
-                                    type="Emphasized"
-                                />
-                            </Toolbar>
-  <f:SimpleForm
-                                editable="true"
-                                layout="ResponsiveGridLayout"
-                                labelSpanXL="3"
-                                labelSpanL="3"
-                                labelSpanM="3"
-                                labelSpanS="12"
-                                adjustLabelSpan="false"
-                                emptySpanXL="4"
-                                emptySpanL="4"
-                                emptySpanM="4"
-                                columnsXL="1"
-                                columnsL="1"
-                                columnsM="1"
-                            >
-                                      <!-- All Profile Input Fields -->
-          <Label text="First Name"/>
-          <Input value="{profileData>/name}" editable="{saveModel>/isEditMode}"/>
-          <Label text="Gender"/>
-          <Select selectedKey="{profileData>/gender}" editable="{saveModel>/isEditMode}">
-            <core:Item key="MALE" text="MALE"/>
-            <core:Item key="FEMALE" text="FEMALE"/>
-          </Select>
-          <Label text="Date of Birth"/>
-          <DatePicker value="{profileData>/DateofBirth}" editable="{saveModel>/isEditMode}"/>
-          <Label text="Nationality"/>
-          <Input value="{profileData>/nationality}" editable="{saveModel>/isEditMode}"/>
-        </f:SimpleForm>
-      </VBox>
-      <!-- Booking History Section (visible if section is 'devices') -->
-      <VBox visible="{= ${profileSectionModel>/selectedSection} === 'devices' }">
-    <Title text="Booking History" level="H3"/>
-
-    <Table items="{profileData>/bookings}" mode="SingleSelectLeft" id="IdProfileaTable">
+   
+    <Text text="Booking History"/>
+     <IconTabBar
+		id="idIconTabBarFiori2"
+		expanded="{device>/isNoPhone}"
+		class="sapUiResponsiveContentPadding">
+		<items>
+			<IconTabFilter
+				text="Upcomming"
+				key="upcomming"
+				>
+				<Text text="Upcomming goes here ..." />
+			</IconTabFilter>
+			<IconTabFilter
+				text="Complete Booking"
+				key="completebooking"
+				count="43">
+				<Text text="Complete Booking  go here ..." />
+        <Table items="{profileData>/bookings}" mode="SingleSelectLeft" id="IdProfileaTable">
         <headerToolbar>
             <Toolbar>
                 <ToolbarSpacer/>
@@ -112,10 +123,19 @@
             </ColumnListItem>
         </items>
     </Table>
-</VBox>
+			</IconTabFilter>
+			
+		</items>
+	</IconTabBar>
+   
+     
+   
+
+    
+
 
    
-    </VBox>
+   
   </HBox>
 </VBox>
 
