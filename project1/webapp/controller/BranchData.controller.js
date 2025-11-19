@@ -413,7 +413,7 @@ sap.ui.define([
 
         onNameInputLiveChange: function (oEvent) {
             var oInput = oEvent.getSource();
-            utils._LCvalidateName(oEvent);
+            utils._LCvalidateMandatoryField(oEvent);
             if (oInput.getValue() === "") oInput.setValueState("None");
         },
 

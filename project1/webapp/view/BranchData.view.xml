@@ -62,17 +62,18 @@
                         visibleInFilterBar="true"
                     >
                         <fb:control>
-                            <ComboBox
+                            <Input
                                 id="MD_id_Pincode"
-                                items="{mainModel>/}"
-                                showClearIcon="true"
+                                showSuggestion="true"
+                                suggestionItems="{mainModel>/}"
                                 width="100%"
+                                showClearIcon="true"
                             >
                                 <core:ListItem
                                     key="{mainModel>Pincode}"
                                     text="{mainModel>Pincode}"
                                 />
-                            </ComboBox>
+                            </Input>
                         </fb:control>
                     </fb:FilterGroupItem>
                 </fb:filterGroupItems>
@@ -82,6 +83,7 @@
                 mode="MultiSelect"
                 sticky="ColumnHeaders,HeaderToolbar"
                 growing="true"
+                busyIndicatorDelay="0"
                 growingThreshold="100"
                 alternateRowColors="true"
                 selectionChange="MC_onTableSelectionChange"
