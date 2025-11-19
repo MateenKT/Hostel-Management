@@ -48,7 +48,7 @@
                 <fb:filterGroupItems>
                     <fb:FilterGroupItem
                         name="Pincode"
-                        label="Pincode"
+                        label="Pin Code"
                         groupName="Group"
                         visibleInFilterBar="true"
                     >
@@ -70,7 +70,7 @@
             <Table
                 id="id_MD_Table"
                 sticky="ColumnHeaders,HeaderToolbar"
-                mode="SingleSelectLeft"
+                mode="MultiSelect"
                 width="auto"
                 growing="true"
                 growingThreshold="100"
@@ -128,7 +128,7 @@
                         minScreenWidth="Tablet"
                         demandPopin="true"
                     >
-                        <Text text="Pincode" />
+                        <Text text="Pin Code" />
                     </Column>
                     <Column
                         minScreenWidth="Tablet"
