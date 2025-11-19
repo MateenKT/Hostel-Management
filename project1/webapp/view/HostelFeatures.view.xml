@@ -53,7 +53,7 @@
                 width="auto"
                 busyIndicatorDelay="0"
                 class="sapUiResponsiveMargin"
-                items="{path:'HostelFeatures>/'}"
+                items="{path:'HostelFeatures>/', sorter: {path: 'BranchCode',descending: false,group: true}}"
             >
 				<headerToolbar>
 					<OverflowToolbar>

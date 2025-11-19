@@ -169,7 +169,7 @@
                 <ObjectPageSection
                     titleUppercase="false"
                     id="FD_id_rderSection"
-                    title="Facility Images"
+                    title="Images"
                 >
                     <subSections>
                         <ObjectPageSubSection id="FD_id_ordersection">
@@ -218,15 +218,7 @@
                                                 change=".onFileSelected"
                                             />
                                         </m:VBox>
-
-                                        <!-- File name -->
-                                        <m:Text
-                                            text="{DisplayImagesModel>fileName}"
-                                            textAlign="Center"
-                                            wrapping="true"
-                                            visible="{= ${DisplayImagesModel>isPlaceholder} === false }"
-                                        />
-                                       
+   
                                         <!-- Delete icon -->
                                         <m:Button
                                             icon="sap-icon://delete"

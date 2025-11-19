@@ -27,7 +27,6 @@
             />
         </m:headerContent>
         <ObjectPageLayout id="ObjectPageLayout">
-            <!-- <headerTitle><ObjectPageDynamicHeaderTitle><expandedHeading><m:Title text="{objectModel>/0/PurchaseOrder/0/CustomerName}" wrapping="true" /></expandedHeading><snappedHeading /></ObjectPageDynamicHeaderTitle></headerTitle><headerContent><m:FlexBox wrap="Wrap" fitContainer="true"><m:Avatar class="sapUiSmallMarginEnd" src="../image/logo.jpeg" displaySize="L" /><layout:VerticalLayout class="sapUiSmallMarginBeginEnd"><m:ObjectIdentifier title="Customer Address" text="{objectModel>/0/PurchaseOrder/0/Address}" tooltip="Customer Address" /></layout:VerticalLayout><layout:VerticalLayout class="sapUiSmallMarginBeginEnd"><m:ObjectIdentifier title="PAN Number" text="{objectModel>/0/PurchaseOrder/0/PAN}" tooltip="PAN Number" /></layout:VerticalLayout><layout:VerticalLayout class="sapUiSmallMarginBeginEnd"><m:ObjectIdentifier title="Type" text="{objectModel>/0/PurchaseOrder/0/Type}" tooltip="Type" /></layout:VerticalLayout></m:FlexBox></headerContent> -->
             <sections>
                 <ObjectPageSection
                     titleUppercase="false"
@@ -210,14 +209,6 @@
                                                 change=".onFileSelected"
                                             />
                                         </m:VBox>
-
-                                        <!-- File name -->
-                                        <m:Text
-                                            text="{DisplayImagesModel>fileName}"
-                                            textAlign="Center"
-                                            wrapping="true"
-                                            visible="{= ${DisplayImagesModel>isPlaceholder} === false }"
-                                        />
 
                                         <!-- Delete icon -->
                                         <m:Button

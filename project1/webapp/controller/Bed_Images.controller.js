@@ -168,33 +168,14 @@ sap.ui.define([
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("RouteBedDetails");
         },
-        // POO_onPOTableDelete: function (oEvent) {
-        //     // 🔹 Get table and model
-        //     var oTable = this.byId("idTable");
-        //     var oModel = oTable.getModel("BedImageModel");
-        //     var aData = oModel.getData();
-
-        //     // 🔹 Get deleted item index
-        //     var oItem = oEvent.getParameter("listItem");
-        //     var sPath = oItem.getBindingContext("BedImageModel").getPath(); // e.g. "/2"
-        //     var iIndex = parseInt(sPath.split("/")[1]);
-
-        //     // 🔹 Remove the selected item from the data
-        //     aData.splice(iIndex, 1);
-
-        //     // 🔹 Update model
-        //     oModel.setData(aData);
-
-        //     // 🔹 Optional feedback
-        //     sap.m.MessageToast.show("Image removed.");
-        // },
+        
         onbranchChange: function (oEvent) {
             utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
         },
+
         onNameInputLiveChange: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent.getSource(), "ID");
         },
-
 
         BT_onsavebuttonpress: async function () {
             var oView = this.getView();
@@ -365,10 +346,10 @@ sap.ui.define([
                     aImages.push(oNewImage);
                 }
 
-                // ✅ Count only real images (exclude placeholder)
+                //  Count only real images (exclude placeholder)
                 const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
 
-                // ✅ If less than 3, keep one placeholder; else remove it
+                // If less than 3, keep one placeholder; else remove it
                 if (realImagesCount < 5) {
                     if (!aImages.some(img => img.isPlaceholder)) {
                         aImages.push({ isPlaceholder: true });
@@ -382,30 +363,44 @@ sap.ui.define([
 
             oReader.readAsDataURL(oFile);
         },
- onImagePress: function (oEvent) {
-    var oSource = oEvent.getSource(); // the clicked image
-    var sImageSrc = oSource.getSrc(); // get the image src
+  onImagePress: function (oEvent) {
+    var oSource = oEvent.getSource();
+    var sImageSrc = oSource.getSrc();
 
-    // Get the filename from binding context if available
     var oContext = oSource.getBindingContext("DisplayImagesModel");
     var sFileName = oContext ? oContext.getProperty("fileName") : "Image Preview";
 
-    // Check if dialog already exists
     if (!this._oImageDialog) {
-        this._oImageDialog = new sap.m.Dialog({
-            title: sFileName, // set dynamic title
-            contentWidth: "80%",
-            contentHeight: "80%",
-            resizable: true,
-            draggable: true,
-            content: [
+
+        // Flex container fills dialog fully
+        var oFlex = new sap.m.FlexBox({
+            width: "100%",
+            height: "100%",
+            renderType: "Div",
+            justifyContent: "Center",
+            alignItems: "Center",
+            items: [
                 new sap.m.Image({
                     id: this.createId("previewImage"),
+                    densityAware: false,
                     width: "100%",
                     height: "100%",
-                    densityAware: false
+                    style: "object-fit: cover; max-width: 100%; max-height: 100%;"
                 })
-            ],
+            ]
+        });
+
+        this._oImageDialog = new sap.m.Dialog({
+            title: sFileName,
+            contentWidth: "50%",
+            contentHeight: "60%",
+            draggable: true,
+            resizable: true,
+            content: [oFlex],
+
+            // 🔥 Remove internal padding so image truly fills container
+            contentPadding: "0rem",
+
             beginButton: new sap.m.Button({
                 text: "Close",
                 press: function () {
@@ -414,27 +409,17 @@ sap.ui.define([
             })
         });
 
-        // Add dialog to the view for lifecycle handling
         this.getView().addDependent(this._oImageDialog);
+
     } else {
-        // If dialog already exists, update the title dynamically
         this._oImageDialog.setTitle(sFileName);
     }
 
-    // Set the image source dynamically
+    // Set new image
     this.byId("previewImage").setSrc(sImageSrc);
 
-    // Open the dialog
     this._oImageDialog.open();
-},
-
-
-
-
-
-
-
-
+}
 
 
     });

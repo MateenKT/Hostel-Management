@@ -1308,3 +1308,15 @@
     margin-top: 12px !important;
 }
 
+.ImageDialogNoPadding > .sapMDialogScroll {
+    padding: 0 !important;
+}
+
+.ImageDialogNoPadding .sapMDialogSection {
+    padding: 0 !important;
+}
+
+.ImageDialogNoPadding .sapMImg {
+    margin: 0 !important;
+    padding: 0 !important;
+}

@@ -21,6 +21,22 @@
             columnsL="2"
             columnsM="1">
 			<f:content>
+			 <Label text="Branch Code" required="true" />
+                <ComboBox
+                    id="HFF_id_BranchCode"
+                    placeholder="Select branch Code"
+                    selectedKey="{HostelFeaturesModel>/BranchCode}"
+                    items="{BranchModel>/}"
+                    showSecondaryValues="true"
+                    change=".onHostelbranchChange"
+                    valueStateText="{i18n>selectBranchCode}"
+                >
+                    <core:ListItem
+                        key="{BranchModel>BranchID}"
+                        text="{BranchModel>BranchID}"
+                        additionalText="{BranchModel>Name}"
+                    />
+                </ComboBox>
 				<!-- Facility Name -->
 				<Label text="Facility Name" required="true" />
 				<Input id="HFF_id_FacilityName" value="{HostelFeaturesModel>/FacilityName}" placeholder="Enter Facility Name"

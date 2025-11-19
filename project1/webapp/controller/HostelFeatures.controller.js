@@ -8,10 +8,11 @@ sap.ui.define([
             this.getOwnerComponent().getRouter().getRoute("RouteHostelFeatures").attachMatched(this._onRouteMatched, this);
         },
 
-        _onRouteMatched: function() {
+        _onRouteMatched: async function() {
             this.i18nModel = this.getView().getModel("i18n").getResourceBundle();
             // Main form model
             this.getView().setModel(new sap.ui.model.json.JSONModel({
+                BranchCode: "",
                 FacilityName: "",
                 Description: "",
                 ID: ""
@@ -29,7 +30,29 @@ sap.ui.define([
                 tokens: []
             }), "tokenModel");
 
+            await  this._loadBranchCode()
             this.Onsearch();
+        },
+
+         _loadBranchCode: async function () {
+             sap.ui.core.BusyIndicator.show(0);
+            try {
+                const oView = this.getView();
+
+                const oResponse = await this.ajaxReadWithJQuery("HM_Branch", {});
+
+                const aBranches = Array.isArray(oResponse?.data)
+                    ? oResponse.data
+                    : (oResponse?.data ? [oResponse.data] : []);
+
+                const oBranchModel = new sap.ui.model.json.JSONModel(aBranches);
+                oView.setModel(oBranchModel, "BranchModel");
+
+                console.log("oBranchModel:", oBranchModel.getData());
+                console.log("Branch data loaded successfully");
+            } catch (err) {
+                console.error("Error while loading branch data:", err);
+            }
         },
 
         HM_AddHostelFeature: function() {
@@ -42,6 +65,7 @@ sap.ui.define([
             }
 
             oView.getModel("HostelFeaturesModel").setData({
+                BranchCode: "",
                 FacilityName: "",
                 Description: "",
                 ID: ""
@@ -117,6 +141,12 @@ sap.ui.define([
             if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
         },
 
+        onHostelbranchChange: function(oEvent) {
+            var oInput = oEvent.getSource();
+            utils._LCstrictValidationComboBox(oEvent);
+            if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
+        },
+
         HF_onsavebuttonpress: async function() {
             const oView = this.getView();
             const oHostelFeaturesModel = oView.getModel("HostelFeaturesModel");
@@ -126,6 +156,7 @@ sap.ui.define([
             
             //  Mandatory field validation
             var isMandatoryValid = (
+                utils._LCstrictValidationComboBox(sap.ui.getCore().byId(oView.createId("HFF_id_BranchCode")), "ID") &&
                 utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("HFF_id_FacilityName")), "ID") &&
                 utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("HFF_id_Description")), "ID")
             );
@@ -143,6 +174,7 @@ sap.ui.define([
             var bDuplicate = aHostelData.some(function(facility) {
                 if (Payload.ID && facility.ID === Payload.ID) return false; // Skip comparing the same record during update
                 return (
+                    facility.BranchCode === Payload.BranchCode &&
                     facility.FacilityName.trim().toLowerCase() === Payload.FacilityName.trim().toLowerCase() 
                 );
             });
@@ -154,6 +186,7 @@ sap.ui.define([
             sap.ui.core.BusyIndicator.show(0);
             try {
                 const oPayload = {
+                    BranchCode: Payload.BranchCode,
                     FacilityName: Payload.FacilityName,
                     Description: Payload.Description,
                     Photo1: oUpload.Photo1,
@@ -332,7 +365,7 @@ sap.ui.define([
             oRouter.navTo("RouteHostel");
         },
 
-        HF_viewroom: function(oEvent) {
+        HF_viewroom: function (oEvent) {
             var oContext = oEvent.getSource().getBindingContext("HostelFeatures");
             var oData = oContext.getObject();
 
@@ -341,53 +374,41 @@ sap.ui.define([
                 return;
             }
 
-            var sBase64 = oData.Photo1;
+            var sBase64 = oData.Photo1.replace(/\s/g, "");
 
-            if (!sBase64) {
-                sap.m.MessageBox.error("No document found for this room!");
-                return;
-            }
-
-            sBase64 = sBase64.replace(/\s/g, "");
-
-            try {
-                if (!sBase64.startsWith("iVB") && !sBase64.startsWith("data:image")) {
-                    var decoded = atob(sBase64);
-                    if (decoded.startsWith("iVB")) {
-                        sBase64 = decoded;
-                    }
-                }
-            } catch (e) {
-                console.error("Base64 decode failed:", e);
-            }
-
-            if (!sBase64.startsWith("data:image")) {
+            if (sBase64 && !sBase64.startsWith("data:image")) {
                 sBase64 = "data:image/jpeg;base64," + sBase64;
             }
 
             var oImage = new sap.m.Image({
                 src: sBase64,
+                densityAware: false,
+                decorative: false,
                 width: "100%",
-                height: "auto"
+                height: "100%",
+                style: "object-fit: cover; display:block; margin:0; padding:0;"
             });
 
             var oDialog = new sap.m.Dialog({
-                title: "View Document",
-                contentWidth: "400px",
-                contentHeight: "350px",
-                verticalScrolling: true,
+                title: "Room Photo",
+                contentWidth: "50%",
+                contentHeight: "60%",
+                horizontalScrolling: false,
+                verticalScrolling: false,
                 content: [oImage],
                 endButton: new sap.m.Button({
                     text: "Close",
-                    press: function() {
+                    press: function () {
                         oDialog.close();
                     }
                 }),
-                afterClose: function() {
+                afterClose: function () {
                     oDialog.destroy();
                 }
             });
+
+            oDialog.addStyleClass("ImageDialogNoPadding");
             oDialog.open();
-        },
+        }
     });
 });
