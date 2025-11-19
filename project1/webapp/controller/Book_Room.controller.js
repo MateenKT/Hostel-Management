@@ -1481,6 +1481,12 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
         return;
       }
 
+      const aPersons = oHostelModel.getData().Persons;
+
+      aPersons?.forEach(person => {
+          person.AllSelectedFacilities = [];
+      });
+
       const sSelectedKey = oEvent.getParameter("selectedItem").getKey(); // daily / monthly / yearly
       const iSelectedValue = parseInt(oHostelModel.getProperty("/SelectedMonths") || "1", 10);  // <-- HOW MANY MONTH/YEAR
       const sStartDate = oHostelModel.getProperty("/StartDate");

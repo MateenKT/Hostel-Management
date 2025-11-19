@@ -148,84 +148,122 @@ onEditFacilityDetails: function () {
             }
             this._oEditDialog.close();
         },
-        onEditDateChange: function (oEvent) {
-            const oView = this.getView();
-            const oEditModel = oView.getModel("edit");
+        onMonthSelectionChange: function (oEvent) {
+    const oView = this.getView();
+    const oHostelModel = oView.getModel("edit");
 
-            if (!oEditModel) return;
+    const sUnit = oHostelModel.getProperty("/UnitText");
+    const sStartDate = oHostelModel.getProperty("/StartDate") || "";
 
-            // Get raw values from model
-            let sStart = oEditModel.getProperty("/StartDate") || "";
-            let sEnd = oEditModel.getProperty("/EndDate") || "";
+    const iSelectedNumber = parseInt(oEvent.getSource().getSelectedKey() || "1", 10);
 
-            // Convert to yyyy-MM-dd for Date()
-            const normalize = (s) => {
-                if (!s) return null;
-                return s.includes("/") ? s.split("/").reverse().join("-") : s;
-            };
-
-            const sStartISO = normalize(sStart);
-            const sEndISO = normalize(sEnd);
-
-            const oStart = sStartISO ? new Date(sStartISO) : null;
-            const oEnd = sEndISO ? new Date(sEndISO) : null;
-
-            // --- BLOCK START DATE EARLIER THAN ORIGINAL ---
-            const sOriginalStart = this._oSelectedFacility.StartDate; // from selected facility
-            const oOriginalStart = normalize(sOriginalStart) ? new Date(normalize(sOriginalStart)) : null;
-
-            if (oStart && oOriginalStart && oStart < oOriginalStart) {
-                sap.m.MessageToast.show("Start Date cannot be earlier than original Start Date.");
-
-                // Reset back to original
-                oEditModel.setProperty("/StartDate", this._formatDateToDDMMYYYY(oOriginalStart));
-
-                // Reset DatePicker UI also
-                const oStartDP = sap.ui.core.Fragment.byId(oView.getId(), "editStartDate");
-                if (oStartDP) oStartDP.setDateValue(oOriginalStart);
-
-                return;
-            }
-
-            // Validate normal date logic
-            if (!oStart || !oEnd || isNaN(oStart) || isNaN(oEnd)) {
-                oEditModel.setProperty("/TotalDays", 0);
-                return;
-            }
-
-            if (oEnd < oStart) {
-                sap.m.MessageToast.show("End Date must be after Start Date");
-                oEditModel.setProperty("/TotalDays", 0);
-                return;
-            }
-
-            // --- Auto-format both dates to dd/MM/yyyy ---
-            oEditModel.setProperty("/StartDate", this._formatDateToDDMMYYYY(oStart));
-            oEditModel.setProperty("/EndDate", this._formatDateToDDMMYYYY(oEnd));
-
-            // --- Calculate days ---
-            const iDays = Math.ceil((oEnd - oStart) / (1000 * 60 * 60 * 24)) ;  // inclusive
-            oEditModel.setProperty("/TotalDays", iDays);
-
-        if (sStart && !oEvent.getParameter("id").includes("editEndDate")) {
-        //var date = this._parseDate(sStart);
-        let oStart = new Date(sStart);
-    
-        // Add 1 day in LOCAL timezone
-        oStart.setDate(oStart.getDate() + 1);
-    
-        // Convert to yyyy-MM-dd WITHOUT timezone conversion
-        const sMinEndDate = [
-            oStart.getFullYear(),
-            String(oStart.getMonth() + 1).padStart(2, "0"),
-            String(oStart.getDate()).padStart(2, "0")
-        ].join("-");
-    
-        //oEndDatePicker.setMinDate(new Date(sMinEndDate));
-         const oEndPicker = sap.ui.core.Fragment.byId(this.getView().getId(), "editEndDate");
-         oEndPicker.setMinDate(new Date(sMinEndDate));
+    if (!sStartDate) {
+        sap.m.MessageToast.show("Please select Start Date first.");
+        return;
     }
-        },
+
+    const oStart = this._parseDate(sStartDate);
+    if (!(oStart instanceof Date) || isNaN(oStart)) {
+        sap.m.MessageToast.show("Invalid Start Date.");
+        return;
+    }
+
+    let oEnd = new Date(oStart);
+
+    // ⭐ USE FIXED DAYS (30 DAYS PER MONTH)
+    let iTotalDays = 0;
+
+    if (sUnit === "Per Month") {
+        iTotalDays = iSelectedNumber * 30;   // FIXED
+        oEnd.setDate(oEnd.getDate() + iTotalDays);
+
+        oHostelModel.setProperty("/TotalMonths", iSelectedNumber);
+        oHostelModel.setProperty("/TotalYears", 0);
+    }
+    else if (sUnit === "Per Year") {
+        iTotalDays = iSelectedNumber * 365;  // FIXED
+        oEnd.setDate(oEnd.getDate() + iTotalDays);
+
+        oHostelModel.setProperty("/TotalYears", iSelectedNumber);
+        oHostelModel.setProperty("/TotalMonths", 0);
+    }
+    else {
+        return;
+    }
+
+    const sEndDate = this._formatDateToDDMMYYYY(oEnd);
+
+    oHostelModel.setProperty("/EndDate", sEndDate);
+    oHostelModel.setProperty("/TotalDays", iTotalDays);
+},
+      onEditDateChange: function (oEvent) {
+    const oView = this.getView();
+    const oModel = oView.getModel("edit");
+
+    const sUnit = oModel.getProperty("/UnitText");
+
+    let iSelCount = 1;
+    if (sUnit === "Per Month") iSelCount = parseInt(oModel.getProperty("/TotalMonths") || "1", 10);
+    else if (sUnit === "Per Year") iSelCount = parseInt(oModel.getProperty("/TotalYears") || "1", 10);
+
+    const sStart = oModel.getProperty("/StartDate");
+    const sEnd = oModel.getProperty("/EndDate");
+
+    const toISO = (s) => s?.includes("/") ? s.split("/").reverse().join("-") : s;
+    const oStart = sStart ? new Date(toISO(sStart)) : null;
+    const oEnd = sEnd ? new Date(toISO(sEnd)) : null;
+
+    if (!oStart || isNaN(oStart)) return;
+
+    let oFinalEnd = new Date(oStart);
+
+    // ⭐ CASE 1: FIXED 30 DAYS PER MONTH
+    if (sUnit === "Per Month") {
+        const iDays = iSelCount * 30;
+        oFinalEnd.setDate(oFinalEnd.getDate() + iDays);
+    }
+
+    // ⭐ CASE 2: FIXED 365 DAYS PER YEAR
+    else if (sUnit === "Per Year") {
+        const iDays = iSelCount * 365;
+        oFinalEnd.setDate(oFinalEnd.getDate() + iDays);
+    }
+
+    // ⭐ OTHER UNITS = SAME AS YOUR ORIGINAL LOGIC
+    else if (sUnit === "Per Day") {
+        oFinalEnd = oEnd ? oEnd : new Date(oStart);
+    }
+    else if (sUnit === "Per Hour") {
+        oFinalEnd = oEnd ? oEnd : new Date(oStart);
+    }
+
+    const sFinalEnd = this._formatDateToDDMMYYYY(oFinalEnd);
+    oModel.setProperty("/EndDate", sFinalEnd);
+
+    // ⭐ TOTAL DAYS ALWAYS FIXED FOR MONTH/YEAR
+    let iDays = 0;
+
+    if (sUnit === "Per Month") {
+        iDays = iSelCount * 30;     // FIXED
+    }
+    else if (sUnit === "Per Year") {
+        iDays = iSelCount * 365;    // FIXED
+    }
+    else if (sUnit === "Per Hour") {
+        const diffHours = (oFinalEnd - oStart) / (1000 * 60 * 60);
+        iDays = diffHours / 24;
+    }
+    else {
+        iDays = Math.ceil((oFinalEnd - oStart) / (1000 * 60 * 60 * 24));
+    }
+    const oEndDP = sap.ui.core.Fragment.byId(oView.getId(), "editEndDate");
+    let oMin = new Date(oStart); 
+    oMin.setDate(oMin.getDate() + 1); 
+    if (oEndDP) oEndDP.setMinDate(oMin);
+    oModel.setProperty("/StartDate", this._formatDateToDDMMYYYY(oStart));
+    oModel.setProperty("/TotalDays", iDays);
+},
+
 
         // Utility function to format date
         _formatDateToDDMMYYYY: function (oDate) {
