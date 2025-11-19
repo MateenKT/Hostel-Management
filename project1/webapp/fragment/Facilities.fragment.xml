@@ -28,7 +28,6 @@
             columnsM="1"
         >
             <f:content>
-                <!-- Branch Code -->
                 <Label
                     text="Branch Code"
                     required="true"
@@ -48,7 +47,6 @@
                     />
                 </ComboBox>
 
-                <!-- Facility Name -->
                 <Label
                     text="Facility Name"
                     required="true"
@@ -59,7 +57,6 @@
                     placeholder="Enter Facility Name"
                 />
 
-                <!-- Type -->
                 <Label
                     text="Type"
                     required="true"
@@ -76,7 +73,6 @@
                     />
                 </ComboBox>
 
-                <!-- Price + Unit -->
                 <Label
                     text="Price"
                     required="true"
@@ -103,7 +99,6 @@
                     </VBox>
                 </HBox>
 
-                <!-- Currency -->
                 <Label
                     text="Currency"
                     required="true"
@@ -119,8 +114,10 @@
                         text="{CurrencyModel>currency}"
                     />
                 </ComboBox>
-                <Label />
-                <Label />
+                 <Label
+                    text="Add Image"
+                    required="true"
+                />
                 <Table
                     id="id_AttachmentTable"
                     items="{UploaderData>/attachments}"
@@ -131,10 +128,6 @@
                 >
                     <headerToolbar>
                         <OverflowToolbar>
-                            <HBox
-                                width="100%"
-                                justifyContent="Start"
-                            >
                                 <u:FileUploader
                                     id="id_fileUploader"
                                     buttonOnly="true"
@@ -143,7 +136,6 @@
                                     multiple="true"
                                     change="onFacilityFileChange"
                                 />
-                            </HBox>
                         </OverflowToolbar>
                     </headerToolbar>
 

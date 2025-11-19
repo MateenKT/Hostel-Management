@@ -1,16 +1,16 @@
 sap.ui.define([
     "./BaseController",
     "../utils/validation",
-     "sap/m/MessageToast",
+    "sap/m/MessageToast",
     "sap/ui/export/Spreadsheet"
-], function(BaseController, utils,   MessageToast,
+], function (BaseController, utils, MessageToast,
     Spreadsheet) {
     "use strict";
     return BaseController.extend("sap.ui.com.project1.controller.Bed_Details", {
-        onInit: function() {
+        onInit: function () {
             this.getOwnerComponent().getRouter().getRoute("RouteBedDetails").attachMatched(this._onRouteMatched, this);
         },
-        _onRouteMatched:async function() {
+        _onRouteMatched: async function () {
             // const omodel = new sap.ui.model.json.JSONModel({
             //     // for Database connection
             //     url: "https://rest.kalpavrikshatechnologies.com/",
@@ -42,10 +42,10 @@ sap.ui.define([
             this.getView().setModel(oUploaderData, "UploaderData");
             await this._loadBranchCode()
             await this.Onsearch()
-         
+
         },
-         _loadBranchCode: async function () {
-             sap.ui.core.BusyIndicator.show(0);
+        _loadBranchCode: async function () {
+            sap.ui.core.BusyIndicator.show(0);
             try {
                 const oView = this.getView();
 
@@ -65,7 +65,7 @@ sap.ui.define([
             }
         },
 
-        HM_RoomDetails: function(oEvent) {
+        HM_RoomDetails: function (oEvent) {
             this.byId("id_BedTable").removeSelections();
             var oView = this.getView();
 
@@ -85,20 +85,20 @@ sap.ui.define([
                 isFileUploaded: false
             });
 
-            var aControls = this.ARD_Dialog.findAggregatedObjects(true, function(oControl) {
-             return oControl instanceof sap.m.Input ||
+            var aControls = this.ARD_Dialog.findAggregatedObjects(true, function (oControl) {
+                return oControl instanceof sap.m.Input ||
                     oControl instanceof sap.m.ComboBox ||
                     oControl instanceof sap.m.Select ||
                     oControl instanceof sap.m.TextArea;
             });
 
-            aControls.forEach(function(oControl) {
+            aControls.forEach(function (oControl) {
                 oControl.setValueState("None");
             });
             this.ARD_Dialog.open();
         },
 
-        BT_onsavebuttonpress: async function() {
+        BT_onsavebuttonpress: async function () {
             var oView = this.getView();
             var Payload = oView.getModel("BedModel").getData();
             const oUploaderData = oView.getModel("UploaderData");
@@ -113,7 +113,7 @@ sap.ui.define([
                 utils._LCvalidateMandatoryField(oView.byId("id_Description"), "ID")
             ) {
 
-                 var Attachment = oView.getModel("tokenModel").getData();
+                var Attachment = oView.getModel("tokenModel").getData();
                 if (!Attachment.tokens || Attachment.tokens.length === 0) {
                     return sap.m.MessageToast.show("Please upload at least one image.");
                 }
@@ -128,7 +128,7 @@ sap.ui.define([
                 }
 
                 var aBedDetails = oView.getModel("BedDetails").getData();
-                var bDuplicate = aBedDetails.some(function(bed) {
+                var bDuplicate = aBedDetails.some(function (bed) {
                     // skip the same record in edit mode
                     if (Payload.ID && bed.ID === Payload.ID) {
                         return false;
@@ -148,9 +148,9 @@ sap.ui.define([
                 }
 
                 // File validation
-               
 
-               const oData = {
+
+                const oData = {
                     data: {
                         Name: Payload.Name,
                         BranchCode: Payload.BranchCode.split('-')[0],
@@ -174,7 +174,7 @@ sap.ui.define([
                     oData.Attachment[`Photo${i}Name`] = "";
                     oData.Attachment[`Photo${i}Type`] = "";
                 }
-                oData.Attachment.BranchCode=Payload.BranchCode
+                oData.Attachment.BranchCode = Payload.BranchCode
 
                 try {
                     sap.ui.core.BusyIndicator.show(0);
@@ -199,7 +199,7 @@ sap.ui.define([
             }
         },
 
-        onTokenDelete: function(oEvent) {
+        onTokenDelete: function (oEvent) {
             const oView = this.getView();
             const oModel = oView.getModel("tokenModel");
             const oUploaderData = oView.getModel("UploaderData");
@@ -215,7 +215,7 @@ sap.ui.define([
             oModel.setProperty("/tokens", aTokens);
             oUploaderData.setProperty("/attachments", aAttachments);
         },
-        onFacilityFileChange: function(oEvent) {
+        onFacilityFileChange: function (oEvent) {
             const oFiles = oEvent.getParameter("files");
             if (!oFiles || oFiles.length === 0) return;
 
@@ -250,7 +250,8 @@ sap.ui.define([
                     aAttachments.push({
                         content: sBase64,
                         fileType: oFile.type,
-                        filename: oFile.name
+                        filename: oFile.name,
+                        size: this.formatFileSize(oFile.size)
                     });
 
                     aTokens.push({
@@ -265,38 +266,46 @@ sap.ui.define([
                 oReader.readAsDataURL(oFile);
             });
         },
-        BT_onCancelButtonPress: function() {
+
+        formatFileSize: function (bytes) {
+            if (!bytes) return "0 Bytes";
+            const sizes = ["Bytes", "KB", "MB", "GB"];
+            let i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return (bytes / Math.pow(1024, i)).toFixed(1) + " " + sizes[i];
+        },
+
+        BT_onCancelButtonPress: function () {
             this.ARD_Dialog.close();
         },
-        onNavBack: function() {
+        onNavBack: function () {
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("TilePage");
         },
-        onHome: function() {
+        onHome: function () {
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("RouteHostel");
         },
-     Onsearch: function () {
-    sap.ui.core.BusyIndicator.show(0);  // <-- Show here also (optional but safe)
-    
-    return this.ajaxReadWithJQuery("HM_BedType", "")
-        .then((oData) => {
-            const oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
-            const model = new sap.ui.model.json.JSONModel(oFCIAerData);
+        Onsearch: function () {
+            sap.ui.core.BusyIndicator.show(0);  // <-- Show here also (optional but safe)
 
-            this.getView().setModel(model, "BedDetails");
-            this._populateUniqueFilterValues(oFCIAerData);
-        })
-        .catch((err) => {
-            console.error("Error in search", err);
-            sap.m.MessageBox.error("Failed to load bed details.");
-        })
-        .finally(() => {
-            sap.ui.core.BusyIndicator.hide();   // <-- Always executed
-        });
-},
+            return this.ajaxReadWithJQuery("HM_BedType", "")
+                .then((oData) => {
+                    const oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
+                    const model = new sap.ui.model.json.JSONModel(oFCIAerData);
 
-        _populateUniqueFilterValues: function(data) {
+                    this.getView().setModel(model, "BedDetails");
+                    this._populateUniqueFilterValues(oFCIAerData);
+                })
+                .catch((err) => {
+                    console.error("Error in search", err);
+                    sap.m.MessageBox.error("Failed to load bed details.");
+                })
+                .finally(() => {
+                    sap.ui.core.BusyIndicator.hide();   // <-- Always executed
+                });
+        },
+
+        _populateUniqueFilterValues: function (data) {
             let uniqueValues = {
                 PO_id_CustomerName: new Set(),
                 PO_id_CompanyName: new Set(),
@@ -320,7 +329,7 @@ sap.ui.define([
                 });
             });
         },
-        HM_onSearch: function() {
+        HM_onSearch: function () {
             var oView = this.getView();
 
             var oFilterBar = oView.byId("PO_id_FilterbarEmployee");
@@ -348,24 +357,24 @@ sap.ui.define([
 
             oBinding.filter(oCombinedFilter);
         },
-        PO_onPressClear: function() {
+        PO_onPressClear: function () {
             this.getView().byId("PO_id_CustomerName").setSelectedKey("")
             this.getView().byId("PO_id_CompanyName").setSelectedKey("")
         },
-        onbranchChange: function(oEvent) {
+        onbranchChange: function (oEvent) {
             utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
         },
-        onNameInputLiveChange: function(oEvent) {
+        onNameInputLiveChange: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent.getSource(), "ID");
         },
-        onColumnListItemPress:function(oEvent){
-               var BEdID = oEvent.getSource().getBindingContext("BedDetails").getObject().ID;
+        onColumnListItemPress: function (oEvent) {
+            var BEdID = oEvent.getSource().getBindingContext("BedDetails").getObject().ID;
             var onav = this.getOwnerComponent().getRouter()
             onav.navTo("RouteRoomImages", {
                 sPath: BEdID
             })
         },
-        HM_DeleteDetails: function() {
+        HM_DeleteDetails: function () {
             var table = this.byId("id_BedTable");
             var aSelectedItems = table.getSelectedItems();
 
@@ -381,51 +390,51 @@ sap.ui.define([
 
             sap.m.MessageBox.confirm(
                 `Are you sure you want to delete the selected bed(s): ${sBedNames}?`, {
-                    title: "Confirm Deletion",
-                    icon: sap.m.MessageBox.Icon.WARNING,
-                    actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
-                    onClose: async function(sAction) {
-                        if (sAction === sap.m.MessageBox.Action.OK) {
-                            sap.ui.core.BusyIndicator.show(0);
-                            try {
-                                // Create array of delete promises
-                                const deletePromises = aSelectedItems.map((item) => {
-                                    const data = item.getBindingContext("BedDetails").getObject();
-                                    const oBody = {
-                                        filters: { ID: data.ID }
-                                    };
+                title: "Confirm Deletion",
+                icon: sap.m.MessageBox.Icon.WARNING,
+                actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
+                onClose: async function (sAction) {
+                    if (sAction === sap.m.MessageBox.Action.OK) {
+                        sap.ui.core.BusyIndicator.show(0);
+                        try {
+                            // Create array of delete promises
+                            const deletePromises = aSelectedItems.map((item) => {
+                                const data = item.getBindingContext("BedDetails").getObject();
+                                const oBody = {
+                                    filters: { ID: data.ID }
+                                };
 
-                                    return $.ajax({
-                                        url: "https://rest.kalpavrikshatechnologies.com/HM_BedType",
-                                        method: "DELETE",
-                                        contentType: "application/json",
-                                        data: JSON.stringify(oBody),
-                                        headers: {
-                                            name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                                            password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-                                        }
-                                    });
+                                return $.ajax({
+                                    url: "https://rest.kalpavrikshatechnologies.com/HM_BedType",
+                                    method: "DELETE",
+                                    contentType: "application/json",
+                                    data: JSON.stringify(oBody),
+                                    headers: {
+                                        name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                                        password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+                                    }
                                 });
+                            });
 
-                                // Wait for all deletions to complete
-                                await Promise.all(deletePromises);
+                            // Wait for all deletions to complete
+                            await Promise.all(deletePromises);
 
-                               await this.Onsearch();
-                                sap.m.MessageToast.show("Selected bed(s) deleted successfully!");
+                            await this.Onsearch();
+                            sap.m.MessageToast.show("Selected bed(s) deleted successfully!");
 
-                            } catch (error) {
-                                console.error("Delete failed:", error);
-                                sap.m.MessageBox.error("Error while deleting bed(s). Please try again.");
-                            } finally {
-                                sap.ui.core.BusyIndicator.hide();
-                                table.removeSelections(true);
-                            }
+                        } catch (error) {
+                            console.error("Delete failed:", error);
+                            sap.m.MessageBox.error("Error while deleting bed(s). Please try again.");
+                        } finally {
+                            sap.ui.core.BusyIndicator.hide();
+                            table.removeSelections(true);
                         }
-                    }.bind(this)
-                }
+                    }
+                }.bind(this)
+            }
             );
         },
-         BD_onDownload:function(){
+        BD_onDownload: function () {
             const oModel = this.byId("id_BedTable").getModel("BedDetails").getData();
             if (!oModel || oModel.length === 0) {
                 MessageToast.show("No data available to download.");
@@ -453,7 +462,7 @@ sap.ui.define([
             });
         },
 
-         createTableSheet: function () {
+        createTableSheet: function () {
             return [{
                 label: "Branch Code",
                 property: "BranchCode",

@@ -12,8 +12,8 @@
         class="sapUiContentPadding"
         resizable="true"
         draggable="true"
-        contentHeight="auto"
         contentWidth="40%"
+        contentHeight="auto"
     >
         <f:SimpleForm
             editable="true"
@@ -27,19 +27,17 @@
             columnsM="1"
         >
             <f:content>
-                <!-- Branch Code -->
                 <Label
                     text="Branch Code"
                     required="true"
                 />
                 <ComboBox
                     id="idRoomType12"
-                    placeholder="Select branch Code"
                     selectedKey="{BedModel>/BranchCode}"
                     items="{BranchModel>/}"
                     change="onbranchChange"
                     showSecondaryValues="true"
-                    valueStateText="Select Branch Code"
+                    placeholder="Select Branch Code"
                 >
                     <core:ListItem
                         key="{BranchModel>BranchID}"
@@ -47,7 +45,7 @@
                         additionalText="{BranchModel>City}"
                     />
                 </ComboBox>
-                <!-- Bed Type -->
+
                 <Label
                     text="Bed Type"
                     required="true"
@@ -56,21 +54,16 @@
                     id="idBedType"
                     value="{BedModel>/Name}"
                     placeholder="Enter Bed Type"
-                    maxLength="60"
-                    liveChange="onNameInputLiveChange"
-                    valueStateText="Enter Bed Type"
                 />
-                <!-- Room Type -->
                 <Label
                     text="Room Type"
                     required="true"
                 />
                 <ComboBox
                     id="idRoomtype"
-                    placeholder="Select Room type"
                     selectedKey="{BedModel>/ACType}"
                     change="onbranchChange"
-                    valueStateText="Select Room Type"
+                    placeholder="Select Room Type"
                 >
                     <core:ListItem
                         key="AC"
@@ -81,33 +74,27 @@
                         text="Non-Ac"
                     />
                 </ComboBox>
-                <!-- No Of Person -->
+
                 <Label
                     text="No Of Person"
                     required="true"
                 />
                 <Input
                     id="idR"
+                    type="Number"
                     value="{BedModel>/NoOfPerson}"
                     placeholder="Enter No Of Person"
-                    liveChange="onNameInputLiveChange"
-                    type="Number"
-                    valueStateText="Enter No of person"
                 />
-                <!-- No of rooms -->
                 <Label
                     text="No Of Rooms"
                     required="true"
                 />
                 <Input
                     id="id_MaxBeds"
-                    value="{BedModel>/MaxBeds}"
-                    placeholder="Enter No Of Room"
-                    liveChange="onNameInputLiveChange"
                     type="Number"
-                    valueStateText="Enter Max no of Beds"
+                    value="{BedModel>/MaxBeds}"
+                    placeholder="Enter No Of Rooms"
                 />
-                <!-- Description -->
                 <Label
                     text="Description"
                     required="true"
@@ -115,62 +102,60 @@
                 <TextArea
                     id="id_Description"
                     value="{BedModel>/Description}"
-                    placeholder="Enter Description"
-                    liveChange="onNameInputLiveChange"
-                    valueStateText="Enter Description"
                     maxLength="150"
+                    placeholder="Enter Description"
                 />
-                <!-- Upload -->
                 <Label
                     text="Add Image"
                     required="true"
                 />
-                <VBox
-                    alignItems="Start"
+
+                <Table
+                    id="id_Bed_AttachmentTable"
+                    items="{UploaderData>/attachments}"
+                    mode="Delete"
+                    popinLayout="Block"
+                    delete="onTokenDelete"
                     width="100%"
-                    renderType="Bare"
                 >
-                    <HBox width="25%">
-                        <u:FileUploader
-                            id="BT_id_FileUploader"
-                            fileSizeExceed="onFileSizeExceeds"
-                            maximumFileSize="5MB"
-                            typeMissmatch="onFileTypeMissmatch"
-                            fileType="jpg,jpeg,png"
-                            change="onFacilityFileChange"
-                            buttonOnly="true"
-                            sameFilenameAllowed="true"
-                            iconFirst="true"
-                            buttonText="Upload Images"
-                            multiple="true"
-                            uploadOnChange="false"
-                            tooltip="Only JPG, PNG, or PDF files under 5MB allowed"
-                        />
-                    </HBox>
-                    <!-- Tokenizer -->
-                    <HBox width="75%">
-                        <ScrollContainer
-                            height="60px"
-                            width="100%"
-                            horizontal="false"
-                            vertical="true"
-                        >
-                            <Tokenizer
-                                id="BD_id_TokenList"
-                                width="100%"
-                                tokenDelete="onTokenDelete"
-                                tokens="{tokenModel>/tokens}"
-                            >
-                                <Token
-                                    key="{tokenModel>key}"
-                                    text="{tokenModel>text}"
-                                />
-                            </Tokenizer>
-                        </ScrollContainer>
-                    </HBox>
-                </VBox>
+                    <headerToolbar>
+                        <OverflowToolbar>
+                            <u:FileUploader
+                                id="BT_id_FileUploader"
+                                fileType="jpg,jpeg,png"
+                                multiple="true"
+                                buttonOnly="true"
+                                buttonText="Upload Images"
+                                change="onFacilityFileChange"
+                            />
+                        </OverflowToolbar>
+                    </headerToolbar>
+
+                    <columns>
+                        <Column>
+                            <Text text="File Name" />
+                        </Column>
+                        <Column hAlign="Center">
+                            <Text text="File Type" />
+                        </Column>
+                        <Column hAlign="Center">
+                            <Text text="File Size" />
+                        </Column>
+                    </columns>
+
+                    <items>
+                        <ColumnListItem>
+                            <cells>
+                                <Text text="{UploaderData>filename}" />
+                                <Text text="{UploaderData>fileType}" />
+                                <Text text="{UploaderData>size}" />
+                            </cells>
+                        </ColumnListItem>
+                    </items>
+                </Table>
             </f:content>
         </f:SimpleForm>
+
         <footer>
             <Toolbar>
                 <ToolbarSpacer />
@@ -178,15 +163,11 @@
                     text="Save"
                     press="BT_onsavebuttonpress"
                     type="Accept"
-                    id="AR_id_saveButton"
-                    class="marginRight"
                 />
                 <Button
                     text="Cancel"
                     press="BT_onCancelButtonPress"
                     type="Reject"
-                    id="AR_id_CancelButton"
-                    class="marginRight"
                 />
             </Toolbar>
         </footer>
