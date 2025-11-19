@@ -45,12 +45,12 @@
     visible="{viewModel>/editMode}"
     selectedKey="{HostelModel>/RoomType}"
     items="{
-        path: 'BedTypeModel>/',
+        path: 'HostelModel>/',
         templateShareable: false
     }"
     selectionChange="onSelectionChange"
 >
-    <core:Item key="{BedTypeModel>Name}" text="{BedTypeModel>Name}" />
+    <core:Item key="{HostelModel>Name}" text="{HostelModel>Name}" />
 </ComboBox>
 
         

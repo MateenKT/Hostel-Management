@@ -330,7 +330,8 @@ sap.ui.define([
               []),
             new sap.m.Label({
               text: "Full Name",
-              required: true
+              required: true,
+              maxLength:40
             }),
             new sap.m.ComboBox({
               selectedKey: "{HostelModel>/Persons/" + i + "/Gender}",
@@ -349,7 +350,8 @@ sap.ui.define([
               ]
             }),
             new sap.m.Input({
-              value: "{HostelModel>/Persons/" + i + "/FullName}"
+              value: "{HostelModel>/Persons/" + i + "/FullName}",
+              maxLength:40
             }),
             new sap.m.Label({
               text: "UserID",
@@ -390,7 +392,7 @@ sap.ui.define([
               text: "Gender",
               required: true
             }),
-            new sap.m.ComboBox({
+            new sap.m.Select({
               selectedKey: "{HostelModel>/Persons/" + i + "/Gender}",
               items: [
                 new sap.ui.core.ListItem({
