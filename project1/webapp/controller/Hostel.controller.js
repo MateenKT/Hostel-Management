@@ -1825,6 +1825,7 @@ _getLocationName: function (lat, lng) {
         },
 
         onBranchSelectionChange: function (oEvent) {
+            utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
             const oView = this.getView();
             const oAreaCombo = oView.byId("id_Area");
             const oRoomType = oView.byId("id_Roomtype");
@@ -1858,6 +1859,8 @@ _getLocationName: function (lat, lng) {
 
         // 🔹 When Area is selected, enable Room Type combo
         onAreaSelectionChange: function (oEvent) {
+            utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
+
             const oRoomType = this.byId("id_Roomtype");
             const oSelectedItem = oEvent.getSource().getSelectedItem();
 
@@ -1877,6 +1880,15 @@ _getLocationName: function (lat, lng) {
     const oBranchCombo = this.byId("id_Area");
     const sSelectedBranch = oBranchCombo.getSelectedItem()?.getKey();
     const sSelectedACType = this.byId("id_Roomtype")?.getSelectedKey();
+
+    if(oBranchcity===undefined){
+        MessageToast.show("Please Select City")
+         oContainer.setBusy(false);
+        return;
+    }
+    if(sSelectedACType===""){
+        this.byId("id_Roomtype").setSelectedKey("All")
+    }
 
     try {
         await this._loadFilteredData(oBranchcity, sSelectedBranch, sSelectedACType);

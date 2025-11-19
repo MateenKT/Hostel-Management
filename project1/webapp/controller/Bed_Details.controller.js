@@ -97,6 +97,9 @@ sap.ui.define([
             });
             this.ARD_Dialog.open();
         },
+        onNoOfPersonInputLiveChange:function(oEvent){
+            utils.onNumber(oEvent.getSource(), "ID");
+        },
 
         BT_onsavebuttonpress: async function () {
             var oView = this.getView();
@@ -108,7 +111,7 @@ sap.ui.define([
                 utils._LCstrictValidationComboBox(oView.byId("idRoomType12"), "ID") &&
                 utils._LCvalidateMandatoryField(oView.byId("idBedType"), "ID") &&
                 utils._LCstrictValidationComboBox(oView.byId("idRoomtype"), "ID") &&
-                utils._LCvalidateMandatoryField(oView.byId("idR"), "ID") &&
+                utils.onNumber(oView.byId("idR"), "ID") &&
                 utils._LCvalidateMandatoryField(oView.byId("id_MaxBeds"), "ID") &&
                 utils._LCvalidateMandatoryField(oView.byId("id_Description"), "ID")
             ) {

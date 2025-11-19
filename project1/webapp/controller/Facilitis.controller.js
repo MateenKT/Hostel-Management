@@ -238,10 +238,25 @@ sap.ui.define([
                 }
             });
         },
-        onFacilitybranchChange: function (oEvent) {
+         onFacilitybranchChange: function (oEvent) {
             var oInput = oEvent.getSource();
             utils._LCstrictValidationComboBox(oEvent);
-            if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
+            if (oInput.getValue() === "") oInput.setValueState("None");
+
+               var sBranchCode =this.byId("idRoomType123").getSelectedKey();
+
+           var oCurrencyModel = this.getView().getModel("BranchModel").getData();
+           var Currency= oCurrencyModel.find((item)=>{
+               return item.BranchID===sBranchCode
+            })
+
+              if(Currency.Country==="India")
+                {
+                this.byId("FL_id_Currency").setSelectedKey("INR")
+                }else{
+
+                this.byId("FL_id_Currency").setSelectedKey("")
+                }
         },
         onFacilityNameChange: function (oEvent) {
             var oInput = oEvent.getSource();

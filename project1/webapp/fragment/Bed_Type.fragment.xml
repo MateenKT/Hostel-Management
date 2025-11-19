@@ -54,6 +54,7 @@
                     id="idBedType"
                     value="{BedModel>/Name}"
                     placeholder="Enter Bed Type"
+                    maxLength="50"
                 />
                 <Label
                     text="Room Type"
@@ -81,9 +82,10 @@
                 />
                 <Input
                     id="idR"
-                    type="Number"
                     value="{BedModel>/NoOfPerson}"
                     placeholder="Enter No Of Person"
+                    liveChange="onNoOfPersonInputLiveChange"
+                    maxLength="2"
                 />
                 <Label
                     text="No Of Rooms"
@@ -91,10 +93,11 @@
                 />
                 <Input
                     id="id_MaxBeds"
-                    type="Number"
                     value="{BedModel>/MaxBeds}"
                     placeholder="Enter No Of Rooms"
-                />
+                    maxLength="3"
+                    liveChange="onNoOfPersonInputLiveChange"
+                    />
                 <Label
                     text="Description"
                     required="true"

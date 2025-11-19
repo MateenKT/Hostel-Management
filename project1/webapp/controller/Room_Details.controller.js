@@ -273,6 +273,9 @@ sap.ui.define([
             if(Currency.Country==="India")
                 {
                 this.byId("FO_id_Currency").setSelectedKey("INR")
+                }else{
+                this.byId("FO_id_Currency").setSelectedKey("")
+
                 }
             
 

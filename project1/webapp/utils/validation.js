@@ -5,7 +5,7 @@ sap.ui.define([], function() {
         _LCvalidateMobileNumber: function(oEvent, type) {
             var oField = type === "ID" ? oEvent : oEvent.getSource();
             if (!oField) return false;
-            var oValue = oField.getValue().replace(/[^0-9]/g, "").slice(0, 10);
+            var oValue = oField.getValue().replace(/[^0-9]/g, "");
             if (oField.getValue() !== oValue) oField.setValue(oValue);
             var regex = /^[1-9]\d{9}$/;
             if (!regex.test(oValue)) {
@@ -16,6 +16,24 @@ sap.ui.define([], function() {
                 return true;
             }
         },
+    onNumber: function (oEvent, type) {
+    var oField = type === "ID" ? oEvent : oEvent.getSource();
+    if (!oField) return false;
+
+    // Remove non-digit characters
+    var value = oField.getValue().replace(/\D/g, "");
+    oField.setValue(value);
+
+    if (!value) { // empty after removing non-digits
+        oField.setValueState("Error");
+        return false;
+    } else {
+        oField.setValueState("None");
+        return true; 
+    }
+},
+
+
 
         // Validate mobile number
         _LCvalidateMobileNumberWithSTD: function(oEventOrControl, sStdCode) {
