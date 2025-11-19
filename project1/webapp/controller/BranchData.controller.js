@@ -13,15 +13,15 @@ sap.ui.define([
 
         _onRouteMatched: function () {
             this.i18nModel = this.getView().getModel("i18n").getResourceBundle();
-            const omodel = new sap.ui.model.json.JSONModel({
-                url: "https://rest.kalpavrikshatechnologies.com/",
-                headers: {
-                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
-                    "Content-Type": "application/json",
-                }
-            });
-            this.getOwnerComponent().setModel(omodel, "LoginModel");
+            // const omodel = new sap.ui.model.json.JSONModel({
+            //     url: "https://rest.kalpavrikshatechnologies.com/",
+            //     headers: {
+            //         name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+            //         password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
+            //         "Content-Type": "application/json",
+            //     }
+            // });
+            // this.getOwnerComponent().setModel(omodel, "LoginModel");
             const oMDmodel = new sap.ui.model.json.JSONModel({
                 BranchID: "",
                 Name: "",
@@ -408,51 +408,6 @@ sap.ui.define([
             if (oInput.getValue() === "") oInput.setValueState("None");
         },
 
-        // MD_DeleteRow: function () {
-        //     var oTable = this.byId("id_MD_Table");
-        //     var oSelectedItem = oTable.getSelectedItem();
-
-        //     if (!oSelectedItem) {
-        //         sap.m.MessageToast.show("Please select a record to delete.");
-        //         return;
-        //     }
-
-        //     var oContext = oSelectedItem.getBindingContext("mainModel");
-        //     var oData = oContext.getObject();
-        //     var that = this;
-
-        //     sap.m.MessageBox.confirm(
-        //         `Are you sure you want to delete the Branch ${oData.Name}?`, {
-        //         icon: sap.m.MessageBox.Icon.WARNING,
-        //         title: "Confirm Deletion",
-        //         actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO],
-        //         emphasizedAction: sap.m.MessageBox.Action.NO,
-        //         onClose: async function (sAction) {
-        //             if (sAction === sap.m.MessageBox.Action.YES) {
-        //                 try {
-        //                     sap.ui.core.BusyIndicator.show(0);
-        //                     await that.ajaxDeleteWithJQuery("HM_Branch", {
-        //                         filters: {
-        //                             BranchID: oData.BranchID
-        //                         }
-        //                     });
-        //                     sap.m.MessageToast.show("Branch deleted successfully!");
-        //                     await that.Onsearch(); // refresh table data
-        //                 } catch (err) {
-        //                     console.error("Delete failed:", err);
-        //                     sap.m.MessageBox.error("Error while deleting Branch. Please try again.");
-        //                 } finally {
-        //                     sap.ui.core.BusyIndicator.hide();
-        //                     oTable.removeSelections(true);
-        //                 }
-        //             } else if (sAction === sap.m.MessageBox.Action.NO) {
-        //                 oTable.removeSelections(true);
-        //             }
-        //         }
-        //     }
-        //     );
-        // },
-
         MD_DeleteRow: function () {
             var oTable = this.byId("id_MD_Table");
             var aSelectedItems = oTable.getSelectedItems();
@@ -541,41 +496,53 @@ sap.ui.define([
             });
             this.isEdit = true;
             this._resetFacilityValueStates();
-
-            // // --- APPLY BINDING FILTERS so ComboBoxes only show relevant items for EDIT ---
-            // const oStateCB = sap.ui.getCore().byId(oView.createId("MC_id_State"));
-            // const oCityCB = sap.ui.getCore().byId(oView.createId("MC_id_City"));
-            // const oCountryCB = sap.ui.getCore().byId(oView.createId("MC_id_Country"));
-
-            // // ensure country ComboBox shows and selects the country
-            // if (oCountryCB) {
-            //     // set selectedKey to country name (your ComboBox uses countryName as key)
-            //     oCountryCB.setSelectedKey(oData.Country || oData.country || "");
-            // }
-
-            // // filter states by countryCode from the selected row (oData.countryCode must exist)
-            // if (oStateCB && oStateCB.getBinding("items")) {
-            //     const countryCode = oData.countryCode || oData.countryCodeFromRow || "";
-            //     oStateCB.getBinding("items").filter([
-            //         new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, countryCode)
-            //     ]);
-            //     // set selected state key (after applying filter)
-            //     oStateCB.setSelectedKey(oData.State || oData.state || "");
-            // }
-
-            // // filter cities by stateName + countryCode
-            // if (oCityCB && oCityCB.getBinding("items")) {
-            //     const stateName = oData.State || oData.state || "";
-            //     const countryCode = oData.countryCode || "";
-            //     oCityCB.getBinding("items").filter([
-            //         new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, stateName),
-            //         new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, countryCode)
-            //     ]);
-            //     // set selected city key (after applying filter)
-            //     oCityCB.setSelectedKey(oData.City || oData.city || oData.baseLocation || "");
-            // }
+            this._applyCountryStateCityFilters();
             this.oDialog.open();
         },
+
+        _applyCountryStateCityFilters: function () {
+                const oModel = this.getView().getModel("MDmodel");
+                const oCountryCB = this.byId("MC_id_Country");
+                const oStateCB = this.byId("MC_id_State");
+                const oSourceCB = this.byId("MC_id_City");;
+
+                const sCountry = oModel.getProperty("/country");     // e.g. "Australia"
+                const sState = oModel.getProperty("/state");       // e.g. "Queensland"
+                const sSource = oModel.getProperty("/baseLocation");      // e.g. "Bongaree"
+
+                // Reset all filters
+                oStateCB.getBinding("items")?.filter([]);
+                oSourceCB.getBinding("items")?.filter([]);
+
+                if (sCountry) {
+                    // Find countryCode by name
+                    const aCountryData = this.getView().getModel("CountryModel").getData();
+                    const oCountryObj = aCountryData.find(c => c.countryName === sCountry);
+
+                    if (oCountryObj) {
+                        const sCountryCode = oCountryObj.code;
+
+                        // Filter States by Country
+                        oStateCB.getBinding("items")?.filter([
+                            new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+                        ]);
+
+                        if (sState) {
+                            // Filter Cities by State + Country
+                            const aFilters = [
+                                new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, sState),
+                                new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+                            ];
+                            oSourceCB.getBinding("items")?.filter(aFilters);
+                        }
+                    }
+                }
+
+                // Ensure values are set back in UI
+                oCountryCB.setValue(sCountry || "");
+                oStateCB.setValue(sState || "");
+                oSourceCB.setValue(sSource || "");
+            },
 
         MC_onChangeCountry: function (oEvent) {
             const oView = this.getView();
