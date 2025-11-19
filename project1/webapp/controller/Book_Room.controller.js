@@ -333,20 +333,21 @@ sap.ui.define([
               required: true,
               maxLength:40
             }),
-            new sap.m.ComboBox({
-              selectedKey: "{HostelModel>/Persons/" + i + "/Gender}",
+            new sap.m.Select({
+              selectedKey: "{HostelModel>/Persons/" + i + "/Salutation}",
               items: [
+                 new sap.ui.core.ListItem({
+                  key: "",
+                  text: ""
+                }),
                 new sap.ui.core.ListItem({
                   key: "Mr",
                   text: "Mr"
                 }), new sap.ui.core.ListItem({
                   key: "Mrs",
                   text: "Mrs"
-                }),
-                new sap.ui.core.ListItem({
-                  key: "Other",
-                  text: "Other"
                 })
+                
               ]
             }),
             new sap.m.Input({
@@ -395,6 +396,10 @@ sap.ui.define([
             new sap.m.Select({
               selectedKey: "{HostelModel>/Persons/" + i + "/Gender}",
               items: [
+                 new sap.ui.core.ListItem({
+                  key: "",
+                  text: ""
+                }),
                 new sap.ui.core.ListItem({
                   key: "Male",
                   text: "Male"
