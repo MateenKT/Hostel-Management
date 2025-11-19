@@ -3,12 +3,13 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageToast",
     "sap/m/MessageBox",
-    "../utils/validation"
-], function (BaseController, JSONModel, MessageToast, MessageBox, utils) {
+    "../utils/validation",
+    "../model/formatter",
+], function (BaseController, JSONModel, MessageToast, MessageBox, utils,Formatter) {
     "use strict";
 
     return BaseController.extend("sap.ui.com.project1.controller.Hostel", {
-
+        Formatter: Formatter,
          onInit: function () {
             this.getOwnerComponent().getRouter().getRoute("RouteHostel").attachMatched(this._onRouteMatched, this);
             this._getBrowserLocation();

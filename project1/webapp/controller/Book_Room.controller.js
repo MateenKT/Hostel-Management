@@ -1976,7 +1976,7 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
 
          aBookingDetails.forEach((item, index) => {
              sMessage +=
-                 "Customer :" +  (index + 1) +"\n"
+                 "Customer :" +  (index + 1) +"\n"+
                  "Customer ID: " + item.CustomerID + "\n" +
                  "Booking ID: " + item.BookingID + "\n\n";
          });

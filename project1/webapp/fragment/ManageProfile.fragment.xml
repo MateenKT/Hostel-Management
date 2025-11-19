@@ -106,9 +106,9 @@
         <items>
             <ColumnListItem>
                 <cells>
-                    <Text text="{path:'profileData>Startdate',formatter: '.Formatter.DateFormat'}"/>
+                    <Text text="{path:'profileData>Startdate'}"/>
                     <Text text="{profileData>room}"/>
-                    <Text text="{profileData>amount}"/>
+                    <Text text="{path:'profileData>amount', formatter: '.Formatter.formatCurrency'}"/>
                     <Text text="{profileData>status}"/>
                 </cells>
             </ColumnListItem>
