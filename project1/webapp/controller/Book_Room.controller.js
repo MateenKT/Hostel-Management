@@ -933,13 +933,40 @@ oFacilityModel.refresh(true);
 //       }
 //     }
     // ,
+    _checkMandatoryFields: function () {
+    const oModel = this.getView().getModel("HostelModel");
+    const aPersons = oModel.getProperty("/Persons") || [];
+    let aMissingFields = [];
+
+    aPersons.forEach((person, index) => {
+        let prefix = "Person " + (index + 1) + ": ";
+
+        if (!person.FullName) aMissingFields.push(prefix + "Full Name");
+        if (!person.DateOfBirth) aMissingFields.push(prefix + "Date of Birth");
+        if (!person.Gender) aMissingFields.push(prefix + "Gender");
+        if (!person.CustomerEmail) aMissingFields.push(prefix + "Email");
+        if (!person.Country) aMissingFields.push(prefix + "Country");
+        if (!person.State) aMissingFields.push(prefix + "State");
+        if (!person.City) aMissingFields.push(prefix + "City");
+        if (!person.MobileNo) aMissingFields.push(prefix + "Mobile No");
+        if (!person.Address) aMissingFields.push(prefix + "Address");
+    });
+
+    return aMissingFields;
+}
+,
     onDialogNextButton: async function () {
-          if (this._iSelectedStepIndex === 1) {
-          if (!this._checkMandatoryFields()) {
-              sap.m.MessageToast.show("Please fill all mandatory personal details before proceeding.");
-              return; // STOP navigation
-          }
-      }
+        if (this._iSelectedStepIndex === 1) {
+    const aMissing = this._checkMandatoryFields();
+
+    if (aMissing.length > 0) {
+        sap.m.MessageBox.error(
+            "Please fill the following mandatory fields:\n\n" + aMissing.join("\n")
+        );
+        return; // STOP navigation
+    }
+}
+
       this._iSelectedStepIndex = this._oWizard.getSteps().indexOf(this._oSelectedStep);
       this.oNextStep = this._oWizard.getSteps()[this._iSelectedStepIndex + 1];
       if (this._oSelectedStep && !this._oSelectedStep.bLast) {

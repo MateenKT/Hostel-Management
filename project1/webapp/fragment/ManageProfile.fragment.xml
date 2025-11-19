@@ -67,17 +67,15 @@
                                       <!-- All Profile Input Fields -->
           <Label text="First Name"/>
           <Input value="{profileData>/name}" editable="{saveModel>/isEditMode}"/>
-          <Label text="Last Name"/>
-          <Input value="{profileData>/lastName}"/>
           <Label text="Gender"/>
-          <Select selectedKey="{profileData>/gender}">
+          <Select selectedKey="{profileData>/gender}" editable="{saveModel>/isEditMode}">
             <core:Item key="MALE" text="MALE"/>
             <core:Item key="FEMALE" text="FEMALE"/>
           </Select>
           <Label text="Date of Birth"/>
-          <DatePicker value="{profileData>/DateofBirth}"/>
+          <DatePicker value="{profileData>/DateofBirth}" editable="{saveModel>/isEditMode}"/>
           <Label text="Nationality"/>
-          <Input value="{profileData>/nationality}"/>
+          <Input value="{profileData>/nationality}" editable="{saveModel>/isEditMode}"/>
         </f:SimpleForm>
       </VBox>
       <!-- Booking History Section (visible if section is 'devices') -->
