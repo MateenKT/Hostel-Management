@@ -5,24 +5,15 @@ sap.ui.define([
 ], function(BaseController, MessageBox, utils) {
     "use strict";
     return BaseController.extend("sap.ui.com.project1.controller.FacilitiesDetails", {
+        
         onInit: function() {
             this.getOwnerComponent().getRouter().getRoute("RouteFacilitiesDetails").attachMatched(this._onRouteMatched, this);
         },
-        _onRouteMatched: async function(oEvent) {
-                var Layout = this.byId("FD_id_ObjectPageLayout");
-      Layout.setSelectedSection(this.byId("FD_id_OrderHeaderSection1"));
-            // const omodel = new sap.ui.model.json.JSONModel({
-            //     // for Database connection
-            //     url: "https://rest.kalpavrikshatechnologies.com/",
-            //     headers: {
-            //         name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-            //         password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
-            //         "Content-Type": "application/json",
-            //     },
-            //     isRadioVisible: false,
-            // });
-            // this.getOwnerComponent().setModel(omodel, "LoginModel");
 
+        _onRouteMatched: async function(oEvent) {
+            var Layout = this.byId("FD_id_ObjectPageLayout");
+            Layout.setSelectedSection(this.byId("FD_id_OrderHeaderSection1"));
+           
             this.i18nModel = this.getView().getModel("i18n").getResourceBundle();
             // Editable control model
             const oEditableModel = new sap.ui.model.json.JSONModel({
@@ -50,21 +41,22 @@ sap.ui.define([
             });
 
             this.BedID = oEvent.getParameter("arguments").sPath;
-              await  this._loadBranchCode()
+            await this._loadBranchCode()
             await this._refreshFacilityDetails(this.BedID);
             await this.Onsearch()
             sap.ui.core.BusyIndicator.hide();
         },
-    _loadBranchCode: async function () {
-             sap.ui.core.BusyIndicator.show(0);
+
+        _loadBranchCode: async function() {
+            sap.ui.core.BusyIndicator.show(0);
             try {
                 const oView = this.getView();
 
                 const oResponse = await this.ajaxReadWithJQuery("HM_Branch", {});
 
-                const aBranches = Array.isArray(oResponse?.data)
-                    ? oResponse.data
-                    : (oResponse?.data ? [oResponse.data] : []);
+                const aBranches = Array.isArray(oResponse?.data) ?
+                    oResponse.data :
+                    (oResponse?.data ? [oResponse.data] : []);
 
                 const oBranchModel = new sap.ui.model.json.JSONModel(aBranches);
                 oView.setModel(oBranchModel, "BranchModel");
@@ -75,47 +67,35 @@ sap.ui.define([
                 console.error("Error while loading branch data:", err);
             }
         },
-        // BI_onEditButtonPress: function() {
-        //     const oView = this.getView();
-        //     oView.getModel("editable").setProperty("/Edit", true);
-        //     const oDisplayModel = oView.getModel("DisplayImagesModel");
-        //     if (!oDisplayModel) return;
-        //     const aImages = oDisplayModel.getProperty("/DisplayImages") || [];
-        //     const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
-        //     oDisplayModel.setProperty("/CanAddMore", realImagesCount < 3);
-        //     if (realImagesCount < 3 && !aImages.some(img => img.isPlaceholder)) {
-        //         aImages.push({
-        //             isPlaceholder: true
-        //         });
-        //         oDisplayModel.setProperty("/DisplayImages", aImages);
-        //     }
-        // },
-          BI_onEditButtonPress: function () {
-    const oView = this.getView();
-    oView.getModel("editable").setProperty("/Edit", true);
+    
+        BI_onEditButtonPress: function() {
+            const oView = this.getView();
+            oView.getModel("editable").setProperty("/Edit", true);
 
-    const oModel = oView.getModel("DisplayImagesModel");
-    let aImages = oModel.getProperty("/DisplayImages") || [];
+            const oModel = oView.getModel("DisplayImagesModel");
+            let aImages = oModel.getProperty("/DisplayImages") || [];
 
-    // Count actual images (non-placeholder)
-    const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
-              oModel.setProperty("/CanAddMore", realImagesCount < 3);
+            // Count actual images (non-placeholder)
+            const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
+            oModel.setProperty("/CanAddMore", realImagesCount < 3);
 
-    // Decide how many placeholders to show
-    const maxImages = 3; // total slots to show
-    let placeholdersNeeded = maxImages - realImagesCount;
+            // Decide how many placeholders to show
+            const maxImages = 3; // total slots to show
+            let placeholdersNeeded = maxImages - realImagesCount;
 
-    // Remove existing placeholders
-    aImages = aImages.filter(img => !img.isPlaceholder);
+            // Remove existing placeholders
+            aImages = aImages.filter(img => !img.isPlaceholder);
 
-    // Add required placeholders
-    for (let i = 0; i < placeholdersNeeded; i++) {
-        aImages.push({ isPlaceholder: true });
-    }
+            // Add required placeholders
+            for (let i = 0; i < placeholdersNeeded; i++) {
+                aImages.push({
+                    isPlaceholder: true
+                });
+            }
 
-    // Update the model
-    oModel.setProperty("/DisplayImages", aImages);
-},
+            // Update the model
+            oModel.setProperty("/DisplayImages", aImages);
+        },
 
         BI_onButtonPress: function() {
             var oRouter = this.getOwnerComponent().getRouter();
@@ -152,35 +132,29 @@ sap.ui.define([
             if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
         },
 
-           onDeleteImage: function (oEvent) {
+        onDeleteImage: function(oEvent) {
+            const oContext = oEvent.getSource().getBindingContext("DisplayImagesModel");
+            const sFileName = oContext.getProperty("fileName");
+            const oModel = this.getView().getModel("DisplayImagesModel");
+            let aImages = oModel.getProperty("/DisplayImages") || [];
 
-    const oContext = oEvent.getSource().getBindingContext("DisplayImagesModel");
-    const sFileName = oContext.getProperty("fileName");
-    const oModel = this.getView().getModel("DisplayImagesModel");
+            let aRealImages = aImages.filter(img => !img.isPlaceholder);
+            aRealImages = aRealImages.filter(img => img.fileName !== sFileName);
 
-    // Original array
-    let aImages = oModel.getProperty("/DisplayImages") || [];
+            const maxImages = 3;
+            const placeholdersNeeded = maxImages - aRealImages.length;
 
-    // ----------- 1. REMOVE ONLY THE CLICKED IMAGE -----------
-    let aRealImages = aImages.filter(img => !img.isPlaceholder);
-    aRealImages = aRealImages.filter(img => img.fileName !== sFileName);
+            let aFinalImages = [...aRealImages];
 
-    // ----------- 2. RECALCULATE PLACEHOLDER COUNT -----------
-    const maxImages = 3;
-    const placeholdersNeeded = maxImages - aRealImages.length;
+            for (let i = 0; i < placeholdersNeeded; i++) {
+                aFinalImages.push({
+                    isPlaceholder: true
+                });
+            }
 
-    // ----------- 3. BUILD NEW ARRAY WITH REAL IMAGES + PLACEHOLDERS -----------
-    let aFinalImages = [...aRealImages];
-
-    for (let i = 0; i < placeholdersNeeded; i++) {
-        aFinalImages.push({ isPlaceholder: true });
-    }
-
-    // ----------- 4. UPDATE MODEL -----------
-    oModel.setProperty("/DisplayImages", aFinalImages);
-    oModel.setProperty("/CanAddMore", aRealImages.length < maxImages);
-}
-,
+            oModel.setProperty("/DisplayImages", aFinalImages);
+            oModel.setProperty("/CanAddMore", aRealImages.length < maxImages);
+        },
 
         onFileSelected: function(oEvent) {
             const oFileUploader = oEvent.getSource();
@@ -228,7 +202,7 @@ sap.ui.define([
             oReader.readAsDataURL(oFile);
         },
 
-         Onsearch: function() {
+        Onsearch: function() {
             sap.ui.core.BusyIndicator.show(0);
             this.ajaxReadWithJQuery("HM_ExtraFacilities", "").then((oData) => {
                 var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
@@ -241,7 +215,7 @@ sap.ui.define([
         BT_onsavebuttonpress: async function() {
             var oView = this.getView();
             var Payload = oView.getModel("FacilitiesModel").getData();
-             var aFacilitiesData = oView.getModel("Facilities").getData();
+            var aFacilitiesData = oView.getModel("Facilities").getData();
 
             // Field validations
             if (
@@ -265,19 +239,19 @@ sap.ui.define([
                 }
 
                 //  Duplicate check
-            var bDuplicate = aFacilitiesData.some(function(facility) {
-                if (Payload.ID && facility.ID === Payload.ID) return false; // Skip comparing the same record during update
-                return (
-                    facility.BranchCode === Payload.BranchCode &&
-                    facility.FacilityName.trim().toLowerCase() === Payload.FacilityName.trim().toLowerCase() &&
-                    facility.UnitText === Payload.UnitText
-                );
-            });
+                var bDuplicate = aFacilitiesData.some(function(facility) {
+                    if (Payload.ID && facility.ID === Payload.ID) return false; // Skip comparing the same record during update
+                    return (
+                        facility.BranchCode === Payload.BranchCode &&
+                        facility.FacilityName.trim().toLowerCase() === Payload.FacilityName.trim().toLowerCase() &&
+                        facility.UnitText === Payload.UnitText
+                    );
+                });
 
-            if (bDuplicate) {
-                sap.m.MessageToast.show("Facility with the same rate type already exists for this branch.");
-                return;
-            }
+                if (bDuplicate) {
+                    sap.m.MessageToast.show("Facility with the same rate type already exists for this branch.");
+                    return;
+                }
 
                 // Convert image files to Base64
                 const toBase64 = (file) => {
@@ -331,7 +305,7 @@ sap.ui.define([
                     }
 
                     // Send AJAX update
-                     sap.ui.core.BusyIndicator.show(0);
+                    sap.ui.core.BusyIndicator.show(0);
                     await this.ajaxUpdateWithJQuery("HM_ExtraFacilities", {
                         data: oData,
                         filters: {
@@ -388,51 +362,65 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide();
             }
         },
-     onImagePress: function (oEvent) {
-    var oSource = oEvent.getSource(); // the clicked image
-    var sImageSrc = oSource.getSrc(); // get the image src
 
-    // Get the filename from binding context if available
-    var oContext = oSource.getBindingContext("DisplayImagesModel");
-    var sFileName = oContext ? oContext.getProperty("fileName") : "Image Preview";
+        onImagePress: function(oEvent) {
+            var oSource = oEvent.getSource();
+            var sImageSrc = oSource.getSrc();
 
-    // Check if dialog already exists
-    if (!this._oImageDialog) {
-        this._oImageDialog = new sap.m.Dialog({
-            title: sFileName, // set dynamic title
-            contentWidth: "80%",
-            contentHeight: "80%",
-            resizable: true,
-            draggable: true,
-            content: [
-                new sap.m.Image({
-                    id: this.createId("previewImage"),
+            var oContext = oSource.getBindingContext("DisplayImagesModel");
+            var sFileName = oContext ? oContext.getProperty("fileName") : "Image Preview";
+
+            if (!this._oImageDialog) {
+                var oFlex = new sap.m.FlexBox({
                     width: "100%",
                     height: "100%",
-                    densityAware: false
-                })
-            ],
-            beginButton: new sap.m.Button({
-                text: "Close",
-                press: function () {
-                    this._oImageDialog.close();
-                }.bind(this)
-            })
-        });
+                    renderType: "Div",
+                    justifyContent: "Center",
+                    alignItems: "Center",
+                    items: [
+                        new sap.m.Image({
+                            id: this.createId("previewImage"),
+                            densityAware: false,
+                            width: "100%",
+                            height: "100%",
+                            style: "object-fit: cover; display:block; margin:0; padding:0;"
+                        })
+                    ]
+                });
 
-        // Add dialog to the view for lifecycle handling
-        this.getView().addDependent(this._oImageDialog);
-    } else {
-        // If dialog already exists, update the title dynamically
-        this._oImageDialog.setTitle(sFileName);
-    }
+                this._oImageDialog = new sap.m.Dialog({
+                    title: sFileName,
+                    contentWidth: "50%",
+                    contentHeight: "60%",
+                    draggable: true,
+                    resizable: true,
+                    horizontalScrolling: false,
+                    verticalScrolling: false,
+                    contentPadding: "0rem",
+                    content: [oFlex],
 
-    // Set the image source dynamically
-    this.byId("previewImage").setSrc(sImageSrc);
+                    beginButton: new sap.m.Button({
+                        text: "Close",
+                        press: function() {
+                            this._oImageDialog.close();
+                        }.bind(this)
+                    }),
 
-    // Open the dialog
-    this._oImageDialog.open();
-}
+                    afterClose: function() {
+                        this._oImageDialog.destroy();
+                        this._oImageDialog = null;
+                    }.bind(this)
+                });
 
+                this.getView().addDependent(this._oImageDialog);
+
+            } else {
+                this._oImageDialog.setTitle(sFileName);
+            }
+
+            // Set clicked image
+            this.byId("previewImage").setSrc(sImageSrc);
+            this._oImageDialog.open();
+        }
     });
 });

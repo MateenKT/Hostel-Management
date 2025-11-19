@@ -4,25 +4,19 @@ sap.ui.define([
     "sap/m/MessageBox",
     "sap/ui/model/json/JSONModel",
     "../utils/validation"
-], function (
-    BaseController,
-    Formatter,
-    MessageBox,
-    JSONModel,
-    utils
-) {
+], function(
+    BaseController, Formatter,MessageBox,JSONModel,utils) {
     "use strict";
-
     return BaseController.extend("sap.ui.com.project1.controller.Bed_Images", {
         Formatter: Formatter,
-        onInit: function () {
-
+        
+        onInit: function() {
             this.getOwnerComponent().getRouter().getRoute("RouteRoomImages").attachMatched(this._onRouteMatched, this);
-
         },
-        _onRouteMatched: async function (oEvent) {
-        var Layout = this.byId("ObjectPageLayout");
-      Layout.setSelectedSection(this.byId("purchaseOrderHeaderSection1"));
+
+        _onRouteMatched: async function(oEvent) {
+            var Layout = this.byId("ObjectPageLayout");
+            Layout.setSelectedSection(this.byId("purchaseOrderHeaderSection1"));
 
             var model = new sap.ui.model.json.JSONModel({
                 Edit: false,
@@ -40,22 +34,23 @@ sap.ui.define([
             this.getView().setModel(BedImageModel, "BedImageModel")
 
             this.BedID = oEvent.getParameter("arguments").sPath;
-               await this._loadBranchCode()
-             
+            await this._loadBranchCode()
 
-             await  this.Onsearch()
-             await this.refershModel(this.BedID)
+
+            await this.Onsearch()
+            await this.refershModel(this.BedID)
         },
-           _loadBranchCode: async function () {
-             sap.ui.core.BusyIndicator.show(0);
+
+        _loadBranchCode: async function() {
+            sap.ui.core.BusyIndicator.show(0);
             try {
                 const oView = this.getView();
 
                 const oResponse = await this.ajaxReadWithJQuery("HM_Branch", {});
 
-                const aBranches = Array.isArray(oResponse?.data)
-                    ? oResponse.data
-                    : (oResponse?.data ? [oResponse.data] : []);
+                const aBranches = Array.isArray(oResponse?.data) ?
+                    oResponse.data :
+                    (oResponse?.data ? [oResponse.data] : []);
 
                 const oBranchModel = new sap.ui.model.json.JSONModel(aBranches);
                 oView.setModel(oBranchModel, "BranchModel");
@@ -66,64 +61,67 @@ sap.ui.define([
                 console.error("Error while loading branch data:", err);
             }
         },
-        Onsearch: function () {
-            sap.ui.core.BusyIndicator.show(0);
 
+        Onsearch: function() {
+            sap.ui.core.BusyIndicator.show(0);
             this.ajaxReadWithJQuery("HM_BedType", "").then((oData) => {
                 var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
                 var model = new sap.ui.model.json.JSONModel(oFCIAerData);
                 this.getView().setModel(model, "BedDetails")
-
-                // sap.ui.core.BusyIndicator.hide();
-
             })
         },
-       refershModel: function (BEdID) {
-    var that = this;
-    sap.ui.core.BusyIndicator.show(0); // show immediately
 
-    this.ajaxReadWithJQuery("HM_BedType", { ID: BEdID })
-        .then(function(oData) {
-            var oFCIAerData = Array.isArray(oData.data.data) ? oData.data.data : [oData.data.data];
-            var oBedData = oFCIAerData[0]; // main data object
+        refershModel: function(BEdID) {
+            var that = this;
+            sap.ui.core.BusyIndicator.show(0); // show immediately
 
-            // Set BedImageModel data
-            that.getView().getModel("BedImageModel").setData(oBedData);
+            this.ajaxReadWithJQuery("HM_BedType", {
+                    ID: BEdID
+                })
+                .then(function(oData) {
+                    var oFCIAerData = Array.isArray(oData.data.data) ? oData.data.data : [oData.data.data];
+                    var oBedData = oFCIAerData[0]; // main data object
 
-            var oBedImages = oData.data.bedDetails[0]; // Photo1..Photo5
+                    // Set BedImageModel data
+                    that.getView().getModel("BedImageModel").setData(oBedData);
 
-            // Transform Photo fields into array
-            var aDisplayImages = [];
-            for (var i = 1; i <= 5; i++) {
-                var photoKey = "Photo" + i;
-                var nameKey = "Photo" + i + "Name";
-                var typeKey = "Photo" + i + "Type";
+                    var oBedImages = oData.data.bedDetails[0]; // Photo1..Photo5
 
-                if (oBedImages[photoKey]) {
-                    var sImageSrc = "data:" + (oBedImages[typeKey] || "image/jpeg") + ";base64," + oBedImages[photoKey];
-                    aDisplayImages.push({
-                        src: sImageSrc,
-                        fileName: oBedImages[nameKey] || ("Photo " + i),
-                        fileType: oBedImages[typeKey],
-                        isPlaceholder: false
+                    // Transform Photo fields into array
+                    var aDisplayImages = [];
+                    for (var i = 1; i <= 5; i++) {
+                        var photoKey = "Photo" + i;
+                        var nameKey = "Photo" + i + "Name";
+                        var typeKey = "Photo" + i + "Type";
+
+                        if (oBedImages[photoKey]) {
+                            var sImageSrc = "data:" + (oBedImages[typeKey] || "image/jpeg") + ";base64," + oBedImages[photoKey];
+                            aDisplayImages.push({
+                                src: sImageSrc,
+                                fileName: oBedImages[nameKey] || ("Photo " + i),
+                                fileType: oBedImages[typeKey],
+                                isPlaceholder: false
+                            });
+                        }
+                    }
+
+                    // Set DisplayImagesModel
+                    var oDisplayModel = new sap.ui.model.json.JSONModel({
+                        DisplayImages: aDisplayImages
                     });
-                }
-            }
+                    that.getView().setModel(oDisplayModel, "DisplayImagesModel");
+                })
+                .catch(function(err) {
+                    console.error("Error fetching BedType data:", err);
+                    // optionally show MessageToast or MessageBox
+                })
+                .finally(function() {
+                    // always hide busy indicator
+                    sap.ui.core.BusyIndicator.hide();
+                });
+        },
 
-            // Set DisplayImagesModel
-            var oDisplayModel = new sap.ui.model.json.JSONModel({ DisplayImages: aDisplayImages });
-            that.getView().setModel(oDisplayModel, "DisplayImagesModel");
-        })
-        .catch(function(err) {
-            console.error("Error fetching BedType data:", err);
-            // optionally show MessageToast or MessageBox
-        })
-        .finally(function() {
-            // always hide busy indicator
-            sap.ui.core.BusyIndicator.hide();
-        });
-},
-        onAddItemButtonPress: function () {
+        onAddItemButtonPress: function() {
             var oTable = this.byId("idTable");
             var oModel = oTable.getModel("BedImageModel");
             var aData = oModel.getData();
@@ -137,47 +135,48 @@ sap.ui.define([
             oModel.setData(aData);
         },
 
-      BI_onEditButtonPress: function () {
-    const oView = this.getView();
-    oView.getModel("editable").setProperty("/Edit", true);
+        BI_onEditButtonPress: function() {
+            const oView = this.getView();
+            oView.getModel("editable").setProperty("/Edit", true);
 
-    const oModel = oView.getModel("DisplayImagesModel");
-    let aImages = oModel.getProperty("/DisplayImages") || [];
+            const oModel = oView.getModel("DisplayImagesModel");
+            let aImages = oModel.getProperty("/DisplayImages") || [];
 
-    // Count actual images (non-placeholder)
-    const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
+            // Count actual images (non-placeholder)
+            const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
 
-    // Decide how many placeholders to show
-    const maxImages = 5; // total slots to show
-    let placeholdersNeeded = maxImages - realImagesCount;
+            // Decide how many placeholders to show
+            const maxImages = 5; // total slots to show
+            let placeholdersNeeded = maxImages - realImagesCount;
 
-    // Remove existing placeholders
-    aImages = aImages.filter(img => !img.isPlaceholder);
+            // Remove existing placeholders
+            aImages = aImages.filter(img => !img.isPlaceholder);
 
-    // Add required placeholders
-    for (let i = 0; i < placeholdersNeeded; i++) {
-        aImages.push({ isPlaceholder: true });
-    }
+            // Add required placeholders
+            for (let i = 0; i < placeholdersNeeded; i++) {
+                aImages.push({
+                    isPlaceholder: true
+                });
+            }
 
-    // Update the model
-    oModel.setProperty("/DisplayImages", aImages);
-}
-,
+            // Update the model
+            oModel.setProperty("/DisplayImages", aImages);
+        },
 
-        BI_onButtonPress: function () {
+        BI_onButtonPress: function() {
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("RouteBedDetails");
         },
-        
-        onbranchChange: function (oEvent) {
+
+        onbranchChange: function(oEvent) {
             utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
         },
 
-        onNameInputLiveChange: function (oEvent) {
+        onNameInputLiveChange: function(oEvent) {
             utils._LCvalidateMandatoryField(oEvent.getSource(), "ID");
         },
 
-        BT_onsavebuttonpress: async function () {
+        BT_onsavebuttonpress: async function() {
             var oView = this.getView();
             var Payload = oView.getModel("BedImageModel").getData();
             var DisplayImagesModel = oView.getModel("DisplayImagesModel").getData();
@@ -192,7 +191,7 @@ sap.ui.define([
             ) {
                 var aBedDetails = oView.getModel("BedDetails").getData();
 
-                var bDuplicate = aBedDetails.some(function (bed) {
+                var bDuplicate = aBedDetails.some(function(bed) {
                     if (Payload.ID && bed.ID === Payload.ID) return false;
                     return (
                         bed.Name.trim().toLowerCase() === Payload.Name.trim().toLowerCase() &&
@@ -259,24 +258,30 @@ sap.ui.define([
                     oData.Attachment[`Photo${i}Type`] = "";
                 }
 
-                var payloadWithoutID = { ...oData };
+                var payloadWithoutID = {
+                    ...oData
+                };
                 delete payloadWithoutID.ID;
                 // attachmentObj.BranchCode=Payload.BranchCode
 
                 if (Payload.ID) {
                     await this.ajaxUpdateWithJQuery("HM_BedType", {
                         data: payloadWithoutID,
-                        filters: { ID: Payload.ID },
+                        filters: {
+                            ID: Payload.ID
+                        },
                     });
                     await this.refershModel(Payload.ID)
                     this.getView().getModel("editable").setProperty("/Edit", false)
 
                 } else {
-                    await this.ajaxCreateWithJQuery("HM_BedType", { data: payloadWithoutID });
+                    await this.ajaxCreateWithJQuery("HM_BedType", {
+                        data: payloadWithoutID
+                    });
                 }
-             sap.ui.core.BusyIndicator.show(0);
+                sap.ui.core.BusyIndicator.show(0);
                 await this.Onsearch();
-                        sap.ui.core.BusyIndicator.hide();
+                sap.ui.core.BusyIndicator.hide();
 
                 sap.m.MessageToast.show("Bed saved successfully.");
                 this.ARD_Dialog.close();
@@ -285,43 +290,42 @@ sap.ui.define([
                 sap.m.MessageToast.show("Please fill all mandatory fields correctly.");
             }
         },
-    onDeleteImage: function (oEvent) {
-    const oContext = oEvent.getSource().getBindingContext("DisplayImagesModel");
-    const sFileName = oContext.getProperty("fileName");
 
-    const oModel = this.getView().getModel("DisplayImagesModel");
-    let aImages = oModel.getProperty("/DisplayImages") || [];
+        onDeleteImage: function(oEvent) {
+            const oContext = oEvent.getSource().getBindingContext("DisplayImagesModel");
+            const sFileName = oContext.getProperty("fileName");
 
-    // STEP 1: Remove ONLY the clicked image
-    const index = aImages.findIndex(img => img.fileName === sFileName);
+            const oModel = this.getView().getModel("DisplayImagesModel");
+            let aImages = oModel.getProperty("/DisplayImages") || [];
 
-    if (index !== -1) {
-        aImages.splice(index, 1); // Delete ONLY one item
-    }
+            // STEP 1: Remove ONLY the clicked image
+            const index = aImages.findIndex(img => img.fileName === sFileName);
 
-    // STEP 2: Remove all placeholders
-    const realImages = aImages.filter(img => !img.isPlaceholder);
+            if (index !== -1) {
+                aImages.splice(index, 1); // Delete ONLY one item
+            }
 
-    // STEP 3: Add placeholders until list reaches 5 items
-    const maxImages = 5;
-    const placeholdersNeeded = maxImages - realImages.length;
+            // STEP 2: Remove all placeholders
+            const realImages = aImages.filter(img => !img.isPlaceholder);
 
-    const finalImages = [...realImages];
+            // STEP 3: Add placeholders until list reaches 5 items
+            const maxImages = 5;
+            const placeholdersNeeded = maxImages - realImages.length;
 
-    for (let i = 0; i < placeholdersNeeded; i++) {
-        finalImages.push({
-            isPlaceholder: true,
-            fileName: null
-        });
-    }
+            const finalImages = [...realImages];
 
-    // STEP 4: Update Model
-    oModel.setProperty("/DisplayImages", finalImages);
-}
-,
-       
+            for (let i = 0; i < placeholdersNeeded; i++) {
+                finalImages.push({
+                    isPlaceholder: true,
+                    fileName: null
+                });
+            }
 
-        onFileSelected: function (oEvent) {
+            // STEP 4: Update Model
+            oModel.setProperty("/DisplayImages", finalImages);
+        },
+
+        onFileSelected: function(oEvent) {
             const oFileUploader = oEvent.getSource();
             const oFile = oEvent.getParameter("files")[0];
             if (!oFile) return;
@@ -352,7 +356,9 @@ sap.ui.define([
                 // If less than 3, keep one placeholder; else remove it
                 if (realImagesCount < 5) {
                     if (!aImages.some(img => img.isPlaceholder)) {
-                        aImages.push({ isPlaceholder: true });
+                        aImages.push({
+                            isPlaceholder: true
+                        });
                     }
                 } else {
                     aImages = aImages.filter(img => !img.isPlaceholder);
@@ -363,64 +369,68 @@ sap.ui.define([
 
             oReader.readAsDataURL(oFile);
         },
-  onImagePress: function (oEvent) {
-    var oSource = oEvent.getSource();
-    var sImageSrc = oSource.getSrc();
 
-    var oContext = oSource.getBindingContext("DisplayImagesModel");
-    var sFileName = oContext ? oContext.getProperty("fileName") : "Image Preview";
+        onImagePress: function(oEvent) {
+            var oSource = oEvent.getSource();
+            var sImageSrc = oSource.getSrc();
 
-    if (!this._oImageDialog) {
+            var oContext = oSource.getBindingContext("DisplayImagesModel");
+            var sFileName = oContext ? oContext.getProperty("fileName") : "Image Preview";
 
-        // Flex container fills dialog fully
-        var oFlex = new sap.m.FlexBox({
-            width: "100%",
-            height: "100%",
-            renderType: "Div",
-            justifyContent: "Center",
-            alignItems: "Center",
-            items: [
-                new sap.m.Image({
-                    id: this.createId("previewImage"),
-                    densityAware: false,
+            if (!this._oImageDialog) {
+
+                // FlexBox that fills the dialog fully
+                var oFlex = new sap.m.FlexBox({
                     width: "100%",
                     height: "100%",
-                    style: "object-fit: cover; max-width: 100%; max-height: 100%;"
-                })
-            ]
-        });
+                    renderType: "Div",
+                    justifyContent: "Center",
+                    alignItems: "Center",
+                    items: [
+                        new sap.m.Image({
+                            id: this.createId("previewImage"),
+                            densityAware: false,
+                            width: "100%",
+                            height: "100%",
+                            style: "object-fit: cover; display:block; margin:0; padding:0;"
+                        })
+                    ]
+                });
 
-        this._oImageDialog = new sap.m.Dialog({
-            title: sFileName,
-            contentWidth: "50%",
-            contentHeight: "60%",
-            draggable: true,
-            resizable: true,
-            content: [oFlex],
+                this._oImageDialog = new sap.m.Dialog({
+                    title: sFileName,
+                    contentWidth: "50%",
+                    contentHeight: "60%",
+                    draggable: true,
+                    resizable: true,
+                    horizontalScrolling: false,
+                    verticalScrolling: false,
+                    contentPadding: "0rem",
+                    content: [oFlex],
 
-            // 🔥 Remove internal padding so image truly fills container
-            contentPadding: "0rem",
+                    beginButton: new sap.m.Button({
+                        text: "Close",
+                        press: function() {
+                            this._oImageDialog.close();
+                        }.bind(this)
+                    }),
 
-            beginButton: new sap.m.Button({
-                text: "Close",
-                press: function () {
-                    this._oImageDialog.close();
-                }.bind(this)
-            })
-        });
+                    afterClose: function() {
+                        this._oImageDialog.destroy();
+                        this._oImageDialog = null;
+                    }.bind(this)
+                });
 
-        this.getView().addDependent(this._oImageDialog);
+                this.getView().addDependent(this._oImageDialog);
 
-    } else {
-        this._oImageDialog.setTitle(sFileName);
-    }
+            } else {
+                this._oImageDialog.setTitle(sFileName);
+            }
 
-    // Set new image
-    this.byId("previewImage").setSrc(sImageSrc);
+            // Set clicked image
+            this.byId("previewImage").setSrc(sImageSrc);
 
-    this._oImageDialog.open();
-}
-
-
+            this._oImageDialog.open();
+        }
     });
 });
