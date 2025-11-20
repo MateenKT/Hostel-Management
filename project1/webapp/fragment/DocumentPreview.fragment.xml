@@ -3,12 +3,12 @@
             title="Document Preview"
             contentWidth="80%"
             contentHeight="80%"
-          >
-
-        <VBox height="100%">
+             horizontalScrolling="false"
+        verticalScrolling="false"
+          >          
+        <VBox height="100%" fitContainer="true" width="100%"  class="fullHeightBox">
             <core:HTML id="pdfViewer" content="" />
         </VBox>
-
         <endButton>
             <Button text="Close" press="onClosePreview"/>
         </endButton>

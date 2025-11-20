@@ -1,5 +1,5 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout">
-  <Dialog id="profileDialog" horizontalScrolling="false" verticalScrolling="true" contentWidth="560px" contentHeight="550px" class="profile-dialog-bg"  stretch="true" 	xmlns:w="sap.ui.integration.widgets" xmlns:f="sap.f"  xmlns:layout="sap.ui.layout">
+  <Dialog id="profileDialog" horizontalScrolling="false" verticalScrolling="true" contentWidth="1000px" contentHeight="500px" class="profile-dialog-bg"  stretch="false" 	xmlns:w="sap.ui.integration.widgets" xmlns:f="sap.f"  xmlns:layout="sap.ui.layout">
   <customHeader>
     <Bar>
       <contentMiddle>
@@ -13,10 +13,10 @@
     <VBox>
 
      <!-- Header Section -->
-<HBox class="sapUiLargeMarginTop" width="100%" justifyContent="SpaceBetween" alignItems="Center">
+<HBox class="sapUiMediumMarginTop" width="100%" justifyContent="SpaceBetween" alignItems="Center">
 
     <!-- LEFT SIDE: Avatar + Profile Details -->
-    <HBox width="75%" alignItems="Center">
+    <HBox width="75%" alignItems="Center" class="profile-card sapUiMediumMarginBegin">
 
         <!-- Avatar -->
         <Avatar 
@@ -77,15 +77,18 @@
     </HBox>
 
     <!-- RIGHT SIDE: Logout Button -->
-    <VBox width="25%" alignItems="End">
-        <Button text="Log Out" press="Onpresslogout" type="Reject" />
+    <VBox width="25%" alignItems="End" class="sapUiSmallMarginBottom">
+        <!-- <Button text="Log Out" press="Onpresslogout" type="Reject" /> -->
+        <GenericTile header="Logout" class="defaultTile bookNowTile" frameType="OneByHalf" press=".Onpresslogout">
+							<customData>
+								<core:CustomData key="type" value="logout"/>
+							</customData>
+						</GenericTile>
     </VBox>
 
 </HBox>
-
-    
-        <Text text="Booking History" class="sapUiSmallMarginTop sapUiSmallMarginBegin"/>
-  <HBox height="100%" renderType="Bare" width="100%">
+   <Text text="Booking History" class="sapUiSmallMarginTop sapUiMediumMarginBegin"/>
+   <HBox height="100%" renderType="Bare" width="100%">
   
      <IconTabBar
 		id="idIconTabBarFiori2"
@@ -116,13 +119,13 @@
                         <!-- START / END DATE ROW -->
                         <HBox class="sapUiSmallMarginBottom">
                             <VBox width="50%">
-                                <Label text="Start Date" />
-                                <Text text="{profileData>/upcoming/startDate}" />
+                                <Label text="Booking Date" />
+                                <Text text="{profileData>/upcoming/Bookingdate}" />
                             </VBox>
 
-                            <VBox width="50%" class="sapUiSmallMarginBegin">
-                                <Label text="End Date" />
-                                <Text text="{profileData>/upcoming/endDate}" />
+                            <VBox width="50%" class="sapUiLargeMarginTop">
+                                <Label text="Room" />
+                                <Text text="{profileData>/upcoming/Bedtype}" />
                             </VBox>
                         </HBox>
 
@@ -131,6 +134,12 @@
                             <VBox width="50%">
                                 <Label text="Amount" />
                                 <Text text="{profileData>/upcoming/amount}" />
+                            </VBox>
+                        </HBox>
+                        <HBox>
+                            <VBox width="50%" class="sapUiLargeMarginTop">
+                                <Label text="Status" />
+                                <Text text="{profileData>/upcoming/Status}" />
                             </VBox>
                         </HBox>
 
@@ -185,14 +194,6 @@
 			
 		</items>
 	</IconTabBar>
-   
-     
-   
-
-    
-
-
-   
    
   </HBox>
 

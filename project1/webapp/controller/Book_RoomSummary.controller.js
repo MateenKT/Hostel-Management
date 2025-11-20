@@ -582,22 +582,6 @@ onOpenDocumentPreview: function (oEvent) {
         return;
     }
 
-    const oView = this.getView();
-
-    if (!this._oDocPreviewDialog) {
-        this._oDocPreviewDialog = sap.ui.xmlfragment(
-            this.createId("DocumentPreviewDialog"),
-            "sap.ui.com.project1.fragment.DocumentPreview",
-            this
-        );
-        oView.addDependent(this._oDocPreviewDialog);
-    }
-
-    const oHtml = sap.ui.core.Fragment.byId(
-        this.createId("DocumentPreviewDialog"),
-        "pdfViewer"
-    );
-
     let sData = oDoc.Document;
 
     if (!sData.startsWith("data:")) {
@@ -605,23 +589,103 @@ onOpenDocumentPreview: function (oEvent) {
         sData = `data:${sType};base64,${sData}`;
     }
 
-    if (oDoc.FileType.includes("pdf")) {
-        oHtml.setContent(`<iframe src="${sData}" width="100%" height="100%" style="border:0"></iframe>`);
-    } 
-    else if (oDoc.FileType.includes("image")) {
-        oHtml.setContent(`<img src="${sData}" style="max-width:100%;height:auto;display:block;margin:auto" />`);
-    } 
-    else {
-        oHtml.setContent(`
-            <div style="padding:20px;">
-                <p>Preview not supported.</p>
-                <a href="${sData}" download="${oDoc.FileName}">Download</a>
-            </div>
-        `);
+    const sTitle = oDoc.FileName || "Document Preview";
+
+    /** DESTROY OLD DIALOG IF EXISTS */
+    if (this._oImageDialog) {
+        this._oImageDialog.destroy();
+        this._oImageDialog = null;
     }
 
-    this._oDocPreviewDialog.open();
-},
+    let oContent;
+
+    if (oDoc.FileType.includes("image")) {
+
+        const oFlex = new sap.m.FlexBox({
+            width: "100%",
+            height: "100%",
+            renderType: "Div",
+            justifyContent: "Center",
+            alignItems: "Center",
+            items: [
+                new sap.m.Image({
+                    id: this.createId("previewImage"),
+                    src: sData,
+                    densityAware: false,
+                    width: "100%",
+                    height: "100%",
+                    style: "object-fit:cover;display:block;margin:0;padding:0;"
+                })
+            ]
+        });
+
+        oContent = oFlex;
+    }
+
+    /** ============================
+     *  PDF PREVIEW 
+     * ============================ */
+    else if (oDoc.FileType.includes("pdf")) {
+
+        const oHtml = new sap.ui.core.HTML({
+            content: `<iframe src="${sData}" style="width:100%;height:100%;border:0;"></iframe>`
+        });
+
+        oContent = oHtml;
+    }
+
+    /** ============================
+     *  UNSUPPORTED FILE
+     * ============================ */
+    else {
+        oContent = new sap.m.VBox({
+            items: [
+                new sap.m.Text({ text: "Preview not supported." }),
+                new sap.m.Link({
+                    text: "Download File",
+                    href: sData,
+                    download: oDoc.FileName
+                })
+            ],
+            width: "100%",
+            height: "100%",
+            justifyContent: "Center",
+            alignItems: "Center"
+        });
+    }
+
+    /** ============================
+     *  CREATE DIALOG
+     * ============================ */
+    this._oImageDialog = new sap.m.Dialog({
+        title: sTitle,
+        contentWidth: "50%",
+        contentHeight: "60%",
+        draggable: true,
+        resizable: true,
+        horizontalScrolling: false,
+        verticalScrolling: false,
+        contentPadding: "0px",
+        content: [oContent],
+
+        beginButton: new sap.m.Button({
+            text: "Close",
+            press: function () {
+                this._oImageDialog.close();
+            }.bind(this)
+        }),
+
+        afterClose: function () {
+            this._oImageDialog.destroy();
+            this._oImageDialog = null;
+        }.bind(this)
+    });
+
+    this.getView().addDependent(this._oImageDialog);
+
+    this._oImageDialog.open();
+}
+,
 
 // Close preview
 onClosePreview: function () {
