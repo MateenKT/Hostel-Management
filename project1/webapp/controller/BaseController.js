@@ -197,5 +197,12 @@ sap.ui.define([
         sap.m.MessageToast.show(error.responseJSON?.message || "Technical error, please contact the administrator");
       }
     },
+
+     onClearAndSearch: function (sFilterBarId) {
+      var oFilterBar = this.byId(sFilterBarId);
+      if (oFilterBar) {
+        oFilterBar.clear(); // Clear all filters in the FilterBar
+      }
+    },
   })
 });

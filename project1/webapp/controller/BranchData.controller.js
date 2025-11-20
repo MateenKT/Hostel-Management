@@ -13,15 +13,15 @@ sap.ui.define([
 
         _onRouteMatched: function () {
             this.i18nModel = this.getView().getModel("i18n").getResourceBundle();
-            const omodel = new sap.ui.model.json.JSONModel({
-                url: "https://rest.kalpavrikshatechnologies.com/",
-                headers: {
-                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
-                    "Content-Type": "application/json",
-                }
-            });
-            this.getOwnerComponent().setModel(omodel, "LoginModel");
+            // const omodel = new sap.ui.model.json.JSONModel({
+            //     url: "https://rest.kalpavrikshatechnologies.com/",
+            //     headers: {
+            //         name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+            //         password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
+            //         "Content-Type": "application/json",
+            //     }
+            // });
+            // this.getOwnerComponent().setModel(omodel, "LoginModel");
             const oMDmodel = new sap.ui.model.json.JSONModel({
                 BranchID: "",
                 Name: "",
@@ -38,6 +38,7 @@ sap.ui.define([
                 isEdit: false
             });
             this.getView().setModel(oeditable, "editableModel");
+            this.onClearAndSearch("MD_id_Filterbar");
             this.Onsearch();
         },
 

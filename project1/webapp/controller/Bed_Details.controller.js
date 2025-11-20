@@ -40,6 +40,7 @@ sap.ui.define([
 
             this.getView().setModel(oTokenModel, "tokenModel");
             this.getView().setModel(oUploaderData, "UploaderData");
+            this.onClearAndSearch("BD_id_FilterbarEmployee");
             await this._loadBranchCode()
             await this.Onsearch()
 
@@ -346,7 +347,7 @@ sap.ui.define([
         HM_onSearch: function () {
             var oView = this.getView();
 
-            var oFilterBar = oView.byId("PO_id_FilterbarEmployee");
+            var oFilterBar = oView.byId("BD_id_FilterbarEmployee");
 
             var oTable = oView.byId("id_BedTable");
             var oBinding = oTable.getBinding("items");

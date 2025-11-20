@@ -180,11 +180,11 @@
                     valueStateText="Select Currency"
                     width="100%"
                     change="onACtypeChange"
-                    placeholder="Select Currency"
+                    placeholder="Select Currency" showSecondaryValues="true"
                 >
-                    <c:Item
+                    <core:ListItem
                         key="{CountryModel>currency}"
-                        text="{CountryModel>currency}"
+                        text="{CountryModel>currency}" additionalText="{CountryModel>countryName}"
                     />
                 </ComboBox>
             </f:content>

@@ -30,12 +30,14 @@ sap.ui.define([
 
             });
             this.getView().setModel(model, "RoomModel")
+            this.onClearAndSearch("RD_id_FilterbarEmployee");
             sap.ui.core.BusyIndicator.show(0);
         
           
             await this.BedTypedetails()
             await this._loadBranchCode()
               await  this.Onsearch()
+
             //  sap.ui.core.BusyIndicator.hide();
           
         },

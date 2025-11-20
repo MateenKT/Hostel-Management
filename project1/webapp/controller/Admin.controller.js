@@ -74,7 +74,7 @@ sap.ui.define([
                 Visible: false
             });
             this.getView().setModel(model, "Visiblemodel")
-
+            this.onClearAndSearch("PO_id_FilterbarEmployee");
             this.BedTypedetails();
         },
         BedTypedetails: function() {

@@ -30,6 +30,7 @@ sap.ui.define([
                 tokens: []
             }), "tokenModel");
 
+            this.onClearAndSearch("HF_id_FilterbarEmployee");
             await  this._loadBranchCode()
             this.Onsearch();
         },

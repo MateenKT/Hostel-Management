@@ -15,7 +15,7 @@
 		</headerContent>
 		<content>
 			<fb:FilterBar
-                id="PO_id_FilterbarEmployee"
+                id="BD_id_FilterbarEmployee"
                 persistencyKey="myPersKey"
                 useToolbar="false"
                 clear="PO_onPressClear"

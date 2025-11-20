@@ -35,6 +35,7 @@ sap.ui.define([
 
             this.getView().setModel(oTokenModel, "tokenModel");
             this.getView().setModel(oUploaderData, "UploaderData");
+            this.onClearAndSearch("FO_id_FilterbarEmployee");
             await this._loadBranchCode()
             await this.Onsearch()
         },
