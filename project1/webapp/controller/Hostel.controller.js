@@ -1866,57 +1866,57 @@ _getLocationName: function (lat, lng) {
             }
         },
 
-        // 🔹 Search logic remains same
-     onSearchRooms: async function () {
+        onSearchRooms: async function () {
             const oContainer = this.byId("idBedTypeFlex");
             oContainer.setBusy(true);
 
-            // const oBranchcity = this.byId("id_Branch").getSelectedItem()?.getKey();
+            // City
+            var oBranchcity = this.byId("id_Branch").getSelectedKey()
+                || this.byId("id_Branch").getValue();
 
-            var oBranchcity = this.getView().byId("id_Branch").getSelectedKey() ? this.getView().byId("id_Branch").getSelectedKey()
-                : this.getView().byId("id_Branch").getValue();
-         const sSelectedACType = this.byId("id_Roomtype")?.getSelectedKey();
-            var sSelectedBranch = this.getView().byId("id_Area").getSelectedKey() ? this.getView().byId("id_Area").getSelectedKey()
-                : this.getView().byId("id_Area").getValue();
-           
-// var oAreaCB = this.getView().byId("id_Area");
-// var oSelectedItem = oAreaCB.getSelectedItem();
-
-// var sSelectedBranchAddress = oSelectedItem ? oSelectedItem.getText() : oAreaCB.getValue();
-
-
-//                var Area=this.getView().getModel("AreaModel").getData().find((item)=>{
-//                   return  item.Address===sSelectedBranchAddress
-//                  })
-//                if(!Area){
-//                  MessageToast.show("Please Select Locality")
-//                 oContainer.setBusy(false);
-
-//                     return false;
-//                }
-            
-
-
-            if (oBranchcity === undefined) {
-                MessageToast.show("Please Select City")
+            if (!oBranchcity) {
+                MessageToast.show("Please Select City");
                 oContainer.setBusy(false);
                 return;
             }
+
+            // AC Type
+            const sSelectedACType = this.byId("id_Roomtype")?.getSelectedKey();
+
             if (sSelectedACType === "") {
                 this.byId("id_Roomtype").setSelectedKey("All")
             }
 
-            try {
-                await this._loadFilteredData(oBranchcity, sSelectedBranch, sSelectedACType);
-            } catch (e) {
-                console.error("Error:", e);
-            } finally {
-                oContainer.setBusy(false); // 🔥 Stop busy only for this area
+            // Locality ComboBox
+            var oAreaCB = this.byId("id_Area");
+            var sSelectedBranch = oAreaCB.getSelectedKey() || oAreaCB.getValue();
+
+            var areaList = this.getView().getModel("AreaModel").getData() || [];
+
+            // Check if selected or typed locality is valid
+            var validArea = areaList.find(item =>
+                item.Address === sSelectedBranch || item.BranchID === sSelectedBranch
+            );
+
+            if (sSelectedBranch && !validArea) {
+                // User typed something, but it does not match the list
+                MessageToast.show("Please select locality");
+                oContainer.setBusy(false);
+                return;
             }
 
+            // If locality is empty, keep it empty (search by city only)
+            var finalBranch = validArea ? validArea.BranchID : "";
+            try {
+                await this._loadFilteredData(oBranchcity, finalBranch, sSelectedACType);
+            } catch (e) {
+                console.error(e);
+            } finally {
+                oContainer.setBusy(false);
+            }
         },
 
-     _loadFilteredData: async function (Scity, sBranchCode, sACType) {
+        _loadFilteredData: async function (Scity, sBranchCode, sACType) {
 
             if (sACType === "All") {
                 sACType = "";
@@ -1938,8 +1938,6 @@ _getLocationName: function (lat, lng) {
                         const oModel = this.getView().getModel("VisibilityModel");
                         oModel.setProperty("/BedTypes", []);
                         oModel.setProperty("/NoData", true);
-
-
                         return;
                     }
 
@@ -1955,7 +1953,6 @@ _getLocationName: function (lat, lng) {
                     aBranchCodes = [sBranchCode];
                 }
 
-
                 const response = await this.ajaxReadWithJQuery("HM_BedType", {
                     BranchCode: JSON.stringify(aBranchCodes)
                 });
@@ -1969,14 +1966,12 @@ _getLocationName: function (lat, lng) {
                     );
                 }
 
-
                 if (sBranchCode && sBranchCode.trim() !== "") {
                     matchedRooms = matchedRooms.filter(
                         room =>
                             room.BranchCode?.toLowerCase() === sBranchCode.toLowerCase()
                     );
                 } else {
-
                     matchedRooms = matchedRooms.filter(
                         room =>
                             aBranchCodes
@@ -1984,7 +1979,6 @@ _getLocationName: function (lat, lng) {
                                 .includes(room.BranchCode?.toLowerCase())
                     );
                 }
-
 
                 const oRoomDetailsModel = oView.getModel("RoomCountModel");
                 // const oCustomerModel = oView.getModel("CustomerModel");
@@ -1995,7 +1989,6 @@ _getLocationName: function (lat, lng) {
 
                 const oBranchModel = oView.getModel("sBRModel");
                 const aBranchData = oBranchModel?.getData() || [];
-
 
                 const convertBase64ToImage = (base64String, fileType) => {
                     if (!base64String) return "./image/Fallback.png";
@@ -2012,9 +2005,7 @@ _getLocationName: function (lat, lng) {
                     return `data:${mimeType};base64,${sBase64}`;
                 };
 
-
                 const aBedTypes = matchedRooms.map(room => {
-
                     const matchingRooms = roomDetails.filter(
                         rd =>
                             rd.BranchCode?.toLowerCase() === room.BranchCode?.toLowerCase() &&
@@ -2025,7 +2016,6 @@ _getLocationName: function (lat, lng) {
                     );
 
                     const firstRoom = matchingRooms[0];
-
                     const price = firstRoom?.Price ? " " + firstRoom.Price : "";
                     const MonthPrice = firstRoom?.MonthPrice ? " " + firstRoom.MonthPrice : "";
                     const YearPrice = firstRoom?.YearPrice ? " " + firstRoom.YearPrice : "";
@@ -2083,12 +2073,9 @@ _getLocationName: function (lat, lng) {
                 });
 
 
-                oView.setModel(
-                    new sap.ui.model.json.JSONModel({ BedTypes: aBedTypes }),
-                    "VisibilityModel"
-                );
-                   oView.getModel("VisibilityModel").setProperty("/NoData", false);
-
+                oView.setModel(new sap.ui.model.json.JSONModel({ BedTypes: aBedTypes }),
+                    "VisibilityModel");
+                oView.getModel("VisibilityModel").setProperty("/NoData", false);
             } catch (err) {
                 console.error("Error loading data:", err);
                 sap.m.MessageToast.show("Failed to load bed type data.");
