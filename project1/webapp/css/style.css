@@ -1320,18 +1320,10 @@
     margin: 0 !important;
     padding: 0 !important;
 }
-.profile-card {
-    border: 1px solid #d0d0d0;           /* light border */
-    border-radius: 12px;                 /* smooth rounded corners */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.10);  /* soft shadow */
-    padding: 16px;                        /* inner spacing */
-    background-color: #ffffff;            /* white card background */
-}
-.profile-card:hover {
-    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
-    transition: box-shadow 0.2s ease-in-out;
-}
-.fullHeightBox {
-    height: 100% !important;
-}
 
+.upload-star {
+    color: rgb(143, 18, 18);
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-left: 6px;  /* slight space before Upload button */
+}

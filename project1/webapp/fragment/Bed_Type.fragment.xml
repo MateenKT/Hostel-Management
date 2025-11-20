@@ -97,7 +97,7 @@
                     placeholder="Enter No Of Rooms"
                     maxLength="3"
                     liveChange="onNoOfPersonInputLiveChange"
-                    />
+                />
                 <Label
                     text="Description"
                     required="true"
@@ -109,55 +109,58 @@
                     placeholder="Enter Description"
                 />
                 <Label
-                    text="Add Image"
-                    required="true"
+                    text=""
                 />
+                <VBox width="100%">
+                    <HBox
+                        justifyContent="End"
+                        width="100%"
+                    >
+                        <u:FileUploader
+                            id="BT_id_FileUploader"
+                            fileType="jpg,jpeg,png"
+                            multiple="true"
+                            sameFilenameAllowed="true"
+                            buttonOnly="true"
+                            buttonText="Upload Images"
+                            change="onFacilityFileChange"
+                        />
+                        <Text
+                            text="*"
+                            class="upload-star"
+                        />
+                    </HBox>
+                    <Table
+                        id="id_Bed_AttachmentTable"
+                        items="{UploaderData>/attachments}"
+                        mode="Delete"
+                        popinLayout="Block"
+                        delete="onTokenDelete"
+                        width="100%"
+                    >
+                        <columns>
+                            <Column>
+                                <Text text="File Name" />
+                            </Column>
+                            <Column hAlign="Center">
+                                <Text text="File Type" />
+                            </Column>
+                            <Column hAlign="Center">
+                                <Text text="File Size" />
+                            </Column>
+                        </columns>
 
-                <Table
-                    id="id_Bed_AttachmentTable"
-                    items="{UploaderData>/attachments}"
-                    mode="Delete"
-                    popinLayout="Block"
-                    delete="onTokenDelete"
-                    width="100%"
-                >
-                    <headerToolbar>
-                        <OverflowToolbar>
-                         <ToolbarSpacer />
-                            <u:FileUploader
-                                id="BT_id_FileUploader"
-                                fileType="jpg,jpeg,png"
-                                multiple="true"
-                                sameFilenameAllowed="true"
-                                buttonOnly="true"
-                                buttonText="Upload Images"
-                                change="onFacilityFileChange"
-                            />
-                        </OverflowToolbar>
-                    </headerToolbar>
-
-                    <columns>
-                        <Column>
-                            <Text text="File Name" />
-                        </Column>
-                        <Column hAlign="Center">
-                            <Text text="File Type" />
-                        </Column>
-                        <Column hAlign="Center">
-                            <Text text="File Size" />
-                        </Column>
-                    </columns>
-
-                    <items>
-                        <ColumnListItem>
-                            <cells>
-                                <Text text="{UploaderData>filename}" />
-                                <Text text="{UploaderData>fileType}" />
-                                <Text text="{UploaderData>size}" />
-                            </cells>
-                        </ColumnListItem>
-                    </items>
-                </Table>
+                        <items>
+                            <ColumnListItem>
+                                <cells>
+                                    <Text text="{UploaderData>filename}" />
+                                    <Text text="{UploaderData>fileType}" />
+                                    <Text text="{UploaderData>size}" />
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                </VBox>
             </f:content>
         </f:SimpleForm>
 
