@@ -108,26 +108,37 @@ sap.ui.define([], function() {
         },
 
         // Amount validation function
-        _LCvalidateAmount: function(oEvent, type) {
-            var oInput = type === "ID" ? (oInput = oEvent) : (oInput = oEvent.getSource());
+        _LCvalidateAmount: function (oEvent, type) {
+            var oInput = type === "ID" ? oEvent : oEvent.getSource();
             var value = oInput.getValue();
-            var cleanedValue = value.replace(/[^0-9.]/g, "");
-            var parts = cleanedValue.split(".");
-            if (parts.length === 2) {
-                cleanedValue = parts[0] + "." + parts[1].slice(0, 2);
+
+            // 1️⃣ Block invalid characters (only digits + one dot)
+            value = value.replace(/[^0-9.]/g, "");     // remove non-numeric except dot
+            value = value.replace(/(\..*)\./g, "$1");  // no more than one dot
+
+            // 2️⃣ Allow only 2 decimals while typing
+            if (value.includes(".")) {
+                let parts = value.split(".");
+                parts[1] = parts[1].substring(0, 2);   // limit decimals to 2
+                value = parts.join(".");
             }
-            oInput.setValue(cleanedValue);
-            if (parseFloat(cleanedValue) <= 0) {
-                oInput.setValueState("Error").focus();
+
+            // Update UI immediately
+            oInput.setValue(value);
+
+            // 3️⃣ Validation
+            if (value === "" || parseFloat(value) <= 0) {
+                oInput.setValueState("Error");
                 return false;
             }
-            if (!/^\d+(\.\d{1,2})?$/.test(cleanedValue)) {
-                oInput.setValueState("Error").focus();
+
+            if (!/^\d+(\.\d{1,2})?$/.test(value)) {
+                oInput.setValueState("Error");
                 return false;
-            } else {
-                oInput.setValueState("None");
-                return true;
             }
+
+            oInput.setValueState("None");
+            return true;
         },
 
         _LCvalidateAmountZeroTaking: function(oEvent, type) {

@@ -4,30 +4,24 @@ sap.ui.define([
     "../utils/validation",
     "sap/ui/model/json/JSONModel",
     "sap/ui/model/odata/type/Currency",
-], function (BaseController, MessageBox, utils, JSONModel, Currency) {
+     "../model/formatter",
+], function (BaseController, MessageBox, utils, JSONModel, Currency, Formatter) {
     "use strict";
     return BaseController.extend("sap.ui.com.project1.controller.Facilitis", {
+         Formatter: Formatter,
         onInit: function () {
             this.getOwnerComponent().getRouter().getRoute("RouteFacilitis").attachMatched(this._onRouteMatched, this);
         },
         _onRouteMatched: async function () {
-            const omodel = new sap.ui.model.json.JSONModel({
-                // for Database connection
-                url: "https://rest.kalpavrikshatechnologies.com/",
-                headers: {
-                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
-                    "Content-Type": "application/json",
-                },
-                isRadioVisible: false,
-            });
-            this.getOwnerComponent().setModel(omodel, "LoginModel");
             this.i18nModel = this.getView().getModel("i18n").getResourceBundle(); // Get i18n model
 
             var model = new sap.ui.model.json.JSONModel({
                 BranchCode: "",
                 Type: "",
-                Price: "",
+                PerHourPrice:"",
+                PerDayPrice:"",
+                PerMonthPrice:"",
+                PerYearPrice:"",
                 FacilityName: ""
             });
             this.getView().setModel(model, "FacilitiesModel")
@@ -42,12 +36,7 @@ sap.ui.define([
             this.getView().setModel(oTokenModel, "tokenModel");
             this.getView().setModel(oUploaderData, "UploaderData");
             await this._loadBranchCode()
-            this.Onsearch()
-            this.ajaxReadWithJQuery("Currency", "").then((oData) => {
-                var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
-                var model = new JSONModel(oFCIAerData);
-                this.getView().setModel(model, "CurrencyModel");
-            })
+            await this.Onsearch()
         },
         _loadBranchCode: async function () {
             sap.ui.core.BusyIndicator.show(0);
@@ -86,8 +75,10 @@ sap.ui.define([
                     BranchCode: "",
                     FacilityName: "",
                     Type: "",
-                    Price: "",
-                    UnitText: "Per Day",
+                    PerHourPrice:"",
+                    PerDayPrice:"",
+                    PerMonthPrice:"",
+                    PerYearPrice:"",
                 });
             }
 
@@ -114,8 +105,10 @@ sap.ui.define([
                     BranchCode: "",
                     FacilityName: "",
                     Type: "",
-                    Price: "",
-                    UnitText: "Per Day",
+                    PerHourPrice:"",
+                    PerDayPrice:"",
+                    PerMonthPrice:"",
+                    PerYearPrice:"",
                 });
             }
 
@@ -138,9 +131,7 @@ sap.ui.define([
                 utils._LCstrictValidationComboBox(sap.ui.getCore().byId(oView.createId("idRoomType123")), "ID") &&
                 utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("idFacilityName")), "ID") &&
                 utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("idFacilityName1")), "ID") &&
-                utils._LCvalidateAmount(sap.ui.getCore().byId(oView.createId("FO_id_Price")), "ID") &&
-                utils._LCstrictValidationComboBox(sap.ui.getCore().byId(oView.createId("FL_id_Currency")), "ID") &&
-                utils._LCstrictValidationComboBox(sap.ui.getCore().byId(oView.createId("FO_id_Rate")), "ID")
+                utils._LCstrictValidationComboBox(sap.ui.getCore().byId(oView.createId("FL_id_Currency")), "ID") 
             );
 
             if (!isMandatoryValid) {
@@ -159,8 +150,7 @@ sap.ui.define([
                 if (Payload.ID && facility.ID === Payload.ID) return false; // Skip comparing the same record during update
                 return (
                     facility.BranchCode === Payload.BranchCode &&
-                    facility.FacilityName.trim().toLowerCase() === Payload.FacilityName.trim().toLowerCase() &&
-                    facility.UnitText === Payload.UnitText
+                    facility.FacilityName.trim().toLowerCase() === Payload.FacilityName.trim().toLowerCase() 
                 );
             });
 
@@ -183,9 +173,11 @@ sap.ui.define([
                     BranchCode: Payload.BranchCode,
                     FacilityName: Payload.FacilityName,
                     Type: Payload.Type,
-                    Price: Payload.Price,
-                    Currency: Payload.Currency,
-                    UnitText: Payload.UnitText
+                    PerHourPrice:Payload.PerHourPrice || 0,
+                    PerDayPrice:Payload.PerDayPrice || 0,
+                    PerMonthPrice:Payload.PerMonthPrice || 0,
+                    PerYearPrice:Payload.PerYearPrice || 0,
+                    Currency: Payload.Currency
                 },
                 Attachment: {}
             };
@@ -242,21 +234,22 @@ sap.ui.define([
             var oInput = oEvent.getSource();
             utils._LCstrictValidationComboBox(oEvent);
             if (oInput.getValue() === "") oInput.setValueState("None");
-
+ 
                var sBranchCode =this.byId("idRoomType123").getSelectedKey();
-
-           var oCurrencyModel = this.getView().getModel("BranchModel").getData();
-           var Currency= oCurrencyModel.find((item)=>{
+ 
+           var oCountryModel = this.getView().getModel("CountryModel").getData();
+           var oBranchModel = this.getView().getModel("BranchModel").getData();
+ 
+           var Branch= oBranchModel.find((item)=>{
                return item.BranchID===sBranchCode
             })
+           
+                  var Currency= oCountryModel.find((item)=>{
+                       return item.countryName===Branch.Country
+                   })
+                this.getView().getModel("FacilitiesModel").setProperty("/Currency", Currency.currency);
 
-              if(Currency.Country==="India")
-                {
-                this.byId("FL_id_Currency").setSelectedKey("INR")
-                }else{
 
-                this.byId("FL_id_Currency").setSelectedKey("")
-                }
         },
         onFacilityNameChange: function (oEvent) {
             var oInput = oEvent.getSource();
@@ -273,9 +266,9 @@ sap.ui.define([
             utils._LCstrictValidationComboBox(oEvent);
             if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
         },
-        onFacilityPriceChange: function (oEvent) {
+        onPriceChange: function(oEvent) {
             var oInput = oEvent.getSource();
-            utils._LCvalidateAmount(oEvent);
+            utils._LCvalidateAmount(oEvent.getSource(), "ID");
             if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
         },
         onFileSizeExceeds: function () {

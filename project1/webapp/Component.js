@@ -36,6 +36,7 @@
                     this._fetchCommonData("Country", "CountryModel");
                     this._fetchCommonData("BaseLocation", "BaseLocationModel");
                     this._fetchCommonData("HM_Branch", "sBRModel");
+                    this._fetchCommonData("Currency", "CurrencyModel");
 
                 },
                 _fetchCommonData: async function (entityName, modelName, filter = "") {

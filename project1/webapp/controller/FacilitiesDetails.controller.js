@@ -26,20 +26,16 @@ sap.ui.define([
             const oFacilityModel = new sap.ui.model.json.JSONModel({
                 BranchCode: "",
                 Type: "",
-                Price: "",
                 FacilityName: "",
+                PerHourPrice:"",
+                PerDayPrice:"",
+                PerMonthPrice:"",
+                PerYearPrice:"",
                 Currency: "",
-                UnitText: ""
             });
             this.getView().setModel(oFacilityModel, "FacilitiesModel");
 
             sap.ui.core.BusyIndicator.show(0);
-            await this.ajaxReadWithJQuery("Currency", "").then((oData) => {
-                var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
-                var model = new sap.ui.model.json.JSONModel(oFCIAerData);
-                this.getView().setModel(model, "CurrencyModel");
-            });
-
             this.BedID = oEvent.getParameter("arguments").sPath;
             await this._loadBranchCode()
             await this._refreshFacilityDetails(this.BedID);
@@ -126,9 +122,9 @@ sap.ui.define([
             if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
         },
 
-        onFacilityPriceChange: function(oEvent) {
+        onPriceChange: function(oEvent) {
             var oInput = oEvent.getSource();
-            utils._LCvalidateAmount(oEvent);
+            utils._LCvalidateAmount(oEvent.getSource(), "ID");
             if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
         },
 
@@ -222,8 +218,6 @@ sap.ui.define([
                 utils._LCstrictValidationComboBox(oView.byId("FD_id_RoomType123"), "ID") &&
                 utils._LCvalidateMandatoryField(oView.byId("FD_id_FacilityName"), "ID") &&
                 utils._LCvalidateMandatoryField(oView.byId("FD_id_FacilityName1"), "ID") &&
-                utils._LCvalidateMandatoryField(oView.byId("FD_id_Price"), "ID") &&
-                utils._LCstrictValidationComboBox(oView.byId("FD_id_Rate"), "ID") &&
                 utils._LCstrictValidationComboBox(oView.byId("FD_id_Currency"), "ID")
             ) {
                 var attachments = oView.getModel("DisplayImagesModel").getData().DisplayImages || [];
@@ -243,8 +237,7 @@ sap.ui.define([
                     if (Payload.ID && facility.ID === Payload.ID) return false; // Skip comparing the same record during update
                     return (
                         facility.BranchCode === Payload.BranchCode &&
-                        facility.FacilityName.trim().toLowerCase() === Payload.FacilityName.trim().toLowerCase() &&
-                        facility.UnitText === Payload.UnitText
+                        facility.FacilityName.trim().toLowerCase() === Payload.FacilityName.trim().toLowerCase()
                     );
                 });
 
@@ -279,9 +272,11 @@ sap.ui.define([
                             BranchCode: Payload.BranchCode,
                             FacilityName: Payload.FacilityName,
                             Type: Payload.Type,
-                            Price: Payload.Price,
+                            PerHourPrice:Payload.PerHourPrice || 0,
+                            PerDayPrice:Payload.PerDayPrice || 0,
+                            PerMonthPrice:Payload.PerMonthPrice || 0,
+                            PerYearPrice:Payload.PerYearPrice || 0,
                             Currency: Payload.Currency,
-                            UnitText: Payload.UnitText,
                         },
                         Attachment: {
                             FacilityName: Payload.FacilityName,
