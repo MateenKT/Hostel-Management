@@ -41,7 +41,7 @@
 							<ComboBox
                                 id="FN_id_FacilityName"
                                 items="{Facilities>/}"
-                                showClearIcon="true"
+                                showClearIcon="true" busyIndicatorDelay="0"
                             >
 								<core:Item
                                     key="{Facilities>FacilityName}"
@@ -56,13 +56,13 @@
                         name="Branch Code"
                         label="Branch Code"
                         groupName="Group"
-                        visibleInFilterBar="true"
+                        visibleInFilterBar="true" 
                     >
 						<fb:control>
 							<ComboBox
                                 id="FN_id_BranchCode"
                                 items="{Facilities>/}"
-                                showClearIcon="true"
+                                showClearIcon="true" busyIndicatorDelay="0"
                             >
 								<core:ListItem
                                     key="{Facilities>BranchCode}"
@@ -103,7 +103,7 @@
 						<Text text="Daily Price" />
 					</Column>
 					<Column demandPopin="true">
-						<Text text="Monhtly Price" />
+						<Text text="Monthly Price" />
 					</Column>
 					<Column demandPopin="true">
 						<Text text="Yearly Price" />

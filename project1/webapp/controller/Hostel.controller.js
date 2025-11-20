@@ -879,41 +879,46 @@ _getLocationName: function (lat, lng) {
             }
         },
 
-        _loadRoomsPageData: async function () {
+      _loadRoomsPageData: async function () {
+            const oContainer = this.byId("idBedTypeFlex");
+            const oBranch = this.byId("id_Branch");
+            const oArea = this.byId("id_Area");
+            const oRoomType = this.byId("id_Roomtype");
 
-    const oContainer = this.byId("idBedTypeFlex"); 
-    oContainer.setBusy(true);
+            oContainer.setBusy(true);
+            oBranch.setBusy(true);
+            oArea.setBusy(true);
+            oRoomType.setBusy(true);
 
-    try {
-        // await this.CustomerDetails();
-        // await this._loadBranchCode();
-        await this.onReadcallforRoom();
+            try {
+                await this.onReadcallforRoom();
 
-        const oBRModel = this.getView().getModel("sBRModel");
-        const oModelData = oBRModel.getData();
+                const oBRModel = this.getView().getModel("sBRModel");
+                const oModelData = oBRModel.getData();
+                const aFiltered = oModelData.filter(item => item.City === this.City);
 
-        const aFiltered = oModelData.filter(item => item.City === this.City);
+                if (aFiltered.length === 0) {
+                    await this._loadFilteredData("Kalaburagi", "", "");
+                } else {
+                    await this._loadFilteredData(this.City, "", "");
+                }
 
-        if (aFiltered.length === 0) {
-            await this._loadFilteredData("Kalaburagi", "", "");
-        } else {
-            await this._loadFilteredData(this.City, "", "");
-        }
+                this.getView().setModel(new JSONModel(aFiltered), "AreaModel");
 
-        this.getView().setModel(new JSONModel(aFiltered), "AreaModel");
+                // Default selections
+                this.byId("id_Branch").setSelectedKey("Kalaburagi");
+                this.byId("id_Area").setEnabled(true).setSelectedKey("");
+                this.byId("id_Roomtype").setEnabled(true).setSelectedKey("All");
 
-        // Default selections
-        this.byId("id_Branch").setSelectedKey("Kalaburagi");
-        this.byId("id_Area").setEnabled(true).setSelectedKey("");
-        this.byId("id_Roomtype").setEnabled(true).setSelectedKey("All");
-
-    } catch (error) {
-        console.error("Error loading Rooms:", error);
-    } finally {
-        oContainer.setBusy(false);
-    }
-}
-,
+            } catch (error) {
+                console.error("Error loading Rooms:", error);
+            } finally {
+                oContainer.setBusy(false);
+                oBranch.setBusy(false);
+                oArea.setBusy(false);
+                oRoomType.setBusy(false);
+            }
+        },
 
         onpressFilter: function () {
             var oView = this.getView();

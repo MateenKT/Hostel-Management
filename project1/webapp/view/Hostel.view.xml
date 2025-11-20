@@ -175,7 +175,7 @@
                                             <ComboBox
                                                 id="id_Branch"
                                                 placeholder="Select City"
-                                                showClearIcon="true"
+                                                showClearIcon="true" busyIndicatorDelay="0"
                                                 enabled="true"
                                                 items="{sBRModel>/}"
                                                 selectionChange=".onBranchSelectionChange"
@@ -201,7 +201,7 @@
                                                 showClearIcon="true"
                                                 enabled="false"
                                                 items="{AreaModel>/}"
-                                                selectionChange=".onAreaSelectionChange"
+                                                selectionChange=".onAreaSelectionChange" busyIndicatorDelay="0"
                                             >
                                                 <core:ListItem
                                                     key="{AreaModel>BranchID}"
@@ -221,7 +221,7 @@
                                             <ComboBox
                                                 id="id_Roomtype"
                                                 placeholder="Select Room Type"
-                                                showClearIcon="true"
+                                                showClearIcon="true" busyIndicatorDelay="0"
                                             >
                                                 <core:Item
                                                     key="AC"
