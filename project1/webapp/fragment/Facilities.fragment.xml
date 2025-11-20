@@ -128,9 +128,11 @@
                 >
                     <headerToolbar>
                         <OverflowToolbar>
+                        <ToolbarSpacer />
                                 <u:FileUploader
                                     id="id_fileUploader"
                                     buttonOnly="true"
+                                    sameFilenameAllowed="true"
                                     buttonText="Upload Images"
                                     fileType="jpg,jpeg,png"
                                     multiple="true"

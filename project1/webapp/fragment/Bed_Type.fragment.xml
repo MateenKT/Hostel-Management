@@ -123,10 +123,12 @@
                 >
                     <headerToolbar>
                         <OverflowToolbar>
+                         <ToolbarSpacer />
                             <u:FileUploader
                                 id="BT_id_FileUploader"
                                 fileType="jpg,jpeg,png"
                                 multiple="true"
+                                sameFilenameAllowed="true"
                                 buttonOnly="true"
                                 buttonText="Upload Images"
                                 change="onFacilityFileChange"
