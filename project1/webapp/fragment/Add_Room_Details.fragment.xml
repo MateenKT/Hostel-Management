@@ -176,15 +176,15 @@
                 <ComboBox
                     id="FO_id_Currency"
                     selectedKey="{RoomModel>/Currency}"
-                    items="{CurrencyModel>/}"
+                    items="{path:'CountryModel>/',length:1000}"
                     valueStateText="Select Currency"
                     width="100%"
                     change="onACtypeChange"
                     placeholder="Select Currency"
                 >
                     <c:Item
-                        key="{CurrencyModel>currency}"
-                        text="{CurrencyModel>currency}"
+                        key="{CountryModel>currency}"
+                        text="{CountryModel>currency}"
                     />
                 </ComboBox>
             </f:content>

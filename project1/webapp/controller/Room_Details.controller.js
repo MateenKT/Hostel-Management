@@ -31,11 +31,7 @@ sap.ui.define([
             });
             this.getView().setModel(model, "RoomModel")
             sap.ui.core.BusyIndicator.show(0);
-           await this.ajaxReadWithJQuery("Currency", "").then((oData) => {
-                var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
-                var model = new JSONModel(oFCIAerData);
-                this.getView().setModel(model, "CurrencyModel");
-            })
+        
           
             await this.BedTypedetails()
             await this._loadBranchCode()
@@ -266,17 +262,16 @@ sap.ui.define([
             var oRoomDetailsModel = oView.getModel("RoomDetailsModel");
                 var oCurrencyModel = oView.getModel("BranchModel").getData();
 
-           var Currency= oCurrencyModel.find((item)=>{
+          var oCountryModel = this.getView().getModel("CountryModel").getData();
+
+           var Branch= oCurrencyModel.find((item)=>{
                return item.BranchID===sBranchCode
             })
-
-            if(Currency.Country==="India")
-                {
-                this.byId("FO_id_Currency").setSelectedKey("INR")
-                }else{
-                this.byId("FO_id_Currency").setSelectedKey("")
-
-                }
+            
+                  var Currency= oCountryModel.find((item)=>{
+                       return item.countryName===Branch.Country
+                   })
+                this.getView().getModel("RoomModel").setProperty("/Currency", Currency.currency);
             
 
 

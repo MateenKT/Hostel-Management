@@ -298,6 +298,12 @@
                                 </VBox>
                             </VBox>
                         </l:Grid>
+                          <IllustratedMessage
+                            visible="{VisibilityModel>/NoData}"
+                            illustrationType="sap.m.IllustratedMessageType.NoData"
+                            title="No Rooms Found"
+                            description="Please select another Branch or City."
+                        />
                     </Page>
                     <ScrollContainer
                         id="idFacilities"
