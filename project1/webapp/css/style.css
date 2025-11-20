@@ -603,11 +603,11 @@
 }
 
 .bedCard {
-    width: 400px;
-    height: 530px;
+    width: auto;              
+    height: auto;
     border-radius: 16px;
     padding: 6px;
-    background-color: #00acc1; /* teal look like your example */
+    background-color: #00acc1;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     overflow: hidden;
     display: flex;
@@ -615,70 +615,32 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* Hover */
 .bedCard:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 8px 18px rgba(0,0,0,0.3);
 }
 
 .bedCardImage {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;             
     object-fit: cover;
+    background-color: white;
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
-    background-color: white;
-}
-
-.bedCardContent {
-    flex: 1;
-    padding: 0.5rem;
-    color: #fff;
-    text-align: center;
-}
-
-.bedCardTitle {
-    font-weight: bold;
-    font-size: 1.2rem;
-    margin-bottom: 0.2rem;
-}
-
-.bedCardDesc {
-    font-size: 1rem;
-    color: #19191a;
-    min-height: 40px;
-}
-
-.bedCardPrice {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #ffffff;
-    margin-top: 0.3rem;
-}
-
-.bedCardButton {
-    margin-top: auto;
-    border-radius: 10px;
-    background-color: white !important;
-    color: #00acc1 !important;
-    font-weight: bold;
-}
- .bedCardAreaTag {
-    display: inline-block;
-    background-color: #f3f3f3;
-    padding: 4px 10px;
-    border-radius: 8px;
-    font-size: 13px;
-    color: #444;
-    margin-top: 6px;
 }
 
 .imageWrapper {
     position: relative;
+    width: 100%;
 }
 
 .areaTagBox {
     position: absolute;
     top: 10px;
     left: 10px;
-    background:#00acc1; /* blue tag */
+    background:#0097a7;
     padding: 4px 10px;
     border-radius: 12px;
     color: white;
@@ -686,6 +648,35 @@
     font-weight: bold;
     z-index: 10;
 }
+
+.bedCardContent {
+    padding: 1rem;
+    color: #fff;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.bedCardTitle {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.bedCardDesc {
+    font-size: 0.95rem;
+    color: #19191a;
+    margin-top: 0.4rem;
+    min-height: 40px;
+}
+
+.bedCardPrice {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fff;
+    margin-top: 0.5rem;
+}
+
 /* Carousel Container */
 .HostelFacilityCarousel {
   border-radius: 0.6rem;
