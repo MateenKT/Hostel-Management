@@ -71,7 +71,7 @@ _getLocationName: function (lat, lng) {
             const oView = this.getView();
 
             // 1️⃣ Login model setup
-            const omodel = new sap.ui.model.json.JSONModel({
+            const omodel = new JSONModel({
                 url: "https://rest.kalpavrikshatechnologies.com/",
                 headers: {
                     name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
@@ -1661,92 +1661,83 @@ _getLocationName: function (lat, lng) {
                 }
             });
         },
-        onEditBooking: function () {
-            var oTable = sap.ui.getCore().byId("IdProfileaTable");
-            var oSelectedItem = oTable.getSelectedItem();
+        onPressBookingRow: function (oEvent) {
 
-            if (!oSelectedItem) {
-                sap.m.MessageToast.show("Please select a booking to edit.");
-                return;
-            }
-            // Extract selected booking data
-            var oContext = oSelectedItem.getBindingContext("profileData");
-            var oBookingData = oContext.getObject();
+    var oContext = oEvent.getSource().getBindingContext("profileData");
+    var oBookingData = oContext.getObject();
 
+    // Status check (optional)
+    var sStatus = (oBookingData.status || "").trim().toLowerCase();
+    if (sStatus !== "new") {
+        sap.m.MessageToast.show("Only bookings with status 'New' can be edited.");
+        return;
+    }
 
-            var sStatus = (oBookingData.status || "").trim().toLowerCase();
-            if (sStatus !== "new") {
-                sap.m.MessageToast.show("Only bookings with status 'New' can be edited.");
-                return;
-            }
-            // Retrieve customerID using the booking (from bookings array)
-            var oProfileModel = this._oProfileDialog.getModel("profileData");
-            var aCustomers = oProfileModel.getProperty("/aCustomers");
-            var aFacilities = oProfileModel.getProperty("/facility");
+    // Now reuse your logic exactly as in onEditBooking
+    var oProfileModel = this._oProfileDialog.getModel("profileData");
+    var aCustomers = oProfileModel.getProperty("/aCustomers");
+    var aFacilities = oProfileModel.getProperty("/facility");
 
-            // Fix possible typo (cutomerid → customerid)
-            var sCustomerID = oBookingData.cutomerid || oBookingData.CustomerID || "";
+    var sCustomerID = oBookingData.cutomerid || oBookingData.CustomerID || "";
 
-            if (!sCustomerID) {
-                sap.m.MessageToast.show("Customer ID not found for this booking.");
-                return;
-            }
+    if (!sCustomerID) {
+        sap.m.MessageToast.show("Customer ID not found for this booking.");
+        return;
+    }
 
-            // Find the full customer details for that CustomerID
-            var oCustomer = aCustomers.find(cust => cust.customerID === sCustomerID);
-            if (!oCustomer) {
-                sap.m.MessageToast.show("No customer details found for this booking.");
-                return;
-            }
+    var oCustomer = aCustomers.find(cust => cust.customerID === sCustomerID);
+    if (!oCustomer) {
+        sap.m.MessageToast.show("No customer details found for this booking.");
+        return;
+    }
 
-            // Filter all facilities belonging to that customer
-            var aCustomerFacilities = aFacilities.filter(fac => fac.customerid === sCustomerID);
+    var aCustomerFacilities = aFacilities.filter(fac => fac.customerid === sCustomerID);
 
-            // 🧮 Call the calculation function for totals
-            var oTotals = this.calculateTotals(
-                [{ FullName: oCustomer.customerName, Facilities: { SelectedFacilities: aCustomerFacilities } }],
-                oBookingData.Startdate,
-                oBookingData.EndDate,
-                oBookingData.RoomPrice
-            );
-            if (!oTotals) {
-                return; // calculation returned null (invalid dates)
-            }
+    // Calculate totals
+    var oTotals = this.calculateTotals(
+        [{ FullName: oCustomer.customerName, Facilities: { SelectedFacilities: aCustomerFacilities } }],
+        oBookingData.Startdate,
+        oBookingData.EndDate,
+        oBookingData.RoomPrice
+    );
+    if (!oTotals) {
+        return;
+    }
 
-            // Prepare data for the next view (HostelModel)
-            var oFullCustomerData = {
-                salutation: oCustomer.salutation,
-                FullName: oCustomer.customerName,
-                Gender: oCustomer.gender,
-                stdcode: oCustomer.stdCode,
-                MobileNo: oCustomer.mobileno,
-                CustomerEmail: oCustomer.customerEmail,
-                Country: oCustomer.country,
-                State: oCustomer.state,
-                City: oCustomer.city,
-                DateOfBirth: oCustomer.DOB,
-                RoomType: oBookingData.room,
-                Price: oBookingData.amount,
-                noofperson: oBookingData.noofperson,
-                RoomPrice: oBookingData.RoomPrice,
-                PaymentType: oBookingData.paymenytype,
-                StartDate: oBookingData.Startdate,
-                EndDate: oBookingData.EndDate || "",
-                CustomerId:oBookingData.cutomerid,
-                TotalDays: oTotals.TotalDays,
-                AllSelectedFacilities: oTotals.AllSelectedFacilities,
-                TotalFacilityPrice: oTotals.TotalFacilityPrice,
-                GrandTotal: oTotals.GrandTotal
-            };
+    // Prepare data for details view
+    var oFullCustomerData = {
+        salutation: oCustomer.salutation,
+        FullName: oCustomer.customerName,
+        Gender: oCustomer.gender,
+        stdcode: oCustomer.stdCode,
+        MobileNo: oCustomer.mobileno,
+        CustomerEmail: oCustomer.customerEmail,
+        Country: oCustomer.country,
+        State: oCustomer.state,
+        City: oCustomer.city,
+        DateOfBirth: oCustomer.DOB,
+        RoomType: oBookingData.room,
+        Price: oBookingData.amount,
+        noofperson: oBookingData.noofperson,
+        RoomPrice: oBookingData.RoomPrice,
+        PaymentType: oBookingData.paymenytype,
+        StartDate: oBookingData.Startdate,
+        EndDate: oBookingData.EndDate || "",
+        CustomerId: oBookingData.cutomerid,
+        TotalDays: oTotals.TotalDays,
+        AllSelectedFacilities: oTotals.AllSelectedFacilities,
+        TotalFacilityPrice: oTotals.TotalFacilityPrice,
+        GrandTotal: oTotals.GrandTotal
+    };
 
-            // Create a model to pass to next view
-            var oHostelModel = new JSONModel(oFullCustomerData);
-            this.getOwnerComponent().setModel(oHostelModel, "HostelModel");
+    // Set model for next screen
+    var oHostelModel = new sap.ui.model.json.JSONModel(oFullCustomerData);
+    this.getOwnerComponent().setModel(oHostelModel, "HostelModel");
 
-            // Navigate to next view
-            var oRouter = this.getOwnerComponent().getRouter();
-            oRouter.navTo("EditBookingDetails");
-        },
+    // Navigate
+    this.getOwnerComponent().getRouter().navTo("EditBookingDetails");
+}
+,
 
         // 🧮 Separated calculation function
         calculateTotals: function (aPersons, sStartDate, sEndDate, RoomPrice) {
@@ -2125,6 +2116,9 @@ _getLocationName: function (lat, lng) {
             catch (error) {
                 sap.m.MessageToast.show("Failed");
             }
+        },
+        OnpressBookingDetails:function(){
+
         }
     });
 });

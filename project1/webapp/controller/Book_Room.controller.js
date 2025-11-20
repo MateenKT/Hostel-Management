@@ -200,7 +200,7 @@ sap.ui.define([
         FacilityID: f.ID,
         FacilityName: f.FacilityName,
         Image: convertBase64ToImage(f.Photo1, f.Photo1Type),
-        Price: f.Price,
+        Price: f.PerDayPrice,
         UnitText: f.UnitText,
         Currency: f.Currency,
         BranchCode:f.BranchCode
@@ -1501,7 +1501,7 @@ _createDynamicPersonsUI: function () {
 
                     // Facility Price (below the image)
                     new sap.m.Text({
-                      text: "{= '₹ ' + ${FacilityModel>Price} + ' ' + ${FacilityModel>Currency} + ' ' + ${FacilityModel>UnitText} }"
+                      text: "{= '₹ ' + ${FacilityModel>Price} + ' ' + ${FacilityModel>Currency}}"
                     }).addStyleClass("sapUiTinyMarginTop facilityPriceText")
 
 
