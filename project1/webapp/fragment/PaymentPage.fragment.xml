@@ -84,34 +84,36 @@
 
                         <Title text="Payment Verification" level="H4" />
 
-                        <Label text="Bank Name" required="true" />
+                        <!-- <Label text="Bank Name" required="true" />
                         <Input id="idBankName"
                             placeholder="Enter Bank Name"
                             liveChange=".onBankNameChange"
                             valueStateText="{i18n>enterBankName}"
-                            maxLength="30" />
+                            maxLength="30" /> -->
 
                         <Label text="Amount" required="true" />
                         <Input id="idAmount"
-                            type="Number"
-                            placeholder="Enter Amount"
-                            liveChange=".onAmountChange"
-                            valueStateText="{i18n>enterAmount}"
-                            maxLength="15" />
+                        type="Number"
+                        value="{PaymentModel>/Amount}"
+                        placeholder="Enter Amount"
+                        liveChange=".onAmountChange"
+                        maxLength="15" />
 
-                        <Label text="Currency" required="true" />
+
+                        <!-- <Label text="Currency" required="true" />
                         <ComboBox id="idCurrency"
                             items="{CurrencyModel>/}"
                             placeholder="Select Currency"
                             valueStateText="Select Currency"
                             change=".onCurrencyChange">
                             <core:Item key="{CurrencyModel>currency}" text="{CurrencyModel>currency}" />
-                        </ComboBox>
+                        </ComboBox> -->
 
                         <Label text="Payment Type" required="true" />
                         <Input id="idPaymentTypeField"
                             placeholder="Enter Payment Type"
                             liveChange=".onPaymentTypeChange"
+                            value="{PaymentModel>/PaymentType}"
                             valueStateText="{i18n>enterPaymentType}"
                             maxLength="20" />
 
@@ -126,6 +128,7 @@
                         <DatePicker id="idPaymentDate"
                             displayFormat="dd/MM/yyyy"
                             valueFormat="dd/MM/yyyy"
+                            value="{PaymentModel>/PaymentDate}"
                             change=".onPaymentDateChange"
                             valueStateText="{i18n>selectPaymentDate}" />
                     </VBox>

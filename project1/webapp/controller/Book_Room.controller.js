@@ -46,7 +46,11 @@ sap.ui.define([
         sap.ui.getCore().setModel(oHostelModel, "HostelModel");
       }
 
-      // Set it on the view
+      this.getView().setModel(new sap.ui.model.json.JSONModel({
+        Amount: "",
+        PaymentType: "UPI",
+        PaymentDate: new Date()
+      }),"PaymentModel");
 
       //  Ensure defaults come from previous step (HostelModel)
       const oData = oHostelModel.getData();
@@ -1718,42 +1722,47 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
       }
     },
 
-      onOpenProceedtoPay: function() {
-        if (!this._oPaymentDialog) {
-            this._oPaymentDialog = sap.ui.xmlfragment(
-                "sap.ui.com.project1.fragment.PaymentPage",
-                this
-            );
-            this.getView().addDependent(this._oPaymentDialog);
-        }
+    onOpenProceedtoPay: function () {
+    if (!this._oPaymentDialog) {
+        this._oPaymentDialog = sap.ui.xmlfragment(
+            "sap.ui.com.project1.fragment.PaymentPage",
+            this
+        );
+        this.getView().addDependent(this._oPaymentDialog);
+    }
 
-        this._clearAllPaymentFields();
+    var oPaymentModel = this.getView().getModel("PaymentModel");
+    var oHostelModel = this.getView().getModel("HostelModel");
 
-        sap.ui.getCore().byId("idPaymentTypeGroup").setSelectedIndex(0);
-        this._togglePaymentSections(true);
-        sap.ui.getCore().byId("idPaymentTypeField").setValue("UPI");
+    // Set default values
+    oPaymentModel.setProperty("/PaymentDate", this.Formatter.formatDate(new Date()));
+    oPaymentModel.setProperty("/PaymentType", "UPI");
+    oPaymentModel.setProperty("/Amount", oHostelModel.getProperty("/OverallTotalCost")
+    );
 
-        var oDatePicker = sap.ui.getCore().byId("idPaymentDate");
-        oDatePicker.setDateValue(new Date());
+    this._oPaymentDialog.open();
+},
 
-        this._oPaymentDialog.open();
-    },
+   onPaymentTypeSelect: function (oEvent) {
+    const index = oEvent.getSource().getSelectedIndex();
+    const isUPI = index === 0;
+    this._togglePaymentSections(isUPI);
 
-    onPaymentTypeSelect: function(oEvent) {
-        const index = oEvent.getSource().getSelectedIndex();
-        const isUPI = index === 0;
+    var oPaymentModel = this.getView().getModel("PaymentModel");
+    var oHostelModel = this.getView().getModel("HostelModel");
 
-        this._togglePaymentSections(isUPI);
-        sap.ui.getCore().byId("idPaymentTypeField").setValue(isUPI ? "UPI" : "CARD");
-    },
+    oPaymentModel.setProperty("/PaymentType", isUPI ? "UPI" : "CARD");
+    oPaymentModel.setProperty("/PaymentDate", this.Formatter.formatDate(new Date()));
+    oPaymentModel.setProperty("/Amount", oHostelModel.getProperty("/OverallTotalCost"));
+},
 
     _togglePaymentSections: function(isUPI) {
         sap.ui.getCore().byId("idUPISection").setVisible(isUPI);
         sap.ui.getCore().byId("idCardSection").setVisible(!isUPI);
 
         const aFields = [
-            "idBankName", "idAmount", "idPaymentTypeField", "idTransactionID",
-            "idPaymentDate", "idCurrency", "idUPIID", "idCardNumber", "idCardExpiry", "idCardCVV"
+           "idAmount", "idPaymentTypeField", "idTransactionID",
+            "idPaymentDate",  "idUPIID", "idCardNumber", "idCardExpiry", "idCardCVV"
         ];
         aFields.forEach(id => sap.ui.getCore().byId(id)?.setValue(""));
     },
@@ -1776,8 +1785,8 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
 
     _clearAllPaymentFields: function() {
         [
-            "idBankName", "idAmount", "idPaymentTypeField", "idTransactionID",
-            "idPaymentDate", "idCurrency", "idUPIID", "idCardNumber",
+             "idAmount", "idPaymentTypeField", "idTransactionID",
+            "idPaymentDate",  "idUPIID", "idCardNumber",
             "idCardExpiry", "idCardCVV"
         ].forEach(id => {
             const c = sap.ui.getCore().byId(id);
@@ -1794,8 +1803,8 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
         }
 
         const aFields = [
-            "idBankName", "idAmount", "idPaymentTypeField", "idTransactionID",
-            "idPaymentDate", "idCurrency", "idUPIID", "idCardNumber", "idCardExpiry", "idCardCVV"
+             "idAmount", "idPaymentTypeField", "idTransactionID",
+            "idPaymentDate",  "idUPIID", "idCardNumber", "idCardExpiry", "idCardCVV"
         ];
         aFields.forEach(id => sap.ui.getCore().byId(id)?.setValue(""));
     },
@@ -1847,8 +1856,8 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
      // Mandatory validation
      const isMandatoryValid = (
          utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idUPIID"), "ID") &&
-         utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idBankName"), "ID") &&
-         utils._LCstrictValidationComboBox(sap.ui.getCore().byId("idCurrency"), "ID") &&
+        //  utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idBankName"), "ID") &&
+        //  utils._LCstrictValidationComboBox(sap.ui.getCore().byId("idCurrency"), "ID") &&
          utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idPaymentTypeField"), "ID") &&
          utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idTransactionID"), "ID") &&
          utils._LCvalidateDate(sap.ui.getCore().byId("idPaymentDate"), "ID")
@@ -1894,12 +1903,12 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
                  });
              }
              const paymentDetails = {
-                 BankName: sap.ui.getCore().byId("idBankName").getValue(),
+                //  BankName: sap.ui.getCore().byId("idBankName").getValue(),
                  Amount: sap.ui.getCore().byId("idAmount").getValue(),
                  PaymentType: sap.ui.getCore().byId("idPaymentTypeField").getValue(),
                  BankTransactionID: sap.ui.getCore().byId("idTransactionID").getValue(),
                  Date: sap.ui.getCore().byId("idPaymentDate").getValue() ? sap.ui.getCore().byId("idPaymentDate").getValue().split("/").reverse().join("-") : "",
-                 Currency: sap.ui.getCore().byId("idCurrency").getValue()
+                //  Currency: sap.ui.getCore().byId("idCurrency").getValue()
              };
 
              // Store in model temporarily
