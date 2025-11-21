@@ -680,14 +680,18 @@ sap.ui.define([
 
 
 
-
         _LoadFacilities: function (sBranchCode) {
             const oView = this.getView();
+            if (!this._oRoomDetailFragment) return; // Safety check
 
             if (!sBranchCode) return;
 
             // Set loading state ON for facility container
-            const oFacilityModel = oView.getModel("FacilityModel");
+            // const oFacilityModel = oView.getModel("FacilityModel");
+            // 🎯 Get the model directly from the fragment
+            const oFacilityModel = this._oRoomDetailFragment.getModel("FacilityModel");
+            if (!oFacilityModel) return; // Model might not be set yet
+
             oFacilityModel.setProperty("/loading", true);
             this.ajaxReadWithJQuery("HM_Facilities", { BranchCode: sBranchCode })
                 .then((Response) => {
@@ -706,6 +710,7 @@ sap.ui.define([
                         FacilityName: f.FacilityName,
                         Image: convert(f.Photo1, f.Photo1Type),
                         Price: f.Price,
+                        Price: f.PerHourPrice, // Correctly map the price from API response
                         UnitText: f.UnitText,
                         Currency: f.Currency
                     }));
@@ -746,6 +751,7 @@ sap.ui.define([
                     SelectedPriceType: "",
                     SelectedPriceValue: ""
                 };
+                console.log(" oSelected.BranchCode  oSelected.BranchCode  oSelected.BranchCode ", oSelected.BranchCode);
 
                 // Set HostelModel
                 const oHostelModel = new sap.ui.model.json.JSONModel(oFullDetails);
@@ -779,7 +785,6 @@ sap.ui.define([
 
                         // Now load facilities in background
                         this._LoadFacilities(oSelected.BranchCode);
-                        this._LoadAmenities(oSelected.BranchCode);
                     });
 
                     return; // stop here because first-time load is async via .then()
@@ -798,7 +803,6 @@ sap.ui.define([
 
                 // Load facilities asynchronously
                 this._LoadFacilities(oSelected.BranchCode);
-                this._LoadAmenities(oSelected.BranchCode);
 
             } catch (err) {
                 console.error("❌ viewDetails error:", err);
@@ -810,49 +814,40 @@ sap.ui.define([
 
 
         _LoadAmenities: async function (sBranchCode) {
-
-            const oModel = new sap.ui.model.json.JSONModel({
+            console.log("📌 Amenity load for branch:", sBranchCode); //      sBranchCode
+            const oAmenityModel = new sap.ui.model.json.JSONModel({
                 loading: true,
                 Amenities: []
             });
 
-            this._oRoomDetailFragment.setModel(oModel, "AmenityModel");
+            this._oRoomDetailFragment.setModel(oAmenityModel, "AmenityModel");
 
             try {
-                // 1️⃣ Try branch-specific amenities
-                let respBranch = await this.ajaxReadWithJQuery("HM_HostelFeatures", {
-                    BranchCode: sBranchCode || ""
-                });
+                // 1️⃣ Fetch ALL once (don’t rely on server filter)
+                let resp = await this.ajaxReadWithJQuery("HM_HostelFeatures", {});
+                let allList = resp?.data || [];
 
-                let branchList = respBranch?.data || [];
-
-                console.log("📌 Backend Amenity (Branch):", sBranchCode, branchList);
+                // 2️⃣ Filter branch only (strict match)
+                const branchList = allList.filter(x => (x.BranchCode || "").trim() === (sBranchCode || "").trim());
 
                 if (branchList.length > 0) {
-                    // Found branch amenities → use them ✔
-                    oModel.setProperty("/Amenities", this._convertAmenities(branchList));
+                    // ✔ Branch exists → show only branch amenities
+                    console.log("🎯 Showing branch amenities:", branchList);
+                    oAmenityModel.setProperty("/Amenities", this._convertAmenities(branchList));
                 } else {
-                    // 2️⃣ No branch amenities → try blank branch fallback
-                    let respBlank = await this.ajaxReadWithJQuery("HM_HostelFeatures", {
-                        BranchCode: ""
-                    });
-
-                    let blankList = respBlank?.data || [];
-
-                    // ❗ UI filter only blank branch amenities
-                    blankList = blankList.filter(x => (x.BranchCode || "").trim() === "");
-
-                    console.warn("↩️ Using ONLY blank branch amenities:", blankList);
-
-                    oModel.setProperty("/Amenities", this._convertAmenities(blankList));
+                    // 🔄 Branch not found → show ONLY blank fallback
+                    const fallbackList = allList.filter(x => (x.BranchCode || "").trim() === "");
+                    console.warn("↩️ Showing fallback amenities:", fallbackList);
+                    oAmenityModel.setProperty("/Amenities", this._convertAmenities(fallbackList));
                 }
 
             } catch (err) {
                 console.error("❌ Amenity load error:", err);
             }
 
-            oModel.setProperty("/loading", false);
+            oAmenityModel.setProperty("/loading", false);
         },
+
         _convertAmenities: function (list) {
             return list.map(item => ({
                 ...item,
@@ -863,10 +858,16 @@ sap.ui.define([
         },
 
 
-
         onRoomDetailOpened: function () {
-            console.log("Dialog fully opened. Now loading amenities...");
-            this._LoadAmenities();
+            // Get the branch code from the dialog's model
+            if (this._oRoomDetailFragment) {
+                const oModel = this._oRoomDetailFragment.getModel("HostelModel");
+                if (oModel) {
+                    const sBranchCode = oModel.getProperty("/BranchCode");
+                    this._LoadAmenities(sBranchCode);
+                    console.log("sBranchCodevvvvvvsBranchCodesBranchCodevvvvvvsBranchCodesBranchCodevvvvvvsBranchCodesBranchCodevvvvvvsBranchCode", sBranchCode);
+                }
+            }
         },
 
         onImageLoadError: function (oEvent) {
