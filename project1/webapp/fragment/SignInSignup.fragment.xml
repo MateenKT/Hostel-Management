@@ -7,7 +7,7 @@
 		<customHeader>
 			<Bar>
 				<contentMiddle>
-					<Title text="Student Portal Access" />
+					<Title text="Hostel Access Portal" />
 				</contentMiddle>
 				<contentRight>
 					<Button type="Transparent" icon="sap-icon://decline" press="onDialogClose" />
@@ -48,7 +48,7 @@
 						<HBox width="100%" alignItems="Center" justifyContent="Start">
 							<VBox width="20%">
 								<Label text="Salutation" required="true"/>
-								<ComboBox id="signUpSalutation" selectedKey="Mr." placeholder="Select" valueStateText="Select Salutation" change="onSalutationChange">
+								<ComboBox id="signUpSalutation" selectedKey="" change="onChangeSalutation" placeholder="Select" valueStateText="Select Salutation">
 									<core:ListItem key="Mr." text="Mr."/>
 									<core:ListItem key="Ms." text="Ms."/>
 									<core:ListItem key="Mrs." text="Mrs."/>
@@ -68,31 +68,31 @@
 						<Label text="Confirm Password" required="true" />
 						<Input id="signUpConfirmPassword" placeholder="Enter Confirm Password" value="{LoginMode>/comfirmpass}" valueState="{}" type="Password" change="FSM_onConfirm" showValueHelp="true" valueStateText="Enter Confirm Password" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility" maxLength="50" liveChange="FSM_onConfirm" />
 						<!-- DOB, GENDER -->
-						<Label text="Date Of Birth"/>
-						<DatePicker id="signUpDOB" displayFormat="long" valueFormat="yyyy-MM-dd"/>
-						<Label text="Gender"/>
-						<Select id="signUpGender" selectedKey="Male">
+						<Label text="Date Of Birth" required="true"/>
+						<DatePicker id="signUpDOB" displayFormat="dd-MM-yyyy" valueFormat="yyyy-MM-dd" change="onChangeDOB" />
+						<Label text="Gender" required="true"/>
+						<Select id="signUpGender" selectedKey="" change="onChangeGender">
+							<core:Item key="" text="Select Gender" />
 							<core:Item key="Male" text="Male"/>
 							<core:Item key="Female" text="Female"/>
 							<core:Item key="Other" text="Other"/>
 						</Select>
-						<!-- STD CODE -->
-						<!-- Phone Number Input -->
-						<!-- ADDRESS -->
-						<Label text="Country"/>
+						<!-- 
+						<ComboBox id="signUpCountry" change="onChangeCountry" selectedKey="{LoginMode>/Country}" placeholder="Select Country" valueStateText="Select Country" items="{path:'CountryModel>/', length:1000}" showSecondaryValues="true"><core:ListItem key="{CountryModel>countryName}" text="{CountryModel>countryName}" additionalText="{CountryModel>code}" /></ComboBox><Label text="State" required="true"/><ComboBox id="signUpState" change="onChangeState" selectedKey="{LoginMode>/State}" placeholder="Select State" valueStateText="Select State" items="{path:'StateModel>/', length:1000}" showSecondaryValues="true"><core:ListItem key="{StateModel>stateName}" text="{StateModel>stateName}"/></ComboBox><Label text="City" required="true"/><ComboBox id="signUpCity" change="onChangeCity" selectedKey="{LoginMode>/City}" placeholder="Select City" valueStateText="Select City" items="{path:'CityModel>/', length:1000}" showSecondaryValues="true"><core:ListItem key="{CityModel>cityName}" text="{CityModel>cityName}" additionalText="{CityModel>branchCode}" /></ComboBox> -->
+						<!-- COUNTRY -->
 						<Label text="Country" required="true"/>
-						<ComboBox id="signUpCountry" change="onChangeCountry" selectedKey="{LoginMode>/Country}" placeholder="Select Country" valueStateText="Select Country" items="{path:'CountryModel>/', length:1000}" showSecondaryValues="true">
-							<core:ListItem key="{CountryModel>countryName}" text="{CountryModel>countryName}" additionalText="{CountryModel>code}" />
+						<ComboBox id="signUpCountry" change="onChangeCountry" selectionChange="onChangeCountry" placeholder="Select Country" valueStateText="Select a valid Country" items="{path:'CountryModel>/', length:1000}" showSecondaryValues="true">
+							<core:ListItem key="{CountryModel>countryName}" text="{CountryModel>countryName}" additionalText="{CountryModel>code}"/>
 						</ComboBox>
-						<Label text="State"/>
+						<!-- STATE -->
 						<Label text="State" required="true"/>
-						<ComboBox id="signUpState" change="onChangeState" selectedKey="{LoginMode>/State}" placeholder="Select State" valueStateText="Select State" items="{path:'StateModel>/', length:1000}" showSecondaryValues="true">
+						<ComboBox id="signUpState" change="onChangeState" selectionChange="onChangeState" placeholder="Select State" valueStateText="Select a valid State" items="{path:'StateModel>/', length:1000}" showSecondaryValues="true">
 							<core:ListItem key="{StateModel>stateName}" text="{StateModel>stateName}"/>
 						</ComboBox>
-						<Label text="City"/>
-						<Label text="City" required="true"/>
-						<ComboBox id="signUpCity" change="onChangeCity" selectedKey="{LoginMode>/City}" placeholder="Select City" valueStateText="Select City" items="{path:'CityModel>/', length:1000}" showSecondaryValues="true">
-							<core:ListItem key="{CityModel>cityName}" text="{CityModel>cityName}" additionalText="{CityModel>branchCode}" />
+						<!-- CITY -->
+						<Label text="City" required="true" />
+						<ComboBox id="signUpCity" change="onChangeCity" selectionChange="onChangeCity" placeholder="Select City" valueStateText="Select a valid City" items="{path:'CityModel>/', length:1000}" showSecondaryValues="true">
+							<core:ListItem key="{CityModel>cityName}" text="{CityModel>cityName}" additionalText="{CityModel>branchCode}"/>
 						</ComboBox>
 						<Label text="Mobile Number" required="true"/>
 						<HBox width="100%" justifyContent="Start" alignItems="Center">
@@ -107,7 +107,7 @@
 								<Input id="signUpPhone" value="{LoginMode>/Mobileno}" placeholder="Enter Contact Number" maxLength="18" liveChange="onMobileLivechnage" valueStateText="Enter a valid mobile number" required="true" />
 							</VBox>
 						</HBox>
-						<Label text="Address"/>
+						<Label text="Address" required="true"/>
 						<TextArea id="signUpAddress" rows="3" value="{LoginMode>/Address}" liveChange="onAddressChange" placeholder="Address" />
 					</f:SimpleForm>
 					<!-- Sign Up Button -->

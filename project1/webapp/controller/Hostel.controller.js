@@ -5,69 +5,70 @@ sap.ui.define([
     "sap/m/MessageBox",
     "../utils/validation",
     "../model/formatter",
-], function (BaseController, JSONModel, MessageToast, MessageBox, utils,Formatter) {
+], function (BaseController, JSONModel, MessageToast, MessageBox, utils, Formatter) {
     "use strict";
     const $C = (id) => sap.ui.getCore().byId(id);
     const $V = (id) => $C(id)?.getValue()?.trim() || "";
     return BaseController.extend("sap.ui.com.project1.controller.Hostel", {
         Formatter: Formatter,
-         onInit: function () {
+        onInit: function () {
             this.getOwnerComponent().getRouter().getRoute("RouteHostel").attachMatched(this._onRouteMatched, this);
             this._getBrowserLocation();
+
         },
 
         _getBrowserLocation: function () {
-    if (!navigator.geolocation) {
-        sap.m.MessageToast.show("Geolocation not supported!");
-        return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-        (pos) => {
-            let lat = pos.coords.latitude;
-            let lng = pos.coords.longitude;
-            this._getLocationName(lat, lng);
-        },
-        (err) => {
-            console.error("Location error:", err);
-        }
-    );
-},
-
-_getLocationName: function (lat, lng) {
-    let url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
-
-    $.ajax({
-        url: url,
-        method: "GET",
-        success: (data) => {
-            if (!data || !data.address) {
-                console.log("Address not found");
+            if (!navigator.geolocation) {
+                sap.m.MessageToast.show("Geolocation not supported!");
                 return;
             }
 
-            let city = data.address.city 
-                    || data.address.town 
-                    || data.address.village 
-                    || data.address.municipality;
-
-            let state = data.address.state;
-            let country = data.address.country;
-
-            console.log("City:", city);
-            console.log("State:", state);
-            console.log("Country:", country);
-
-            console.log("Full Location:", `${city}, ${state}, ${country}`);
-
-            this.City=city
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    let lat = pos.coords.latitude;
+                    let lng = pos.coords.longitude;
+                    this._getLocationName(lat, lng);
+                },
+                (err) => {
+                    console.error("Location error:", err);
+                }
+            );
         },
-        error: (err) => {
-            console.error("Reverse geocoding failed", err);
+
+        _getLocationName: function (lat, lng) {
+            let url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
+
+            $.ajax({
+                url: url,
+                method: "GET",
+                success: (data) => {
+                    if (!data || !data.address) {
+                        console.log("Address not found");
+                        return;
+                    }
+
+                    let city = data.address.city
+                        || data.address.town
+                        || data.address.village
+                        || data.address.municipality;
+
+                    let state = data.address.state;
+                    let country = data.address.country;
+
+                    console.log("City:", city);
+                    console.log("State:", state);
+                    console.log("Country:", country);
+
+                    console.log("Full Location:", `${city}, ${state}, ${country}`);
+
+                    this.City = city
+                },
+                error: (err) => {
+                    console.error("Reverse geocoding failed", err);
+                }
+            });
         }
-    });
-}
-,
+        ,
         _onRouteMatched: async function () {
             const oView = this.getView();
 
@@ -177,7 +178,7 @@ _getLocationName: function (lat, lng) {
 
                 const oBranchModel = new sap.ui.model.json.JSONModel(aBranches);
                 oView.setModel(oBranchModel, "sBRModel");
-                               this._populateUniqueFilterValues(aBranches);
+                this._populateUniqueFilterValues(aBranches);
 
 
                 console.log("oBranchModel:", oBranchModel.getData());
@@ -186,7 +187,7 @@ _getLocationName: function (lat, lng) {
                 console.error("Error while loading branch data:", err);
             }
         },
-         _populateUniqueFilterValues: function(data) {
+        _populateUniqueFilterValues: function (data) {
             let uniqueValues = {
                 id_Branch: new Set(),
 
@@ -372,7 +373,7 @@ _getLocationName: function (lat, lng) {
 
 
 
-  
+
 
         onSelectPricePlan: function (oEvent) {
             const oTile = oEvent.getSource();
@@ -915,7 +916,7 @@ _getLocationName: function (lat, lng) {
             }
         },
 
-      _loadRoomsPageData: async function () {
+        _loadRoomsPageData: async function () {
             const oContainer = this.byId("idBedTypeFlex");
             const oBranch = this.byId("id_Branch");
             const oArea = this.byId("id_Area");
@@ -1107,17 +1108,113 @@ _getLocationName: function (lat, lng) {
             // this._oLocationDialog.open();
         },
 
+   
+
         onpressLogin: function () {
             if (!this._oSignDialog) {
-                this._oSignDialog = sap.ui.xmlfragment("sap.ui.com.project1.fragment.SignInSignup", this);
+                this._oSignDialog = sap.ui.xmlfragment(
+                    "sap.ui.com.project1.fragment.SignInSignup",
+                    this
+                );
                 this.getView().addDependent(this._oSignDialog);
+
+                // Attach the reset logic to the afterClose event
+                // This ensures cleanup happens whether closed by ESC key or button
+                this._oSignDialog.attachAfterClose(this._resetAuthDialog, this);
             }
+
+            // Always default to the Sign In panel
+            const oSignInPanel = sap.ui.getCore().byId("signInPanel");
+            const oSignUpPanel = sap.ui.getCore().byId("signUpPanel");
+            if (oSignInPanel) oSignInPanel.setVisible(true);
+            if (oSignUpPanel) oSignUpPanel.setVisible(false);
+
+
             this._oSignDialog.open();
+            this._FragmentDatePickersReadOnly(["signUpDOB"]);
+
+            const oDOB = sap.ui.getCore().byId("signUpDOB");
+            const today = new Date();
+
+            const maxDOB = new Date();  // Minimum age = 10
+            maxDOB.setFullYear(today.getFullYear() - 10);
+
+            const minDOB = new Date();  // Maximum age = 118
+            minDOB.setFullYear(today.getFullYear() - 118);
+
+            oDOB.setMaxDate(maxDOB);
+            oDOB.setMinDate(minDOB);
+            setTimeout(() => {
+                const oGender = sap.ui.getCore().byId("signUpGender");
+                if (oGender) oGender.setSelectedKey("");
+            }, 0);
+
             return;
         },
-        onDialogClose: function () {
-            this._oSignDialog.close()
+
+        _resetAuthDialog: function () {
+            const $C = (id) => sap.ui.getCore().byId(id);
+            const oModel = this.getView().getModel("LoginMode");
+
+            // 🔄 Reset Model Data
+            oModel.setData({
+                Salutation: "",
+                fullname: "",
+                Email: "",        // <<<<< Clear Email Model
+                STDCode: "",
+                Mobileno: "",
+                password: "",     // <<<<< Clear Password Model
+                comfirmpass: "",
+                UserID: "",
+                Gender: "",
+                Country: "",
+                State: "",
+                City: "",
+                Address: "",
+                DateOfBirth: ""
+            });
+
+            // 🧹 Reset UI controls
+            // 🧹 Reset Sign-Up controls
+            [
+                "signUpSalutation", "signUpName", "signUpEmail", "signUpPassword",
+                "signUpConfirmPassword", "signUpDOB", "signUpGender", "signUpCountry",
+                "signUpState", "signUpCity", "signUpSTD", "signUpPhone", "signUpAddress"
+            ].forEach(id => {
+                const ctrl = $C(id);
+                if (ctrl) {
+                    ctrl.setValueState("None");
+                    if (ctrl.setValue) ctrl.setValue("");
+                    if (ctrl.setSelectedKey) ctrl.setSelectedKey("");
+                }
+            });
+
+            // 🧹 Reset Sign-In controls
+            ["signInuserid", "signInusername", "signinPassword"].forEach(id => {
+                const ctrl = $C(id);
+                if (ctrl) {
+                    ctrl.setValueState("None");
+                    if (ctrl.setValue) ctrl.setValue("");
+                }
+            });
+
+            // Re-enable STD & Gender
+            const STD = $C("signUpSTD");
+            const GEN = $C("signUpGender");
+            if (STD) STD.setEnabled(true);
+            if (GEN) GEN.setEnabled(true);
+
+
+            // Reset to SignIn tab (if you want)
+            const oVM = this.getView().getModel("LoginViewModel");
+            oVM.setProperty("/selectedAccountType", "personal");
         },
+
+
+        onDialogClose: function () {
+            if (this._oSignDialog) this._oSignDialog.close();
+        },
+
 
         _onFieldclear: function () {
             var ofield
@@ -1188,16 +1285,17 @@ _getLocationName: function (lat, lng) {
             }
             $C("signUpConfirmPassword").setValueState("Success");
 
-            // 6) Date of Birth + Age Check
+            /* ===== 6) Date of Birth + Age Check ===== */
             const oDOB = $C("signUpDOB");
             const dobValue = oDOB.getDateValue();
+
             if (!dobValue) {
                 oDOB.setValueState("Error");
                 oDOB.setValueStateText("Date of Birth is required");
                 return;
             }
 
-            // No future dates
+            // Prevent future dates
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             if (dobValue > today) {
@@ -1212,24 +1310,30 @@ _getLocationName: function (lat, lng) {
             const m = today.getMonth() - dobValue.getMonth();
             if (m < 0 || (m === 0 && today.getDate() < dobValue.getDate())) age--;
 
-            if (age < 18) {
+            // Strict age limits: 10–118
+            if (age < 10 || age > 118) {
                 oDOB.setValueState("Error");
-                oDOB.setValueStateText("Minimum age required is 18");
-                sap.m.MessageToast.show("Minimum age required is 18 years");
+                oDOB.setValueStateText("Age must be between 10 and 118 years");
+                sap.m.MessageToast.show("Age must be between 10 and 118 years");
                 return;
             }
 
-            if (age < 15 || age > 60) {
-                oDOB.setValueState("Warning");
-                oDOB.setValueStateText("Please verify Date of Birth");
-                sap.m.MessageToast.show("Please verify your Date of Birth");
-            } else {
-                oDOB.setValueState("None");
-            }
-
+            // Valid age
+            oDOB.setValueState("None");
             const DateOfBirth = dobValue.toISOString().split("T")[0];
 
-            // 7) Gender
+            /* ===== 7) Gender Validation + Dr Rule ===== */
+            const sSalutation = $C("signUpSalutation").getSelectedKey();
+            const sGender = $C("signUpGender").getSelectedKey();
+
+            if (sSalutation === "Dr." && !sGender) {
+                $C("signUpGender").setValueState("Error");
+                $C("signUpGender").setValueStateText("Please select gender");
+                sap.m.MessageToast.show("Please select gender");
+                return;
+            }
+
+            // Strict validation for Mr./Ms./Mrs.
             if (!utils._LCstrictValidationSelect($C("signUpGender"))) return;
 
             // 8) Country → State → City
@@ -1288,22 +1392,23 @@ _getLocationName: function (lat, lng) {
                 await this.ajaxCreateWithJQuery("HM_Login", payload);
                 sap.m.MessageToast.show("Sign Up successful!");
 
-                oModel.setData({
-                    Salutation: "Mr.",
-                    fullname: "",
-                    Email: "",
-                    STDCode: "+91",
-                    Mobileno: "",
-                    password: "",
-                    comfirmpass: "",
-                    UserID: "",
-                    Gender: "",
-                    Country: "",
-                    State: "",
-                    City: "",
-                    Address: "",
-                    DateOfBirth: ""
-                });
+                // oModel.setData({
+                //     Salutation: "Mr.",
+                //     fullname: "",
+                //     Email: "",
+                //     STDCode: "+91",
+                //     Mobileno: "",
+                //     password: "",
+                //     comfirmpass: "",
+                //     UserID: "",
+                //     Gender: "",
+                //     Country: "",
+                //     State: "",
+                //     City: "",
+                //     Address: "",
+                //     DateOfBirth: ""
+                // });
+                this._resetAuthDialog();
                 this._oSignDialog.close();
 
             } catch (err) {
@@ -1311,13 +1416,69 @@ _getLocationName: function (lat, lng) {
                 console.error("SignUp Error:", err);
             }
         },
-        onAfterRenderingSignUp: function () {
-            const dob = sap.ui.getCore().byId("signUpDOB");
-            if (dob) dob.setMaxDate(new Date());
+
+
+        onChangeSalutation: function (oEvent) {
+            const $C = (id) => sap.ui.getCore().byId(id);
+            const oCombo = oEvent.getSource();
+            const sal = oCombo.getValue();           // user typed or selected text
+            const oGender = $C("signUpGender");
+
+            // 🔍 Strict Combo Validation (Check must match list)
+            const valid = utils._LCstrictValidationComboBox(oCombo, "ID");
+            if (!valid) {
+                // invalid → reset dependent Gender & disable it
+                oGender.setSelectedKey("");
+                oGender.setEnabled(false);
+                oGender.setValueState("None");
+                return;   // 🔥 stop, don't auto assign!
+            }
+
+            // 🎯 If valid selection → apply Gender Autoselect Rules
+            if (sal === "Mr.") {
+                oGender.setSelectedKey("Male");
+                oGender.setEnabled(false);
+            }
+            else if (sal === "Ms." || sal === "Mrs.") {
+                oGender.setSelectedKey("Female");
+                oGender.setEnabled(false);
+            }
+            else { // Dr.
+                oGender.setSelectedKey("");
+                oGender.setEnabled(true);
+                oGender.setValueState("Error");
+                oGender.setValueStateText("Please select gender");
+            }
+        },  
+
+
+     
+
+        onChangeGender: function (oEvent) {
+            const oSel = oEvent.getSource();
+            const val = oSel.getSelectedKey();
+
+            if (val) {
+                oSel.setValueState("None");
+                oSel.setValueStateText("");
+            } else {
+                oSel.setValueState("Error");
+                oSel.setValueStateText("Please select gender");
+            }
         },
-        onSalutationChange: function (oEvent) {
-            utils._LCstrictValidationComboBox(oEvent);
+        onChangeDOB: function (oEvent) {
+            const oDP = oEvent.getSource();
+            const dobValue = oDP.getDateValue();
+
+            if (dobValue) {
+                oDP.setValueState("None");
+                oDP.setValueStateText("");
+            } else {
+                oDP.setValueState("Error");
+                oDP.setValueStateText("Date of Birth is required");
+            }
         },
+
 
 
 
@@ -1332,42 +1493,34 @@ _getLocationName: function (lat, lng) {
             const oStdCB = $C("signUpSTD");
             const oPhone = $C("signUpPhone");
 
-            // Reset State + City
-            oModel.setProperty("/State", "");
-            oModel.setProperty("/City", "");
-            oStateCB.setValue("");
-            oCityCB.setValue("");
+            // 🚫 Validate only if invalid entry typed
+            if (!utils._LCstrictValidationComboBox(oCountryCB, "ID")) return;
+            oCountryCB.setValueState("None"); // Clear previous error
+
+            /** RESET CHILD CONTROLS */
+            oModel.setProperty("/State", ""); oStateCB.setValue("");
+            oModel.setProperty("/City", ""); oCityCB.setValue("");
+
             oStateCB.getBinding("items")?.filter([]);
             oCityCB.getBinding("items")?.filter([]);
 
-            // Reset Phone
-            oPhone.setValue("");
-            oPhone.setValueState("None");
-            oPhone.setPlaceholder("Enter Contact Number");
-            oPhone.setMaxLength(18);
+            /** RESET PHONE + STD */
+            oPhone.setValue(""); oPhone.setValueState("None"); oPhone.setMaxLength(18);
+            oStdCB.setEnabled(true); oStdCB.setSelectedKey(""); oStdCB.setValueState("None");
 
-            const oItem = oCountryCB.getSelectedItem();
-            if (!oItem) return;
-
-            const sCountryName = oItem.getKey();
-            const sCountryCode = oItem.getAdditionalText();
-
-            // Update Model
-            oModel.setProperty("/Country", sCountryName);
-
-            // Get STD
-            const aCountries = this.getOwnerComponent().getModel("CountryModel").getData();
-            const oCountryObj = aCountries.find(c => c.countryName === sCountryName);
-
-            if (oCountryObj?.stdCode) {
-                oModel.setProperty("/STDCode", oCountryObj.stdCode);
-                oStdCB.setSelectedKey(oCountryObj.stdCode);
-                oStdCB.setEnabled(false);
+            /** SET STD FROM COUNTRY LIST */
+            const name = oCountryCB.getSelectedKey();
+            const list = this.getOwnerComponent().getModel("CountryModel").getData();
+            const obj = list.find(c => c.countryName === name);
+            if (obj?.stdCode) {
+                oModel.setProperty("/STDCode", obj.stdCode);
+                oStdCB.setSelectedKey(obj.stdCode);
+                oStdCB.setEnabled(false); // 🔐 Lock STD
             }
 
-            // Filter State
+            /** FILTER STATES BY COUNTRY */
             oStateCB.getBinding("items")?.filter([
-                new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+                new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, oCountryCB.getSelectedItem().getAdditionalText())
             ]);
         },
 
@@ -1394,12 +1547,6 @@ _getLocationName: function (lat, lng) {
             oInput.setValueState("Success");
             oInput.setValueStateText("Looks good");
         },
-
-
-
-
-
-
         onChangeState: function (oEvent) {
             const $C = (id) => sap.ui.getCore().byId(id);
             const oModel = this.getView().getModel("LoginMode");
@@ -1407,28 +1554,31 @@ _getLocationName: function (lat, lng) {
             const oStateCB = oEvent.getSource();
             const oCityCB = $C("signUpCity");
 
-            const oItem = oStateCB.getSelectedItem();
-            if (!oItem) return;
+            if (!utils._LCstrictValidationComboBox(oStateCB, "ID")) return;
+            oStateCB.setValueState("None");
 
-            const sStateName = oItem.getKey();
-            oModel.setProperty("/State", sStateName);
+            const state = oStateCB.getSelectedKey();
+            oModel.setProperty("/State", state);
 
-            // Reset city selection
+            /** RESET & FILTER CITY */
             oModel.setProperty("/City", "");
             oCityCB.setValue("");
-
-            // Filter cities based on state
             oCityCB.getBinding("items")?.filter([
-                new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, sStateName)
+                new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, state)
             ]);
         },
+
+
         onChangeCity: function (oEvent) {
-            const oModel = this.getView().getModel("LoginMode");
-            const oItem = oEvent.getSource().getSelectedItem();
-            if (oItem) {
-                oModel.setProperty("/City", oItem.getKey());
-            }
+            const oCityCB = oEvent.getSource();
+            if (!utils._LCstrictValidationComboBox(oCityCB, "ID")) return;
+            oCityCB.setValueState("None");
+
+            const value = oCityCB.getSelectedKey();
+            this.getView().getModel("LoginMode").setProperty("/City", value);
         },
+
+
 
         _LCvalidateName: function (oEvent) {
             utils._LCvalidateName(oEvent);
@@ -1943,81 +2093,81 @@ _getLocationName: function (lat, lng) {
         },
         onPressBookingRow: function (oEvent) {
 
-    var oContext = oEvent.getSource().getBindingContext("profileData");
-    var oBookingData = oContext.getObject();
+            var oContext = oEvent.getSource().getBindingContext("profileData");
+            var oBookingData = oContext.getObject();
 
-    // Status check (optional)
-    var sStatus = (oBookingData.status || "").trim().toLowerCase();
-    if (sStatus !== "new") {
-        sap.m.MessageToast.show("Only bookings with status 'New' can be edited.");
-        return;
-    }
+            // Status check (optional)
+            var sStatus = (oBookingData.status || "").trim().toLowerCase();
+            if (sStatus !== "new") {
+                sap.m.MessageToast.show("Only bookings with status 'New' can be edited.");
+                return;
+            }
 
-    // Now reuse your logic exactly as in onEditBooking
-    var oProfileModel = this._oProfileDialog.getModel("profileData");
-    var aCustomers = oProfileModel.getProperty("/aCustomers");
-    var aFacilities = oProfileModel.getProperty("/facility");
+            // Now reuse your logic exactly as in onEditBooking
+            var oProfileModel = this._oProfileDialog.getModel("profileData");
+            var aCustomers = oProfileModel.getProperty("/aCustomers");
+            var aFacilities = oProfileModel.getProperty("/facility");
 
-    var sCustomerID = oBookingData.cutomerid || oBookingData.CustomerID || "";
+            var sCustomerID = oBookingData.cutomerid || oBookingData.CustomerID || "";
 
-    if (!sCustomerID) {
-        sap.m.MessageToast.show("Customer ID not found for this booking.");
-        return;
-    }
+            if (!sCustomerID) {
+                sap.m.MessageToast.show("Customer ID not found for this booking.");
+                return;
+            }
 
-    var oCustomer = aCustomers.find(cust => cust.customerID === sCustomerID);
-    if (!oCustomer) {
-        sap.m.MessageToast.show("No customer details found for this booking.");
-        return;
-    }
+            var oCustomer = aCustomers.find(cust => cust.customerID === sCustomerID);
+            if (!oCustomer) {
+                sap.m.MessageToast.show("No customer details found for this booking.");
+                return;
+            }
 
-    var aCustomerFacilities = aFacilities.filter(fac => fac.customerid === sCustomerID);
+            var aCustomerFacilities = aFacilities.filter(fac => fac.customerid === sCustomerID);
 
-    // Calculate totals
-    var oTotals = this.calculateTotals(
-        [{ FullName: oCustomer.customerName, Facilities: { SelectedFacilities: aCustomerFacilities } }],
-        oBookingData.Startdate,
-        oBookingData.EndDate,
-        oBookingData.RoomPrice
-    );
-    if (!oTotals) {
-        return;
-    }
+            // Calculate totals
+            var oTotals = this.calculateTotals(
+                [{ FullName: oCustomer.customerName, Facilities: { SelectedFacilities: aCustomerFacilities } }],
+                oBookingData.Startdate,
+                oBookingData.EndDate,
+                oBookingData.RoomPrice
+            );
+            if (!oTotals) {
+                return;
+            }
 
-    // Prepare data for details view
-    var oFullCustomerData = {
-        salutation: oCustomer.salutation,
-        FullName: oCustomer.customerName,
-        Gender: oCustomer.gender,
-        stdcode: oCustomer.stdCode,
-        MobileNo: oCustomer.mobileno,
-        CustomerEmail: oCustomer.customerEmail,
-        Country: oCustomer.country,
-        State: oCustomer.state,
-        City: oCustomer.city,
-        DateOfBirth: oCustomer.DOB,
-        RoomType: oBookingData.room,
-        Price: oBookingData.amount,
-        noofperson: oBookingData.noofperson,
-        RoomPrice: oBookingData.RoomPrice,
-        PaymentType: oBookingData.paymenytype,
-        StartDate: oBookingData.Startdate,
-        EndDate: oBookingData.EndDate || "",
-        CustomerId: oBookingData.cutomerid,
-        TotalDays: oTotals.TotalDays,
-        AllSelectedFacilities: oTotals.AllSelectedFacilities,
-        TotalFacilityPrice: oTotals.TotalFacilityPrice,
-        GrandTotal: oTotals.GrandTotal
-    };
+            // Prepare data for details view
+            var oFullCustomerData = {
+                salutation: oCustomer.salutation,
+                FullName: oCustomer.customerName,
+                Gender: oCustomer.gender,
+                stdcode: oCustomer.stdCode,
+                MobileNo: oCustomer.mobileno,
+                CustomerEmail: oCustomer.customerEmail,
+                Country: oCustomer.country,
+                State: oCustomer.state,
+                City: oCustomer.city,
+                DateOfBirth: oCustomer.DOB,
+                RoomType: oBookingData.room,
+                Price: oBookingData.amount,
+                noofperson: oBookingData.noofperson,
+                RoomPrice: oBookingData.RoomPrice,
+                PaymentType: oBookingData.paymenytype,
+                StartDate: oBookingData.Startdate,
+                EndDate: oBookingData.EndDate || "",
+                CustomerId: oBookingData.cutomerid,
+                TotalDays: oTotals.TotalDays,
+                AllSelectedFacilities: oTotals.AllSelectedFacilities,
+                TotalFacilityPrice: oTotals.TotalFacilityPrice,
+                GrandTotal: oTotals.GrandTotal
+            };
 
-    // Set model for next screen
-    var oHostelModel = new sap.ui.model.json.JSONModel(oFullCustomerData);
-    this.getOwnerComponent().setModel(oHostelModel, "HostelModel");
+            // Set model for next screen
+            var oHostelModel = new sap.ui.model.json.JSONModel(oFullCustomerData);
+            this.getOwnerComponent().setModel(oHostelModel, "HostelModel");
 
-    // Navigate
-    this.getOwnerComponent().getRouter().navTo("EditBookingDetails");
-}
-,
+            // Navigate
+            this.getOwnerComponent().getRouter().navTo("EditBookingDetails");
+        }
+        ,
 
         // 🧮 Separated calculation function
         calculateTotals: function (aPersons, sStartDate, sEndDate, RoomPrice) {
@@ -2415,12 +2565,8 @@ _getLocationName: function (lat, lng) {
                 sap.m.MessageToast.show("Failed");
             }
         },
-        OnpressBookingDetails:function(){
+        OnpressBookingDetails: function () {
 
         }
     });
 });
-
-
-
-
