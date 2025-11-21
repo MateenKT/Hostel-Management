@@ -35,7 +35,7 @@
                            <Text text="{HostelModel>/StartDate}"/>
                             <Label text="End Date" />
                            <Text text="{HostelModel>/EndDate}"/>
-                            <Label text="Month" />
+                            <Label text="Month/Year" />
                            <Text text="{HostelModel>/SelectedMonths}"/>
              
             </f:content>

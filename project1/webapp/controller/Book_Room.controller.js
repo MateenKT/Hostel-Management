@@ -200,7 +200,10 @@ sap.ui.define([
         FacilityID: f.ID,
         FacilityName: f.FacilityName,
         Image: convertBase64ToImage(f.Photo1, f.Photo1Type),
-        Price: f.PerDayPrice,
+        PricePerHour:f.PerHourPrice,
+        PricePerDay: f.PerDayPrice,
+    PricePerMonth: f.PerMonthPrice,
+    PricePerYear: f.PerYearPrice,
         UnitText: f.UnitText,
         Currency: f.Currency,
         BranchCode:f.BranchCode
@@ -212,7 +215,6 @@ sap.ui.define([
       });
       oView.setModel(oFacilityModel, "FacilityModel");
     },
-
 
 //     onNoOfPersonSelect: function (oEvent) {
 //       var that = this
@@ -1458,14 +1460,15 @@ _createDynamicPersonsUI: function () {
                               oCard.removeStyleClass("serviceCardSelected");
                             } else {
                               aSelected.push({
-                                FacilityName: oFacilityObj.FacilityName,
-
-                                Price: oFacilityObj.Price,
-                                Image: oFacilityObj.Image,
-                                Currency: oFacilityObj.Currency,
-                                UnitText: oFacilityObj.UnitText
-                              });
-                              
+    FacilityName: oFacilityObj.FacilityName,
+    BranchCode: oFacilityObj.BranchCode, 
+    PricePerDay: oFacilityObj.PricePerDay,
+    PricePerMonth: oFacilityObj.PricePerMonth,
+    PricePerYear: oFacilityObj.PricePerYear,
+    Currency: oFacilityObj.Currency,
+    UnitText: oFacilityObj.UnitText,
+    Image: oFacilityObj.Image
+});
                               oCard.addStyleClass("serviceCardSelected");
                             }
 
@@ -1500,10 +1503,14 @@ _createDynamicPersonsUI: function () {
                     }),
 
                     // Facility Price (below the image)
-                    new sap.m.Text({
-                      text: "{= '₹ ' + ${FacilityModel>Price} + ' ' + ${FacilityModel>Currency}}"
-                    }).addStyleClass("sapUiTinyMarginTop facilityPriceText")
-
+                  new sap.m.Text({
+    text: "{= " +
+          "   ${HostelModel>/SelectedPriceType} === 'daily' ? '₹ ' + ${FacilityModel>PricePerDay} + ' ' + ${FacilityModel>Currency} +' '+ ${HostelModel>/SelectedPriceType}:" +
+          "   ${HostelModel>/SelectedPriceType} === 'monthly' ? '₹ ' + ${FacilityModel>PricePerMonth} + ' ' + ${FacilityModel>Currency} +' '+ ${HostelModel>/SelectedPriceType}:" +
+          "   ${HostelModel>/SelectedPriceType} === 'yearly' ? '₹ ' + ${FacilityModel>PricePerYear} + ' ' + ${FacilityModel>Currency} +' '+ ${HostelModel>/SelectedPriceType}:" +
+          "   '₹ ' + ${FacilityModel>PricePerDay} + ' ' + ${FacilityModel>Currency}" +
+          "}"
+}).addStyleClass("sapUiTinyMarginTop facilityPriceText")
 
                   ]
                 })
@@ -1526,8 +1533,6 @@ _createDynamicPersonsUI: function () {
       }
 oFacilityModel.refresh(true);
       oModel.refresh(true);
-
-   
 },
 
     onDialogNextButton: async function () {
@@ -1535,16 +1540,15 @@ oFacilityModel.refresh(true);
         if (this._iSelectedStepIndex === 0) {
         this._createDynamicPersonsUI();
     }
-        if (this._iSelectedStepIndex === 1) {
-    const aMissing = this._checkMandatoryFields();
-
-    if (aMissing.length > 0) {
-        sap.m.MessageBox.error(
-            "Please fill the following mandatory fields:\n\n" + aMissing.join("\n")
-        );
-        return; // STOP navigation
-    }
-}
+//         if (this._iSelectedStepIndex === 1) {
+//     const aMissing = this._checkMandatoryFields();
+//     if (aMissing.length > 0) {
+//         sap.m.MessageBox.error(
+//             "Please fill the following mandatory fields:\n\n" + aMissing.join("\n")
+//         );
+//         return; // STOP navigation
+//     }
+// }
 
       this._iSelectedStepIndex = this._oWizard.getSteps().indexOf(this._oSelectedStep);
       this.oNextStep = this._oWizard.getSteps()[this._iSelectedStepIndex + 1];
@@ -1712,8 +1716,8 @@ let roomRentPerPerson = baseRoomRent * monthsOrYears;
   oHostelModel.setProperty("/OverallTotalCost", grandTotalSum);
   oHostelModel.updateBindings(true);
   oHostelModel.refresh(true);
-}
-,
+},
+
     // Separated calculation function
 calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
   const oStartDate = this._parseDate(sStartDate);
@@ -1745,33 +1749,21 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
       if(faciliti?.length>0){
         aAllFacilities.push(faciliti[0])
       }else{
-      const fPrice = parseFloat(f.Price || 0);
-      let fTotal = 0;
+      let fPrice = 0;
+const sType = this.getView().getModel("HostelModel").getProperty("/SelectedPriceType");
 
-      switch ((f.UnitText || "").toLowerCase()) {
-        case "per hour":          // ⭐ NEW
-        case "hour":
-          fTotal = fPrice * diffHours;
-          break;
+if (sType === "daily") fPrice = f.PricePerDay;
+if (sType === "monthly") fPrice = f.PricePerMonth;
+if (sType === "yearly") fPrice = f.PricePerYear;
 
-        case "per day":
-          fTotal = fPrice * iDays;
-          break;
 
-        case "per month":
-        case "month":
-          fTotal = fPrice * (iMonths <= 0 ? 1 : iMonths);
-          break;
+     let fTotal = 0;
+switch (sType) {
+  case "daily":   fTotal = fPrice * iDays;     break;
+  case "monthly": fTotal = fPrice * iMonths;   break;
+  case "yearly":  fTotal = fPrice * iYears;    break;
+}
 
-        case "per year":
-        case "year":
-          fTotal = fPrice * (iYears <= 0 ? 1 : iYears);
-          break;
-
-        default:
-          fTotal = fPrice * iDays;
-          break;
-      }
 
       totalFacilityPrice += fTotal;
 
@@ -1789,6 +1781,7 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
         TotalAmount: fTotal,
         Image: f.Image,
         Currency: f.Currency,
+        Branch:f.BranchCode,
         UnitText: f.UnitText
       });
     }
@@ -1958,8 +1951,7 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
 
     oHostelModel.setProperty("/EndDate", sEndDate);
     oView.byId("idEndDate1")?.setValue(sEndDate);
-}
-,
+},
     _formatDateToDDMMYYYY: function (oDate) {
       if (!(oDate instanceof Date)) return "";
       const dd = String(oDate.getDate()).padStart(2, "0");
@@ -2006,40 +1998,6 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
       oBtnModel.setProperty("/Next", true);
     },
 
-    // onRoomDurationChange: function(oEvent) {
-    // 	const sSelectedDuration = oEvent.getParameter("selectedItem").getKey(); // E.g. "Daily", "Monthly", "Yearly" if any
-    // 	const oHostelModel = this.getView().getModel("HostelModel");
-    // 	const oRoomDetailModel = this.getView().getModel("RoomDetailModel");
-
-    // 	// Get current RoomType value
-    // 	const sRoomType = this.getView().byId("GI_Roomtype").getText();
-
-    // 	// Get all RoomDetail entries
-    // 	const aRoomDetails = oRoomDetailModel.getData(); // assumes array at root "/"
-
-    // 	// Find matching room detail by BedTypeName == RoomType
-    // 	const oMatchingRoom = aRoomDetails.find(item => item.BedTypeName === sRoomType);
-
-    // 	if (oMatchingRoom) {
-    // 		let sNewPrice = "";
-    // 		if (sSelectedDuration === "Per Day") {
-    // 			sNewPrice = oMatchingRoom.Price; // Daily price field
-    // 		} else if (sSelectedDuration === "Monthly" || sSelectedDuration === "Per Month") {
-    // 			sNewPrice = oMatchingRoom.MonthPrice; // Monthly price field
-    // 		} else if (sSelectedDuration === "Yearly" || sSelectedDuration === "Per Year") {
-    // 			sNewPrice = oMatchingRoom.YearPrice; // Optional yearly price if exists
-    // 		} else {
-    // 			sNewPrice = oMatchingRoom.Price; // default fallback
-    // 		}
-
-    // 		// Update Price in HostelModel
-    // 		oHostelModel.setProperty("/Price", sNewPrice);
-
-    // 	} else {
-    // 		// No matching room found - clear price or handle otherwise
-    // 		oHostelModel.setProperty("/Price", "");
-    // 	}
-    // },
     onRoomDurationChange: function (oEvent) {
       const oView = this.getView();
       const oHostelModel = oView.getModel("HostelModel");
@@ -2090,6 +2048,7 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
         oHostelModel.setProperty("/StartDate","");
         oHostelModel.setProperty("/EndDate","");
         oEndDatePicker.setEditable(true);
+        oBTN.setProperty("/Next", false)
         return;
       }
           if (sSelectedKey === "monthly") {
@@ -2098,6 +2057,7 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
           oHostelModel.setProperty("/StartDate","");
           oHostelModel.setProperty("/EndDate","");
           oEndDatePicker.setEditable(false); 
+          oBTN.setProperty("/Next", false)
           return;
         }
         if (sSelectedKey === "yearly") {
@@ -2106,6 +2066,7 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
           oHostelModel.setProperty("/StartDate","");
           oHostelModel.setProperty("/EndDate","");
           oEndDatePicker.setEditable(false);
+          oBTN.setProperty("/Next", false)
           return;
         }
 
@@ -2477,13 +2438,31 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
              // Store in model temporarily
              oData.PaymentDetails = paymentDetails;
 
+             // Determine correct facility price based on selected price type
+
+
+
              //  Handle both object and string facility formats
              if (p.Facilities && p.Facilities.SelectedFacilities && p.Facilities.SelectedFacilities.length > 0) {
                  p.Facilities.SelectedFacilities.forEach(fac => {
+                  let facilityPrice = 0;
+
+if (oData.SelectedPriceType === "daily") {
+    facilityPrice = fac.PricePerDay || 0;
+}
+else if (oData.SelectedPriceType === "monthly") {
+    facilityPrice = fac.PricePerMonth || 0;
+}
+else if (oData.SelectedPriceType === "yearly") {
+    facilityPrice = fac.PricePerYear || 0;
+}
+else if (oData.SelectedPriceType === "hourly") {
+    facilityPrice = fac.PricePerHour || 0;
+}
                      facilityData.push({
                          PaymentID: "",
                          FacilityName: typeof fac === 'string' ? fac : fac.FacilityName,
-                         FacilitiPrice: fac.Price,
+                         FacilitiPrice:facilityPrice,
                          StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
                          EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
                          PaidStatus: "Pending"

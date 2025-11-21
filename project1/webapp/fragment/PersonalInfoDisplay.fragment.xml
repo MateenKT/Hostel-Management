@@ -100,7 +100,7 @@
                   visible="{= !!${HostelModel>FacilityName} }">
                 <Image src="{HostelModel>Image}" width="180px" height="140px" />
                 <Text text="{HostelModel>FacilityName}" />
-                <Text text="{= ${HostelModel>Price} ? ${HostelModel>Price}+ ' ' + ${HostelModel>Currency} + ' ' + ${HostelModel>UnitText} : '' }"/>
+                <Text text="{= ${HostelModel>Price} ? ${HostelModel>Price}+ ' ' + ${HostelModel>Currency} + ' ' + ${HostelModel>/SelectedPriceType} : '' }"/>
             </VBox>
         </FlexBox>
 
@@ -135,7 +135,8 @@
                 <ColumnListItem>
                     <cells>
                         <Text text="{HostelModel>FacilityName}" />
-                        <Text text="{= ${HostelModel>Price} ? ${HostelModel>Price}+ ' ' + ${HostelModel>Currency} + ' ' + ${HostelModel>UnitText} : '' }"/>
+                      <Text 
+    text="{= ${HostelModel>Price} + ' ' + ${HostelModel>Currency} + ' ' + ${HostelModel>/SelectedPriceType} }"/>
                         <Text text="{HostelModel>StartDate}" />
                         <Text text="{HostelModel>EndDate}" />
                         <Text text="{HostelModel>TotalDays}" />

@@ -27,14 +27,13 @@ sap.ui.define([
         onNavBack: function () {
             this.getOwnerComponent().getRouter().navTo("RouteHomePage");
         },
-       onTableSelection: function (oEvent) {
+ onTableSelection: function (oEvent) {
     const oSelectedItem = oEvent.getParameter("listItem");
     if (!oSelectedItem) {
         sap.m.MessageToast.show("No row selected");
         return;
     }
 
-    // store table ref so we can remove selections later
     this._oSelectedTable = oEvent.getSource();
 
     const oContext = oSelectedItem.getBindingContext("HostelModel");
@@ -45,9 +44,13 @@ sap.ui.define([
 
     const oSelectedData = oContext.getObject();
     this._oSelectedFacility = oSelectedData;
-    this._sSelectedPath = oContext.getPath(); // e.g. "/AllSelectedFacilities/2"
+    this._sSelectedPath = oContext.getPath();
 
-    // Try to parse index from path when possible
+    // ⭐ Get BranchCode of the selected facility
+    const sBranch = oSelectedData.Branch || "";
+    console.log("Selected Facility BranchCode:", sBranch);
+
+    // Parse index from path
     let idx = -1;
     try {
         const parts = this._sSelectedPath.split("/");
@@ -56,10 +59,8 @@ sap.ui.define([
     } catch (e) {
         idx = -1;
     }
-    this._oSelectedIndex = idx;
 
-    // keep a small debug log (optional)
-    // console.log("Selected facility:", this._oSelectedFacility, "index:", this._oSelectedIndex);
+    this._oSelectedIndex = idx;
 },
 
 // --- Open edit dialog for selected facility ---
@@ -68,12 +69,13 @@ onEditFacilityDetails: function () {
         sap.m.MessageToast.show("Please select a row to edit.");
         return;
     }
-
+    const sBranchCode = this._oSelectedFacility.Branch || "";
     // Create safe shallow copy for editing
     const oFacilityData = this._oSelectedFacility || {};
     const oSafeCopy = Object.assign({}, oFacilityData, {
         FacilityID: oFacilityData.FacilityID || (Date.now() + "_" + Math.random()),
-        PersonName: oFacilityData.PersonName || oFacilityData.PersonName || ""
+        PersonName: oFacilityData.PersonName || oFacilityData.PersonName || "",
+          BranchCode: sBranchCode 
     });
 
     // Create / set edit model
@@ -114,6 +116,15 @@ onEditFacilityDetails: function () {
          const oEndPicker = sap.ui.core.Fragment.byId(this.getView().getId(), "editEndDate");
          oEndPicker.setMinDate(new Date(sMinEndDate));
     }
+ const sPriceType = this.getView().getModel("HostelModel").getProperty("/SelectedPriceType");
+
+let sUnit = "";
+if (sPriceType === "daily")  sUnit = "Per Day";
+if (sPriceType === "monthly") sUnit = "Per Month";
+if (sPriceType === "yearly")  sUnit = "Per Year";
+
+this._oEditModel.setProperty("/UnitText", sUnit);
+    
     // if (oMinDate && !isNaN(oMinDate.getTime())) {
     //     const oStartPicker = sap.ui.core.Fragment.byId(this.getView().getId(), "editStartDate");
     //     const oEndPicker = sap.ui.core.Fragment.byId(this.getView().getId(), "editEndDate");
@@ -141,11 +152,20 @@ onEditFacilityDetails: function () {
         },
 
         onEditDialogClose: function () {
-            var oView = this.getView()
-            const oTable = oView.byId("idFacilityRoomTable");
-            if (oTable) {
-                oTable.removeSelections();
-            }
+             const oView = this.getView();
+           const oTable = this._oSelectedTable || oView.byId("idFacilitySummaryTable");
+    if (oTable) {
+        // remove selection
+        try { oTable.removeSelections(true); } catch (e) { /* ignore */ }
+        const oBinding = oTable.getBinding("items");
+        if (oBinding) oBinding.refresh();
+    }
+
+    // Clear selection cache
+    this._oSelectedTable = null;
+    this._oSelectedFacility = null;
+    this._oSelectedIndex = null;
+    this._sSelectedPath = null;
             this._oEditDialog.close();
         },
         onMonthSelectionChange: function (oEvent) {
@@ -411,6 +431,17 @@ aPersons[oUpdatedData.ID].AllSelectedFacilities[iIndex] = oUpdatedData; // Examp
     this._sSelectedPath = null;
 
     this.onEditDialogClose();
+    var Table = this._oSelectedTable || oView.byId("idFacilitySummaryTable");
+     if (Table) {
+        // remove selection
+        try { Table.removeSelections(true); } catch (e) { /* ignore */ }
+        const oBinding = Table.getBinding("items");
+        if (oBinding) oBinding.refresh();
+    }
+     this._oSelectedTable = null;
+    this._oSelectedFacility = null;
+    this._oSelectedIndex = null;
+    this._sSelectedPath = null;
     sap.m.MessageToast.show("Facility updated successfully!");
 },
 
@@ -549,19 +580,25 @@ onUnitTextChange: function (oEvent) {
     const oEditModel = this.getView().getModel("edit");
     const oFacilityModel = this.getView().getModel("FacilityModel");
 
-    const sSelectedUnit = oEvent.getSource().getSelectedItem().getText(); // Per Day / Per Month
+    const sSelectedUnit = oEvent.getSource().getSelectedItem().getText();
     const sFacilityName = oEditModel.getProperty("/FacilityName");
+    const sBranch = oEditModel.getProperty("/Branch");
 
-    // Update unit type in edit model
+    // Update unit type
     oEditModel.setProperty("/UnitText", sSelectedUnit);
 
-    // Get ALL facilities from FacilityModel
+    //  CLEAR START & END DATE & DAYS WHEN UNIT TYPE CHANGES
+    oEditModel.setProperty("/StartDate", "");
+    oEditModel.setProperty("/EndDate", "");
+    oEditModel.setProperty("/TotalDays", "");
+    oEditModel.refresh(true);
+
+    // Get facilities list
     const aFacilities = oFacilityModel.getProperty("/Facilities") || [];
 
-    // Find row matching both facility name + selected unit
     const oMatched = aFacilities.find(f =>
         f.FacilityName === sFacilityName &&
-        f.UnitText === sSelectedUnit
+        f.BranchCode === sBranch
     );
 
     if (!oMatched) {
@@ -569,9 +606,19 @@ onUnitTextChange: function (oEvent) {
         return;
     }
 
-    // Update the correct price in dialog
-    oEditModel.setProperty("/Price", oMatched.Price);
-},
+    // Pick correct price based on Unit Type
+    let price = 0;
+
+    if (sSelectedUnit === "Per Day")   price = oMatched.PricePerDay;
+    if (sSelectedUnit === "Per Month") price = oMatched.PricePerMonth;
+    if (sSelectedUnit === "Per Year")  price = oMatched.PricePerYear;
+    if (sSelectedUnit === "Per Hour")  price = oMatched.PricePerHour;
+
+    // Update price in dialog
+    oEditModel.setProperty("/Price", price);
+}
+
+,
 
 onOpenDocumentPreview: function (oEvent) {
     const oCtx = oEvent.getSource().getBindingContext("HostelModel");
@@ -693,6 +740,57 @@ onClosePreview: function () {
     this._oDocPreviewDialog.close();
   }
 },
+onTimeChange: function () {
+    const oEditModel = this.getView().getModel("edit");
+
+    const sStart = oEditModel.getProperty("/StartTime");
+    const sEnd = oEditModel.getProperty("/EndTime");
+
+    // Morning or Evening
+    if (sStart) {
+        oEditModel.setProperty("/StartPeriod", this._getTimePeriod(sStart)); 
+    }
+    if (sEnd) {
+        oEditModel.setProperty("/EndPeriod", this._getTimePeriod(sEnd)); 
+    }
+
+    // Existing time difference calculation (keep your logic)
+    if (!sStart || !sEnd) {
+        oEditModel.setProperty("/TotalTime", "");
+        return;
+    }
+
+    const [sh, sm] = sStart.split(":").map(Number);
+    const [eh, em] = sEnd.split(":").map(Number);
+
+    const startDate = new Date(0, 0, 0, sh, sm);
+    const endDate = new Date(0, 0, 0, eh, em);
+
+    if (endDate < startDate) {
+        sap.m.MessageToast.show("End Time cannot be earlier than Start Time.");
+        oEditModel.setProperty("/TotalTime", "");
+        return;
+    }
+
+    const diffMs = endDate - startDate;
+    const diffMins = Math.floor(diffMs / 60000);
+
+    const hours = Math.floor(diffMins / 60).toString().padStart(2, "0");
+    const minutes = (diffMins % 60).toString().padStart(2, "0");
+
+    const finalTime = `${hours}:${minutes}`;
+    oEditModel.setProperty("/TotalTime", finalTime);
+},
+
+_getTimePeriod: function (sTime) {
+    if (!sTime) return "";
+
+    const [hour] = sTime.split(":").map(Number);
+
+    return hour < 12 ? "Morning" : "Evening";
+},
+
+
 
     });
 });

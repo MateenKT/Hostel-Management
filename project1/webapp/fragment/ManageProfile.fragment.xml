@@ -109,16 +109,7 @@
     <VBox width="100%" class="sapUiMediumMargin">
 
         <f:Card class="sapUiTinyMargin">
-            <f:header>
-                <Toolbar class="customdashboard">
-                    <Title text="Upcoming Booking" level="H5" wrapping="true" class="Dashboardtitle"/>
-                    <ToolbarSpacer/>
-                </Toolbar>
-            </f:header>
-
             <f:content>
-
-                <!-- >>>>>>>>>> START 2 COLUMN GRID INSIDE CARD <<<<<<<<<< -->
                 <layout:Grid
                     defaultSpan="XL6 L6 M12 S12"
                     hSpacing="1"
@@ -128,7 +119,7 @@
                     <!-- Column 1 -->
                     <layout:content>
                         <VBox>
-                            <Label text="Booking Date" />
+                            <Label text="Booking ID" />
                             <Text text="20/11/2025" />
                         </VBox>
                     </layout:content>
@@ -148,15 +139,6 @@
                             <Text text="2000" />
                         </VBox>
                     </layout:content>
-
-                    <!-- Column 4 -->
-                    <layout:content>
-                        <VBox>
-                            <Label text="Status" />
-                            <Text text="Upcoming" />
-                        </VBox>
-                    </layout:content>
-
                 </layout:Grid>
                 <!-- >>>>>>>>>> END 2 COLUMN GRID <<<<<<<<<< -->
 

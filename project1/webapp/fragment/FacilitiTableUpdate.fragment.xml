@@ -6,20 +6,49 @@
         id="editFacilityDialog"
         title="Edit Facility"
         afterClose=".onEditDialogClose">
-
         <content>
             <VBox class="sapUiSmallMargin">
 
                 <Label text="Facility Name" />
                 <Input id="editFacilityName" value="{edit>/FacilityName}" editable="false" />
                 <Label text="Unit Type" required="true" />
-
-                <ComboBox editable="false" id="idUnitType" placeholder="Select Unit Type"  items="{RateType>/}" 
+                <ComboBox editable="true" id="idUnitType" placeholder="Select Unit Type"  items="{RateType>/}" 
                 value="{edit>/UnitText}" change="onUnitTextChange" width="100%" valueStateText="{i18n>selectRateType}">
                      <core:Item key="{RateType>ID}" text="{RateType>RateType}" />
                 </ComboBox>
+                <Label text="Start Time" visible="{= ${edit>/UnitText} === 'Per Hour' }" />
+<TimePicker
+    id="editStartTime"
+    value="{edit>/StartTime}"
+    displayFormat="HH:mm"
+    valueFormat="HH:mm"
+    change=".onTimeChange"
+    visible="{= ${edit>/UnitText} === 'Per Hour' }"
+/>
+<Input value="{edit>/StartPeriod}" editable="false" visible="{= ${edit>/UnitText} === 'Per Hour' }" />
 
-                <Label text="Facility Price (₹)" />
+<Label text="End Time"  visible="{= ${edit>/UnitText} === 'Per Hour' }"/>
+<TimePicker
+    id="editEndTime"
+    value="{edit>/EndTime}"
+    displayFormat="HH:mm"
+    valueFormat="HH:mm"
+    change=".onTimeChange"
+    visible="{= ${edit>/UnitText} === 'Per Hour' }"
+/>
+<Input value="{edit>/EndPeriod}" editable="false" visible="{= ${edit>/UnitText} === 'Per Hour' }"/>
+
+
+<Label text="Total Time (HH:MM)" visible="{= ${edit>/UnitText} === 'Per Hour' }"/>
+<Input
+    id="editTotalTime"
+    value="{edit>/TotalTime}"
+    editable="false"
+    visible="{= ${edit>/UnitText} === 'Per Hour' }"
+/>
+
+
+                <Label text="Facility Price" />
                 <Input id="editPrice" value="{edit>/Price}" type="Number" editable="false" />
 
                 <Label text="Currency" required="true" />
