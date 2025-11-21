@@ -3,70 +3,65 @@ sap.ui.define([
     "../utils/validation",
     "sap/m/MessageToast",
     "sap/ui/export/Spreadsheet"
-], function (BaseController, utils, MessageToast,
+], function(BaseController, utils, MessageToast,
     Spreadsheet) {
     "use strict";
     return BaseController.extend("sap.ui.com.project1.controller.Bed_Details", {
-        onInit: function () {
+        onInit: function() {
             this.getOwnerComponent().getRouter().getRoute("RouteBedDetails").attachMatched(this._onRouteMatched, this);
         },
-        _onRouteMatched: async function () {
-            // const omodel = new sap.ui.model.json.JSONModel({
-            //     // for Database connection
-            //     url: "https://rest.kalpavrikshatechnologies.com/",
-            //     headers: {
-            //         name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-            //         password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
-            //         "Content-Type": "application/json",
-            //     },
-            //     isRadioVisible: false,
-            // });
-            // this.getOwnerComponent().setModel(omodel, "LoginModel");
 
-            var model = new sap.ui.model.json.JSONModel({
-                BranchCode: "",
-                Name: "",
-                ACType: "",
-            });
-            this.getView().setModel(model, "BedModel")
+        _onRouteMatched: async function() {
+            try {
+                var model = new sap.ui.model.json.JSONModel({
+                    BranchCode: "",
+                    Name: "",
+                    ACType: "",
+                });
+                this.getView().setModel(model, "BedModel")
 
-            const oTokenModel = new sap.ui.model.json.JSONModel({
-                tokens: []
-            });
+                const oTokenModel = new sap.ui.model.json.JSONModel({
+                    tokens: []
+                });
 
-            const oUploaderData = new sap.ui.model.json.JSONModel({
-                attachments: []
-            });
+                const oUploaderData = new sap.ui.model.json.JSONModel({
+                    attachments: []
+                });
 
-            this.getView().setModel(oTokenModel, "tokenModel");
-            this.getView().setModel(oUploaderData, "UploaderData");
-            this.onClearAndSearch("BD_id_FilterbarEmployee");
-            await this._loadBranchCode()
-            await this.Onsearch()
-
+                this.getView().setModel(oTokenModel, "tokenModel");
+                this.getView().setModel(oUploaderData, "UploaderData");
+                this.onClearAndSearch("BD_id_FilterbarEmployee");
+                await this._loadBranchCode()
+                await this.Onsearch()
+            } catch (err) {
+                sap.ui.core.BusyIndicator.hide();
+                sap.m.MessageToast.show(err.message || err.responseText);
+            } finally {
+                sap.ui.core.BusyIndicator.hide();
+            }
         },
-        _loadBranchCode: async function () {
+
+        _loadBranchCode: async function() {
             sap.ui.core.BusyIndicator.show(0);
             try {
                 const oView = this.getView();
 
                 const oResponse = await this.ajaxReadWithJQuery("HM_Branch", {});
 
-                const aBranches = Array.isArray(oResponse?.data)
-                    ? oResponse.data
-                    : (oResponse?.data ? [oResponse.data] : []);
+                const aBranches = Array.isArray(oResponse?.data) ?
+                    oResponse.data :
+                    (oResponse?.data ? [oResponse.data] : []);
 
                 const oBranchModel = new sap.ui.model.json.JSONModel(aBranches);
                 oView.setModel(oBranchModel, "BranchModel");
 
-                console.log("oBranchModel:", oBranchModel.getData());
-                console.log("Branch data loaded successfully");
             } catch (err) {
-                console.error("Error while loading branch data:", err);
+                sap.ui.core.BusyIndicator.hide();
+                sap.m.MessageToast.show(err.message || err.responseText);
             }
         },
 
-        HM_RoomDetails: function (oEvent) {
+        HM_RoomDetails: function(oEvent) {
             this.byId("id_BedTable").removeSelections();
             var oView = this.getView();
 
@@ -86,37 +81,43 @@ sap.ui.define([
                 isFileUploaded: false
             });
 
-            var aControls = this.ARD_Dialog.findAggregatedObjects(true, function (oControl) {
+            var aControls = this.ARD_Dialog.findAggregatedObjects(true, function(oControl) {
                 return oControl instanceof sap.m.Input ||
                     oControl instanceof sap.m.ComboBox ||
                     oControl instanceof sap.m.Select ||
                     oControl instanceof sap.m.TextArea;
             });
 
-            aControls.forEach(function (oControl) {
+            aControls.forEach(function(oControl) {
                 oControl.setValueState("None");
             });
             this.ARD_Dialog.open();
         },
-        onNoOfPersonInputLiveChange:function(oEvent){
+
+        onNoOfPersonInputLiveChange: function(oEvent) {
             utils.onNumber(oEvent.getSource(), "ID");
         },
 
-        BT_onsavebuttonpress: async function () {
+        onLivehange: function(oEvent) {
+            var oInput = oEvent.getSource();
+            utils._LCvalidateMandatoryField(oEvent);
+            if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
+        },
+
+        BT_onsavebuttonpress: async function() {
             var oView = this.getView();
             var Payload = oView.getModel("BedModel").getData();
             const oUploaderData = oView.getModel("UploaderData");
             const attachments = oUploaderData.getProperty("/attachments") || [];
 
             if (
-                utils._LCstrictValidationComboBox(oView.byId("idRoomType12"), "ID") &&
-                utils._LCvalidateMandatoryField(oView.byId("idBedType"), "ID") &&
-                utils._LCstrictValidationComboBox(oView.byId("idRoomtype"), "ID") &&
-                utils.onNumber(oView.byId("idR"), "ID") &&
-                utils._LCvalidateMandatoryField(oView.byId("id_MaxBeds"), "ID") &&
-                utils._LCvalidateMandatoryField(oView.byId("id_Description"), "ID")
+                utils._LCstrictValidationComboBox(oView.byId("BD_id_RoomType12"), "ID") &&
+                utils._LCvalidateMandatoryField(oView.byId("BD_idBedType"), "ID") &&
+                utils._LCstrictValidationComboBox(oView.byId("BD_id_Roomtype"), "ID") &&
+                utils.onNumber(oView.byId("BD_id_Person"), "ID") &&
+                utils._LCvalidateMandatoryField(oView.byId("BD_id_MaxBeds"), "ID") &&
+                utils._LCvalidateMandatoryField(oView.byId("BD_id_Description"), "ID")
             ) {
-
                 var Attachment = oView.getModel("tokenModel").getData();
                 if (!Attachment.tokens || Attachment.tokens.length === 0) {
                     return sap.m.MessageToast.show("Please upload at least one image.");
@@ -132,7 +133,7 @@ sap.ui.define([
                 }
 
                 var aBedDetails = oView.getModel("BedDetails").getData();
-                var bDuplicate = aBedDetails.some(function (bed) {
+                var bDuplicate = aBedDetails.some(function(bed) {
                     // skip the same record in edit mode
                     if (Payload.ID && bed.ID === Payload.ID) {
                         return false;
@@ -152,8 +153,6 @@ sap.ui.define([
                 }
 
                 // File validation
-
-
                 const oData = {
                     data: {
                         Name: Payload.Name,
@@ -203,7 +202,7 @@ sap.ui.define([
             }
         },
 
-        onTokenDelete: function (oEvent) {
+        onTokenDelete: function(oEvent) {
             const oView = this.getView();
             const oModel = oView.getModel("tokenModel");
             const oUploaderData = oView.getModel("UploaderData");
@@ -229,8 +228,8 @@ sap.ui.define([
             oModel.setProperty("/tokens", aTokens);
             oUploaderData.setProperty("/attachments", aAttachments);
         },
-        
-        onFacilityFileChange: function (oEvent) {
+
+        onFacilityFileChange: function(oEvent) {
             const oFiles = oEvent.getParameter("files");
             if (!oFiles || oFiles.length === 0) return;
 
@@ -241,7 +240,7 @@ sap.ui.define([
             let aAttachments = oUploaderData.getProperty("/attachments") || [];
             let aTokens = oTokenModel.getProperty("/tokens") || [];
 
-            //  Block if already 3 files uploaded
+            // Block if already 5 files uploaded
             if (aAttachments.length >= 5) {
                 sap.m.MessageToast.show("You can upload a maximum of 5 images only.");
                 return;
@@ -252,6 +251,15 @@ sap.ui.define([
             const aSelectedFiles = Array.from(oFiles).slice(0, iAvailableSlots);
 
             aSelectedFiles.forEach((oFile) => {
+                const bIsDuplicate = aAttachments.some(att =>
+                    att.filename === oFile.name // filename duplicate
+                );
+
+                if (bIsDuplicate) {
+                    sap.m.MessageToast.show(`"${oFile.name}" is already uploaded.`);
+                    return;
+                }
+
                 // Validate file type
                 if (!oFile.type.match(/^image\/(jpeg|jpg|png)$/)) {
                     sap.m.MessageToast.show("Only image files (jpg, jpeg, png) are allowed.");
@@ -262,6 +270,14 @@ sap.ui.define([
                 oReader.onload = (e) => {
                     const sBase64 = e.target.result.split(",")[1];
 
+                    // Final Duplicate Check using file content
+                    const bContentDuplicate = aAttachments.some(att => att.content === sBase64);
+                    if (bContentDuplicate) {
+                        sap.m.MessageToast.show(`This image is already uploaded.`);
+                        return;
+                    }
+
+                    // Add attachment
                     aAttachments.push({
                         content: sBase64,
                         fileType: oFile.type,
@@ -269,6 +285,7 @@ sap.ui.define([
                         size: this.formatFileSize(oFile.size)
                     });
 
+                    // Add token
                     aTokens.push({
                         key: oFile.name,
                         text: oFile.name
@@ -282,26 +299,29 @@ sap.ui.define([
             });
         },
 
-        formatFileSize: function (bytes) {
+        formatFileSize: function(bytes) {
             if (!bytes) return "0 Bytes";
             const sizes = ["Bytes", "KB", "MB", "GB"];
             let i = Math.floor(Math.log(bytes) / Math.log(1024));
             return (bytes / Math.pow(1024, i)).toFixed(1) + " " + sizes[i];
         },
 
-        BT_onCancelButtonPress: function () {
+        BT_onCancelButtonPress: function() {
             this.ARD_Dialog.close();
         },
-        onNavBack: function () {
+
+        onNavBack: function() {
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("TilePage");
         },
-        onHome: function () {
+
+        onHome: function() {
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("RouteHostel");
         },
-        Onsearch: function () {
-            sap.ui.core.BusyIndicator.show(0);  // <-- Show here also (optional but safe)
+
+        Onsearch: function() {
+            sap.ui.core.BusyIndicator.show(0); // <-- Show here also (optional but safe)
 
             return this.ajaxReadWithJQuery("HM_BedType", "")
                 .then((oData) => {
@@ -316,11 +336,11 @@ sap.ui.define([
                     sap.m.MessageBox.error("Failed to load bed details.");
                 })
                 .finally(() => {
-                    sap.ui.core.BusyIndicator.hide();   // <-- Always executed
+                    sap.ui.core.BusyIndicator.hide(); // <-- Always executed
                 });
         },
 
-        _populateUniqueFilterValues: function (data) {
+        _populateUniqueFilterValues: function(data) {
             let uniqueValues = {
                 PO_id_CustomerName: new Set(),
                 PO_id_CompanyName: new Set(),
@@ -344,11 +364,9 @@ sap.ui.define([
                 });
             });
         },
-        HM_onSearch: function () {
+
+        HM_onSearch: function() {
             var oView = this.getView();
-
-            var oFilterBar = oView.byId("BD_id_FilterbarEmployee");
-
             var oTable = oView.byId("id_BedTable");
             var oBinding = oTable.getBinding("items");
 
@@ -365,31 +383,32 @@ sap.ui.define([
                 aFilters.push(new sap.ui.model.Filter("BranchCode", sap.ui.model.FilterOperator.Contains, sCustomerID));
             }
 
-            var oCombinedFilter = new sap.ui.model.Filter({
-                filters: aFilters,
-                and: true
-            });
-
+            var oCombinedFilter = new sap.ui.model.Filter({filters: aFilters,and: true});
             oBinding.filter(oCombinedFilter);
         },
-        PO_onPressClear: function () {
+
+        PO_onPressClear: function() {
             this.getView().byId("PO_id_CustomerName").setSelectedKey("")
             this.getView().byId("PO_id_CompanyName").setSelectedKey("")
         },
-        onbranchChange: function (oEvent) {
+
+        onbranchChange: function(oEvent) {
             utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
         },
-        onNameInputLiveChange: function (oEvent) {
+
+        onNameInputLiveChange: function(oEvent) {
             utils._LCvalidateMandatoryField(oEvent.getSource(), "ID");
         },
-        onColumnListItemPress: function (oEvent) {
+
+        onColumnListItemPress: function(oEvent) {
             var BEdID = oEvent.getSource().getBindingContext("BedDetails").getObject().ID;
             var onav = this.getOwnerComponent().getRouter()
             onav.navTo("RouteRoomImages", {
                 sPath: BEdID
             })
         },
-        HM_DeleteDetails: function () {
+        
+        HM_DeleteDetails: function() {
             var table = this.byId("id_BedTable");
             var aSelectedItems = table.getSelectedItems();
 
@@ -405,51 +424,54 @@ sap.ui.define([
 
             sap.m.MessageBox.confirm(
                 `Are you sure you want to delete the selected bed(s): ${sBedNames}?`, {
-                title: "Confirm Deletion",
-                icon: sap.m.MessageBox.Icon.WARNING,
-                actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
-                onClose: async function (sAction) {
-                    if (sAction === sap.m.MessageBox.Action.OK) {
-                        sap.ui.core.BusyIndicator.show(0);
-                        try {
-                            // Create array of delete promises
-                            const deletePromises = aSelectedItems.map((item) => {
-                                const data = item.getBindingContext("BedDetails").getObject();
-                                const oBody = {
-                                    filters: { ID: data.ID }
-                                };
+                    title: "Confirm Deletion",
+                    icon: sap.m.MessageBox.Icon.WARNING,
+                    actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
+                    onClose: async function(sAction) {
+                        if (sAction === sap.m.MessageBox.Action.OK) {
+                            sap.ui.core.BusyIndicator.show(0);
+                            try {
+                                // Create array of delete promises
+                                const deletePromises = aSelectedItems.map((item) => {
+                                    const data = item.getBindingContext("BedDetails").getObject();
+                                    const oBody = {
+                                        filters: {
+                                            ID: data.ID
+                                        }
+                                    };
 
-                                return $.ajax({
-                                    url: "https://rest.kalpavrikshatechnologies.com/HM_BedType",
-                                    method: "DELETE",
-                                    contentType: "application/json",
-                                    data: JSON.stringify(oBody),
-                                    headers: {
-                                        name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                                        password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-                                    }
+                                    return $.ajax({
+                                        url: "https://rest.kalpavrikshatechnologies.com/HM_BedType",
+                                        method: "DELETE",
+                                        contentType: "application/json",
+                                        data: JSON.stringify(oBody),
+                                        headers: {
+                                            name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                                            password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+                                        }
+                                    });
                                 });
-                            });
 
-                            // Wait for all deletions to complete
-                            await Promise.all(deletePromises);
+                                // Wait for all deletions to complete
+                                await Promise.all(deletePromises);
 
-                            await this.Onsearch();
-                            sap.m.MessageToast.show("Selected bed(s) deleted successfully!");
+                                await this.Onsearch();
+                                sap.m.MessageToast.show("Selected bed(s) deleted successfully!");
 
-                        } catch (error) {
-                            console.error("Delete failed:", error);
-                            sap.m.MessageBox.error("Error while deleting bed(s). Please try again.");
-                        } finally {
-                            sap.ui.core.BusyIndicator.hide();
-                            table.removeSelections(true);
+                            } catch (error) {
+                                console.error("Delete failed:", error);
+                                sap.m.MessageBox.error("Error while deleting bed(s). Please try again.");
+                            } finally {
+                                sap.ui.core.BusyIndicator.hide();
+                                table.removeSelections(true);
+                            }
                         }
-                    }
-                }.bind(this)
-            }
+                    }.bind(this)
+                }
             );
         },
-        BD_onDownload: function () {
+
+        BD_onDownload: function() {
             const oModel = this.byId("id_BedTable").getModel("BedDetails").getData();
             if (!oModel || oModel.length === 0) {
                 MessageToast.show("No data available to download.");
@@ -472,42 +494,43 @@ sap.ui.define([
             };
             MessageToast.show("Downloading Room Details");
             const oSheet = new Spreadsheet(oSettings);
-            oSheet.build().finally(function () {
+            oSheet.build().finally(function() {
                 oSheet.destroy();
             });
         },
 
-        createTableSheet: function () {
+        createTableSheet: function() {
             return [{
-                label: "Branch Code",
-                property: "BranchCode",
-                type: "string"
-            },
-            {
-                label: "Bed Type",
-                property: "Name",
-                type: "string"
-            },
-            {
-                label: "Room Type",
-                property: "ACType",
-                type: "string"
-            },
-            {
-                label: "Max No of Rooms",
-                property: "MaxBeds",
-                type: "string"
-            },
-            {
-                label: "No of Persons",
-                property: "NoOfPerson",
-                type: "string"
-            },
-            {
-                label: "Description",
-                property: "Description",
-                type: "string"
-            }]
+                    label: "Branch Code",
+                    property: "BranchCode",
+                    type: "string"
+                },
+                {
+                    label: "Bed Type",
+                    property: "Name",
+                    type: "string"
+                },
+                {
+                    label: "Room Type",
+                    property: "ACType",
+                    type: "string"
+                },
+                {
+                    label: "Max No of Rooms",
+                    property: "MaxBeds",
+                    type: "string"
+                },
+                {
+                    label: "No of Persons",
+                    property: "NoOfPerson",
+                    type: "string"
+                },
+                {
+                    label: "Description",
+                    property: "Description",
+                    type: "string"
+                }
+            ]
         },
     });
 });

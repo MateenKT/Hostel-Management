@@ -11,6 +11,7 @@ sap.ui.define([
         },
 
         _onRouteMatched: async function(oEvent) {
+             try {
             var Layout = this.byId("FD_id_ObjectPageLayout");
             Layout.setSelectedSection(this.byId("FD_id_OrderHeaderSection1"));
            
@@ -41,6 +42,12 @@ sap.ui.define([
             await this._refreshFacilityDetails(this.BedID);
             await this.Onsearch()
             sap.ui.core.BusyIndicator.hide();
+        } catch (err) {
+                sap.ui.core.BusyIndicator.hide();
+                sap.m.MessageToast.show(err.message || err.responseText);
+            } finally {
+                sap.ui.core.BusyIndicator.hide();
+            }
         },
 
         _loadBranchCode: async function() {
@@ -57,11 +64,10 @@ sap.ui.define([
                 const oBranchModel = new sap.ui.model.json.JSONModel(aBranches);
                 oView.setModel(oBranchModel, "BranchModel");
 
-                console.log("oBranchModel:", oBranchModel.getData());
-                console.log("Branch data loaded successfully");
-            } catch (err) {
-                console.error("Error while loading branch data:", err);
-            }
+                 } catch (err) {
+                sap.ui.core.BusyIndicator.hide();
+                sap.m.MessageToast.show(err.message || err.responseText);
+            } 
         },
     
         BI_onEditButtonPress: function() {
@@ -152,8 +158,7 @@ sap.ui.define([
             oModel.setProperty("/CanAddMore", aRealImages.length < maxImages);
         },
 
-        onFileSelected: function(oEvent) {
-            const oFileUploader = oEvent.getSource();
+        onFileSelected: function (oEvent) {
             const oFile = oEvent.getParameter("files")[0];
             if (!oFile) return;
 
@@ -163,8 +168,20 @@ sap.ui.define([
                 const oModel = this.getView().getModel("DisplayImagesModel");
                 let aImages = oModel.getProperty("/DisplayImages") || [];
 
-                const iPlaceholderIndex = aImages.findIndex(img => img.isPlaceholder);
+                const aRealImages = aImages.filter(img => !img.isPlaceholder);
+                const bFileNameDuplicate = aRealImages.some(img => img.fileName === oFile.name);
+                if (bFileNameDuplicate) {
+                    sap.m.MessageToast.show(`"${oFile.name}" is already added.`);
+                    return;
+                }
 
+                const bContentDuplicate = aRealImages.some(img => img.src === sBase64);
+                if (bContentDuplicate) {
+                    sap.m.MessageToast.show(`This image is already added.`);
+                    return;
+                }
+
+                const iPlaceholderIndex = aImages.findIndex(img => img.isPlaceholder);
                 const oNewImage = {
                     src: sBase64,
                     fileName: oFile.name,
@@ -178,15 +195,10 @@ sap.ui.define([
                     aImages.push(oNewImage);
                 }
 
-                // Count only real images (exclude placeholder)
                 const realImagesCount = aImages.filter(img => !img.isPlaceholder).length;
-
-                // If less than 3, keep one placeholder; else remove it
                 if (realImagesCount < 3) {
                     if (!aImages.some(img => img.isPlaceholder)) {
-                        aImages.push({
-                            isPlaceholder: true
-                        });
+                        aImages.push({ isPlaceholder: true });
                     }
                 } else {
                     aImages = aImages.filter(img => !img.isPlaceholder);

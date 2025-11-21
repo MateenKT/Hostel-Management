@@ -4,62 +4,72 @@ sap.ui.define([
     "../utils/validation",
     "sap/ui/model/json/JSONModel",
     "sap/ui/model/odata/type/Currency",
-     "../model/formatter",
-], function (BaseController, MessageBox, utils, JSONModel, Currency, Formatter) {
+    "../model/formatter",
+], function(BaseController, MessageBox, utils, JSONModel, Currency, Formatter) {
     "use strict";
     return BaseController.extend("sap.ui.com.project1.controller.Facilitis", {
-         Formatter: Formatter,
-        onInit: function () {
+        Formatter: Formatter,
+        onInit: function() {
             this.getOwnerComponent().getRouter().getRoute("RouteFacilitis").attachMatched(this._onRouteMatched, this);
         },
-        _onRouteMatched: async function () {
-            this.i18nModel = this.getView().getModel("i18n").getResourceBundle(); // Get i18n model
 
-            var model = new sap.ui.model.json.JSONModel({
-                BranchCode: "",
-                Type: "",
-                PerHourPrice:"",
-                PerDayPrice:"",
-                PerMonthPrice:"",
-                PerYearPrice:"",
-                FacilityName: ""
-            });
-            this.getView().setModel(model, "FacilitiesModel")
+        _onRouteMatched: async function() {
+            try {
+                this.i18nModel = this.getView().getModel("i18n").getResourceBundle(); // Get i18n model
 
-            const oTokenModel = new sap.ui.model.json.JSONModel({
-                tokens: []
-            });
-            const oUploaderData = new sap.ui.model.json.JSONModel({
-                attachments: []
-            });
+                var model = new sap.ui.model.json.JSONModel({
+                    BranchCode: "",
+                    Type: "",
+                    PerHourPrice: "",
+                    PerDayPrice: "",
+                    PerMonthPrice: "",
+                    PerYearPrice: "",
+                    FacilityName: ""
+                });
+                this.getView().setModel(model, "FacilitiesModel")
 
-            this.getView().setModel(oTokenModel, "tokenModel");
-            this.getView().setModel(oUploaderData, "UploaderData");
-            this.onClearAndSearch("FO_id_FilterbarEmployee");
-            await this._loadBranchCode()
-            await this.Onsearch()
+                const oTokenModel = new sap.ui.model.json.JSONModel({
+                    tokens: []
+                });
+                const oUploaderData = new sap.ui.model.json.JSONModel({
+                    attachments: []
+                });
+
+                this.getView().setModel(oTokenModel, "tokenModel");
+                this.getView().setModel(oUploaderData, "UploaderData");
+                this.onClearAndSearch("FO_id_FilterbarEmployee");
+                await this._loadBranchCode()
+                await this.Onsearch()
+            } catch (err) {
+                sap.ui.core.BusyIndicator.hide();
+                sap.m.MessageToast.show(err.message || err.responseText);
+            } finally {
+                sap.ui.core.BusyIndicator.hide();
+            }
         },
-        _loadBranchCode: async function () {
+
+        _loadBranchCode: async function() {
             sap.ui.core.BusyIndicator.show(0);
             try {
                 const oView = this.getView();
 
                 const oResponse = await this.ajaxReadWithJQuery("HM_Branch", {});
 
-                const aBranches = Array.isArray(oResponse?.data)
-                    ? oResponse.data
-                    : (oResponse?.data ? [oResponse.data] : []);
+                const aBranches = Array.isArray(oResponse?.data) ?
+                    oResponse.data :
+                    (oResponse?.data ? [oResponse.data] : []);
 
                 const oBranchModel = new sap.ui.model.json.JSONModel(aBranches);
                 oView.setModel(oBranchModel, "BranchModel");
-
-                console.log("oBranchModel:", oBranchModel.getData());
-                console.log("Branch data loaded successfully");
             } catch (err) {
-                console.error("Error while loading branch data:", err);
+                sap.ui.core.BusyIndicator.hide();
+                sap.m.MessageToast.show(err.message || err.responseText);
+            } finally {
+                sap.ui.core.BusyIndicator.hide();
             }
         },
-        FD_RoomDetails: function (oEvent) {
+
+        FD_RoomDetails: function(oEvent) {
             this.byId("id_facilityTable").removeSelections();
             var oView = this.getView();
 
@@ -76,10 +86,10 @@ sap.ui.define([
                     BranchCode: "",
                     FacilityName: "",
                     Type: "",
-                    PerHourPrice:"",
-                    PerDayPrice:"",
-                    PerMonthPrice:"",
-                    PerYearPrice:"",
+                    PerHourPrice: "",
+                    PerDayPrice: "",
+                    PerMonthPrice: "",
+                    PerYearPrice: "",
                 });
             }
 
@@ -96,7 +106,8 @@ sap.ui.define([
             this._resetFacilityValueStates();
             this.ARD_Dialog.open();
         },
-        FD_onCancelButtonPress: function () {
+
+        FD_onCancelButtonPress: function() {
             var oView = this.getView();
 
             // Clear all data on close
@@ -106,10 +117,10 @@ sap.ui.define([
                     BranchCode: "",
                     FacilityName: "",
                     Type: "",
-                    PerHourPrice:"",
-                    PerDayPrice:"",
-                    PerMonthPrice:"",
-                    PerYearPrice:"",
+                    PerHourPrice: "",
+                    PerDayPrice: "",
+                    PerMonthPrice: "",
+                    PerYearPrice: "",
                 });
             }
 
@@ -119,7 +130,8 @@ sap.ui.define([
             oTable.removeSelections();
             this.ARD_Dialog.close();
         },
-        FD_onsavebuttonpress: async function () {
+
+        FD_onsavebuttonpress: async function() {
             const oView = this.getView();
             const oFacilitiesModel = oView.getModel("FacilitiesModel");
             const oUploaderData = oView.getModel("UploaderData");
@@ -132,7 +144,7 @@ sap.ui.define([
                 utils._LCstrictValidationComboBox(sap.ui.getCore().byId(oView.createId("idRoomType123")), "ID") &&
                 utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("idFacilityName")), "ID") &&
                 utils._LCvalidateMandatoryField(sap.ui.getCore().byId(oView.createId("idFacilityName1")), "ID") &&
-                utils._LCstrictValidationComboBox(sap.ui.getCore().byId(oView.createId("FL_id_Currency")), "ID") 
+                utils._LCstrictValidationComboBox(sap.ui.getCore().byId(oView.createId("FL_id_Currency")), "ID")
             );
 
             if (!isMandatoryValid) {
@@ -147,11 +159,11 @@ sap.ui.define([
             }
 
             //  Duplicate check
-            var bDuplicate = aFacilitiesData.some(function (facility) {
+            var bDuplicate = aFacilitiesData.some(function(facility) {
                 if (Payload.ID && facility.ID === Payload.ID) return false; // Skip comparing the same record during update
                 return (
                     facility.BranchCode === Payload.BranchCode &&
-                    facility.FacilityName.trim().toLowerCase() === Payload.FacilityName.trim().toLowerCase() 
+                    facility.FacilityName.trim().toLowerCase() === Payload.FacilityName.trim().toLowerCase()
                 );
             });
 
@@ -174,10 +186,10 @@ sap.ui.define([
                     BranchCode: Payload.BranchCode,
                     FacilityName: Payload.FacilityName,
                     Type: Payload.Type,
-                    PerHourPrice:Payload.PerHourPrice || 0,
-                    PerDayPrice:Payload.PerDayPrice || 0,
-                    PerMonthPrice:Payload.PerMonthPrice || 0,
-                    PerYearPrice:Payload.PerYearPrice || 0,
+                    PerHourPrice: Payload.PerHourPrice || 0,
+                    PerDayPrice: Payload.PerDayPrice || 0,
+                    PerMonthPrice: Payload.PerMonthPrice || 0,
+                    PerYearPrice: Payload.PerYearPrice || 0,
                     Currency: Payload.Currency
                 },
                 Attachment: {}
@@ -220,63 +232,63 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide();
             }
         },
-        _resetFacilityValueStates: function () {
+
+        _resetFacilityValueStates: function() {
             var oView = this.getView();
-            var aFields = ["idRoomType123", "idFacilityName", "idFacilityName1",
-                "FO_id_Price", "FL_id_Currency", "FO_id_Rate"];
-            aFields.forEach(function (sId) {
+            var aFields = ["idRoomType123", "idFacilityName", "idFacilityName1", "FL_id_Currency", "idPerHourPrice", 
+                "idPerDayPrice", "idPerMonthPrice", "idPerYearPrice"
+            ];
+            aFields.forEach(function(sId) {
                 var oField = sap.ui.getCore().byId(oView.createId(sId));
                 if (oField && oField.setValueState) {
                     oField.setValueState("None");
                 }
             });
         },
-         onFacilitybranchChange: function (oEvent) {
+
+        onFacilitybranchChange: function(oEvent) {
             var oInput = oEvent.getSource();
             utils._LCstrictValidationComboBox(oEvent);
             if (oInput.getValue() === "") oInput.setValueState("None");
- 
-               var sBranchCode =this.byId("idRoomType123").getSelectedKey();
- 
-           var oCountryModel = this.getView().getModel("CountryModel").getData();
-           var oBranchModel = this.getView().getModel("BranchModel").getData();
- 
-           var Branch= oBranchModel.find((item)=>{
-               return item.BranchID===sBranchCode
+
+            var sBranchCode = this.byId("idRoomType123").getSelectedKey();
+
+            var oCountryModel = this.getView().getModel("CountryModel").getData();
+            var oBranchModel = this.getView().getModel("BranchModel").getData();
+
+            var Branch = oBranchModel.find((item) => {
+                return item.BranchID === sBranchCode
             })
-           
-                  var Currency= oCountryModel.find((item)=>{
-                       return item.countryName===Branch.Country
-                   })
-                this.getView().getModel("FacilitiesModel").setProperty("/Currency", Currency.currency);
 
-
+            var Currency = oCountryModel.find((item) => {
+                return item.countryName === Branch.Country
+            })
+            this.getView().getModel("FacilitiesModel").setProperty("/Currency", Currency.currency);
         },
-        onFacilityNameChange: function (oEvent) {
+
+        onFacilityNameChange: function(oEvent) {
             var oInput = oEvent.getSource();
             utils._LCvalidateMandatoryField(oEvent);
             if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
         },
-        onFacilityTypeChange: function (oEvent) {
+
+        onFacilityTypeChange: function(oEvent) {
             var oInput = oEvent.getSource();
             utils._LCvalidateMandatoryField(oEvent);
             if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
         },
-        onFacilityRateChange: function (oEvent) {
-            var oInput = oEvent.getSource();
-            utils._LCstrictValidationComboBox(oEvent);
-            if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
-        },
+
         onPriceChange: function(oEvent) {
             var oInput = oEvent.getSource();
             utils._LCvalidateAmount(oEvent.getSource(), "ID");
             if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
         },
-        onFileSizeExceeds: function () {
+
+        onFileSizeExceeds: function() {
             sap.m.MessageToast.show(this.i18nModel.getText("fileSizeExceeds"));
         },
 
-        onTokenDelete: function (oEvent) {
+        onTokenDelete: function(oEvent) {
             const oView = this.getView();
             const oTokenModel = oView.getModel("tokenModel");
             const oUploaderData = oView.getModel("UploaderData");
@@ -315,7 +327,7 @@ sap.ui.define([
             let aAttachments = oUploaderData.getProperty("/attachments") || [];
             let aTokens = oTokenModel.getProperty("/tokens") || [];
 
-            //  Block if already 3 files uploaded
+            // Block if already 3 files uploaded
             if (aAttachments.length >= 3) {
                 sap.m.MessageToast.show("You can upload a maximum of 3 images only.");
                 return;
@@ -326,6 +338,15 @@ sap.ui.define([
             const aSelectedFiles = Array.from(oFiles).slice(0, iAvailableSlots);
 
             aSelectedFiles.forEach((oFile) => {
+                const bIsDuplicate = aAttachments.some(att =>
+                    att.filename === oFile.name   // filename duplicate
+                );
+
+                if (bIsDuplicate) {
+                    sap.m.MessageToast.show(`"${oFile.name}" is already uploaded.`);
+                    return;
+                }
+
                 // Validate file type
                 if (!oFile.type.match(/^image\/(jpeg|jpg|png)$/)) {
                     sap.m.MessageToast.show("Only image files (jpg, jpeg, png) are allowed.");
@@ -336,6 +357,15 @@ sap.ui.define([
                 oReader.onload = (e) => {
                     const sBase64 = e.target.result.split(",")[1];
 
+                    // Final Duplicate Check using file content
+                    const bContentDuplicate = aAttachments.some(att => att.content === sBase64);
+
+                    if (bContentDuplicate) {
+                        sap.m.MessageToast.show(`This image is already uploaded.`);
+                        return;
+                    }
+
+                    // Add attachment
                     aAttachments.push({
                         content: sBase64,
                         fileType: oFile.type,
@@ -343,6 +373,7 @@ sap.ui.define([
                         size: this._formatFileSize(oFile.size)
                     });
 
+                    // Add token
                     aTokens.push({
                         key: oFile.name,
                         text: oFile.name
@@ -356,14 +387,14 @@ sap.ui.define([
             });
         },
 
-        _formatFileSize: function (bytes) {
+        _formatFileSize: function(bytes) {
             if (!bytes) return "0 Bytes";
             const sizes = ["Bytes", "KB", "MB", "GB"];
             let i = Math.floor(Math.log(bytes) / Math.log(1024));
             return (bytes / Math.pow(1024, i)).toFixed(1) + " " + sizes[i];
         },
 
-        Onsearch: function () {
+        Onsearch: function() {
             sap.ui.core.BusyIndicator.show(0);
             this.ajaxReadWithJQuery("HM_ExtraFacilities", "").then((oData) => {
                 var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
@@ -376,7 +407,7 @@ sap.ui.define([
             })
         },
 
-        _populateUniqueFilterValues: function (data) {
+        _populateUniqueFilterValues: function(data) {
             let uniqueValues = {
                 FN_id_FacilityName: new Set(),
                 FN_id_BranchCode: new Set()
@@ -399,10 +430,9 @@ sap.ui.define([
                 });
             });
         },
-        FC_onSearch: function () {
-            var oView = this.getView();
-            var oFilterBar = oView.byId("FO_id_FilterbarEmployee");
 
+        FC_onSearch: function() {
+            var oView = this.getView();
             var oTable = oView.byId("id_facilityTable");
             var oBinding = oTable.getBinding("items");
 
@@ -416,25 +446,26 @@ sap.ui.define([
             if (sCustomerID) {
                 aFilters.push(new sap.ui.model.Filter("BranchCode", sap.ui.model.FilterOperator.Contains, sCustomerID));
             }
-            var oCombinedFilter = new sap.ui.model.Filter({
-                filters: aFilters,
-                and: true
-            });
+            var oCombinedFilter = new sap.ui.model.Filter({filters: aFilters, and: true});
             oBinding.filter(oCombinedFilter);
         },
-        FC_onPressClear: function () {
+
+        FC_onPressClear: function() {
             this.getView().byId("FN_id_FacilityName").setSelectedKey("")
             this.getView().byId("FN_id_BranchCode").setSelectedKey("")
         },
-        onNavBack: function () {
+
+        onNavBack: function() {
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("TilePage");
         },
-        onHome: function () {
+
+        onHome: function() {
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("RouteHostel");
         },
-        FD_onFacilityRowPress: function (oEvent) {
+
+        FD_onFacilityRowPress: function(oEvent) {
             var ofacilityID = oEvent.getSource().getBindingContext("Facilities").getObject().ID;
             var onav = this.getOwnerComponent().getRouter()
             onav.navTo("RouteFacilitiesDetails", {
@@ -442,7 +473,7 @@ sap.ui.define([
             });
         },
 
-        HM_DeleteDetails: async function () {
+        HM_DeleteDetails: async function() {
             var oTable = this.byId("id_facilityTable");
             var aSelectedItems = oTable.getSelectedItems();
 
@@ -452,8 +483,6 @@ sap.ui.define([
             }
 
             var that = this;
-
-            // Build facility names for confirmation message
             var sNames = aSelectedItems.map(item => {
                 var oData = item.getBindingContext("Facilities").getObject();
                 return oData.FacilityName;
@@ -461,40 +490,38 @@ sap.ui.define([
 
             sap.m.MessageBox.confirm(
                 `Are you sure you want to delete the selected facilities: ${sNames}?`, {
-                icon: sap.m.MessageBox.Icon.WARNING,
-                title: "Confirm Deletion",
-                actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO],
-                emphasizedAction: sap.m.MessageBox.Action.NO,
-                onClose: async function (sAction) {
-                    if (sAction === sap.m.MessageBox.Action.YES) {
-                        try {
-                            sap.ui.core.BusyIndicator.show(0);
-
-                            // Collect all delete promises
-                            const aDeletePromises = aSelectedItems.map(async (item) => {
-                                var oData = item.getBindingContext("Facilities").getObject();
-                                await that.ajaxDeleteWithJQuery("HM_ExtraFacilities", {
-                                    filters: { ID: oData.ID }
+                    icon: sap.m.MessageBox.Icon.WARNING,
+                    title: "Confirm Deletion",
+                    actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO],
+                    emphasizedAction: sap.m.MessageBox.Action.NO,
+                    onClose: async function(sAction) {
+                        if (sAction === sap.m.MessageBox.Action.YES) {
+                            try {
+                                sap.ui.core.BusyIndicator.show(0);
+                                const aDeletePromises = aSelectedItems.map(async (item) => {
+                                    var oData = item.getBindingContext("Facilities").getObject();
+                                    await that.ajaxDeleteWithJQuery("HM_ExtraFacilities", {
+                                        filters: {
+                                            ID: oData.ID
+                                        }
+                                    });
                                 });
-                            });
 
-                            // Wait for all deletions to complete
-                            await Promise.all(aDeletePromises);
-
-                            sap.m.MessageToast.show("Selected facilities deleted successfully!");
-                            await that.Onsearch(); // refresh table
-                        } catch (err) {
-                            console.error("Delete failed:", err);
-                            sap.m.MessageBox.error("Error while deleting facilities. Please try again.");
-                        } finally {
-                            sap.ui.core.BusyIndicator.hide();
+                                await Promise.all(aDeletePromises);
+                                sap.m.MessageToast.show("Selected facilities deleted successfully!");
+                                await that.Onsearch(); // refresh table
+                            } catch (err) {
+                                sap.ui.core.BusyIndicator.hide();
+                                sap.m.MessageToast.show(err.message || err.responseText);
+                            } finally {
+                                sap.ui.core.BusyIndicator.hide();
+                                oTable.removeSelections(true);
+                            }
+                        } else {
                             oTable.removeSelections(true);
                         }
-                    } else {
-                        oTable.removeSelections(true);
                     }
                 }
-            }
             );
         }
     });
