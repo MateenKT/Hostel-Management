@@ -7,7 +7,8 @@ sap.ui.define([
     "../model/formatter",
 ], function (BaseController, JSONModel, MessageToast, MessageBox, utils,Formatter) {
     "use strict";
-
+    const $C = (id) => sap.ui.getCore().byId(id);
+    const $V = (id) => $C(id)?.getValue()?.trim() || "";
     return BaseController.extend("sap.ui.com.project1.controller.Hostel", {
         Formatter: Formatter,
          onInit: function () {
@@ -371,6 +372,8 @@ _getLocationName: function (lat, lng) {
 
 
 
+  
+
         onSelectPricePlan: function (oEvent) {
             const oTile = oEvent.getSource();
             const sType = oTile.data("type"); // "daily", "monthly", or "yearly"
@@ -421,6 +424,7 @@ _getLocationName: function (lat, lng) {
                 `Selected ${sType.charAt(0).toUpperCase() + sType.slice(1)} plan — ${sCurrency} ${sPriceValue}`
             );
         },
+
 
 
 
@@ -673,6 +677,9 @@ _getLocationName: function (lat, lng) {
 
 
 
+
+
+
         _LoadFacilities: function (sBranchCode) {
             const oView = this.getView();
 
@@ -681,15 +688,14 @@ _getLocationName: function (lat, lng) {
             // Set loading state ON for facility container
             const oFacilityModel = oView.getModel("FacilityModel");
             oFacilityModel.setProperty("/loading", true);
-
             this.ajaxReadWithJQuery("HM_Facilities", { BranchCode: sBranchCode })
                 .then((Response) => {
-
+                    console.log("Facility Response:", Response);
                     const aFacilities = (Response && Response.data) ? Response.data : [];
 
                     const convert = (base64, type) => {
                         if (!base64) {
-                            return sap.ui.require.toUrl("sap/ui/com/project1/image/Fallback.png");
+                            return sap.ui.require.toUrl("sap/ui/com/project1/image/no-image.png");
                         }
                         return `data:${type || "image/jpeg"};base64,${base64}`;
                     };
@@ -698,11 +704,13 @@ _getLocationName: function (lat, lng) {
                         FacilityID: f.ID,
                         FacilityName: f.FacilityName,
                         Image: convert(f.Photo1, f.Photo1Type),
-                        Price: f.Price
+                        Price: f.Price,
+                        UnitText: f.UnitText,
+                        Currency: f.Currency
                     }));
 
                     oFacilityModel.setProperty("/Facilities", formatted);
-                    oFacilityModel.setProperty("/loading", false);  // <--- important
+                    oFacilityModel.setProperty("/loading", false);
 
                     oFacilityModel.refresh(true);
 
@@ -712,6 +720,7 @@ _getLocationName: function (lat, lng) {
                     oFacilityModel.setProperty("/loading", false);
                 });
         },
+
 
         viewDetails: function (oEvent) {
             try {
@@ -740,6 +749,7 @@ _getLocationName: function (lat, lng) {
                 // Set HostelModel
                 const oHostelModel = new sap.ui.model.json.JSONModel(oFullDetails);
                 oView.setModel(oHostelModel, "HostelModel");
+                console.log("oHostelModel:", oHostelModel.getData());
 
                 // Always set an EMPTY FacilityModel BEFORE opening fragment
                 // oView.setModel(new sap.ui.model.json.JSONModel({ Facilities: [] }), "FacilityModel");
@@ -768,6 +778,7 @@ _getLocationName: function (lat, lng) {
 
                         // Now load facilities in background
                         this._LoadFacilities(oSelected.BranchCode);
+                        this._LoadAmenities(oSelected.BranchCode);
                     });
 
                     return; // stop here because first-time load is async via .then()
@@ -786,6 +797,7 @@ _getLocationName: function (lat, lng) {
 
                 // Load facilities asynchronously
                 this._LoadFacilities(oSelected.BranchCode);
+                this._LoadAmenities(oSelected.BranchCode);
 
             } catch (err) {
                 console.error("❌ viewDetails error:", err);
@@ -794,7 +806,10 @@ _getLocationName: function (lat, lng) {
 
 
 
-        _LoadAmenities: async function () {
+
+
+        _LoadAmenities: async function (sBranchCode) {
+
             const oModel = new sap.ui.model.json.JSONModel({
                 loading: true,
                 Amenities: []
@@ -803,26 +818,47 @@ _getLocationName: function (lat, lng) {
             this._oRoomDetailFragment.setModel(oModel, "AmenityModel");
 
             try {
-                let resp = await this.ajaxReadWithJQuery("HM_HostelFeatures", "");
-                let list = resp?.data || [];
-
-                // Convert base64 → proper data URL
-                list = list.map(item => {
-                    return {
-                        ...item,
-                        ImageSrc: item.Photo1
-                            ? "data:image/jpeg;base64," + item.Photo1
-                            : ""
-                    };
+                // 1️⃣ Try branch-specific amenities
+                let respBranch = await this.ajaxReadWithJQuery("HM_HostelFeatures", {
+                    BranchCode: sBranchCode || ""
                 });
 
-                oModel.setProperty("/Amenities", list);
+                let branchList = respBranch?.data || [];
+
+                console.log("📌 Backend Amenity (Branch):", sBranchCode, branchList);
+
+                if (branchList.length > 0) {
+                    // Found branch amenities → use them ✔
+                    oModel.setProperty("/Amenities", this._convertAmenities(branchList));
+                } else {
+                    // 2️⃣ No branch amenities → try blank branch fallback
+                    let respBlank = await this.ajaxReadWithJQuery("HM_HostelFeatures", {
+                        BranchCode: ""
+                    });
+
+                    let blankList = respBlank?.data || [];
+
+                    // ❗ UI filter only blank branch amenities
+                    blankList = blankList.filter(x => (x.BranchCode || "").trim() === "");
+
+                    console.warn("↩️ Using ONLY blank branch amenities:", blankList);
+
+                    oModel.setProperty("/Amenities", this._convertAmenities(blankList));
+                }
 
             } catch (err) {
-                console.error("Amenity load error:", err);
+                console.error("❌ Amenity load error:", err);
             }
 
             oModel.setProperty("/loading", false);
+        },
+        _convertAmenities: function (list) {
+            return list.map(item => ({
+                ...item,
+                ImageSrc: item.Photo1
+                    ? `data:${item.Photo1Type || "image/jpeg"};base64,${item.Photo1}`
+                    : ""
+            }));
         },
 
 
@@ -1103,9 +1139,7 @@ _getLocationName: function (lat, lng) {
             utils._LCvalidateEmail(oEvent);
         },
 
-        onMobileLivechnage: function (oEvent) {
-            utils._LCvalidateMobileNumber(oEvent)
-        },
+
         SM_onTogglePasswordVisibility: function (oEvent) {
             var oInput = oEvent.getSource();
             var sType = oInput.getType() === "Password" ? "Text" : "Password";
@@ -1121,78 +1155,319 @@ _getLocationName: function (lat, lng) {
         SM_onChnageSetAndConfirm: function (oEvent) {
             utils._LCvalidatePassword(oEvent);
         },
-        FSM_onConfirm: function () {
-            const oFragModel = this.getView().getModel("LoginMode");
-            if (oFragModel.getProperty("/password") !== oFragModel.getProperty("/comfirmpass")) {
-                sap.ui.getCore().byId("signUpConfirmPassword").setValueState("Error")
-                MessageToast.show("Password Mismatch");
-                return;
-            } else {
-                sap.ui.getCore().byId("signUpConfirmPassword").setValueState("None")
-            }
-        },
+
         onSignUp: async function () {
-            var oDialog = this._oSignDialog;  // Assumes you stored the fragment dialog in this._oAuthDialog
-            var ofrag = sap.ui.getCore();
-            var oModel = this.getView().getModel("LoginMode");
-            var oData = oModel.getData();
 
-            // Basic validation example
-            if (
-                !utils._LCvalidateMandatoryField(ofrag.byId("signUpName"), "ID") ||
-                !utils._LCvalidateEmail(ofrag.byId("signUpEmail"), "ID") || !utils._LCvalidateMobileNumber(ofrag.byId("signUpPhone"), "ID") || !utils._LCvalidatePassword(ofrag.byId("signUpPassword"), "ID")
-            ) {
-                MessageToast.show("Make sure all the mandatory fields are filled/validate the entered value");
+
+            const oModel = this.getView().getModel("LoginMode");
+            const oData = oModel.getData();
+
+            /* ========= CONTROL GETTER ========= */
+            const $C = (id) => sap.ui.getCore().byId(id);
+
+            /* ========= SEQUENTIAL VALIDATION (follow UI order) ========= */
+
+            // 1) Salutation
+            if (!utils._LCstrictValidationComboBox($C("signUpSalutation"), "ID")) return;
+
+            // 2) Full Name
+            if (!utils._LCvalidateName($C("signUpName"), "ID")) return;
+
+            // 3) Email
+            if (!utils._LCvalidateEmail($C("signUpEmail"), "ID")) return;
+
+            // 4) Create Password
+            if (!utils._LCvalidatePassword($C("signUpPassword"), "ID")) return;
+
+            // 5) Confirm Password
+            if ($C("signUpPassword").getValue() !== $C("signUpConfirmPassword").getValue()) {
+                $C("signUpConfirmPassword").setValueState("Error");
+                $C("signUpConfirmPassword").setValueStateText("Passwords do not match");
+                sap.m.MessageToast.show("Passwords do not match");
                 return;
             }
-            // Get current timestamp
-            var oNow = new Date();
-            var sTimeDate = oNow.getFullYear() + "-" +
-                String(oNow.getMonth() + 1).padStart(2, "0") + "-" +
-                String(oNow.getDate()).padStart(2, "0") + " " +
-                String(oNow.getHours()).padStart(2, "0") + ":" +
-                String(oNow.getMinutes()).padStart(2, "0") + ":" +
-                String(oNow.getSeconds()).padStart(2, "0");
+            $C("signUpConfirmPassword").setValueState("Success");
 
-            // Payload
-            var oPayload = {
+            // 6) Date of Birth + Age Check
+            const oDOB = $C("signUpDOB");
+            const dobValue = oDOB.getDateValue();
+            if (!dobValue) {
+                oDOB.setValueState("Error");
+                oDOB.setValueStateText("Date of Birth is required");
+                return;
+            }
+
+            // No future dates
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            if (dobValue > today) {
+                oDOB.setValueState("Error");
+                oDOB.setValueStateText("Future date not allowed");
+                sap.m.MessageToast.show("Future date not allowed!");
+                return;
+            }
+
+            // Age calculation
+            let age = today.getFullYear() - dobValue.getFullYear();
+            const m = today.getMonth() - dobValue.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < dobValue.getDate())) age--;
+
+            if (age < 18) {
+                oDOB.setValueState("Error");
+                oDOB.setValueStateText("Minimum age required is 18");
+                sap.m.MessageToast.show("Minimum age required is 18 years");
+                return;
+            }
+
+            if (age < 15 || age > 60) {
+                oDOB.setValueState("Warning");
+                oDOB.setValueStateText("Please verify Date of Birth");
+                sap.m.MessageToast.show("Please verify your Date of Birth");
+            } else {
+                oDOB.setValueState("None");
+            }
+
+            const DateOfBirth = dobValue.toISOString().split("T")[0];
+
+            // 7) Gender
+            if (!utils._LCstrictValidationSelect($C("signUpGender"))) return;
+
+            // 8) Country → State → City
+            if (!utils._LCstrictValidationComboBox($C("signUpCountry"), "ID")) return;
+            if (!utils._LCstrictValidationComboBox($C("signUpState"), "ID")) return;
+            if (!utils._LCstrictValidationComboBox($C("signUpCity"), "ID")) return;
+
+            // 9) Mobile Number (After location – correct UI order)
+            if (!utils._LCstrictValidationComboBox($C("signUpSTD"), "ID")) return;
+            const sSTD = $C("signUpSTD").getSelectedKey();
+            if (!utils._LCvalidateInternationalMobileNumberWithSTD($C("signUpPhone"), sSTD)) return;
+
+            // 10) Address
+            const addrInput = $C("signUpAddress");
+            const addr = addrInput.getValue().trim();
+            if (!addr) {
+                addrInput.setValueState("Error");
+                addrInput.setValueStateText("Address is required");
+                return;
+            }
+            if (addr.length < 8) {
+                addrInput.setValueState("Error");
+                addrInput.setValueStateText("Address must be at least 8 characters long");
+                return;
+            }
+
+
+            /* ===================== 14) TIMESTAMP ======================== */
+            const now = new Date();
+            const TimeDate =
+                `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ` +
+                `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+
+            /* ===================== 15) FINAL PAYLOAD ==================== */
+            const payload = {
                 data: {
+                    Salutation: $C("signUpSalutation").getSelectedKey(),
                     UserName: oData.fullname,
-                    EmailID: oData.Email,
-                    MobileNo: oData.Mobileno,
-                    Password: btoa(oData.password),
                     Role: "Customer",
-                    TimeDate: sTimeDate,
-                    Status: "Active"
+                    EmailID: oData.Email,
+                    Password: btoa(oData.password),
+                    STDCode: oData.STDCode,
+                    MobileNo: oData.Mobileno,
+                    Status: "Active",
+                    TimeDate,
+                    DateOfBirth,
+                    Gender: $C("signUpGender").getSelectedKey(),
+                    Country: oData.Country,
+                    State: oData.State,
+                    City: oData.City,
+                    Address: oData.Address
                 }
             };
 
             try {
-                // Use your reusable helper
-                await this.ajaxCreateWithJQuery("HM_Login", oPayload);
-                // Handle success
+                await this.ajaxCreateWithJQuery("HM_Login", payload);
                 sap.m.MessageToast.show("Sign Up successful!");
 
-                // Reset model
                 oModel.setData({
-                    salutation: "Mr.",
+                    Salutation: "Mr.",
                     fullname: "",
                     Email: "",
                     STDCode: "+91",
                     Mobileno: "",
                     password: "",
-                    comfirmpass: ""
+                    comfirmpass: "",
+                    UserID: "",
+                    Gender: "",
+                    Country: "",
+                    State: "",
+                    City: "",
+                    Address: "",
+                    DateOfBirth: ""
                 });
-
-                if (oDialog) {
-                    oDialog.close();
-                }
+                this._oSignDialog.close();
 
             } catch (err) {
-                // Handle error
-                sap.m.MessageToast.show("Error in Sign Up: " + err);
+                sap.m.MessageToast.show("Sign Up failed!" + err);
+                console.error("SignUp Error:", err);
             }
         },
+        onAfterRenderingSignUp: function () {
+            const dob = sap.ui.getCore().byId("signUpDOB");
+            if (dob) dob.setMaxDate(new Date());
+        },
+        onSalutationChange: function (oEvent) {
+            utils._LCstrictValidationComboBox(oEvent);
+        },
+
+
+
+
+        onChangeCountry: function (oEvent) {
+            const $C = (id) => sap.ui.getCore().byId(id);
+            const oModel = this.getView().getModel("LoginMode");
+
+            const oCountryCB = oEvent.getSource();
+            const oStateCB = $C("signUpState");
+            const oCityCB = $C("signUpCity");
+            const oStdCB = $C("signUpSTD");
+            const oPhone = $C("signUpPhone");
+
+            // Reset State + City
+            oModel.setProperty("/State", "");
+            oModel.setProperty("/City", "");
+            oStateCB.setValue("");
+            oCityCB.setValue("");
+            oStateCB.getBinding("items")?.filter([]);
+            oCityCB.getBinding("items")?.filter([]);
+
+            // Reset Phone
+            oPhone.setValue("");
+            oPhone.setValueState("None");
+            oPhone.setPlaceholder("Enter Contact Number");
+            oPhone.setMaxLength(18);
+
+            const oItem = oCountryCB.getSelectedItem();
+            if (!oItem) return;
+
+            const sCountryName = oItem.getKey();
+            const sCountryCode = oItem.getAdditionalText();
+
+            // Update Model
+            oModel.setProperty("/Country", sCountryName);
+
+            // Get STD
+            const aCountries = this.getOwnerComponent().getModel("CountryModel").getData();
+            const oCountryObj = aCountries.find(c => c.countryName === sCountryName);
+
+            if (oCountryObj?.stdCode) {
+                oModel.setProperty("/STDCode", oCountryObj.stdCode);
+                oStdCB.setSelectedKey(oCountryObj.stdCode);
+                oStdCB.setEnabled(false);
+            }
+
+            // Filter State
+            oStateCB.getBinding("items")?.filter([
+                new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+            ]);
+        },
+
+        onMobileLivechnage: function (oEvent) {
+            const sSTD = sap.ui.getCore().byId("signUpSTD").getSelectedKey() || "";
+            utils._LCvalidateInternationalMobileNumberWithSTD(oEvent, sSTD);
+        },
+        onAddressChange: function (oEvent) {
+            const oInput = oEvent.getSource();
+            const sValue = oInput.getValue().trim();
+
+            if (!sValue) {
+                oInput.setValueState("Error");
+                oInput.setValueStateText("Address is required");
+                return;
+            }
+
+            if (sValue.length < 8) {
+                oInput.setValueState("Error");
+                oInput.setValueStateText("Address must be at least 8 characters long");
+                return;
+            }
+
+            oInput.setValueState("Success");
+            oInput.setValueStateText("Looks good");
+        },
+
+
+
+
+
+
+        onChangeState: function (oEvent) {
+            const $C = (id) => sap.ui.getCore().byId(id);
+            const oModel = this.getView().getModel("LoginMode");
+
+            const oStateCB = oEvent.getSource();
+            const oCityCB = $C("signUpCity");
+
+            const oItem = oStateCB.getSelectedItem();
+            if (!oItem) return;
+
+            const sStateName = oItem.getKey();
+            oModel.setProperty("/State", sStateName);
+
+            // Reset city selection
+            oModel.setProperty("/City", "");
+            oCityCB.setValue("");
+
+            // Filter cities based on state
+            oCityCB.getBinding("items")?.filter([
+                new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, sStateName)
+            ]);
+        },
+        onChangeCity: function (oEvent) {
+            const oModel = this.getView().getModel("LoginMode");
+            const oItem = oEvent.getSource().getSelectedItem();
+            if (oItem) {
+                oModel.setProperty("/City", oItem.getKey());
+            }
+        },
+
+        _LCvalidateName: function (oEvent) {
+            utils._LCvalidateName(oEvent);
+        },
+
+        FSM_onConfirm: function () {
+            const oModel = this.getView().getModel("LoginMode");
+            const pass = oModel.getProperty("/password")?.trim() || "";
+            const confirm = oModel.getProperty("/comfirmpass")?.trim() || "";
+            const oInput = sap.ui.getCore().byId("signUpConfirmPassword");
+
+            // Required field
+            if (!confirm) {
+                oInput.setValueState("Error");
+                oInput.setValueStateText("Confirm Password is required");
+                return;
+            }
+
+            // Compare with main password
+            if (pass !== confirm) {
+                oInput.setValueState("Error");
+                oInput.setValueStateText("Passwords do not match");
+                return;
+            }
+
+            // Correct (Do NOT show success on password)
+            oInput.setValueState("None");
+            oInput.setValueStateText("");
+        },
+
+
+
+
+
+
+
+
+
+
 
         onSignIn: async function () {
             // var ofrag = sap.ui.getCore();

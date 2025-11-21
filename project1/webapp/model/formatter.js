@@ -124,6 +124,24 @@ sap.ui.define([
 
         var formattedValue = oCurrencyFormat.format(Number(price), currency);
         return "Starting At " + formattedValue;
-    }
+    },
+        //   formatCurrency: function (value, code) {
+        //             if (value || value === 0) {
+        //                 var oCurrencyFormat = sap.ui.core.format.NumberFormat.getCurrencyInstance({
+        //                     currencyCode: false // hides the currency code like "INR"
+        //                 });
+        //                 var formatted = oCurrencyFormat.format(value);
+        //                 return code ? formatted + " " + code : formatted;
+        //             }
+        //             return "";
+        //         },
+
+        formatCurrency: function (value, code) {
+            var n = parseFloat(value);
+            var fmt = sap.ui.core.format.NumberFormat.getCurrencyInstance({ currencyCode: false });
+            var formatted = fmt.format(n);
+            return code ? formatted + " " + code : formatted;
+        },
+
     }
 });

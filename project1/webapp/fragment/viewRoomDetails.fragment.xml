@@ -18,7 +18,7 @@
 			</Bar>
 		</customHeader>
 		<content>
-			<VBox width="100%" class="roomTopAligned"  renderType="Bare">
+			<VBox width="100%" class="roomTopAligned" renderType="Bare">
 				<l:Grid width="100%" hSpacing="1" vSpacing="1" class="sapUiTinyMarginBeginEnd">
 					<l:content>
 						<VBox width="100%">
@@ -33,7 +33,7 @@
 						</VBox>
 					</l:content>
 					<l:content>
-						<VBox width="100%" class="roomTopAligned" >
+						<VBox width="100%" class="roomTopAligned">
 							<layoutData>
 								<l:GridData span="L4 M6 S12"/>
 							</layoutData>
@@ -42,24 +42,23 @@
 								<core:Icon src="sap-icon://ui-notifications" size="1.5rem" class="sapUiTinyMarginBegin descIcon"/>
 								<ExpandableText maxCharacters="330" text="{HostelModel>/Description}" class="descTextLarge" />
 							</VBox>
-
 							<!-- sap-icon://along-stacked-chart  -->
 						</VBox>
 					</l:content>
 				</l:Grid>
 				<l:Grid width="100%" defaultSpan="L3 M6 S12" hSpacing="1" vSpacing="1" class="priceGrid sapUiTinyMarginBeginEnd sapUiSmallMarginTop">
 					<l:content>
-						<GenericTile header="Per Day" subheader="{HostelModel>/Currency} {HostelModel>/Price}" class="defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%">
+						<GenericTile header="Per Day" subheader="{        						parts:['HostelModel>/Price','HostelModel>/Currency'],					formatter: '.Formatter.formatCurrency'}" class="defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%" visible="{= parseInt(${HostelModel>/Price}.trim()) !== 0 }">
 							<customData>
 								<core:CustomData key="type" value="daily"/>
 							</customData>
 						</GenericTile>
-						<GenericTile header="Per Month" subheader="{HostelModel>/Currency} {HostelModel>/MonthPrice}" class="defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%">
+						<GenericTile header="Per Month" subheader="{    						parts:['HostelModel>/MonthPrice','HostelModel>/Currency'],    						formatter: '.Formatter.formatCurrency'}" class="defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%" visible="{= parseInt(${HostelModel>/MonthPrice}.trim()) !== 0 }">
 							<customData>
 								<core:CustomData key="type" value="monthly"/>
 							</customData>
 						</GenericTile>
-						<GenericTile header="Per Year" subheader="{HostelModel>/Currency} {HostelModel>/YearPrice}" class="defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%">
+						<GenericTile header="Per Year" subheader="{    						parts:['HostelModel>/YearPrice','HostelModel>/Currency'],   						formatter: '.Formatter.formatCurrency'}" class="defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" width="100%" visible="{= parseInt(${HostelModel>/YearPrice}.trim()) !== 0 }">
 							<customData>
 								<core:CustomData key="type" value="yearly"/>
 							</customData>
@@ -74,9 +73,9 @@
 				</l:Grid>
 				<!-- Facilities Header -->
 				<Bar design="Header" class="sapUiMediumMarginTop">
-					<contentMiddle>
+					<contentLeft>
 						<Title text="Available Facilities" />
-					</contentMiddle>
+					</contentLeft>
 				</Bar>
 				<HBox justifyContent="Center" visible="{FacilityModel>/loading}">
 					<BusyIndicator size="0.8rem" />
@@ -84,17 +83,21 @@
 				<!-- REAL Responsive Grid -->
 				<HBox class="facilityGrid" wrap="Wrap" items="{FacilityModel>/Facilities}">
 					<items>
-						<VBox class="unifiedCard">
+						<!-- <VBox class="unifiedCard"> -->
+						<VBox class="unifiedCard" visible="{= parseFloat(${FacilityModel>Price}) > 0 }">
 							<Image src="{FacilityModel>Image}" class="unifiedCardImg" />
 							<Text text="{FacilityModel>FacilityName}" class="unifiedCardTitle" />
-							<Text text="₹{FacilityModel>Price}" class="unifiedCardText" />
+							<!-- <Text text="{= ${FacilityModel>Currency} + ' ' + ${FacilityModel>Price} + ' ' + (${FacilityModel>UnitText} || '') }" class="unifiedCardText" />
+							 -->
+							<!-- <Text class="unifiedCardText" text="{        parts: ['FacilityModel>Price', 'FacilityModel>Currency'],       formatter: '.Formatter.formatCurrency'  }" /> -->
+							<Text class="unifiedCardText" text="{        parts: ['FacilityModel>Price','FacilityModel>Currency'],        formatter: '.Formatter.formatCurrency'    } {FacilityModel>UnitText}" />
 						</VBox>
 					</items>
 				</HBox>
 				<Bar design="Header" class="sapUiMediumMarginTop sapUiTinyMarginBeginEnd">
-					<contentMiddle>
+					<contentLeft>
 						<Title text="Amenities" />
-					</contentMiddle>
+					</contentLeft>
 				</Bar>
 				<!-- Loading -->
 				<HBox justifyContent="Center" visible="{AmenityModel>/loading}">
@@ -106,7 +109,7 @@
 						<VBox class="unifiedCard">
 							<Image src="{AmenityModel>ImageSrc}" class="unifiedCardImg" />
 							<Text text="{AmenityModel>FacilityName}" class="unifiedCardTitle" />
-							<ExpandableText text="{AmenityModel>Description}" maxCharacters="100" class="amenityDesc expandableAmenityText" />
+							<Text text="{AmenityModel>Description}" class="amenityDesc expandableAmenityText" />
 						</VBox>
 					</items>
 				</HBox>

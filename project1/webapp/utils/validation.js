@@ -558,6 +558,74 @@ sap.ui.define([], function() {
                 oComboBox.setValueState("None");
                 return true;
             }
-        }
+        },
+        // Strict validation for Select control (like ComboBox strict)
+        _LCstrictValidationSelect: function (oField) {
+            if (!oField) return false;
+            let key = oField.getSelectedKey();
+            if (!key) {
+                oField.setValueState("Error");
+                oField.setValueStateText("Please select value");
+                return false;
+            }
+            oField.setValueState("None");
+            return true;
+        },
+
+        // Mandatory TextArea validation
+        _LCvalidateAddress: function (oField) {
+            if (!oField) return false;
+            let v = (oField.getValue() || "").trim();
+            if (!v) {
+                oField.setValueState("Error");
+                oField.setValueStateText("Address is required");
+                return false;
+            }
+            oField.setValueState("None");
+            return true;
+        },
+        _LCvalidateInternationalMobileNumberWithSTD: function (oEventOrControl, sStdCode) {
+            var oField = (typeof oEventOrControl.getSource === "function")
+                ? oEventOrControl.getSource() : oEventOrControl;
+
+            if (!oField) return false;
+
+            // Set dynamic max length
+            if (sStdCode === "+91") {
+                oField.setMaxLength(10);
+            } else {
+                oField.setMaxLength(18);
+            }
+
+            // Clean non-numeric chars
+            var oValue = oField.getValue().replace(/[^0-9]/g, "");
+            oField.setValue(oValue);
+
+            if (sStdCode === "+91") {
+                var indianRegex = /^[1-9][0-9]{9}$/;
+                if (!indianRegex.test(oValue)) {
+                    oField.setValueState("Error");
+                    oField.setValueStateText("Enter 10-digit valid mobile number");
+                    oField.focus();
+                    return false;
+                }
+                oField.setValueState("None");
+                return true;
+            }
+
+            var intlRegex = /^[0-9]{4,18}$/;
+            if (!intlRegex.test(oValue)) {
+                oField.setValueState("Error");
+                oField.setValueStateText("Enter valid mobile number");
+                oField.focus();
+                return false;
+            }
+
+            oField.setValueState("None");
+            return true;
+        },
+
+
+
     };
 });
