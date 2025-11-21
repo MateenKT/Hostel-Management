@@ -1,180 +1,127 @@
-<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout">
-  <Dialog id="profileDialog" horizontalScrolling="false" verticalScrolling="true" contentWidth="1000px" contentHeight="500px" class="profile-dialog-bg"  stretch="false" 	xmlns:w="sap.ui.integration.widgets" xmlns:f="sap.f"  xmlns:layout="sap.ui.layout">
-  <customHeader>
-    <Bar>
-      <contentMiddle>
-        <Title text="My Account" />
-      </contentMiddle>
-      <contentRight>
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout"
+    xmlns:f="sap.f" xmlns:layout="sap.ui.layout"
+    xmlns:g="sap.f"
+    xmlns:card="sap.f.cards"
+    xmlns:m="sap.m">
 
-        <Button type="Reject" text="Logout" press="onProfileDialogClose"/>
-        <Button type="Transparent" icon="sap-icon://decline" press="onProfileDialogClose"/>
-      </contentRight>
-    </Bar> 
-  </customHeader>
-    <VBox>
+<Dialog id="profileDialog"
+    horizontalScrolling="false"
+    verticalScrolling="true"
+    contentWidth="1000px"
+    contentHeight="500px"
+    resizable="true"
+    draggable="true">
 
-     <!-- Header Section -->
-<HBox class="sapUiMediumMarginTop sapUiMediumMarginBegin" width="100%" justifyContent="SpaceBetween" alignItems="Center">
+    <!-- HEADER -->
+    <customHeader>
+        <Bar class="profileHeaderBar">
+            <contentMiddle>
+                <Title text="My Account" level="H4" />
+            </contentMiddle>
+            <contentRight>
+                <Button type="Reject" text="Logout" press="onProfileDialogClose" />
+                <Button icon="sap-icon://decline" type="Transparent" press="onProfileDialogClose" />
+            </contentRight>
+        </Bar>
+    </customHeader>
 
-    <!-- LEFT SIDE: Avatar + Profile Details -->
-   <f:Card class="sapUiTinyMargin profile-card-container" width="100%">
+    <VBox class="profileMainContainer sapUiSmallMargin">
+
+        <!-- PROFILE CARD -->
+      <f:Card class="profileCard">
     <f:content>
 
-        <HBox width="100%" alignItems="Center" class=" sapUiMediumMargin">
+        <m:FlexBox
+            busyIndicatorDelay="0"
+            wrap="Wrap"
+            alignItems="Center"
+            fitContainer="true"
+            class="profileTopBox">
 
             <!-- Avatar -->
-            <Avatar 
-                src="{profileData>/photo}" 
-                initials="{profileData>/initials}" 
+            <m:Avatar
+                class="sapUiMediumMarginEnd sapUiTinyMarginBottom sapUiTinyMarginBegin"
+                displayShape="Circle"
                 displaySize="XL"
-                class="sapUiSmallMarginBegin" />
+                src="{profileData>/photo}"
+                initials="{profileData>/initials}" />
 
-            <!-- Profile Details -->
-            <VBox width="100%" class="sapUiSmallMarginBegin">
+            <!-- COLUMN 1 -->
+            <layout:VerticalLayout class="sapUiTinyMarginBegin sapUiTinyMarginEnd sapUiTinyMarginBottom">
 
-                <l:Grid
-                    defaultSpan="L6 M6 S12"
-                    width="100%"
-                    hSpacing="2"
-                    vSpacing="2">
+                <layout:HorizontalLayout class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
+                    <m:Label text="Name :" />
+                    <m:Text class="sapUiTinyMarginBegin" text="{profileData>/name}" />
+                </layout:HorizontalLayout>
 
-                    <!-- LEFT COLUMN -->
-                    <l:content>
-                        <VBox>
-                            <HBox>
-                                <Label text="Name :" />
-                                <Text text="{profileData>/name}" class="profile-contact-text" />
-                            </HBox>
+                <layout:HorizontalLayout class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
+                    <m:Label text="DOB :" />
+                    <m:Text class="sapUiTinyMarginBegin" text="{profileData>/dob}" />
+                </layout:HorizontalLayout>
 
-                            <HBox>
-                                <Label text="DOB :" />
-                                <Text text="{profileData>/dob}" class="profile-contact-text" />
-                            </HBox>
+                <layout:HorizontalLayout class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
+                    <m:Label text="Gender :" />
+                    <m:Text class="sapUiTinyMarginBegin" text="{profileData>/gender}" />
+                </layout:HorizontalLayout>
 
-                            <HBox>
-                                <Label text="Gender :" />
-                                <Text text="{profileData>/gender}" class="profile-contact-text" />
-                            </HBox>
-                        </VBox>
-                    </l:content>
+            </layout:VerticalLayout>
 
-                    <!-- RIGHT COLUMN -->
-                    <l:content>
-                        <VBox>
-                            <HBox>
-                                <Label text="Mobile :" />
-                                <Text text="{profileData>/phone}" class="profile-contact-text" />
-                            </HBox>
+            <!-- COLUMN 2 -->
+            <layout:VerticalLayout class="sapUiTinyMarginBegin sapUiTinyMarginEnd sapUiTinyMarginBottom">
 
-                            <HBox>
-                                <Label text="Email :" />
-                                <Text text="{profileData>/email}" class="profile-contact-text" />
-                            </HBox>
+                <layout:HorizontalLayout class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
+                    <m:Label text="Mobile :" />
+                    <m:Text class="sapUiTinyMarginBegin" text="{profileData>/phone}" />
+                </layout:HorizontalLayout>
 
-                            <HBox>
-                                <Label text="Address :" />
-                                <Text text="{profileData>/address}" class="profile-contact-text" />
-                            </HBox>
-                        </VBox>
-                    </l:content>
+                <layout:HorizontalLayout class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
+                    <m:Label text="Email :" />
+                    <m:Text class="sapUiTinyMarginBegin" text="{profileData>/email}" />
+                </layout:HorizontalLayout>
 
-                </l:Grid>
+                <layout:HorizontalLayout class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
+                    <m:Label text="Address :" />
+                    <m:Text class="sapUiTinyMarginBegin" text="{profileData>/address}" />
+                </layout:HorizontalLayout>
 
-            </VBox>
+            </layout:VerticalLayout>
 
-        </HBox>
+        </m:FlexBox>
 
     </f:content>
-
 </f:Card>
 
 
-</HBox>
-   <Text text="Booking History" class="sapUiSmallMarginTop sapUiMediumMarginBegin"/>
-   <HBox height="100%" renderType="Bare" width="100%">
-  
-     <IconTabBar
-		id="idIconTabBarFiori2"
-		expanded="{device>/isNoPhone}"
-		class="sapUiResponsiveContentPadding sapUiSmallMarginTop">
-		<items>
-			<IconTabFilter
-    text="Upcoming"
-    key="upcoming">
 
-   <layout:Grid defaultSpan="XL6 L6 M12 S12" vSpacing="1" 
-             class="sapUiResponsiveMargin sapUiTinyMargin">
-
-    <VBox width="100%" class="sapUiMediumMargin">
-
-        <f:Card class="sapUiTinyMargin">
-            <f:content>
-                <layout:Grid
-                    defaultSpan="XL6 L6 M12 S12"
-                    hSpacing="1"
-                    vSpacing="1"
-                    class="sapUiSmallMargin">
-
-                    <!-- Column 1 -->
-                    <layout:content>
-                        <VBox>
-                            <Label text="Booking ID" />
-                            <Text text="20/11/2025" />
-                        </VBox>
-                    </layout:content>
-
-                    <!-- Column 2 -->
-                    <layout:content>
-                        <VBox>
-                            <Label text="Room" />
-                            <Text text="Double-Bed - AC" />
-                        </VBox>
-                    </layout:content>
-
-                    <!-- Column 3 -->
-                    <layout:content>
-                        <VBox>
-                            <Label text="Amount" />
-                            <Text text="2000" />
-                        </VBox>
-                    </layout:content>
-                </layout:Grid>
-                <!-- >>>>>>>>>> END 2 COLUMN GRID <<<<<<<<<< -->
-
-            </f:content>
-
-        </f:Card>
-
-    </VBox>
-
-</layout:Grid>
-
-
-</IconTabFilter>
-
-
-			<IconTabFilter
-				text="Complete Booking"
-				key="completebooking">
-			
-        <Table items="{profileData>/bookings}"  id="IdProfileaTable">
+        <!-- BOOKING HISTORY -->
+       <Table 
+    id="IdProfileaTable"
+    items="{
+        path: 'profileData>/bookings',
+        sorter: [
+           {
+        path: 'bookingGroup',
+        descending: false,
+        group: true
+    },
+    {
+        path: 'Startdate',
+        descending: true
+    }
+        ]
+    }">
         <headerToolbar>
-            <Toolbar>
-                <ToolbarSpacer/>
-                <!-- <Button 
-                    text="Edit"
-                    icon="sap-icon://edit"
-                    press="onEditBooking"
-                    type="Emphasized"/> -->
-            </Toolbar>
+            <OverflowToolbar>
+						<Title text="Booking History ({=${profileData>/bookings}.length})" />
+						<ToolbarSpacer />
+						 <!-- <Button text="Edit" icon="sap-icon://edit" press="onEditBooking" type="Emphasized"/> -->
+					</OverflowToolbar>
         </headerToolbar>
 
         <columns>
-            <Column><Text text="Booking Date"/></Column>
+            <Column><Text text="Start Date"/></Column>
             <Column><Text text="Room"/></Column>
             <Column><Text text="Amount"/></Column>
-            <Column><Text text="Status"/></Column>
         </columns>
 
         <items>
@@ -183,19 +130,12 @@
                     <Text text="{path:'profileData>Startdate'}"/>
                     <Text text="{profileData>room}"/>
                     <Text text="{path:'profileData>amount', formatter: '.Formatter.formatCurrency'}"/>
-                    <Text text="{profileData>status}"/>
                 </cells>
             </ColumnListItem>
         </items>
     </Table>
-			</IconTabFilter>
-			
-		</items>
-	</IconTabBar>
-   
-  </HBox>
-
 
     </VBox>
-  </Dialog>
+
+</Dialog>
 </core:FragmentDefinition>

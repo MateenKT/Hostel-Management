@@ -1001,10 +1001,19 @@ _createDynamicPersonsUI: function () {
         }
 
         // Already logged in → auto-fill
+        aPersons[0].Salutation = oUser.Salutation || "";
         aPersons[0].FullName = oUser.UserName || "";
         aPersons[0].CustomerEmail = oUser.EmailID || "";
         aPersons[0].MobileNo = oUser.MobileNo || "";
         aPersons[0].UserID = oUser.UserID || "";
+        aPersons[0].DateOfBirth = oUser.DateOfBirth || "";
+        aPersons[0].Gender = oUser.Gender || "";
+        aPersons[0].Country = oUser.Country || "";
+        aPersons[0].State = oUser.State || "";
+        aPersons[0].City = oUser.City || "";
+        aPersons[0].Address = oUser.Address || "";
+        aPersons[0].STDCode = oUser.STDCode || "";
+
 
     } else {
         // Only clear if user unchecks manually
@@ -2166,12 +2175,20 @@ switch (sType) {
         }
 
         // Update LoginModel
-        oLoginModel.setProperty("/EmployeeID", oMatchedUser.UserID);
-        oLoginModel.setProperty("/EmployeeName", oMatchedUser.UserName);
+        oLoginModel.setProperty("/UserID", oMatchedUser.UserID);
+        oLoginModel.setProperty("/UserName", oMatchedUser.UserName);
         oLoginModel.setProperty("/EmailID", oMatchedUser.EmailID);
-        oLoginModel.setProperty("/Role", oMatchedUser.Role);
-        oLoginModel.setProperty("/BranchCode", oMatchedUser.BranchCode || "");
-        oLoginModel.setProperty("/MobileNo", oMatchedUser.MobileNo || "");
+        oLoginModel.setProperty("/MobileNo", oMatchedUser.MobileNo);
+        oLoginModel.setProperty("/Status", oMatchedUser.Status);
+        oLoginModel.setProperty("/DateOfBirth", oMatchedUser.DateOfBirth);
+        oLoginModel.setProperty("/Gender", oMatchedUser.Gender);
+        oLoginModel.setProperty("/Country", oMatchedUser.Country);
+        oLoginModel.setProperty("/State", oMatchedUser.State);
+        oLoginModel.setProperty("/City", oMatchedUser.City);
+        oLoginModel.setProperty("/Address", oMatchedUser.Address);
+        oLoginModel.setProperty("/STDCode", oMatchedUser.STDCode);
+        oLoginModel.setProperty("/Salutation", oMatchedUser.Salutation);
+      
               
          this._oLoggedInUser = oMatchedUser;
         // Clear input fields
@@ -2192,10 +2209,18 @@ switch (sType) {
     if (aPersons && aPersons.length > 0) {
 
         // Fill Person 1 details
-        aPersons[0].FullName = oMatchedUser.UserName || "";
-        aPersons[0].CustomerEmail = oMatchedUser.EmailID || "";
-        aPersons[0].MobileNo = oMatchedUser.MobileNo || "";
-        aPersons[0].UserID = oMatchedUser.UserID || "";
+        aPersons[0].Salutation      = oMatchedUser.Salutation || "";
+        aPersons[0].FullName        = oMatchedUser.UserName || "";
+        aPersons[0].DateOfBirth     = oMatchedUser.DateOfBirth || "";
+        aPersons[0].Gender          = oMatchedUser.Gender || "";
+        aPersons[0].MobileNo        = oMatchedUser.MobileNo || "";
+        aPersons[0].CustomerEmail   = oMatchedUser.EmailID || "";
+        aPersons[0].Country         = oMatchedUser.Country || "";
+        aPersons[0].State           = oMatchedUser.State || "";
+        aPersons[0].City            = oMatchedUser.City || "";
+        aPersons[0].Address         = oMatchedUser.Address || "";
+        aPersons[0].STDCode         = oMatchedUser.STDCode || "";
+        aPersons[0].UserID          = oMatchedUser.UserID || "";
 
         oHostelModel.refresh(true);
 

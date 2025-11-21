@@ -1662,6 +1662,8 @@ sap.ui.define([
                 oLoginModel.setProperty("/Role", oMatchedUser.Role);
                 oLoginModel.setProperty("/BranchCode", oMatchedUser.BranchCode || "");
                 oLoginModel.setProperty("/MobileNo", oMatchedUser.MobileNo || "");
+                oLoginModel.setProperty("/DateofBirth", oMatchedUser.DateofBirth)
+
 
                 if (oMatchedUser.Role === "Customer") {
                     this._oLoggedInUser = oMatchedUser;
@@ -1750,25 +1752,40 @@ sap.ui.define([
                     sap.m.MessageToast.show("No booking history found.");
                 }
 
-                // Map booking data
-                const aBookingData = aAllBookings.map(booking => ({
-                    Startdate: booking.StartDate
-                        ? new Date(booking.StartDate
-                        ).toLocaleDateString("en-GB") : "N/A",
-                    EndDate: booking.EndDate
-                        ? new Date(booking.EndDate
-                        ).toLocaleDateString("en-GB") : "N/A",
-                    room: booking.BedType || "N/A",
-                    amount: booking.RentPrice || "N/A",
-                    status: booking.Status || "N/A",
-                    cutomerid: booking.CustomerID,
-                    branchCode: booking.BranchCode,
-                    noofperson: booking.NoOfPersons,
-                    grandTotal: booking.RentPrice,
-                    paymenytype: booking.PaymentType,
-                    RoomPrice: booking.RoomPrice
+               const today = new Date();
+                today.setHours(0, 0, 0, 0); // avoid timezone issues
+                const aBookingData = aAllBookings.map(booking => {
+                    const oStart = booking.StartDate ? new Date(booking.StartDate) : null;
+                    if (oStart) oStart.setHours(0, 0, 0, 0);
 
-                }));
+                    let bookingGroup = "Others";
+
+                    if (booking.Status === "Completed") {
+                        bookingGroup = "Completed";
+                    } else if (booking.Status === "New" || booking.Status === "Assigned") {
+                        if (oStart <= today) {
+                            bookingGroup = "Ongoing";
+                        } else {
+                            bookingGroup = "Upcoming";
+                        }
+                    }
+
+                    return {
+                        Startdate: oStart ? oStart.toLocaleDateString("en-GB") : "N/A",
+                        EndDate: booking.EndDate
+                            ? new Date(booking.EndDate).toLocaleDateString("en-GB") : "N/A",
+                        room: booking.BedType || "N/A",
+                        amount: booking.RentPrice || "N/A",
+                        status: booking.Status || "N/A",
+                        bookingGroup: bookingGroup,
+                        cutomerid: booking.CustomerID,
+                        branchCode: booking.BranchCode,
+                        noofperson: booking.NoOfPersons,
+                        grandTotal: booking.RentPrice,
+                        paymenytype: booking.PaymentType,
+                        RoomPrice: booking.RoomPrice
+                    };
+                });
                 const aFacilitiData = aAllFacilitis.map(faciliti => ({
                     startdate: faciliti.StartDate ? new Date(faciliti.StartDate).toLocaleDateString("en-GB") : "N/A",
                     bookingid: faciliti.BookingID,
@@ -1797,6 +1814,9 @@ sap.ui.define([
                     name: oUser.UserName || "",
                     email: oUser.EmailID || "",
                     phone: oUser.MobileNo || "",
+                    dob: this.Formatter.DateFormat(oUser.DateOfBirth) || "",
+                    gender: oUser.Gender || "",
+                    address : oUser.Address || "",
                     bookings: aBookingData,
                     facility: aFacilitiData,
                     aCustomers: aCustomerDetails
@@ -1841,9 +1861,14 @@ sap.ui.define([
             sap.m.MessageToast.show("Profile picture edit not implemented yet.");
 
         },
-        onProfileDialogClose: function () {
-            this._oProfileDialog.close()
-        },
+         onProfileDialogClose: function () {
+    this._oProfileDialog.close();
+
+    const oView = this.getView();
+    oView.byId("loginButton")?.setVisible(true);
+    oView.byId("ProfileAvatar")?.setVisible(false);
+}
+,
         Bookfragment: function () {
             if (!this.FCIA_Dialog) {
                 var oView = this.getView();
