@@ -1108,14 +1108,7 @@ sap.ui.define([
             // this._oLocationDialog.open();
         },
 
-        // onpressLogin: function () {
-        //     if (!this._oSignDialog) {
-        //         this._oSignDialog = sap.ui.xmlfragment("sap.ui.com.project1.fragment.SignInSignup", this);
-        //         this.getView().addDependent(this._oSignDialog);
-        //     }
-        //     this._oSignDialog.open();
-        //     return;
-        // },
+   
 
         onpressLogin: function () {
             if (!this._oSignDialog) {
@@ -1124,7 +1117,18 @@ sap.ui.define([
                     this
                 );
                 this.getView().addDependent(this._oSignDialog);
+
+                // Attach the reset logic to the afterClose event
+                // This ensures cleanup happens whether closed by ESC key or button
+                this._oSignDialog.attachAfterClose(this._resetAuthDialog, this);
             }
+
+            // Always default to the Sign In panel
+            const oSignInPanel = sap.ui.getCore().byId("signInPanel");
+            const oSignUpPanel = sap.ui.getCore().byId("signUpPanel");
+            if (oSignInPanel) oSignInPanel.setVisible(true);
+            if (oSignUpPanel) oSignUpPanel.setVisible(false);
+
 
             this._oSignDialog.open();
             this._FragmentDatePickersReadOnly(["signUpDOB"]);
@@ -1180,7 +1184,6 @@ sap.ui.define([
                 const ctrl = $C(id);
                 if (ctrl) {
                     ctrl.setValueState("None");
-                    ctrl.setValueStateText("");
                     if (ctrl.setValue) ctrl.setValue("");
                     if (ctrl.setSelectedKey) ctrl.setSelectedKey("");
                 }
@@ -1191,7 +1194,6 @@ sap.ui.define([
                 const ctrl = $C(id);
                 if (ctrl) {
                     ctrl.setValueState("None");
-                    ctrl.setValueStateText("");
                     if (ctrl.setValue) ctrl.setValue("");
                 }
             });
@@ -1210,8 +1212,7 @@ sap.ui.define([
 
 
         onDialogClose: function () {
-            this._resetAuthDialog();
-            this._oSignDialog.close();
+            if (this._oSignDialog) this._oSignDialog.close();
         },
 
 
@@ -1415,33 +1416,25 @@ sap.ui.define([
                 console.error("SignUp Error:", err);
             }
         },
-        // onAfterRenderingSignUp: function () {
-        //     const oDatePicker = sap.ui.getCore().byId("signUpDOB");
-        //     if (!oDatePicker) return;
 
-        //     // Restrict typing (read-only), click opens calendar
-        //     this._FragmentDatePickersReadOnly(["signUpDOB"]);
-
-        //     const today = new Date();
-
-        //     // Max DOB → 18 years old
-        //     const maxDOB = new Date();
-        //     maxDOB.setFullYear(today.getFullYear() - 18);
-
-        //     // Min DOB → max 100 years old
-        //     const minDOB = new Date();
-        //     minDOB.setFullYear(today.getFullYear() - 100);
-
-        //     oDatePicker.setMaxDate(maxDOB);
-        //     oDatePicker.setMinDate(minDOB);
-        // },
 
         onChangeSalutation: function (oEvent) {
             const $C = (id) => sap.ui.getCore().byId(id);
-
-            const sal = oEvent.getSource().getSelectedKey();
+            const oCombo = oEvent.getSource();
+            const sal = oCombo.getValue();           // user typed or selected text
             const oGender = $C("signUpGender");
 
+            // 🔍 Strict Combo Validation (Check must match list)
+            const valid = utils._LCstrictValidationComboBox(oCombo, "ID");
+            if (!valid) {
+                // invalid → reset dependent Gender & disable it
+                oGender.setSelectedKey("");
+                oGender.setEnabled(false);
+                oGender.setValueState("None");
+                return;   // 🔥 stop, don't auto assign!
+            }
+
+            // 🎯 If valid selection → apply Gender Autoselect Rules
             if (sal === "Mr.") {
                 oGender.setSelectedKey("Male");
                 oGender.setEnabled(false);
@@ -1450,16 +1443,16 @@ sap.ui.define([
                 oGender.setSelectedKey("Female");
                 oGender.setEnabled(false);
             }
-            else {
-                // Dr. → No auto selection
+            else { // Dr.
                 oGender.setSelectedKey("");
                 oGender.setEnabled(true);
                 oGender.setValueState("Error");
                 oGender.setValueStateText("Please select gender");
             }
+        },  
 
-            oGender.setValueState("None");
-        },
+
+     
 
         onChangeGender: function (oEvent) {
             const oSel = oEvent.getSource();
@@ -1490,54 +1483,6 @@ sap.ui.define([
 
 
 
-        // onChangeCountry: function (oEvent) {
-        //     const $C = (id) => sap.ui.getCore().byId(id);
-        //     const oModel = this.getView().getModel("LoginMode");
-
-        //     const oCountryCB = oEvent.getSource();
-        //     const oStateCB = $C("signUpState");
-        //     const oCityCB = $C("signUpCity");
-        //     const oStdCB = $C("signUpSTD");
-        //     const oPhone = $C("signUpPhone");
-
-        //     // Reset State + City
-        //     oModel.setProperty("/State", "");
-        //     oModel.setProperty("/City", "");
-        //     oStateCB.setValue("");
-        //     oCityCB.setValue("");
-        //     oStateCB.getBinding("items")?.filter([]);
-        //     oCityCB.getBinding("items")?.filter([]);
-
-        //     // Reset Phone
-        //     oPhone.setValue("");
-        //     oPhone.setValueState("None");
-        //     oPhone.setPlaceholder("Enter Contact Number");
-        //     oPhone.setMaxLength(18);
-
-        //     const oItem = oCountryCB.getSelectedItem();
-        //     if (!oItem) return;
-
-        //     const sCountryName = oItem.getKey();
-        //     const sCountryCode = oItem.getAdditionalText();
-
-        //     // Update Model
-        //     oModel.setProperty("/Country", sCountryName);
-
-        //     // Get STD
-        //     const aCountries = this.getOwnerComponent().getModel("CountryModel").getData();
-        //     const oCountryObj = aCountries.find(c => c.countryName === sCountryName);
-
-        //     if (oCountryObj?.stdCode) {
-        //         oModel.setProperty("/STDCode", oCountryObj.stdCode);
-        //         oStdCB.setSelectedKey(oCountryObj.stdCode);
-        //         oStdCB.setEnabled(false);
-        //     }
-
-        //     // Filter State
-        //     oStateCB.getBinding("items")?.filter([
-        //         new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
-        //     ]);
-        // },
         onChangeCountry: function (oEvent) {
             const $C = (id) => sap.ui.getCore().byId(id);
             const oModel = this.getView().getModel("LoginMode");
@@ -1634,37 +1579,6 @@ sap.ui.define([
         },
 
 
-
-
-        // onChangeState: function (oEvent) {
-        //     const $C = (id) => sap.ui.getCore().byId(id);
-        //     const oModel = this.getView().getModel("LoginMode");
-
-        //     const oStateCB = oEvent.getSource();
-        //     const oCityCB = $C("signUpCity");
-
-        //     const oItem = oStateCB.getSelectedItem();
-        //     if (!oItem) return;
-
-        //     const sStateName = oItem.getKey();
-        //     oModel.setProperty("/State", sStateName);
-
-        //     // Reset city selection
-        //     oModel.setProperty("/City", "");
-        //     oCityCB.setValue("");
-
-        //     // Filter cities based on state
-        //     oCityCB.getBinding("items")?.filter([
-        //         new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, sStateName)
-        //     ]);
-        // },
-        // onChangeCity: function (oEvent) {
-        //     const oModel = this.getView().getModel("LoginMode");
-        //     const oItem = oEvent.getSource().getSelectedItem();
-        //     if (oItem) {
-        //         oModel.setProperty("/City", oItem.getKey());
-        //     }
-        // },
 
         _LCvalidateName: function (oEvent) {
             utils._LCvalidateName(oEvent);
