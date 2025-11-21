@@ -114,10 +114,14 @@
 						<cells>
 							<Text text="{Facilities>FacilityName}" />
 							<Text text="{Facilities>Type}" />
-							<Text text="{= ${Facilities>PerHourPrice} ? ${Facilities>PerHourPrice} + ' ' + ${Facilities>Currency} : '' }" />
-							<Text text="{= ${Facilities>PerDayPrice} ? ${Facilities>PerDayPrice} + ' ' + ${Facilities>Currency} : '' }" />
-							<Text text="{= ${Facilities>PerMonthPrice} ? ${Facilities>PerMonthPrice} + ' ' + ${Facilities>Currency} : '' }" />
-							<Text text="{= ${Facilities>PerYearPrice} ? ${Facilities>PerYearPrice} + ' ' + ${Facilities>Currency} : '' }" />
+							<Text text="{parts: ['Facilities>PerHourPrice','Facilities>Currency'],
+									formatter: '.Formatter.formatPrice'}"/>
+							<Text text="{parts: ['Facilities>PerDayPrice','Facilities>Currency'],
+									formatter: '.Formatter.formatPrice'}"/>
+							<Text text="{parts: ['Facilities>PerMonthPrice','Facilities>Currency'],
+									formatter: '.Formatter.formatPrice'}"/>
+							<Text text="{parts: ['Facilities>PerYearPrice','Facilities>Currency'],
+									formatter: '.Formatter.formatPrice'}"/>
 						</cells>
 					</ColumnListItem>
 				</items>

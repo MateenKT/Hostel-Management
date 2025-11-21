@@ -111,9 +111,12 @@
 							<Text text="{RoomDetailsModel>RoomNo}" />
 							<Text text="{RoomDetailsModel>BedTypeName}" />
 							<Text text="{RoomDetailsModel>ExtraBed}" />
-							<Text text="{= ${RoomDetailsModel>Price} ?  + ${RoomDetailsModel>Price} + ' ' + ${RoomDetailsModel>Currency} : '' }"/>
-							<Text text="{= ${RoomDetailsModel>MonthPrice} ?  + ${RoomDetailsModel>MonthPrice} + ' ' + ${RoomDetailsModel>Currency} : '' }"/>
-							<Text text="{= ${RoomDetailsModel>YearPrice} ? + ${RoomDetailsModel>YearPrice} + ' ' + ${RoomDetailsModel>Currency} : '' }"/>
+							<Text text="{parts: ['RoomDetailsModel>Price','RoomDetailsModel>Currency'],
+									formatter: '.Formatter.formatPrice'}"/>
+							<Text text="{parts: ['RoomDetailsModel>MonthPrice','RoomDetailsModel>Currency'],
+									formatter: '.Formatter.formatPrice'}"/>
+							<Text text="{parts: ['RoomDetailsModel>YearPrice','RoomDetailsModel>Currency'],
+									formatter: '.Formatter.formatPrice'}"/>
 						</cells>
 					</ColumnListItem>
 				</items>

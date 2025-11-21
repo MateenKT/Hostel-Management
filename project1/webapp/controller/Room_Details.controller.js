@@ -3,10 +3,12 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "../utils/validation",
     "sap/m/MessageToast",
-    "sap/ui/export/Spreadsheet"
-], function( BaseController, JSONModel, utils, MessageToast, Spreadsheet) {
+    "sap/ui/export/Spreadsheet",
+    "../model/formatter"
+], function( BaseController, JSONModel, utils, MessageToast, Spreadsheet, Formatter) {
     "use strict";
     return BaseController.extend("sap.ui.com.project1.controller.Room_Details", {
+        Formatter: Formatter,
         onInit: function() {
             this.getOwnerComponent().getRouter().getRoute("RouteRoomDetails").attachMatched(this._onRouteMatched, this);
         },
