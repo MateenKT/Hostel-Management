@@ -1042,7 +1042,7 @@ _createDynamicPersonsUI: function () {
                   text: ""
                 }),
                 new sap.ui.core.ListItem({
-                  key: "Mr",
+                  key: "Mr.",
                   text: "Mr"
                 }), new sap.ui.core.ListItem({
                   key: "Mrs",
