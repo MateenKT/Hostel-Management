@@ -25,7 +25,7 @@
     change=".onTimeChange"
     visible="{= ${edit>/UnitText} === 'Per Hour' }"
 />
-<Input value="{edit>/StartPeriod}" editable="false" visible="{= ${edit>/UnitText} === 'Per Hour' }" />
+<!-- <Input value="{edit>/StartPeriod}" editable="false" visible="{= ${edit>/UnitText} === 'Per Hour' }" /> -->
 
 <Label text="End Time"  visible="{= ${edit>/UnitText} === 'Per Hour' }"/>
 <TimePicker
@@ -36,7 +36,7 @@
     change=".onTimeChange"
     visible="{= ${edit>/UnitText} === 'Per Hour' }"
 />
-<Input value="{edit>/EndPeriod}" editable="false" visible="{= ${edit>/UnitText} === 'Per Hour' }"/>
+<!-- <Input value="{edit>/EndPeriod}" editable="false" visible="{= ${edit>/UnitText} === 'Per Hour' }"/> -->
 
 
 <Label text="Total Time (HH:MM)" visible="{= ${edit>/UnitText} === 'Per Hour' }"/>

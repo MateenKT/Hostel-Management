@@ -491,9 +491,15 @@ if (sTable) {
                 return;
             }
 
-            // Inclusive day count: if start === end => 1 day
-            const dayDiff = Math.floor((fEndDate.getTime() - fStartDate.getTime()) / msPerDay);
-            const fDays = (dayDiff >= 0) ? (dayDiff + 1) : 0; // if negative -> 0 (invalid)
+//          const dayDiff = Math.floor((fEndDate.getTime() - fStartDate.getTime()) / msPerDay);
+
+// // No +1 here because TotalDays is already calculated in onEditDateChange
+// var fDays = dayDiff >= 0 ? dayDiff + 1 : 0;
+
+// OR EVEN BETTER (MOST ACCURATE):
+// USE the user-calculated dialog value directly
+const fDays = Number(f.TotalDays || 0);
+
 
             if (fDays <= 0) {
                 sap.m.MessageToast.show("Facility End Date must be same or after Start Date for " + (f.FacilityName || ""));

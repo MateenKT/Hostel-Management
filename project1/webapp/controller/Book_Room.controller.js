@@ -1006,21 +1006,27 @@ _createDynamicPersonsUI: function () {
         aPersons[0].CustomerEmail = oUser.EmailID || "";
         aPersons[0].MobileNo = oUser.MobileNo || "";
         aPersons[0].UserID = oUser.UserID || "";
-        aPersons[0].DateOfBirth = oUser.DateOfBirth || "";
+        that.Formatter.DateFormat(aPersons[0].DateOfBirth) = that.Formatter.DateFormat(oUser.DateOfBirth) || "";
         aPersons[0].Gender = oUser.Gender || "";
         aPersons[0].Country = oUser.Country || "";
         aPersons[0].State = oUser.State || "";
         aPersons[0].City = oUser.City || "";
         aPersons[0].Address = oUser.Address || "";
         aPersons[0].STDCode = oUser.STDCode || "";
-
-
     } else {
         // Only clear if user unchecks manually
         aPersons[0].FullName = "";
         aPersons[0].CustomerEmail = "";
         aPersons[0].MobileNo = "";
         aPersons[0].UserID = "";
+        aPersons[0].Salutation = "";
+        aPersons[0].DateOfBirth ="";
+        aPersons[0].Gender="";
+        aPersons[0].State = "";
+        aPersons[0].Country  = "";
+        aPersons[0].City = "";
+        aPersons[0].Address = "";
+        aPersons[0].STDCode ="";
     }
 
     oModel.refresh(true);
@@ -1071,6 +1077,7 @@ _createDynamicPersonsUI: function () {
             }),
             new sap.m.DatePicker({
               value: "{HostelModel>/Persons/" + i + "/DateOfBirth}",
+              formatter: that.DateFormat,
               valueFormat: "dd/MM/yyyy",
               displayFormat: "dd/MM/yyyy",
               maxDate: (function () {
