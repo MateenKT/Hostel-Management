@@ -30,14 +30,13 @@ sap.ui.define([
         // If not found, create a fallback model
         oHostelModel = new JSONModel({
           UserID: "",
-          RoomType: "",
+          BedType: "",
+          ACType: "",
           Price: "",
           PaymentType: "",
           Person: "",
           StartDate: "",
           EndDate: "",
-          BedType: "",
-          ACType: "",
           FinalPrice: "",
           SelectedPriceType: "",
           Capacity: "",
@@ -46,14 +45,24 @@ sap.ui.define([
         sap.ui.getCore().setModel(oHostelModel, "HostelModel");
       }
 
-      this.getView().setModel(new sap.ui.model.json.JSONModel({
+      this.getView().setModel(new JSONModel({
         Amount: "",
         PaymentType: "UPI",
         PaymentDate: new Date()
       }),"PaymentModel");
 
       //  Ensure defaults come from previous step (HostelModel)
+    
       const oData = oHostelModel.getData();
+
+// 🟦 RESET VALUES EVERY TIME ROUTE LOADS
+oHostelModel.setProperty("/StartDate", "");
+oHostelModel.setProperty("/EndDate", "");
+oHostelModel.setProperty("/Salutation", "");
+oHostelModel.setProperty("/FullName", "");
+oHostelModel.setProperty("/SelectedMonths", "1");
+oHostelModel.setProperty("/SelectedPerson", "1");
+
 
       // If older fields exist, normalize them to new ones
       if (oData.RoomType && !oData.BedType && oData.RoomType.includes("-")) {
@@ -67,12 +76,12 @@ sap.ui.define([
         oData.FinalPrice = oData.SelectedPriceValue;
       }
 
-      if (oData.SelectedPriceType && !["daily", "monthly", "yearly"].includes(oData.SelectedPriceType)) {
-        // Convert older values like "Per Month" to "monthly"
+      if (oData.SelectedPriceType && !["per day", "per month", "per year"].includes(oData.SelectedPriceType)) {
+     
         const map = {
-          "daily": "Per Day",
-          "monthly": "Per Month",
-          "yearly": "Per Year"
+          "Per Day": "Per Day",
+          "Per Month": "Per Month",
+          "Per Year": "Per Year"
         };
         oData.SelectedPriceType = map[oData.SelectedPriceType] || "Per Month";
       }
@@ -97,14 +106,14 @@ sap.ui.define([
       var oEndDatePicker = this.getView().byId("idEndDate1")
       const sSelectedType = oData.SelectedPriceType?.toLowerCase() || "";
 
-      if (sSelectedType === "daily") {
+      if (sSelectedType === "per day") {
         oBTn.setProperty("/Month", false);
 
         oEndDatePicker.setEditable(true)
-      } else if (sSelectedType === "monthly") {
+      } else if (sSelectedType === "per month") {
         oBTn.setProperty("/Month", true);
         oEndDatePicker.setEditable(false)
-      } else if (sSelectedType === "yearly") {
+      } else if (sSelectedType === "per year") {
         oBTn.setProperty("/Month", true);
 
         oEndDatePicker.setEditable(false)
@@ -1410,37 +1419,34 @@ _createDynamicPersonsUI: function () {
           content: [
             ...(i === 0 && iPersons > 1 ? [
                     new sap.m.CheckBox({
-                        text: "Select For All Person",
-                        selected: true,
-                        select: function (e) {
-                            const bSel = e.getParameter("selected");
-                            oData.ForBothSelected = bSel;
+    text: "Select For All Person",
+    selected: !!oData.ForBothSelected,
+    select: function (e) {
+        const bSel = e.getParameter("selected");
+        oData.ForBothSelected = bSel;
 
-                            if (bSel) {
-                                const firstPersonName = oData.Persons[0].PersonName;
+        if (bSel) {
+            // copy person 0 to all
+            const master = oData.Persons[0].Facilities.SelectedFacilities.map(f => ({ ...f }));
+            for (let p = 1; p < iPersons; p++) {
+                oData.Persons[p].Facilities.SelectedFacilities = master.map(f => ({ ...f }));
+            }
+        } else {
+            // unselected → clear all others
+            for (let p = 1; p < iPersons; p++) {
+                oData.Persons[p].Facilities.SelectedFacilities = [];
+            }
 
-                                // Assign personName to first person facilities
-                                oData.Persons[0].Facilities.SelectedFacilities =
-                                    oData.Persons[0].Facilities.SelectedFacilities.map(f => ({
-                                        ...f,
-                                        PersonName: firstPersonName
-                                    }));
+            // 🟢 Reset UI selection classes
+            setTimeout(() => {
+                $(".serviceCardSelected").removeClass("serviceCardSelected");
+            }, 50);
+        }
 
-                                // Copy to all persons
-                                for (let p = 1; p < iPersons; p++) {
-                                    const personName = oData.Persons[p].PersonName;
+        oModel.refresh(true);
+    }
+})
 
-                                    oData.Persons[p].Facilities.SelectedFacilities =
-                                        oData.Persons[0].Facilities.SelectedFacilities.map(f => ({
-                                            ...f,
-                                            PersonName: personName
-                                        }));
-                                }
-                            }
-
-                            oModel.refresh(true);
-                        }
-                    })
                 ] : []),
 
             new sap.m.FlexBox({
@@ -1475,47 +1481,47 @@ _createDynamicPersonsUI: function () {
                           height: "178px",
                           class: "serviceImage",
                           densityAware: false,
-                          press: function (oEvent) {
-                            const oCtx = oEvent.getSource().getBindingContext("FacilityModel");
-                            const oFacilityObj = oCtx.getObject();
-                            const aPersons = oModel.getProperty("/Persons");
-                            const aSelected = aPersons[i].Facilities.SelectedFacilities;
-                            const oCard = oEvent.getSource().getParent().getParent();
-                            const bAlreadySelected = aSelected.find(f => f.FacilityName === oFacilityObj.FacilityName);
+                        press: function (oEvent) {
+    const oCtx = oEvent.getSource().getBindingContext("FacilityModel");
+    const oFacility = oCtx.getObject();
+    const aPersons = oModel.getProperty("/Persons");
+    const aSelected = aPersons[i].Facilities.SelectedFacilities;
 
-                            if (bAlreadySelected) {
-                              const idx = aSelected.findIndex(f => f.FacilityName === oFacilityObj.FacilityName);
-                              aSelected.splice(idx, 1);
-                            
-                              oCard.removeStyleClass("serviceCardSelected");
-                            } else {
-                              aSelected.push({
-    FacilityName: oFacilityObj.FacilityName,
-    BranchCode: oFacilityObj.BranchCode, 
-    PricePerDay: oFacilityObj.PricePerDay,
-    PricePerMonth: oFacilityObj.PricePerMonth,
-    PricePerYear: oFacilityObj.PricePerYear,
-    Currency: oFacilityObj.Currency,
-    UnitText: oModel.getProperty("/SelectedPriceType"),
-    Image: oFacilityObj.Image
-});
-                              oCard.addStyleClass("serviceCardSelected");
-                            }
+    const oCard = oEvent.getSource().getParent().getParent();
+    const idx = aSelected.findIndex(f => f.FacilityName === oFacility.FacilityName);
 
-                            // If "For Both" is selected, copy selected facilities to second person
-                            if (oData.ForBothSelected && iPersons > 1 && i === 0) {
-                                            for (let p = 1; p < iPersons; p++) {
-                                                const personName = oData.Persons[p].PersonName;
-                                                oData.Persons[p].Facilities.SelectedFacilities =
-                                                    oData.Persons[0].Facilities.SelectedFacilities.map(f => ({
-                                                        ...f,
-                                                        PersonName: personName
-                                                    }));
-                                            }
-                                        }
- 
-                                        oModel.refresh(true);
-                                    }
+    // toggle
+    if (idx > -1) {
+        aSelected.splice(idx, 1);
+        oCard.removeStyleClass("serviceCardSelected");
+    } else {
+        aSelected.push({
+            FacilityName: oFacility.FacilityName,
+            BranchCode: oFacility.BranchCode,
+            PricePerDay: oFacility.PricePerDay,
+            PricePerMonth: oFacility.PricePerMonth,
+            PricePerYear: oFacility.PricePerYear,
+            Currency: oFacility.Currency,
+            UnitText: oModel.getProperty("/SelectedPriceType"),
+            Image: oFacility.Image
+        });
+        oCard.addStyleClass("serviceCardSelected");
+    }
+
+    if (oData.ForBothSelected && i === 0) {
+        // sync to all
+        for (let p = 1; p < iPersons; p++) {
+            oData.Persons[p].Facilities.SelectedFacilities = aPersons[0].Facilities.SelectedFacilities.map(f => ({ ...f }));
+        }
+
+    }
+
+
+    oModel.refresh(true);
+      that._currentPersonIndex = i;
+    that._applyFacilitySelectionUI();
+}
+
                         }),
 
                         // Facility name overlay (hover effect)
@@ -1564,7 +1570,26 @@ _createDynamicPersonsUI: function () {
 oFacilityModel.refresh(true);
       oModel.refresh(true);
 },
+_applyFacilitySelectionUI: function () {
+    setTimeout(() => {
+        const oHostelModel = this.getView().getModel("HostelModel");
+        const aPersons = oHostelModel.getProperty("/Persons");
+        const person = aPersons[this._currentPersonIndex];
 
+        if (!person) return;
+
+        // remove all selection UI
+        $(".serviceCard").removeClass("serviceCardSelected");
+
+        // reapply correct selection
+        person.Facilities.SelectedFacilities.forEach(f => {
+            $(`img[src='${f.Image}']`)
+                .closest(".serviceCard")
+                .addClass("serviceCardSelected");
+        });
+    }, 50);
+}
+,
     onDialogNextButton: async function () {
 
         if (this._iSelectedStepIndex === 0) {

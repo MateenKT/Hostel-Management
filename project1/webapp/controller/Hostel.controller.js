@@ -1950,8 +1950,12 @@ sap.ui.define([
                             bookingGroup = "Upcoming";
                         }
                     }
-
+                    const customer = aCustomers.find(c => c.CustomerID === booking.CustomerID);
+                         const sSalutation = customer?.Salutation || "";
+    const sFullName = customer?.CustomerName || "N/A";
                     return {
+                        salutation: sSalutation,                // ✔ Add salutation
+        customerName: `${sSalutation} ${sFullName}`.trim(),
                         Startdate: oStart ? oStart.toLocaleDateString("en-GB") : "N/A",
                         EndDate: booking.EndDate
                             ? new Date(booking.EndDate).toLocaleDateString("en-GB") : "N/A",
@@ -2004,21 +2008,6 @@ sap.ui.define([
                 });
                 this._oProfileDialog.setModel(oProfileModel, "profileData");
 
-                //  Menu model (for tab switch)
-                const oMenuModel = new JSONModel({
-                    items: [
-                        { title: "My Profile", icon: "sap-icon://employee", key: "profile" },
-                        { title: "Booking History", icon: "sap-icon://history", key: "devices" }
-                    ]
-                });
-                this._oProfileDialog.setModel(oMenuModel, "profileMenuModel");
-
-                //  Section model (default = booking if available)
-                const oSectionModel = new JSONModel({
-                    selectedSection: aBookingData.length ? "profile" : "devices"
-                });
-                this._oProfileDialog.setModel(oSectionModel, "profileSectionModel");
-
                 //  Open the dialog
                 this._oProfileDialog.open();
 
@@ -2027,10 +2016,6 @@ sap.ui.define([
                 sap.m.MessageToast.show("Error fetching profile details.");
             }
         },
-
-
-
-
         onProfileLogout: function () {
             // Close the dialog and perform logout logic
             if (this._oProfileDialog) this._oProfileDialog.close();

@@ -150,13 +150,13 @@
         <!-- Totals for THIS person (NOTE: all RELATIVE, no leading "/") -->
         <VBox class="sapUiSmallMarginTop" visible="{HostelModel>/HasFacilities}">
             <HBox justifyContent="End" class="sapUiSmallMarginTop">
-                <Label text="Total Facility Cost:" design="Bold" class="sapUiSmallMarginEnd"/>
+                <Label text="Total Facility Cost:" class="totalColumnBold sapUiSmallMarginEnd"/>
                 <Text text="{
                    parts: [
         'HostelModel>TotalFacilityPrice',
         'HostelModel>/Currency'
     ], formatter: '.Formatter.formatCurrency'
-                }" class="sapUiSmallMarginEnd"/>
+                }" class="totalColumnBold sapUiSmallMarginEnd"/>
               
             </HBox>
             <!-- <HBox justifyContent="End" class="sapUiSmallMarginTop">

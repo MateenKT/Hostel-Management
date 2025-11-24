@@ -69,9 +69,9 @@
                                 <core:ListItem key="Daily" text="Per Day" />
                                 </ComboBox>
                 <!-- Project Address -->
-                <core:Title text="Select Person" />
-               <Label text="No of Persons" required="true" />
-                <Text text="{HostelModel>/noofperson}" visible="true"/>
+                <core:Title text="" />
+               <!-- <Label text="No of Persons" required="true" />
+                <Text text="{HostelModel>/noofperson}" visible="true"/> -->
                 <!-- <Input value="{HostelModel>/noofperson}" visible="{viewModel>/editMode}"/> -->
 
                 <!-- Site Contact -->

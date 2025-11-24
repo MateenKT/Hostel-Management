@@ -120,6 +120,7 @@
         </headerToolbar>
 
         <columns>
+            <Column><Text text="Customer Name"/></Column>
             <Column><Text text="Start Date"/></Column>
             <Column><Text text="Room"/></Column>
             <Column><Text text="Amount"/></Column>
@@ -130,6 +131,7 @@
         <items>
             <ColumnListItem type="Navigation" press="onPressBookingRow">
                 <cells>
+                    <Text text="{profileData>customerName}"/>
                     <Text text="{path:'profileData>Startdate'}"/>
                     <Text text="{profileData>room}"/>
                     <Text text="{path:'profileData>amount', formatter: '.Formatter.formatCurrency'}"/>
