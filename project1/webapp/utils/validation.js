@@ -601,27 +601,34 @@ sap.ui.define([], function() {
             var oValue = oField.getValue().replace(/[^0-9]/g, "");
             oField.setValue(oValue);
 
+            // 🔥 FIX: Do not validate empty value
+            if (!oValue) {
+                oField.setValueState("None");
+                oField.setValueStateText("");
+                return false;
+            }
+
+            // 🇮🇳 Indian format validation
             if (sStdCode === "+91") {
                 var indianRegex = /^[1-9][0-9]{9}$/;
                 if (!indianRegex.test(oValue)) {
                     oField.setValueState("Error");
                     oField.setValueStateText("Enter 10-digit valid mobile number");
-                    oField.focus();
                     return false;
                 }
-                oField.setValueState("None");
+                oField.setValueState("Success");
                 return true;
             }
 
+            // 🌍 International validation
             var intlRegex = /^[0-9]{4,18}$/;
             if (!intlRegex.test(oValue)) {
                 oField.setValueState("Error");
                 oField.setValueStateText("Enter valid mobile number");
-                oField.focus();
                 return false;
             }
 
-            oField.setValueState("None");
+            oField.setValueState("Success");
             return true;
         },
 

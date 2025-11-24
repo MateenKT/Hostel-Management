@@ -204,5 +204,34 @@ sap.ui.define([
         oFilterBar.clear(); // Clear all filters in the FilterBar
       }
     },
+    _startAllCarouselsAutoSlide: function (iDelay = 3000) {
+      try {
+        const oView = this.getView();
+        const aCarousels = oView.findAggregatedObjects(true, control => control.isA("sap.m.Carousel"));
+
+        aCarousels.forEach(carousel => {
+          if (!carousel || carousel.bIsDestroyed) return;
+
+          const iSlideCount = carousel.getPages().length;
+          if (iSlideCount <= 1) return;
+
+          // Clear old interval if exists
+          if (carousel._autoSlideInterval) {
+            clearInterval(carousel._autoSlideInterval);
+          }
+
+          let currentIndex = carousel.getActivePageIndex ? carousel.getActivePageIndex() : 0;
+
+          carousel._autoSlideInterval = setInterval(() => {
+            if (!carousel || carousel.bIsDestroyed) return;
+            currentIndex = (currentIndex + 1) % iSlideCount;
+            carousel.setActivePage(carousel.getPages()[currentIndex]);
+          }, iDelay);
+        });
+      } catch (err) {
+        console.error("Carousel Auto Slide Error:", err);
+      }
+    },
+
   })
 });

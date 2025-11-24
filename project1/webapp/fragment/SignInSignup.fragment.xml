@@ -60,14 +60,6 @@
 								<Input id="signUpName" value="{LoginMode>/fullname}" placeholder="Full Name" required="true" liveChange="_LCvalidateName" valueStateText="Enter valid name"/>
 							</VBox>
 						</HBox>
-						<!-- Row 2: Email (full width) -->
-						<Label text="Email" required="true" />
-						<Input id="signUpEmail" value="{LoginMode>/Email}" placeholder="Email" type="Email" required="true" liveChange="onEmailliveChange" valueStateText="Enter valid email" />
-						<Label text="Create Password" required="true" />
-						<Input id="signUpPassword" placeholder="Enter Password" value="{LoginMode>/password}" valueState="{LoginViewModel>/frgNewPasswordValueState}" type="Password" liveChange="SM_onChnageSetAndConfirm" showValueHelp="true" valueStateText="Password must contain 1 uppercase, 1 lowercase, 1 number &amp; 1 special character" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility" maxLength="50" />
-						<Label text="Confirm Password" required="true" />
-						<Input id="signUpConfirmPassword" placeholder="Enter Confirm Password" value="{LoginMode>/comfirmpass}" valueState="{}" type="Password" change="FSM_onConfirm" showValueHelp="true" valueStateText="Enter Confirm Password" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility" maxLength="50" liveChange="FSM_onConfirm" />
-						<!-- DOB, GENDER -->
 						<Label text="Date Of Birth" required="true"/>
 						<DatePicker id="signUpDOB" displayFormat="dd-MM-yyyy" valueFormat="yyyy-MM-dd" change="onChangeDOB" />
 						<Label text="Gender" required="true"/>
@@ -77,42 +69,47 @@
 							<core:Item key="Female" text="Female"/>
 							<core:Item key="Other" text="Other"/>
 						</Select>
-						<!-- 
-						<ComboBox id="signUpCountry" change="onChangeCountry" selectedKey="{LoginMode>/Country}" placeholder="Select Country" valueStateText="Select Country" items="{path:'CountryModel>/', length:1000}" showSecondaryValues="true"><core:ListItem key="{CountryModel>countryName}" text="{CountryModel>countryName}" additionalText="{CountryModel>code}" /></ComboBox><Label text="State" required="true"/><ComboBox id="signUpState" change="onChangeState" selectedKey="{LoginMode>/State}" placeholder="Select State" valueStateText="Select State" items="{path:'StateModel>/', length:1000}" showSecondaryValues="true"><core:ListItem key="{StateModel>stateName}" text="{StateModel>stateName}"/></ComboBox><Label text="City" required="true"/><ComboBox id="signUpCity" change="onChangeCity" selectedKey="{LoginMode>/City}" placeholder="Select City" valueStateText="Select City" items="{path:'CityModel>/', length:1000}" showSecondaryValues="true"><core:ListItem key="{CityModel>cityName}" text="{CityModel>cityName}" additionalText="{CityModel>branchCode}" /></ComboBox> -->
-						<!-- COUNTRY -->
+						<!-- ================== 2) CONTACT DETAILS ================== -->
+						<Label text="Email" required="true"/>
+						<Input id="signUpEmail" value="{LoginMode>/Email}" placeholder="Email" type="Email" required="true" liveChange="onEmailliveChange" valueStateText="Enter valid email" />
 						<Label text="Country" required="true"/>
 						<ComboBox id="signUpCountry" change="onChangeCountry" selectionChange="onChangeCountry" placeholder="Select Country" valueStateText="Select a valid Country" items="{path:'CountryModel>/', length:1000}" showSecondaryValues="true">
 							<core:ListItem key="{CountryModel>countryName}" text="{CountryModel>countryName}" additionalText="{CountryModel>code}"/>
 						</ComboBox>
-						<!-- STATE -->
 						<Label text="State" required="true"/>
 						<ComboBox id="signUpState" change="onChangeState" selectionChange="onChangeState" placeholder="Select State" valueStateText="Select a valid State" items="{path:'StateModel>/', length:1000}" showSecondaryValues="true">
 							<core:ListItem key="{StateModel>stateName}" text="{StateModel>stateName}"/>
 						</ComboBox>
-						<!-- CITY -->
-						<Label text="City" required="true" />
+						<Label text="City" required="true"/>
 						<ComboBox id="signUpCity" change="onChangeCity" selectionChange="onChangeCity" placeholder="Select City" valueStateText="Select a valid City" items="{path:'CityModel>/', length:1000}" showSecondaryValues="true">
 							<core:ListItem key="{CityModel>cityName}" text="{CityModel>cityName}" additionalText="{CityModel>branchCode}"/>
 						</ComboBox>
-						<Label text="Mobile Number" required="true"/>
-						<HBox width="100%" justifyContent="Start" alignItems="Center">
-							<!-- STD ComboBox -->
+						<Label text=""/>
+						<HBox width="100%" alignItems="Center" justifyContent="Start">
 							<VBox width="26%">
-								<ComboBox id="signUpSTD" selectedKey="{LoginMode>/STDCode}" placeholder="Code" valueStateText="Select Code" showSecondaryValues="true" items="{path:'CountryModel>/', length:1000}">
+								<Label text="ISD Code" required="true"/>
+								<ComboBox id="signUpSTD" placeholder="Code" valueStateText="Select Code" showSecondaryValues="true" items="{path:'CountryModel>/', length:1000}">
 									<core:ListItem key="{CountryModel>stdCode}" text="{CountryModel>stdCode}" additionalText="{CountryModel>code}" />
 								</ComboBox>
 							</VBox>
-							<!-- Phone Input -->
-							<VBox width="74%">
+							<VBox width="74%" class="sapUiTinyMarginBegin">
+								<Label text="Mobile Number" required="true"/>
 								<Input id="signUpPhone" value="{LoginMode>/Mobileno}" placeholder="Enter Contact Number" maxLength="18" liveChange="onMobileLivechnage" valueStateText="Enter a valid mobile number" required="true" />
 							</VBox>
 						</HBox>
 						<Label text="Address" required="true"/>
-						<TextArea id="signUpAddress" rows="3" value="{LoginMode>/Address}" liveChange="onAddressChange" placeholder="Address" />
+						<TextArea id="signUpAddress" rows="3" maxLength="500" value="{LoginMode>/Address}" liveChange="onAddressChange" placeholder="Address" />
+						<HBox width="100%">
+							<Label text="Account Security" design="Bold" class="sapUiSmallMarginTop"/>
+						</HBox>
+						<!-- <Title text="Account Security" /> -->
+						<Label text="Create Password" required="true" />
+						<Input id="signUpPassword" placeholder="Enter Password" value="{LoginMode>/password}" valueState="{LoginViewModel>/frgNewPasswordValueState}" type="Password" liveChange="SM_onChnageSetAndConfirm" showValueHelp="true" valueStateText="Password must contain 1 uppercase, 1 lowercase, 1 number &amp; 1 special character" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility" maxLength="50" />
+						<Label text="Confirm Password" required="true" />
+						<Input id="signUpConfirmPassword" placeholder="Enter Confirm Password" value="{LoginMode>/comfirmpass}" type="Password" change="FSM_onConfirm" liveChange="FSM_onConfirm" showValueHelp="true" valueStateText="Enter Confirm Password" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility" maxLength="50"/>
 					</f:SimpleForm>
-					<!-- Sign Up Button -->
 					<HBox justifyContent="End" class="sapUiSmallMarginTop">
-						<Button text="Sign Up" type="Emphasized" width="120px" press="onSignUp" />
+						<Button text="Sign Up" type="Emphasized" width="120px" press="onSignUp"/>
 					</HBox>
 				</content>
 			</Panel>

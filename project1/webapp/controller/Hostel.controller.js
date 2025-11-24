@@ -825,11 +825,15 @@ sap.ui.define([
                     // ✔ Branch exists → show only branch amenities
                     console.log("🎯 Showing branch amenities:", branchList);
                     oAmenityModel.setProperty("/Amenities", this._convertAmenities(branchList));
+                // } else {
+                //     // 🔄 Branch not found → show ONLY blank fallback
+                //     const fallbackList = allList.filter(x => (x.BranchCode || "").trim() === "");
+                //     console.warn("↩️ Showing fallback amenities:", fallbackList);
+                //     oAmenityModel.setProperty("/Amenities", this._convertAmenities(fallbackList));
+                // }
                 } else {
-                    // 🔄 Branch not found → show ONLY blank fallback
-                    const fallbackList = allList.filter(x => (x.BranchCode || "").trim() === "");
-                    console.warn("↩️ Showing fallback amenities:", fallbackList);
-                    oAmenityModel.setProperty("/Amenities", this._convertAmenities(fallbackList));
+                    console.warn("🚫 No amenities found for this branch:", sBranchCode);
+                    oAmenityModel.setProperty("/Amenities", []); // show nothing
                 }
 
             } catch (err) {
@@ -1243,8 +1247,173 @@ sap.ui.define([
             utils._LCvalidatePassword(oEvent);
         },
 
-        onSignUp: async function () {
+        // onSignUp: async function () {
 
+
+        //     const oModel = this.getView().getModel("LoginMode");
+        //     const oData = oModel.getData();
+
+        //     /* ========= CONTROL GETTER ========= */
+        //     const $C = (id) => sap.ui.getCore().byId(id);
+
+        //     /* ========= SEQUENTIAL VALIDATION (follow UI order) ========= */
+
+        //     // 1) Salutation
+        //     if (!utils._LCstrictValidationComboBox($C("signUpSalutation"), "ID")) return;
+
+        //     // 2) Full Name
+        //     if (!utils._LCvalidateName($C("signUpName"), "ID")) return;
+
+        //     // 3) Email
+        //     if (!utils._LCvalidateEmail($C("signUpEmail"), "ID")) return;
+
+        //     // 4) Create Password
+        //     if (!utils._LCvalidatePassword($C("signUpPassword"), "ID")) return;
+
+        //     // 5) Confirm Password
+        //     if ($C("signUpPassword").getValue() !== $C("signUpConfirmPassword").getValue()) {
+        //         $C("signUpConfirmPassword").setValueState("Error");
+        //         $C("signUpConfirmPassword").setValueStateText("Passwords do not match");
+        //         sap.m.MessageToast.show("Passwords do not match");
+        //         return;
+        //     }
+        //     $C("signUpConfirmPassword").setValueState("Success");
+
+        //     /* ===== 6) Date of Birth + Age Check ===== */
+        //     const oDOB = $C("signUpDOB");
+        //     const dobValue = oDOB.getDateValue();
+
+        //     if (!dobValue) {
+        //         oDOB.setValueState("Error");
+        //         oDOB.setValueStateText("Date of Birth is required");
+        //         return;
+        //     }
+
+        //     // Prevent future dates
+        //     const today = new Date();
+        //     today.setHours(0, 0, 0, 0);
+        //     if (dobValue > today) {
+        //         oDOB.setValueState("Error");
+        //         oDOB.setValueStateText("Future date not allowed");
+        //         sap.m.MessageToast.show("Future date not allowed!");
+        //         return;
+        //     }
+
+        //     // Age calculation
+        //     let age = today.getFullYear() - dobValue.getFullYear();
+        //     const m = today.getMonth() - dobValue.getMonth();
+        //     if (m < 0 || (m === 0 && today.getDate() < dobValue.getDate())) age--;
+
+        //     // Strict age limits: 10–118
+        //     if (age < 10 || age > 118) {
+        //         oDOB.setValueState("Error");
+        //         oDOB.setValueStateText("Age must be between 10 and 118 years");
+        //         sap.m.MessageToast.show("Age must be between 10 and 118 years");
+        //         return;
+        //     }
+
+        //     // Valid age
+        //     oDOB.setValueState("None");
+        //     const DateOfBirth = dobValue.toISOString().split("T")[0];
+
+        //     /* ===== 7) Gender Validation + Dr Rule ===== */
+        //     const sSalutation = $C("signUpSalutation").getSelectedKey();
+        //     const sGender = $C("signUpGender").getSelectedKey();
+
+        //     if (sSalutation === "Dr." && !sGender) {
+        //         $C("signUpGender").setValueState("Error");
+        //         $C("signUpGender").setValueStateText("Please select gender");
+        //         sap.m.MessageToast.show("Please select gender");
+        //         return;
+        //     }
+
+        //     // Strict validation for Mr./Ms./Mrs.
+        //     if (!utils._LCstrictValidationSelect($C("signUpGender"))) return;
+
+        //     // 8) Country → State → City
+        //     if (!utils._LCstrictValidationComboBox($C("signUpCountry"), "ID")) return;
+        //     if (!utils._LCstrictValidationComboBox($C("signUpState"), "ID")) return;
+        //     if (!utils._LCstrictValidationComboBox($C("signUpCity"), "ID")) return;
+
+        //     // 9) Mobile Number (After location – correct UI order)
+        //     if (!utils._LCstrictValidationComboBox($C("signUpSTD"), "ID")) return;
+        //     const sSTD = $C("signUpSTD").getSelectedKey();
+        //     if (!utils._LCvalidateInternationalMobileNumberWithSTD($C("signUpPhone"), sSTD)) return;
+
+        //     // 10) Address
+        //     const addrInput = $C("signUpAddress");
+        //     const addr = addrInput.getValue().trim();
+        //     if (!addr) {
+        //         addrInput.setValueState("Error");
+        //         addrInput.setValueStateText("Address is required");
+        //         return;
+        //     }
+        //     if (addr.length < 8) {
+        //         addrInput.setValueState("Error");
+        //         addrInput.setValueStateText("Address must be at least 8 characters long");
+        //         return;
+        //     }
+
+
+        //     /* ===================== 14) TIMESTAMP ======================== */
+        //     const now = new Date();
+        //     const TimeDate =
+        //         `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ` +
+        //         `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
+
+        //     /* ===================== 15) FINAL PAYLOAD ==================== */
+        //     const payload = {
+        //         data: {
+        //             Salutation: $C("signUpSalutation").getSelectedKey(),
+        //             UserName: oData.fullname,
+        //             Role: "Customer",
+        //             EmailID: oData.Email,
+        //             Password: btoa(oData.password),
+        //             STDCode: oData.STDCode,
+        //             MobileNo: oData.Mobileno,
+        //             Status: "Active",
+        //             TimeDate,
+        //             DateOfBirth,
+        //             Gender: $C("signUpGender").getSelectedKey(),
+        //             Country: oData.Country,
+        //             State: oData.State,
+        //             City: oData.City,
+        //             Address: oData.Address
+        //         }
+        //     };
+
+        //     try {
+        //         await this.ajaxCreateWithJQuery("HM_Login", payload);
+        //         sap.m.MessageToast.show("Sign Up successful!");
+
+        //         // oModel.setData({
+        //         //     Salutation: "Mr.",
+        //         //     fullname: "",
+        //         //     Email: "",
+        //         //     STDCode: "+91",
+        //         //     Mobileno: "",
+        //         //     password: "",
+        //         //     comfirmpass: "",
+        //         //     UserID: "",
+        //         //     Gender: "",
+        //         //     Country: "",
+        //         //     State: "",
+        //         //     City: "",
+        //         //     Address: "",
+        //         //     DateOfBirth: ""
+        //         // });
+        //         this._resetAuthDialog();
+        //         this._oSignDialog.close();
+
+        //     } catch (err) {
+        //         sap.m.MessageToast.show("Sign Up failed!" + err);
+        //         console.error("SignUp Error:", err);
+        //     }
+        // },
+
+
+
+        onSignUp: async function () {
 
             const oModel = this.getView().getModel("LoginMode");
             const oData = oModel.getData();
@@ -1252,7 +1421,9 @@ sap.ui.define([
             /* ========= CONTROL GETTER ========= */
             const $C = (id) => sap.ui.getCore().byId(id);
 
-            /* ========= SEQUENTIAL VALIDATION (follow UI order) ========= */
+            /* =======================================================
+             *                1) IDENTITY VALIDATION
+             * ======================================================= */
 
             // 1) Salutation
             if (!utils._LCstrictValidationComboBox($C("signUpSalutation"), "ID")) return;
@@ -1260,22 +1431,7 @@ sap.ui.define([
             // 2) Full Name
             if (!utils._LCvalidateName($C("signUpName"), "ID")) return;
 
-            // 3) Email
-            if (!utils._LCvalidateEmail($C("signUpEmail"), "ID")) return;
-
-            // 4) Create Password
-            if (!utils._LCvalidatePassword($C("signUpPassword"), "ID")) return;
-
-            // 5) Confirm Password
-            if ($C("signUpPassword").getValue() !== $C("signUpConfirmPassword").getValue()) {
-                $C("signUpConfirmPassword").setValueState("Error");
-                $C("signUpConfirmPassword").setValueStateText("Passwords do not match");
-                sap.m.MessageToast.show("Passwords do not match");
-                return;
-            }
-            $C("signUpConfirmPassword").setValueState("Success");
-
-            /* ===== 6) Date of Birth + Age Check ===== */
+            // 3) Date of Birth (Age Check)
             const oDOB = $C("signUpDOB");
             const dobValue = oDOB.getDateValue();
 
@@ -1285,9 +1441,9 @@ sap.ui.define([
                 return;
             }
 
-            // Prevent future dates
             const today = new Date();
             today.setHours(0, 0, 0, 0);
+
             if (dobValue > today) {
                 oDOB.setValueState("Error");
                 oDOB.setValueStateText("Future date not allowed");
@@ -1295,24 +1451,20 @@ sap.ui.define([
                 return;
             }
 
-            // Age calculation
             let age = today.getFullYear() - dobValue.getFullYear();
             const m = today.getMonth() - dobValue.getMonth();
             if (m < 0 || (m === 0 && today.getDate() < dobValue.getDate())) age--;
 
-            // Strict age limits: 10–118
             if (age < 10 || age > 118) {
                 oDOB.setValueState("Error");
                 oDOB.setValueStateText("Age must be between 10 and 118 years");
                 sap.m.MessageToast.show("Age must be between 10 and 118 years");
                 return;
             }
-
-            // Valid age
             oDOB.setValueState("None");
             const DateOfBirth = dobValue.toISOString().split("T")[0];
 
-            /* ===== 7) Gender Validation + Dr Rule ===== */
+            // 4) Gender + Dr special rule
             const sSalutation = $C("signUpSalutation").getSelectedKey();
             const sGender = $C("signUpGender").getSelectedKey();
 
@@ -1323,22 +1475,34 @@ sap.ui.define([
                 return;
             }
 
-            // Strict validation for Mr./Ms./Mrs.
             if (!utils._LCstrictValidationSelect($C("signUpGender"))) return;
 
-            // 8) Country → State → City
+
+            /* =======================================================
+             *             2) CONTACT DETAILS VALIDATION
+             * ======================================================= */
+
+            // 5) Email
+            if (!utils._LCvalidateEmail($C("signUpEmail"), "ID")) return;
+
+            // 6) Country → State → City
             if (!utils._LCstrictValidationComboBox($C("signUpCountry"), "ID")) return;
             if (!utils._LCstrictValidationComboBox($C("signUpState"), "ID")) return;
             if (!utils._LCstrictValidationComboBox($C("signUpCity"), "ID")) return;
 
-            // 9) Mobile Number (After location – correct UI order)
+            // 7) Mobile Number
             if (!utils._LCstrictValidationComboBox($C("signUpSTD"), "ID")) return;
             const sSTD = $C("signUpSTD").getSelectedKey();
             if (!utils._LCvalidateInternationalMobileNumberWithSTD($C("signUpPhone"), sSTD)) return;
 
-            // 10) Address
+
+            /* =======================================================
+             *             3) ADDRESS VALIDATION
+             * ======================================================= */
+
             const addrInput = $C("signUpAddress");
             const addr = addrInput.getValue().trim();
+
             if (!addr) {
                 addrInput.setValueState("Error");
                 addrInput.setValueStateText("Address is required");
@@ -1351,13 +1515,32 @@ sap.ui.define([
             }
 
 
-            /* ===================== 14) TIMESTAMP ======================== */
+            /* =======================================================
+             *            4) ACCOUNT SECURITY VALIDATION
+             * ======================================================= */
+
+            // 8) Create Password
+            if (!utils._LCvalidatePassword($C("signUpPassword"), "ID")) return;
+
+            // 9) Confirm Password
+            if ($C("signUpPassword").getValue() !== $C("signUpConfirmPassword").getValue()) {
+                $C("signUpConfirmPassword").setValueState("Error");
+                $C("signUpConfirmPassword").setValueStateText("Passwords do not match");
+                sap.m.MessageToast.show("Passwords do not match");
+                return;
+            }
+            $C("signUpConfirmPassword").setValueState("Success");
+
+
+            /* =======================================================
+             *              5) TIMESTAMP & FINAL PAYLOAD
+             * ======================================================= */
+
             const now = new Date();
             const TimeDate =
                 `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ` +
                 `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
 
-            /* ===================== 15) FINAL PAYLOAD ==================== */
             const payload = {
                 data: {
                     Salutation: $C("signUpSalutation").getSelectedKey(),
@@ -1378,29 +1561,15 @@ sap.ui.define([
                 }
             };
 
+
+            /* =======================================================
+             *                      SUBMIT
+             * ======================================================= */
             try {
                 await this.ajaxCreateWithJQuery("HM_Login", payload);
                 sap.m.MessageToast.show("Sign Up successful!");
-
-                // oModel.setData({
-                //     Salutation: "Mr.",
-                //     fullname: "",
-                //     Email: "",
-                //     STDCode: "+91",
-                //     Mobileno: "",
-                //     password: "",
-                //     comfirmpass: "",
-                //     UserID: "",
-                //     Gender: "",
-                //     Country: "",
-                //     State: "",
-                //     City: "",
-                //     Address: "",
-                //     DateOfBirth: ""
-                // });
                 this._resetAuthDialog();
                 this._oSignDialog.close();
-
             } catch (err) {
                 sap.m.MessageToast.show("Sign Up failed!" + err);
                 console.error("SignUp Error:", err);
@@ -1534,8 +1703,8 @@ sap.ui.define([
                 return;
             }
 
-            oInput.setValueState("Success");
-            oInput.setValueStateText("Looks good");
+            oInput.setValueState("None");
+            oInput.setValueStateText("");
         },
         onChangeState: function (oEvent) {
             const $C = (id) => sap.ui.getCore().byId(id);
@@ -1574,29 +1743,34 @@ sap.ui.define([
             utils._LCvalidateName(oEvent);
         },
 
-        FSM_onConfirm: function () {
+        FSM_onConfirm: function (oEvent) {
             const oModel = this.getView().getModel("LoginMode");
-            const pass = oModel.getProperty("/password")?.trim() || "";
-            const confirm = oModel.getProperty("/comfirmpass")?.trim() || "";
+
+            // Get confirm directly from the control (live accurate value)
+            const confirm = oEvent?.getSource()?.getValue()?.trim() || "";
+
+            // Get main password directly from its input (not from model)
+            const pass = sap.ui.getCore().byId("signUpPassword").getValue().trim();
+
             const oInput = sap.ui.getCore().byId("signUpConfirmPassword");
 
-            // Required field
+            // Required
             if (!confirm) {
                 oInput.setValueState("Error");
                 oInput.setValueStateText("Confirm Password is required");
                 return;
             }
 
-            // Compare with main password
+            // Compare
             if (pass !== confirm) {
                 oInput.setValueState("Error");
                 oInput.setValueStateText("Passwords do not match");
                 return;
             }
 
-            // Correct (Do NOT show success on password)
-            oInput.setValueState("None");
-            oInput.setValueStateText("");
+            // If matched → Green
+            oInput.setValueState("Success");
+            oInput.setValueStateText("Passwords matched");
         },
         onSignIn: async function () {
             // var ofrag = sap.ui.getCore();
@@ -2052,38 +2226,58 @@ sap.ui.define([
             if (oRoomTypeCombo) oRoomTypeCombo.setEnabled(true);
         },
 
+        // onAfterRendering: function () {
+        //     setTimeout(() => {
+        //         this._startCarouselAutoSlide();
+        //     }, 500);
+        // },
+
+        // _startCarouselAutoSlide: function () {
+        //     const oView = this.getView();
+
+        //     // Find all Carousel controls rendered in the view
+        //     const aCarousels = oView.findAggregatedObjects(true, control => control.isA("sap.m.Carousel"));
+
+        //     aCarousels.forEach(carousel => {
+        //         let currentIndex = 0;
+
+        //         // Clear existing timers to avoid duplicates
+        //         if (carousel._autoSlideInterval) {
+        //             clearInterval(carousel._autoSlideInterval);
+        //         }
+
+        //         const iSlideCount = carousel.getPages().length;
+        //         if (iSlideCount <= 1) return; // Skip if only one image
+
+        //         // Start auto-slide
+        //         carousel._autoSlideInterval = setInterval(() => {
+        //             if (!carousel || carousel.bIsDestroyed) return;
+
+        //             currentIndex = (currentIndex + 1) % iSlideCount;
+        //             carousel.setActivePage(carousel.getPages()[currentIndex]);
+        //         }, 3000);
+        //     });
+        // },
         onAfterRendering: function () {
-            setTimeout(() => {
-                this._startCarouselAutoSlide();
-            }, 500);
-        },
-
-        _startCarouselAutoSlide: function () {
             const oView = this.getView();
-
-            // Find all Carousel controls rendered in the view
-            const aCarousels = oView.findAggregatedObjects(true, control => control.isA("sap.m.Carousel"));
+            const aCarousels = oView.findAggregatedObjects(true, c => c.isA("sap.m.Carousel"));
 
             aCarousels.forEach(carousel => {
-                let currentIndex = 0;
+                const oBinding = carousel.getBinding("pages");
+                if (oBinding) {
+                    // When data arrives and pages are created
+                    oBinding.attachEventOnce("dataReceived", () => {
+                        setTimeout(() => this._startAllCarouselsAutoSlide(3000), 200);
+                    });
 
-                // Clear existing timers to avoid duplicates
-                if (carousel._autoSlideInterval) {
-                    clearInterval(carousel._autoSlideInterval);
+                    // Also run if pages already available (local data, static, cached)
+                    setTimeout(() => this._startAllCarouselsAutoSlide(3000), 200);
                 }
-
-                const iSlideCount = carousel.getPages().length;
-                if (iSlideCount <= 1) return; // Skip if only one image
-
-                // Start auto-slide
-                carousel._autoSlideInterval = setInterval(() => {
-                    if (!carousel || carousel.bIsDestroyed) return;
-
-                    currentIndex = (currentIndex + 1) % iSlideCount;
-                    carousel.setActivePage(carousel.getPages()[currentIndex]);
-                }, 3000);
             });
         },
+
+
+
 
         onExit: function () {
             // Clear all intervals when leaving view
