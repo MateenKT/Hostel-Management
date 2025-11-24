@@ -95,6 +95,7 @@
 
         <!-- BOOKING HISTORY -->
        <Table 
+       mode="SingleSelectLeft"
     id="IdProfileaTable"
     items="{
         path: 'profileData>/bookings',
@@ -114,7 +115,7 @@
             <OverflowToolbar>
 						<Title text="Booking History ({=${profileData>/bookings}.length})" />
 						<ToolbarSpacer />
-						 <!-- <Button text="Edit" icon="sap-icon://edit" press="onEditBooking" type="Emphasized"/> -->
+						 <Button text="Delete"  press="onDeleteBooking" type="Emphasized"/>
 					</OverflowToolbar>
         </headerToolbar>
 

@@ -109,9 +109,9 @@ onEditFacilityDetails: function () {
  const sPriceType = this.getView().getModel("HostelModel").getProperty("/SelectedPriceType");
 
 let sUnit = "";
-if (sPriceType === "daily")  sUnit = "Per Day";
-if (sPriceType === "monthly") sUnit = "Per Month";
-if (sPriceType === "yearly")  sUnit = "Per Year";
+if (sPriceType === "Per Day")  sUnit = "Per Day";
+if (sPriceType === "Per Month") sUnit = "Per Month";
+if (sPriceType === "Per Year")  sUnit = "Per Year";
 
 this._oEditModel.setProperty("/UnitText", sUnit);
     

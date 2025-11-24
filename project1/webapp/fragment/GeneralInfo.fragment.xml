@@ -21,22 +21,20 @@
                 <core:Title text="" />
               <!-- <Input id="idUserID" value="{HostelModel>/UserID}" visible="true" /> -->
                <Label text="Room Type" />
-                            <Text id="GI_Roomtype"  text="{=${HostelModel>/BedType} + ' - ' + ${HostelModel>/ACType}}"  width="100%" />
-                            <!-- <Text text="{HostelModel>/BranchCode}"/> -->
-                           
+                            <Text id="GI_Roomtype"  text="{=${HostelModel>/BedType} + ' - ' + ${HostelModel>/ACType}}"  width="100%" /> 
              <Label text="Rent Price" />
                             <Text  text="{HostelModel>/FinalPrice} {HostelModel>/Currency}" width="100%" />     
                 <Label text="Booking Duration" required="true" />
 <ComboBox
     id="idPaymentMethod1"
     placeholder="Select Payment Method"
-    selectedKey="{HostelModel>/SelectedPriceType}"
+    value="{HostelModel>/SelectedPriceType}"
     width="100%"
     selectionChange="onRoomDurationChange"
 >
-    <core:ListItem key="daily" text="Per Day"/>
-    <core:ListItem key="monthly" text="Per Month"/>
-    <core:ListItem key="yearly" text="Per Year"/>
+    <core:Item text="Per Day"/>
+    <core:Item  text="Per Month"/>
+    <core:Item  text="Per Year"/>
 </ComboBox>
                                
                 <core:Title text="" />
@@ -83,7 +81,6 @@
     <core:Item key="9" text="9" />
     <core:Item key="10" text="10" />
     <core:Item key="11" text="11" />
-    <core:Item key="12" text="11" />
 </Select>
 
 

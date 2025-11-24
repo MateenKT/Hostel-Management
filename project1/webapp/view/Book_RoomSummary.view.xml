@@ -64,7 +64,7 @@
         'HostelModel>RoomRentPerPerson',
         'HostelModel>/Currency'
     ],formatter: '.Formatter.formatCurrency'}" />
-                <Text text="{ parts: [
+                <Text class="totalColumnBold" text="{ parts: [
         'HostelModel>GrandTotal',
         'HostelModel>/Currency'
     ],formatter: '.Formatter.formatCurrency'}" />
