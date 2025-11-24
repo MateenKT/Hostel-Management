@@ -1332,3 +1332,79 @@
 .fullHeightBox {
     height: 100% !important;
 }
+.sapUiCompFilterBar{
+    background: linear-gradient(135deg, #00b7c7, #008b96) !important;
+}
+.sapUiCompFilterBar .sapMLabel {
+    color: #ffffff !important;
+}
+/* .authDialog .sapMBtnInner {
+    background: linear-gradient(135deg, #00b7c7, #007984) !important;
+} */
+/* .authDialog button,
+.authDialog .sapMBtnInner,
+.authDialog .sapMBtnIcon {
+    color: #fff !important;
+} */
+/* AUTH DIALOG - NORMAL STATE */
+/* .authDialog .sapMBtnInner {
+  background-color: #1bb2bf !important;
+    color: #ffffff !important;
+    border: 2px solid #0074d9 !important;  /* blue border */
+    /* border-radius: 10px !important;
+    font-weight: bold;
+} */
+/* AUTH DIALOG - HOVER */
+/* .authDialog .sapMBtn:hover .sapMBtnInner,
+.authDialog .sapMBtn.sapMBtnHover .sapMBtnInner {
+    background: #ffffff !important;
+    color: #005bbf !important;      /* BLUE text */
+    /* border-color: #005bbf !important;
+}
+/* AUTH DIALOG - ACTIVE */
+/* .authDialog .sapMBtn.sapMBtnActive .sapMBtnInner {
+    background: #e6f0ff !important; /* light blue */
+    /* color: #005bbf !important; */
+    /* border-color: #005bbf !important;
+}
+.authDialog .sapUiIcon {
+  background-color: #1bb2bf !important;
+    color: #ffffff !important;
+}
+.authDialog .sapUiIcon :hover{
+  background-color: #ffffff !important;
+    color: #1781cd !important;
+} */
+span.sapMBtnInner.sapMBtnEmphasized {
+    background-color: #00ACC1 !important; /* light teal */
+    color: #FFFFFF !important;
+    border-radius: 8px !important;
+    border: none !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+/* span.sapMBtnInner.sapMBtnEmphasized:hover {
+    background-color: #0097A7 !important; /* primary teal */
+/* } */ 
+
+/* Pressed (active) */
+/* .sapMBtnEmphasized.sapMBtnActive > .sapMBtnInner {
+    background-color: #007E8A !important; /* deep teal */
+/* } */ 
+
+/* .sapMBtn > .sapMBtnInner > .sapMBtnContent {
+    color: #FFFFFF !important;
+} */
+
+.sapMBtn:hover>.sapMBtnHoverable {
+    color: #fff;
+    background-color: #ffffff;
+    border-color: #ffffff;
+}
+/* Make ONLY FilterBar CLEAR button text white (normal) */
+.sapUiCompFilterBar .sapUiCompFilterBarButtons .sapMBtnTransparent .sapMBtnContent bdi {
+    color: #ffffff !important;
+}
+/* Make ONLY FilterBar CLEAR button text white (normal) */
+.sapUiCompFilterBar .sapUiCompFilterBarButtons .sapMBtnTransparent .sapMBtnContent bdi:hover {
+    color: #0e57bf !important;
+}
