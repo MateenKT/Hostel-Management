@@ -377,21 +377,29 @@ sap.ui.define([
             const oModel = oView.getModel("HostelModel");
             const oData = oModel.getData();
             const sCurrency = oData.Currency || "INR";
-            // Define mapping between tile type → model property
+
+            // Map type -> model property
             const mPriceMap = {
                 daily: "Price",
                 monthly: "MonthPrice",
                 yearly: "YearPrice"
             };
-            // Safely pick the right price
+
+            // Map type -> backend label
+            const mTypeLabel = {
+                daily: "Per Day",
+                monthly: "Per Month",
+                yearly: "Per Year"
+            };
+
             const sPriceKey = mPriceMap[sType];
             const sPriceValue = sPriceKey ? oData[sPriceKey] : "N/A";
-            // Clear any previously selected plan(for visual and logical consistency)
+
+            // Reset then set values
             oModel.setProperty("/SelectedPriceType", "");
             oModel.setProperty("/SelectedPriceValue", "");
 
-            // Update the model with only the chosen plan
-            oModel.setProperty("/SelectedPriceType", sType);
+            oModel.setProperty("/SelectedPriceType", mTypeLabel[sType] || sType);
             oModel.setProperty("/SelectedPriceValue", sPriceValue);
             oModel.setProperty("/SelectedCurrency", sCurrency);
 
@@ -400,26 +408,27 @@ sap.ui.define([
             let aSiblings = [];
 
             if (oParent.getItems) {
-                aSiblings = oParent.getItems(); // HBox/VBox/List/Grid
+                aSiblings = oParent.getItems();
             } else if (oParent.getContent) {
-                aSiblings = oParent.getContent(); // layout controls
+                aSiblings = oParent.getContent();
             }
 
-            // Remove highlight from all other tiles
             aSiblings.forEach(oItem => {
                 if (oItem.removeStyleClass) {
                     oItem.removeStyleClass("selectedTile");
                     oItem.addStyleClass("defaultTile");
                 }
             });
-            // Add selection highlight to current one
+
             oTile.removeStyleClass("defaultTile");
             oTile.addStyleClass("selectedTile");
-            // User feedback
+
+            // Toast using label, not raw key
             sap.m.MessageToast.show(
-                `Selected ${sType.charAt(0).toUpperCase() + sType.slice(1)} plan — ${sCurrency} ${sPriceValue}`
+                `Selected ${mTypeLabel[sType]} — ${sCurrency} ${sPriceValue}`
             );
         },
+
 
 
 
@@ -458,6 +467,7 @@ sap.ui.define([
                 Source: "UI5_HostelApp",
                 Status: "Pending"
             };
+            console.log("📌 FINAL BOOKING PAYLOAD:", oBookingData);
 
             // 3️⃣ Merge and clean
             const oMergedData = {
@@ -627,8 +637,6 @@ sap.ui.define([
 
 
 
-
-
         _bindCarousel: function () {
             const oCarousel = this._oRoomDetailFragment
                 .findAggregatedObjects(true, obj => obj.isA && obj.isA("sap.m.Carousel"))[0];
@@ -645,30 +653,49 @@ sap.ui.define([
                     decorative: false
                 })
             });
-
-            if (this._carouselInterval) {
-                clearInterval(this._carouselInterval);
-                this._carouselInterval = null;
-            }
-
-            const that = this;
-            setTimeout(() => {
-                that._carouselInterval = setInterval(() => {
-                    const aPages = oCarousel.getPages();
-                    if (aPages.length <= 1) return;
-
-                    const sCurrent = oCarousel.getActivePage();
-                    const oCurrent = sap.ui.getCore().byId(sCurrent);
-                    if (!oCurrent) return;
-
-                    const iIndex = aPages.indexOf(oCurrent);
-                    const iNext = (iIndex + 1) % aPages.length;
-
-                    oCarousel.setActivePage(aPages[iNext]);
-
-                }, 3500);
-            }, 400);
         },
+
+
+        // _bindCarousel: function () {
+        //     const oCarousel = this._oRoomDetailFragment
+        //         .findAggregatedObjects(true, obj => obj.isA && obj.isA("sap.m.Carousel"))[0];
+
+        //     if (!oCarousel) return;
+
+        //     oCarousel.unbindAggregation("pages");
+        //     oCarousel.bindAggregation("pages", {
+        //         path: "HostelModel>/ImageList",
+        //         template: new sap.m.Image({
+        //             src: "{HostelModel>}",
+        //             width: "100%",
+        //             densityAware: false,
+        //             decorative: false
+        //         })
+        //     });
+
+        //     if (this._carouselInterval) {
+        //         clearInterval(this._carouselInterval);
+        //         this._carouselInterval = null;
+        //     }
+
+        //     const that = this;
+        //     setTimeout(() => {
+        //         that._carouselInterval = setInterval(() => {
+        //             const aPages = oCarousel.getPages();
+        //             if (aPages.length <= 1) return;
+
+        //             const sCurrent = oCarousel.getActivePage();
+        //             const oCurrent = sap.ui.getCore().byId(sCurrent);
+        //             if (!oCurrent) return;
+
+        //             const iIndex = aPages.indexOf(oCurrent);
+        //             const iNext = (iIndex + 1) % aPages.length;
+
+        //             oCarousel.setActivePage(aPages[iNext]);
+
+        //         }, 3500);
+        //     }, 400);
+        // },
 
 
 
@@ -777,6 +804,7 @@ sap.ui.define([
 
                         // Bind carousel
                         this._bindCarousel();
+                        
 
                         // Now load facilities in background
                         this._LoadFacilities(oSelected.BranchCode);
@@ -2258,37 +2286,37 @@ sap.ui.define([
         //         }, 3000);
         //     });
         // },
-        onAfterRendering: function () {
-            const oView = this.getView();
-            const aCarousels = oView.findAggregatedObjects(true, c => c.isA("sap.m.Carousel"));
+        // onAfterRendering: function () {
+        //     const oView = this.getView();
+        //     const aCarousels = oView.findAggregatedObjects(true, c => c.isA("sap.m.Carousel"));
 
-            aCarousels.forEach(carousel => {
-                const oBinding = carousel.getBinding("pages");
-                if (oBinding) {
-                    // When data arrives and pages are created
-                    oBinding.attachEventOnce("dataReceived", () => {
-                        setTimeout(() => this._startAllCarouselsAutoSlide(3000), 200);
-                    });
+        //     aCarousels.forEach(carousel => {
+        //         const oBinding = carousel.getBinding("pages");
+        //         if (oBinding) {
+        //             // When data arrives and pages are created
+        //             oBinding.attachEventOnce("dataReceived", () => {
+        //                 setTimeout(() => this._startAllCarouselsAutoSlide(3000), 200);
+        //             });
 
-                    // Also run if pages already available (local data, static, cached)
-                    setTimeout(() => this._startAllCarouselsAutoSlide(3000), 200);
-                }
-            });
-        },
-
-
+        //             // Also run if pages already available (local data, static, cached)
+        //             setTimeout(() => this._startAllCarouselsAutoSlide(3000), 200);
+        //         }
+        //     });
+        // },
 
 
-        onExit: function () {
-            // Clear all intervals when leaving view
-            const oView = this.getView();
-            const aCarousels = oView.findAggregatedObjects(true, c => c.isA("sap.m.Carousel"));
-            aCarousels.forEach(c => {
-                if (c._autoSlideInterval) {
-                    clearInterval(c._autoSlideInterval);
-                }
-            });
-        },
+
+
+        // onExit: function () {
+        //     // Clear all intervals when leaving view
+        //     const oView = this.getView();
+        //     const aCarousels = oView.findAggregatedObjects(true, c => c.isA("sap.m.Carousel"));
+        //     aCarousels.forEach(c => {
+        //         if (c._autoSlideInterval) {
+        //             clearInterval(c._autoSlideInterval);
+        //         }
+        //     });
+        // },
         onPressBookingRow: function (oEvent) {
 
             var oContext = oEvent.getSource().getBindingContext("profileData");

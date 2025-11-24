@@ -204,34 +204,126 @@ sap.ui.define([
         oFilterBar.clear(); // Clear all filters in the FilterBar
       }
     },
+/////////////////////////////////////////////////////////
+    _carouselTimers: new Map(),
+
+    /* Start auto-slide + interaction handling */
     _startAllCarouselsAutoSlide: function (iDelay = 3000) {
       try {
         const oView = this.getView();
-        const aCarousels = oView.findAggregatedObjects(true, control => control.isA("sap.m.Carousel"));
+        if (!oView) return;
+
+        const aCarousels = oView.findAggregatedObjects(true, c => c?.isA("sap.m.Carousel"));
 
         aCarousels.forEach(carousel => {
           if (!carousel || carousel.bIsDestroyed) return;
 
-          const iSlideCount = carousel.getPages().length;
-          if (iSlideCount <= 1) return;
+          const pages = carousel.getPages();
+          if (!pages || pages.length <= 1) return;
 
-          // Clear old interval if exists
-          if (carousel._autoSlideInterval) {
-            clearInterval(carousel._autoSlideInterval);
+          /* Stop any old timers for this carousel */
+          this._clearCarouselTimer(carousel.getId());
+
+          /* Safe current index */
+          let index = carousel.indexOfPage(carousel.getActivePage());
+
+          /* Start interval autoplay */
+          const autoTimer = setInterval(() => {
+            if (carousel.bIsDestroyed) return;
+            index = (index + 1) % pages.length;
+            carousel.setActivePage(pages[index]);
+          }, iDelay);
+
+          this._carouselTimers.set(carousel.getId(), autoTimer);
+
+          /* ------------ USER INTERACTION LOGIC ------------- */
+
+          /* Pause immediately when user touches/clicks */
+          const fnPause = () => {
+            this._pauseCarouselAutoSlide(carousel);
+            carousel._userTouched = true;
+          };
+
+          carousel.attachBrowserEvent("touchstart", fnPause);
+          carousel.attachBrowserEvent("mousedown", fnPause);
+
+          /* If the user swipes to the next image → resume after delay */
+          if (carousel.onAfterSwipe) {
+            const origSwipeFn = carousel.onAfterSwipe.bind(carousel);
+
+            carousel.onAfterSwipe = (e) => {
+              origSwipeFn?.(e);
+              clearTimeout(carousel._resumeTimer);
+
+              carousel._resumeTimer = setTimeout(() => {
+                this._resumeCarouselAutoSlide(carousel, iDelay);
+              }, 2000); // resume 2 sec after swipe
+            };
           }
 
-          let currentIndex = carousel.getActivePageIndex ? carousel.getActivePageIndex() : 0;
+          /* If user just taps without swiping → resume later */
+          const fnEnd = () => {
+            clearTimeout(carousel._resumeTimer);
+            carousel._resumeTimer = setTimeout(() => {
+              this._resumeCarouselAutoSlide(carousel, iDelay);
+            }, 3000); // resume after 3 sec idle
+          };
 
-          carousel._autoSlideInterval = setInterval(() => {
-            if (!carousel || carousel.bIsDestroyed) return;
-            currentIndex = (currentIndex + 1) % iSlideCount;
-            carousel.setActivePage(carousel.getPages()[currentIndex]);
-          }, iDelay);
+          carousel.attachBrowserEvent("touchend", fnEnd);
+          carousel.attachBrowserEvent("mouseup", fnEnd);
+
+          /* ------------ END INTERACTION LOGIC ------------- */
         });
+
       } catch (err) {
-        console.error("Carousel Auto Slide Error:", err);
+        console.error("Auto Slide Error:", err);
       }
     },
+
+    /* Stop autoplay for one carousel */
+    _pauseCarouselAutoSlide: function (carousel) {
+      const id = carousel.getId();
+      if (this._carouselTimers.has(id)) {
+        clearInterval(this._carouselTimers.get(id));
+        this._carouselTimers.delete(id);
+      }
+    },
+
+    /* Resume autoplay safely */
+    _resumeCarouselAutoSlide: function (carousel, iDelay = 3000) {
+      if (!carousel || carousel.bIsDestroyed) return;
+
+      const pages = carousel.getPages();
+      if (!pages || pages.length <= 1) return;
+
+      let index = carousel.indexOfPage(carousel.getActivePage());
+
+      const interval = setInterval(() => {
+        if (carousel.bIsDestroyed) return;
+        index = (index + 1) % pages.length;
+        carousel.setActivePage(pages[index]);
+      }, iDelay);
+
+      this._carouselTimers.set(carousel.getId(), interval);
+    },
+
+    /* Kill all autoplay timers */
+    _clearCarouselTimer: function (id) {
+      if (this._carouselTimers.has(id)) {
+        clearInterval(this._carouselTimers.get(id));
+        this._carouselTimers.delete(id);
+      }
+    },
+
+    _clearAllCarouselTimers: function () {
+      this._carouselTimers.forEach(interval => clearInterval(interval));
+      this._carouselTimers.clear();
+    },
+
+    /* Auto cleanup with View destruction */
+    onExit: function () {
+      this._clearAllCarouselTimers();
+    }
 
   })
 });
