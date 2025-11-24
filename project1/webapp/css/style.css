@@ -1408,6 +1408,9 @@ span.sapMBtnInner.sapMBtnEmphasized {
 .sapUiCompFilterBar .sapUiCompFilterBarButtons .sapMBtnTransparent .sapMBtnContent bdi:hover {
     color: #0e57bf !important;
 }
+.totalColumnBold {
+    font-weight: bold;
+}
 /* NORMAL — make CLEAR text white */
 .sapUiCompFilterBar .sapUiCompFilterBarButtons 
     .sapMBtnTransparent .sapMBtnInner .sapMBtnContent bdi {

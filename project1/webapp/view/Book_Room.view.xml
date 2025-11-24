@@ -85,7 +85,7 @@
         
     >
 
-        <ScrollContainer width="100%" height="100%" vertical="true">
+        <ScrollContainer width="100%" height="100%" vertical="true" horizontal="false">
       
             <VBox id="idPersonalContainer1" class="sapUiSmallMargin" width="100%"/>
         </ScrollContainer>

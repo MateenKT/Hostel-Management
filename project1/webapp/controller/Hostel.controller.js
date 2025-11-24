@@ -16,7 +16,6 @@ sap.ui.define([
             this._getBrowserLocation();
 
         },
-
         _getBrowserLocation: function () {
             if (!navigator.geolocation) {
                 sap.m.MessageToast.show("Geolocation not supported!");
@@ -111,10 +110,10 @@ sap.ui.define([
                 ]
             }), "profileMenuModel");
 
-            oView.setModel(new sap.ui.model.json.JSONModel({ isEditMode: false }), "saveModel");
-            oView.setModel(new sap.ui.model.json.JSONModel({ isOtpSelected: false, isPasswordSelected: true }), "LoginViewModel");
-            oView.setModel(new sap.ui.model.json.JSONModel({ fullname: "", Email: "", Mobileno: "", password: "", comfirmpass: "" }), "LoginMode");
-            oView.setModel(new sap.ui.model.json.JSONModel({ selectedSection: "profile" }), "profileSectionModel");
+            oView.setModel(new JSONModel({ isEditMode: false }), "saveModel");
+            oView.setModel(new JSONModel({ isOtpSelected: false, isPasswordSelected: true }), "LoginViewModel");
+            oView.setModel(new JSONModel({ fullname: "", Email: "", Mobileno: "", password: "", comfirmpass: "" }), "LoginMode");
+            oView.setModel(new JSONModel({ selectedSection: "profile" }), "profileSectionModel");
 
             // 5️⃣ Hardcoded branches (initial fallback)
             const aBranches = [
@@ -123,7 +122,7 @@ sap.ui.define([
                 { BranchCode: "BR003", BranchName: "Nagpur" },
                 { BranchCode: "BR004", BranchName: "Nashik" }
             ];
-            oView.setModel(new sap.ui.model.json.JSONModel({ Branches: aBranches }), "BranchModel");
+            oView.setModel(new JSONModel({ Branches: aBranches }), "BranchModel");
         },
 
         CustomerDetails: async function () {
@@ -370,10 +369,6 @@ sap.ui.define([
         //         sap.m.MessageToast.show("Failed to load bed type data.");
         //     }
         // },
-
-
-
-
 
         onSelectPricePlan: function (oEvent) {
             const oTile = oEvent.getSource();
@@ -793,7 +788,7 @@ sap.ui.define([
                 // Fragment already exists (2nd, 3rd, nth time)
 
                 this._oRoomDetailFragment.setModel(oHostelModel, "HostelModel");
-                this._oRoomDetailFragment.setModel(oView.getModel("FacilityModel"), "FacilityModel");
+                this._oRoomDetailFragment.setModel(oView.getModel("FacilityModel"), "FacilityModel");   
 
                 // Open instantly
                 this._oRoomDetailFragment.open();
@@ -808,10 +803,6 @@ sap.ui.define([
                 console.error("❌ viewDetails error:", err);
             }
         },
-
-
-
-
 
         _LoadAmenities: async function (sBranchCode) {
             console.log("📌 Amenity load for branch:", sBranchCode); //      sBranchCode
@@ -857,7 +848,6 @@ sap.ui.define([
             }));
         },
 
-
         onRoomDetailOpened: function () {
             // Get the branch code from the dialog's model
             if (this._oRoomDetailFragment) {
@@ -865,7 +855,6 @@ sap.ui.define([
                 if (oModel) {
                     const sBranchCode = oModel.getProperty("/BranchCode");
                     this._LoadAmenities(sBranchCode);
-                    console.log("sBranchCodevvvvvvsBranchCodesBranchCodevvvvvvsBranchCodesBranchCodevvvvvvsBranchCodesBranchCodevvvvvvsBranchCode", sBranchCode);
                 }
             }
         },
@@ -1609,17 +1598,6 @@ sap.ui.define([
             oInput.setValueState("None");
             oInput.setValueStateText("");
         },
-
-
-
-
-
-
-
-
-
-
-
         onSignIn: async function () {
             // var ofrag = sap.ui.getCore();
             var oModel = this.getView().getModel("LoginMode");

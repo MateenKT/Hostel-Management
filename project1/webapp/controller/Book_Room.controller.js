@@ -956,6 +956,7 @@ _createDynamicPersonsUI: function () {
           editable: true,
           title: "Person " + (i + 1) + " Details",
           layout: "ColumnLayout",
+          adjustLabelSpan: false,
           labelSpanXL: 4,
           labelSpanL: 3,
           labelSpanM: 4,
@@ -970,6 +971,7 @@ _createDynamicPersonsUI: function () {
                   text: "Fill Yourself"
                 }),
                 new sap.m.CheckBox({
+                  width: "100%",
                   id: that.createId("IDSelfCheck_" + i),
                  select: function (oEvent) {
     const oView = that.getView();
@@ -1006,7 +1008,7 @@ _createDynamicPersonsUI: function () {
         aPersons[0].CustomerEmail = oUser.EmailID || "";
         aPersons[0].MobileNo = oUser.MobileNo || "";
         aPersons[0].UserID = oUser.UserID || "";
-        that.Formatter.DateFormat(aPersons[0].DateOfBirth) = that.Formatter.DateFormat(oUser.DateOfBirth) || "";
+        aPersons[0].DateOfBirth = oUser.DateOfBirth || "";
         aPersons[0].Gender = oUser.Gender || "";
         aPersons[0].Country = oUser.Country || "";
         aPersons[0].State = oUser.State || "";
@@ -1041,6 +1043,7 @@ _createDynamicPersonsUI: function () {
               maxLength:40
             }),
             new sap.m.Select({
+              width: "100%",
               selectedKey: "{HostelModel>/Persons/" + i + "/Salutation}",
               items: [
                  new sap.ui.core.ListItem({
@@ -1051,13 +1054,14 @@ _createDynamicPersonsUI: function () {
                   key: "Mr.",
                   text: "Mr"
                 }), new sap.ui.core.ListItem({
-                  key: "Mrs",
+                  key: "Mrs.",
                   text: "Mrs"
                 })
                 
               ]
             }),
             new sap.m.Input({
+              width: "100%",
               value: "{HostelModel>/Persons/" + i + "/FullName}",
               maxLength:40
             }),
@@ -1066,6 +1070,7 @@ _createDynamicPersonsUI: function () {
               required: true
             }),
             new sap.m.Input({
+            
               value: "{HostelModel>/Persons/" + i + "/UserID}",
               editable: false,
               visible: false
@@ -1076,6 +1081,7 @@ _createDynamicPersonsUI: function () {
               required: true
             }),
             new sap.m.DatePicker({
+              width: "100%",
               value: "{HostelModel>/Persons/" + i + "/DateOfBirth}",
               formatter: that.DateFormat,
               valueFormat: "dd/MM/yyyy",
@@ -1102,6 +1108,7 @@ _createDynamicPersonsUI: function () {
               required: true
             }),
             new sap.m.Select({
+              width: "100%",
               selectedKey: "{HostelModel>/Persons/" + i + "/Gender}",
               items: [
                  new sap.ui.core.ListItem({
@@ -1129,6 +1136,7 @@ _createDynamicPersonsUI: function () {
               type:"Email"
 						}),
 						new sap.m.Input({
+              width: "100%",
 							value: "{HostelModel>/Persons/" + i + "/CustomerEmail}"
 						}),
 
@@ -1138,6 +1146,7 @@ _createDynamicPersonsUI: function () {
 						}),
 
 						 new sap.m.ComboBox({
+              width: "100%",
             selectedKey: "{HostelModel>/Persons/" + i + "/Country}",
             items: {
                 path: "CountryModel>/",
@@ -1202,6 +1211,7 @@ _createDynamicPersonsUI: function () {
               required: true, 
 						}),
         new sap.m.ComboBox({
+          width: "100%",
             id: that.createId("ID_State_" + i),
             selectedKey: "{HostelModel>/Persons/" + i + "/State}",
             items: {
@@ -1244,6 +1254,7 @@ _createDynamicPersonsUI: function () {
 						}),
 
         new sap.m.ComboBox({
+          width: "100%",
             id: that.createId("ID_City_" + i),
             selectedKey: "{HostelModel>/Persons/" + i + "/City}",
             items: {
@@ -1268,10 +1279,12 @@ _createDynamicPersonsUI: function () {
 						}),
 
 		 new sap.m.Input({
+      
             value: "{HostelModel>/Persons/" + i + "/STDCode}",
         }),
 
              new sap.m.Input({
+              width: "100%",
             id: that.createId("ID_Mobile_" + i),
             value: "{HostelModel>/Persons/" + i + "/MobileNo}",
             type: "Number", maxLength: 20,
@@ -1323,6 +1336,7 @@ _createDynamicPersonsUI: function () {
               required: true
             }),
             new sap.m.TextArea({
+              width: "100%",
               value: "{HostelModel>/Persons/" + i + "/Address}",
               placeholder: "Enter Permanent Address",
               rows: 3,
@@ -2124,25 +2138,25 @@ switch (sType) {
     },
   
  
-    onSwitchToSignIn: function () {
-      var oSignInPanel = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInPanel");
-      var oSignUpPanel = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpPanel");
+    // onSwitchToSignIn: function () {
+    //   var oSignInPanel = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInPanel");
+    //   var oSignUpPanel = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpPanel");
 
-      oSignInPanel.setVisible(true);
-      oSignUpPanel.setVisible(false);
+    //   oSignInPanel.setVisible(true);
+    //   oSignUpPanel.setVisible(false);
 
-      this.getView().getModel("LoginViewModel").setProperty("/selectedAccountType", "personal");
-    },
+    //   this.getView().getModel("LoginViewModel").setProperty("/selectedAccountType", "personal");
+    // },
 
-    onSwitchToSignUp: function () {
-      var oSignInPanel = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInPanel");
-      var oSignUpPanel = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpPanel");
+    // onSwitchToSignUp: function () {
+    //   var oSignInPanel = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInPanel");
+    //   var oSignUpPanel = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpPanel");
 
-      oSignInPanel.setVisible(false);
-      oSignUpPanel.setVisible(true);
+    //   oSignInPanel.setVisible(false);
+    //   oSignUpPanel.setVisible(true);
 
-      this.getView().getModel("LoginViewModel").setProperty("/selectedAccountType", "biz");
-    },
+    //   this.getView().getModel("LoginViewModel").setProperty("/selectedAccountType", "biz");
+    // },
 
     // Sign In
     onSignIn: async function () {
@@ -2214,11 +2228,11 @@ switch (sType) {
 
     // Ensure Persons array exists
     if (aPersons && aPersons.length > 0) {
-
+        const DOB =this.Formatter.DateFormat(oMatchedUser.DateOfBirth)
         // Fill Person 1 details
         aPersons[0].Salutation      = oMatchedUser.Salutation || "";
         aPersons[0].FullName        = oMatchedUser.UserName || "";
-        aPersons[0].DateOfBirth     = oMatchedUser.DateOfBirth || "";
+        aPersons[0].DateOfBirth     = DOB;
         aPersons[0].Gender          = oMatchedUser.Gender || "";
         aPersons[0].MobileNo        = oMatchedUser.MobileNo || "";
         aPersons[0].CustomerEmail   = oMatchedUser.EmailID || "";
@@ -2227,7 +2241,11 @@ switch (sType) {
         aPersons[0].City            = oMatchedUser.City || "";
         aPersons[0].Address         = oMatchedUser.Address || "";
         aPersons[0].STDCode         = oMatchedUser.STDCode || "";
-        aPersons[0].UserID          = oMatchedUser.UserID || "";
+
+       aPersons.forEach(p => {
+    p.UserID = oMatchedUser.UserID;
+        });
+
 
         oHostelModel.refresh(true);
 
@@ -2248,6 +2266,21 @@ switch (sType) {
         sap.m.MessageToast.show("Failed to fetch login data: " + err);
       }
     },
+     SM_onTogglePasswordVisibility: function (oEvent) {
+            var oInput = oEvent.getSource();
+            var sType = oInput.getType() === "Password" ? "Text" : "Password";
+            oInput.setType(sType);
+            // Toggle the value help icon properly without losing the value
+            var sIcon =
+                sType === "Password" ? "sap-icon://show" : "sap-icon://hide";
+            oInput.setValueHelpIconSrc(sIcon);
+            // Ensure the current value of the password is retained
+            var sCurrentValue = oInput.getValue();
+            oInput.setValue(sCurrentValue);
+        },
+        SM_onChnageSetAndConfirm: function (oEvent) {
+            utils._LCvalidatePassword(oEvent);
+        },
 		onUserlivechange: function (oEvent) {
 			utils._LCvalidateMandatoryField(oEvent);
 		},
@@ -2516,12 +2549,15 @@ else if (oData.SelectedPriceType === "hourly") {
                  State: p.State,
                  City: p.City,
                  PermanentAddress: p.Address,
-                 Documents: p.Document ? [{
-                     DocumentType: p.DocumentType || "ID Proof",
-                     File: p.Document,
-                     FileName: p.FileName || "Document",
-                     FileType: p.FileType || "application/pdf"
-                 }] : [],
+                 Documents: (p.Documents && p.Documents.length > 0)
+    ? p.Documents.map(doc => ({
+        DocumentType: "ID Proof",
+        File: doc.Document,
+        FileName: doc.FileName,
+        FileType: doc.FileType
+    }))
+    : [],
+
                  Booking: bookingData,
                  FacilityItems: facilityData,
                  PaymentDetails: [oData.PaymentDetails]
@@ -2543,10 +2579,7 @@ else if (oData.SelectedPriceType === "hourly") {
          let sMessage = "Booking Successful!\n\n";
 
          aBookingDetails.forEach((item, index) => {
-             sMessage +=
-                //  "Customer :" +  (index + 1) +"\n"+
-                //  "Customer ID: " + item.CustomerID + "\n" +
-                 "Booking ID: " + item.BookingID;
+             sMessage += "Booking ID: " + item.BookingID + "\n";
          });
 
          // Show success box

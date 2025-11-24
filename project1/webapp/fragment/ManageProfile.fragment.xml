@@ -26,7 +26,7 @@
     </customHeader>
 
     <VBox class="profileMainContainer sapUiSmallMargin">
-
+    
         <!-- PROFILE CARD -->
       <f:Card class="profileCard">
     <f:content>
@@ -122,6 +122,8 @@
             <Column><Text text="Start Date"/></Column>
             <Column><Text text="Room"/></Column>
             <Column><Text text="Amount"/></Column>
+            <Column><Text text="Status"/></Column>
+
         </columns>
 
         <items>
@@ -130,6 +132,7 @@
                     <Text text="{path:'profileData>Startdate'}"/>
                     <Text text="{profileData>room}"/>
                     <Text text="{path:'profileData>amount', formatter: '.Formatter.formatCurrency'}"/>
+                    <Text text="{path:'profileData>status'}"/>
                 </cells>
             </ColumnListItem>
         </items>

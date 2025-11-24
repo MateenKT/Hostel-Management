@@ -68,7 +68,12 @@
                     />
                 </ComboBox>
 
-              <Label 
+
+
+
+                <Label text="Start Date" />
+                <DatePicker id="editStartDate" value="{edit>/StartDate}" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd" change="onEditDateChange" />
+                              <Label 
     text="How many Month/Year"  
     visible="{= ${edit>/UnitText} !== 'Per Day' &amp;&amp; ${edit>/UnitText} !== 'Per Hour' }" 
 />
@@ -95,10 +100,6 @@
     <core:Item key="11" text="11" />
     <core:Item key="12" text="12" />
 </Select>
-
-
-                <Label text="Start Date" />
-                <DatePicker id="editStartDate" value="{edit>/StartDate}" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd" change="onEditDateChange" />
 
                 <Label text="End Date" />
                 <DatePicker id="editEndDate" editable="{= ${edit>/UnitText} !== 'Per Month' &amp;&amp; ${edit>/UnitText} !== 'Per Year' }"  value="{path:'edit>/EndDate'}" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd" change="onEditDateChange"  />

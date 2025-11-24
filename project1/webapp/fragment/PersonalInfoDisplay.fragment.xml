@@ -88,6 +88,7 @@
             <Title text="Selected Facilities" level="H4" />
         </Toolbar>
         <FlexBox
+             wrap= "Wrap"   
             alignItems="Start"
             justifyContent="Start"
             class="sapUiSmallMarginTop"
@@ -128,7 +129,7 @@
                 <Column minScreenWidth="Desktop" demandPopin="true" ><Text text="Start Date" /></Column>
                 <Column demandPopin="true" minScreenWidth="Desktop"><Text text="End Date" /></Column>
                 <Column minScreenWidth="Desktop" demandPopin="true" ><Text text="Days" /></Column>
-                <Column demandPopin="true" ><Text text="Total" /></Column>
+                <Column demandPopin="true" ><Text class="sapUiSmallBold" text="Total" /></Column>
             </columns>
 
             <items>
@@ -140,7 +141,7 @@
                         <Text text="{HostelModel>StartDate}" />
                         <Text text="{HostelModel>EndDate}" />
                         <Text text="{HostelModel>TotalDays}" />
-                        <Text text="{= ${HostelModel>TotalAmount}.toFixed(2) + ' ' + ${HostelModel>/Currency} }" />
+                        <Text class="totalColumnBold" text="{= ${HostelModel>TotalAmount}.toFixed(2) + ' ' + ${HostelModel>/Currency} }" />
                     </cells>
                 </ColumnListItem>
             </items>
