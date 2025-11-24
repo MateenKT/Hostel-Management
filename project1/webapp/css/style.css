@@ -57,7 +57,7 @@
 
 /* Login Button */
 .loginButton {
-  background-color: #1bb2bf !important;
+  background: linear-gradient(135deg, #00b7c7, #008b96) !important;
   border-radius: 10px !important;
   color: white !important;
   font-size: 1rem !important;
@@ -1406,5 +1406,33 @@ span.sapMBtnInner.sapMBtnEmphasized {
 }
 /* Make ONLY FilterBar CLEAR button text white (normal) */
 .sapUiCompFilterBar .sapUiCompFilterBarButtons .sapMBtnTransparent .sapMBtnContent bdi:hover {
+    color: #0e57bf !important;
+}
+/* NORMAL — make CLEAR text white */
+.sapUiCompFilterBar .sapUiCompFilterBarButtons 
+    .sapMBtnTransparent .sapMBtnInner .sapMBtnContent bdi {
+    color: #ffffff !important;
+}
+
+/* HOVER — when mouse enters the button */
+.sapUiCompFilterBar .sapUiCompFilterBarButtons 
+    .sapMBtnTransparent.sapMBtnHover .sapMBtnInner {
+    background-color: #ffffff !important; /* white background */
+}
+
+/* HOVER — change text to BLUE */
+.sapUiCompFilterBar .sapUiCompFilterBarButtons 
+    .sapMBtnTransparent.sapMBtnHover .sapMBtnInner .sapMBtnContent bdi {
+    color: #0e57bf !important; /* blue text */
+}
+
+/* ACTIVE (click) — keep same as hover */
+.sapUiCompFilterBar .sapUiCompFilterBarButtons 
+    .sapMBtnTransparent.sapMBtnActive .sapMBtnInner {
+    background-color: #ffffff !important;
+}
+
+.sapUiCompFilterBar .sapUiCompFilterBarButtons 
+    .sapMBtnTransparent.sapMBtnActive .sapMBtnInner .sapMBtnContent bdi {
     color: #0e57bf !important;
 }
