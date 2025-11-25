@@ -131,7 +131,7 @@
         },
          {
           "name": "RouteFacilitis",
-          "pattern": "Facilitis",
+          "pattern": "Facilities",
           "target": [
             "TargetFacilitis"
           ]

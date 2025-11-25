@@ -1527,3 +1527,8 @@ span.sapMBtnInner.sapMBtnEmphasized {
   background: #28c2d0 !important;
   color: white !important;
 }
+
+.customBoldTitle {
+    font-weight: bold;
+    font-size: 1.5rem; /* optional, adjust size */
+}
