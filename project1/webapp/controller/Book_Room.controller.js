@@ -2464,9 +2464,6 @@ onMonthSelectionChange: function (oEvent) {
 
      // Mandatory validation
      const isMandatoryValid = (
-        //  utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idUPIID"), "ID") &&
-        //  utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idBankName"), "ID") &&
-        //  utils._LCstrictValidationComboBox(sap.ui.getCore().byId("idCurrency"), "ID") &&
          utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idPaymentTypeField"), "ID") &&
          utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idTransactionID"), "ID") &&
          utils._LCvalidateDate(sap.ui.getCore().byId("idPaymentDate"), "ID")
@@ -2523,10 +2520,6 @@ onMonthSelectionChange: function (oEvent) {
              // Store in model temporarily
              oData.PaymentDetails = paymentDetails;
 
-             // Determine correct facility price based on selected price type
-
-
-
              //  Handle both object and string facility formats
              if (p.Facilities && p.Facilities.SelectedFacilities && p.Facilities.SelectedFacilities.length > 0) {
                  p.Facilities.SelectedFacilities.forEach(fac => {
@@ -2551,7 +2544,10 @@ onMonthSelectionChange: function (oEvent) {
                          FacilitiPrice:facilityPrice,
                          StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
                          EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
-                         PaidStatus: "Pending"
+                         PaidStatus: "Pending",
+                         UnitText:fac.UnitText,
+                         TotalHour:fac.TotalTime,
+                         Currency:fac.Currency
                      });
                  });
              }
@@ -3176,7 +3172,10 @@ onSelectionChange: function (oEvent) {
       var oRouter = this.getOwnerComponent().getRouter()
       oRouter.navTo("RouteHostel")
     },
-
+ onHome:function(){
+    var oRouter = this.getOwnerComponent().getRouter()
+      oRouter.navTo("RouteHostel")
+ }
 
   });
 });

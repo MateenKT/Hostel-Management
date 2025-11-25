@@ -58,8 +58,7 @@
                             <Label text="Price" required="true" />
                             <Text  text="{HostelModel>/RoomPrice}"   />
                            
-                
-                 <Label text="Payment Method" required="true" />
+                            <Label text="Payment Method" required="true" />
                             <Text text="{HostelModel>/PaymentType}" visible="{= !${viewModel>/editMode} }"/>
                             <ComboBox value="{HostelModel>/PaymentType}" visible="{viewModel>/editMode}" selectedKey="{HostelModel>/PaymentType}" items="{
                           path: 'BedTypeModel>/',
@@ -69,7 +68,7 @@
                                 <core:ListItem key="Daily" text="Per Day" />
                                 </ComboBox>
                 <!-- Project Address -->
-                <core:Title text="" />
+               
                <!-- <Label text="No of Persons" required="true" />
                 <Text text="{HostelModel>/noofperson}" visible="true"/> -->
                 <!-- <Input value="{HostelModel>/noofperson}" visible="{viewModel>/editMode}"/> -->
@@ -165,7 +164,7 @@
             <ToolbarSpacer />
             <Button 
                 icon=""
-                text="Add Faciliti"
+                text="Add Facility"
                 press="onPressAddFaciliti"
                 type="Emphasized"
             />
@@ -248,7 +247,7 @@
             <OverflowToolbar>
                 <ToolbarSpacer />
                 <Button
-                    text="proceed to pay"
+                    text="Proceed to pay"
                     visible="false"
                     type="Emphasized"
                     press="onOpenProceedtoPay"
