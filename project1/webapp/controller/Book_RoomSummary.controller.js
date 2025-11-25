@@ -103,14 +103,6 @@ sap.ui.define([
                 const oEndPicker = sap.ui.core.Fragment.byId(this.getView().getId(), "editEndDate");
                 oEndPicker.setMinDate(new Date(sMinEndDate));
             }
-            const sPriceType = this.getView().getModel("HostelModel").getProperty("/SelectedPriceType");
-
-            let sUnit = "";
-            if (sPriceType === "Per Day") sUnit = "Per Day";
-            if (sPriceType === "Per Month") sUnit = "Per Month";
-            if (sPriceType === "Per Year") sUnit = "Per Year";
-
-            this._oEditModel.setProperty("/UnitText", sUnit);
         },
         _parsePossibleDateString: function (s) {
             if (!s) return null;
@@ -261,9 +253,6 @@ sap.ui.define([
                 oEndDP.setMinDate(oMin);
             }
         },
-
-
-
         // Utility function to format date
         _formatDateToDDMMYYYY: function (oDate) {
             const dd = String(oDate.getDate()).padStart(2, '0');
@@ -272,9 +261,20 @@ sap.ui.define([
             return dd + "/" + mm + "/" + yyyy;
         },
         onEditFacilitySave: function () {
+
             const oView = this.getView();
             const oHostelModel = oView.getModel("HostelModel");
             const oEditModel = oView.getModel("edit");
+    //           const isMandatoryValid = (
+    //      utils._LCvalidateMandatoryField(sap.ui.getCore().byId(""), "ID") &&
+    //      utils._LCvalidateMandatoryField(sap.ui.getCore().byId(""), "ID") &&
+    //      utils._LCvalidateDate(sap.ui.getCore().byId(""), "ID")
+    //  );
+
+    //  if (!isMandatoryValid) {
+    //      sap.m.MessageToast.show("Please fill all mandatory fields.");
+    //      return;
+    //  }
 
             if (!oHostelModel || !oEditModel) return sap.m.MessageToast.show("Missing models");
 
@@ -477,13 +477,6 @@ sap.ui.define([
                         sap.m.MessageToast.show("Invalid facility start/end date for " + (f.FacilityName || ""));
                         return;
                     }
-
-                    //          const dayDiff = Math.floor((fEndDate.getTime() - fStartDate.getTime()) / msPerDay);
-
-                    // // No +1 here because TotalDays is already calculated in onEditDateChange
-                    // var fDays = dayDiff >= 0 ? dayDiff + 1 : 0;
-
-                    // OR EVEN BETTER (MOST ACCURATE):
                     // USE the user-calculated dialog value directly
                     const fDays = Number(f.TotalDays || 0);
 
@@ -644,6 +637,17 @@ sap.ui.define([
             if (sSelectedUnit === "Per Month") price = oMatched.PricePerMonth;
             if (sSelectedUnit === "Per Year") price = oMatched.PricePerYear;
             if (sSelectedUnit === "Per Hour") price = oMatched.PricePerHour;
+                  
+           // Reset Month/Year count to 1 when unit changes
+if (sSelectedUnit === "Per Month") {
+    oEditModel.setProperty("/TotalMonths", "1");
+    oEditModel.setProperty("/TotalYears", "");   // clear year
+}
+
+if (sSelectedUnit === "Per Year") {
+    oEditModel.setProperty("/TotalYears", "1");
+    oEditModel.setProperty("/TotalMonths", "");  // clear month
+}
 
             // Update price in dialog
             oEditModel.setProperty("/Price", price);

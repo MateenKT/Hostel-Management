@@ -2630,7 +2630,6 @@ onMonthSelectionChange: function (oEvent) {
        onPressAvatar: async function () {
             const oUser = this._oLoggedInUser || {};
             const sPhoto = "./image.jpg";
-
             try {
                 const sUserID = oUser.UserID || "";
                 if (!sUserID) {

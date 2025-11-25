@@ -20,7 +20,7 @@
             </contentMiddle>
             <contentRight>
                 <Button type="Reject" text="Logout" press="onProfileDialogClose" />
-                <Button icon="sap-icon://decline" type="Transparent" press="onProfileDialogClose" />
+                <Button icon="sap-icon://decline" type="Transparent" press="onProfileclose" />
             </contentRight>
         </Bar>
     </customHeader>

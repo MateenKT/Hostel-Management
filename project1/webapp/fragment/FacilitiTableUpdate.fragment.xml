@@ -47,7 +47,6 @@
     visible="{= ${edit>/UnitText} === 'Per Hour' }"
 />
 
-
                 <Label text="Facility Price" />
                 <Input id="editPrice" value="{edit>/Price}" type="Number" editable="false" />
 
@@ -72,10 +71,10 @@
 
 
                 <Label text="Start Date" />
-                <DatePicker id="editStartDate" value="{edit>/StartDate}" maxDate="{edit>/NewEndDate}" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd" change="onEditDateChange" />
+                <DatePicker id="editStartDate" value="{edit>/StartDate}" maxDate="{edit>/NewEndDate}" displayFormat="dd/MM/yyyy" valueFormat="dd/MM/yyyy" change="onEditDateChange" />
                               <Label 
     text="How many Month/Year"  
-    visible="{= ${edit>/UnitText} !== 'Per Day' &amp;&amp; ${edit>/UnitText} !== 'Per Hour' }" 
+    visible="{= ${edit>/UnitText} !== ' Per Day' &amp;&amp; ${edit>/UnitText} !== 'Per Hour' }" 
 />
 
 <Select
@@ -86,6 +85,7 @@
             ? ${edit>/TotalMonths} 
             : ${edit>/TotalYears}
     }"
+    change="onMonthSelectionChange"
 >
     <core:Item key="1" text="1" />
     <core:Item key="2" text="2" />
@@ -102,7 +102,7 @@
 </Select>
 
                 <Label text="End Date" />
-                <DatePicker id="editEndDate" editable="{= ${edit>/UnitText} !== 'Per Month' &amp;&amp; ${edit>/UnitText} !== 'Per Year' }"  value="{path:'edit>/EndDate'}" minDate="{edit>/NewStartDate}" displayFormat="dd/MM/yyyy" valueFormat="yyyy-MM-dd" change="onEditDateChange"  />
+                <DatePicker id="editEndDate" editable="{= ${edit>/UnitText} !== 'Per Month' &amp;&amp; ${edit>/UnitText} !== 'Per Year' }"  value="{path:'edit>/EndDate'}" minDate="{edit>/NewStartDate}" displayFormat="dd/MM/yyyy" valueFormat="dd/MM/yyyy" change="onEditDateChange"  />
 
                 <Label text="Days" />
                 <Input id="editDays" value="{edit>/TotalDays}" editable="false" />

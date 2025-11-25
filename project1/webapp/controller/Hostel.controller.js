@@ -2016,19 +2016,16 @@ sap.ui.define([
                 sap.m.MessageToast.show("Error fetching profile details.");
             }
         },
-        onProfileLogout: function () {
+        onProfileclose: function () {
             // Close the dialog and perform logout logic
             if (this._oProfileDialog) this._oProfileDialog.close();
-            sap.m.MessageToast.show("You have been logged out.");
-
         },
 
         onEditProfilePic: function () {
             sap.m.MessageToast.show("Profile picture edit not implemented yet.");
-
         },
          onProfileDialogClose: function () {
-    this._oProfileDialog.close();
+    this._oProfileDialog.destroy();
 
     const oView = this.getView();
     oView.byId("loginButton")?.setVisible(true);
