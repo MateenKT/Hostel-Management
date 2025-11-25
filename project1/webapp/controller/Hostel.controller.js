@@ -1068,72 +1068,18 @@ sap.ui.define([
         // },
 
 
-        onpressBookrooms: function () {
+        onpressBookrooms: async function () {
             var oTabHeader = this.byId("mainTabHeader");
             oTabHeader.setSelectedKey("idRooms");
             this.byId("pageContainer").to(this.byId("idRooms"));
 
             var page = this.byId("idRooms");
-            if (page && page.scrollTo) page.scrollTo(0, 0);
+            if (page && page.scrollTo) {
+                page.scrollTo(0, 0);
+            }
 
-            var that = this;
-
-            // --- Create popup dynamically ---
-            // if (!this._oLocationDialog) {
-            //     this._oLocationDialog = new sap.m.Dialog({
-            //         title: "Search Rooms by Location",
-            //         type: "Message",
-            //         contentWidth: "400px",
-            //         draggable: true,
-            //         resizable: true,
-            //         content: [
-            //             new sap.m.VBox({
-            //                 width: "100%",
-            //                 items: [
-            //                     new sap.m.Label({ text: "Select Location", labelFor: "idBranchCombo" }),
-            //                     new sap.m.ComboBox("idBranchCombo", {
-            //                         width: "100%",
-            //                         placeholder: "Select City...",
-            //                         items: {
-            //                             path: "BranchModel>/Branches",
-            //                             template: new sap.ui.core.Item({
-            //                                 key: "{BranchModel>BranchCode}",
-            //                                 text: "{BranchModel>BranchName}"
-            //                             })
-            //                         }
-            //                     }),
-
-            //                     //  Add AC Type ComboBox
-            //                     new sap.m.Label({ text: "AC Type", labelFor: "idACTypeCombo" }),
-            //                     new sap.m.ComboBox("idACTypeCombo", {
-            //                         width: "100%",
-            //                         placeholder: "Select AC Type...",
-            //                         items: [
-            //                             new sap.ui.core.Item({ key: "AC", text: "AC Room" }),
-            //                             new sap.ui.core.Item({ key: "Non-AC", text: "Non-AC Room" })
-            //                         ]
-            //                     }),
-
-            //                     new sap.m.Button({
-            //                         text: "Search",
-            //                         type: "Emphasized",
-            //                         icon: "sap-icon://search",
-            //                         press: function () {
-            //                             that.onSearchRooms();
-            //                         }
-            //                     })
-            //                 ]
-            //             })
-            //         ]
-            //     });
-
-            //     this.getView().addDependent(this._oLocationDialog);
-            // }
-
-            // this._oLocationDialog.open();
+            await this._loadRoomsPageData();
         },
-
-   
 
         onpressLogin: function () {
             if (!this._oSignDialog) {
@@ -1803,83 +1749,66 @@ sap.ui.define([
             oInput.setValueState("Success");
             oInput.setValueStateText("Passwords matched");
         },
-        onSignIn: async function () {
-            // var ofrag = sap.ui.getCore();
+         onSignIn: async function () {
             var oModel = this.getView().getModel("LoginMode");
             var oData = oModel.getData();
             const oLoginModel = this.getView().getModel("LoginModel");
 
-            // Get input values
-            var sUserid = sap.ui.getCore().byId("signInuserid").getValue();
-            var sUsername = sap.ui.getCore().byId("signInusername").getValue();
-            var sPassword = sap.ui.getCore().byId("signinPassword").getValue();
+            const sUserid = sap.ui.getCore().byId("signInuserid").getValue();
+            const sUsername = sap.ui.getCore().byId("signInusername").getValue();
+            const sPassword = sap.ui.getCore().byId("signinPassword").getValue();
 
-            // Basic validation example
-            if (
-                !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInuserid"), "ID") || !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID") ||
+            if (!utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInuserid"), "ID") ||
+                !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID") ||
                 !utils._LCvalidatePassword(sap.ui.getCore().byId("signinPassword"), "ID")
             ) {
-                sap.m.MessageToast.show("Make sure all the mandatory fields are filled/validate the entered value");
+                sap.m.MessageToast.show("Make sure all mandatory fields are filled correctly");
                 return;
             }
 
             try {
-                //  Fetch all registered users (no payload — server ignores it anyway)
-                const oResponse = await this.ajaxReadWithJQuery("HM_Login", "");
+                const payload = { UserID: sUserid, UserName: sUsername, Password: btoa(sPassword)};
+                sap.ui.core.BusyIndicator.show(0);
+                const oResponse = await this.ajaxReadWithJQuery("HM_Login", payload);
+                const aUsers = oResponse.data[0] || [];
 
-                const aUsers = oResponse?.commentData || [];
+                oLoginModel.setProperty("/EmployeeID", aUsers.UserID);
+                oLoginModel.setProperty("/EmployeeName", aUsers.UserName);
+                oLoginModel.setProperty("/EmailID", aUsers.EmailID);
+                oLoginModel.setProperty("/Role", aUsers.Role);
+                oLoginModel.setProperty("/BranchCode", aUsers.BranchCode || "");
+                oLoginModel.setProperty("/MobileNo", aUsers.MobileNo || "");
+                oLoginModel.setProperty("/DateofBirth", aUsers.DateOfBirth || "");
 
-                const oMatchedUser = aUsers.find(user =>
-                    user.UserID === sUserid &&
-                    user.UserName === sUsername &&
-                    (user.Password === sPassword || user.Password === btoa(sPassword))
-                );
+                // For global access
+                this._oLoggedInUser = aUsers;
 
-                if (!oMatchedUser) {
-                    sap.m.MessageToast.show("Invalid credentials. Please try again.");
-                    return;
+                sap.ui.getCore().byId("signInusername").setValue("");
+                sap.ui.getCore().byId("signinPassword").setValue("");
+
+                if (this._oSignDialog) {
+                    this._oSignDialog.close();
                 }
 
-                oLoginModel.setProperty("/EmployeeID", oMatchedUser.UserID);
-                oLoginModel.setProperty("/EmployeeName", oMatchedUser.UserName);
-                oLoginModel.setProperty("/EmailID", oMatchedUser.EmailID);
-                oLoginModel.setProperty("/Role", oMatchedUser.Role);
-                oLoginModel.setProperty("/BranchCode", oMatchedUser.BranchCode || "");
-                oLoginModel.setProperty("/MobileNo", oMatchedUser.MobileNo || "");
-                oLoginModel.setProperty("/DateofBirth", oMatchedUser.DateofBirth)
-
-
-                if (oMatchedUser.Role === "Customer") {
-                    this._oLoggedInUser = oMatchedUser;
-                    const oUserModel = new JSONModel(oMatchedUser);
+                if (aUsers.Role === "Customer") {
+                    const oUserModel = new JSONModel(aUsers);
                     sap.ui.getCore().setModel(oUserModel, "LoginModel");
+                  this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", true);
 
-                    sap.ui.getCore().byId("signInusername").setValue("");
-                    sap.ui.getCore().byId("signinPassword").setValue("");
 
-                    if (this._oSignDialog) this._oSignDialog.close();
 
-                    const oView = this.getView();
-                    oView.byId("loginButton")?.setVisible(false);
-                    oView.byId("ProfileAvatar")?.setVisible(true);
-
-                } else if (oMatchedUser.Role === "Admin" || oMatchedUser.Role === "Employee") {
-                    sap.ui.getCore().byId("signInusername").setValue("");
-                    sap.ui.getCore().byId("signinPassword").setValue("");
-
-                    if (this._oSignDialog) this._oSignDialog.close();
-
+                } else if (aUsers.Role === "Admin" ||aUsers.Role === "Employee") {
                     this.getOwnerComponent().getRouter().navTo("TilePage");
                 } else {
                     sap.m.MessageToast.show("Invalid credentials. Please try again.");
                 }
-
             } catch (err) {
-                console.error("Login Error:", err);
-                sap.m.MessageToast.show("Failed to fetch login data: " + err);
+                sap.ui.core.BusyIndicator.hide();
+                sap.m.MessageToast.show(err.message || err.responseText);
+            } finally {
+                sap.ui.core.BusyIndicator.hide();
             }
         },
-
 
         onPressAvatar: async function () {
             const oUser = this._oLoggedInUser || {};
@@ -1895,10 +1824,8 @@ sap.ui.define([
                     UserID: sUserID
                 };
                 //  Fetch only the logged-in user's data
+                 sap.ui.core.BusyIndicator.show(0);
                 const response = await this.ajaxReadWithJQuery("HM_Customer", filter);
-
-                console.log("HM_Customer Response:", response);
-
                 // Handle correct structure
                 const aCustomers = response?.commentData || response?.Customers || response?.value || [];
 
@@ -2014,9 +1941,11 @@ sap.ui.define([
                 //  Open the dialog
                 this._oProfileDialog.open();
 
-            } catch (error) {
-                console.error("Profile data load failed:", error);
-                sap.m.MessageToast.show("Error fetching profile details.");
+            } catch (err) {
+                sap.ui.core.BusyIndicator.hide();
+                sap.m.MessageToast.show(err.message || err.responseText);
+            } finally {
+                sap.ui.core.BusyIndicator.hide();
             }
         },
         onProfileclose: function () {
@@ -2030,9 +1959,7 @@ sap.ui.define([
          onProfileDialogClose: function () {
     this._oProfileDialog.destroy();
 
-    const oView = this.getView();
-    oView.byId("loginButton")?.setVisible(true);
-    oView.byId("ProfileAvatar")?.setVisible(false);
+  this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", false);
 }
 ,
         Bookfragment: function () {

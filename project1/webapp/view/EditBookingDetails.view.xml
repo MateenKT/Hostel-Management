@@ -22,9 +22,9 @@
         expandable="false"
         class="customPanelHeader"
     >
-    <HBox justifyContent="End" 
-            width="100%">
-     <Button text="Edit" press="onPressEditSave" class="myUnifiedBtn" />
+    <HBox justifyContent="End" width="100%">
+     <Button id="idEditBtn" text="Edit" press="onPressEditSave" class="myUnifiedBtn" />
+     <Button text="Cancel" press="onPressCancelBooking" class="myUnifiedBtn"></Button>
     </HBox>
    
         <f:SimpleForm
@@ -164,6 +164,7 @@
             <ToolbarSpacer />
             <Button 
                 icon=""
+                id="id_addfacility"
                 text="Add Facility"
                 press="onPressAddFaciliti"
                 class="myUnifiedBtn"
@@ -173,6 +174,7 @@
                 text="Edit"
                 press="onEditFacilityDetails"
                 class="myUnifiedBtn"
+                id="id_editfacility"
                 
             />
         </Toolbar>

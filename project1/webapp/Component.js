@@ -31,6 +31,11 @@
                     // set the device model
                     this.setModel(models.createDeviceModel(), "device");
 
+                     var oUIModel = new sap.ui.model.json.JSONModel({
+                        isLoggedIn: false
+                    });
+                    this.setModel(oUIModel, "UIModel");
+
                     this._fetchCommonData("City", "CityModel");                   
                     this._fetchCommonData("State", "StateModel");
                     this._fetchCommonData("Country", "CountryModel");

@@ -28,19 +28,19 @@
                     id="loginButton"
                     class=" sapUiSmallMarginTop loginButton"
                     tooltip="{i18n>tooltipLogin}"
-                    press="onpressLogin"
+                    press="onpressLogin"  visible="{= !${UIModel>/isLoggedIn} }"
                 >
                     <layoutData>
                         <OverflowToolbarLayoutData priority="NeverOverflow" />
                     </layoutData>
                 </Button>
                 <Avatar
-                    visible="true"
+                    visible="{UIModel>/isLoggedIn}"
                     id="ProfileAvatar"
                     initials="{profileData>/initials}"
                     displaySize="XS"
                     tooltip="Profile pic"
-                    press="onPressAvatar"
+                    press="onPressAvatar" 
                 />
             </tnt:ToolHeader>
         </tnt:header>
