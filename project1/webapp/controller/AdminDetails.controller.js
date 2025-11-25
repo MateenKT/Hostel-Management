@@ -256,6 +256,10 @@ sap.ui.define([
                         f.TotalYears = totalYears;
                         fTotal = fPrice * totalYears;
                         otherFacilitiesTotal += fTotal;
+                    } else if (unit === "Per Hour") {
+                        const totalHours = f.TotalHour || 0; 
+                        fTotal = fPrice * totalHours;
+                        otherFacilitiesTotal += fTotal;
                     }
 
                     // -------------------------------
@@ -274,7 +278,8 @@ sap.ui.define([
                         TotalYears: totalYears,
                         TotalAmount: fTotal,
                         TotalHour: f.TotalHour,
-                        Image: f.Image
+                        Image: f.Image,
+                        Currency:f.Currency
                     });
 
                 });
@@ -389,7 +394,8 @@ sap.ui.define([
         onEditDialogClose: function () {
             this.HM_Dialog.close();
         },
-        onFacilityChange: function () {
+        onFacilityChange: function (oEvent) {
+            utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
             var oUnitType = sap.ui.getCore().byId("idUnitType");
             sap.ui.getCore().byId("editPrice").setValue("");
             sap.ui.getCore().byId("FU_id_Currency").setSelectedKey("");
@@ -398,6 +404,7 @@ sap.ui.define([
             oUnitType.setSelectedKey("").setVisible(true);
         },
         onUnitTextChange: function (oEvent) {
+            utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
             var editdata = this.getView().getModel("edit")
             var data = this.getView().getModel("Facilities").getData()
             var Sfacilityname = sap.ui.getCore().byId("editFacilityName").getSelectedKey()
@@ -435,6 +442,7 @@ sap.ui.define([
 
         },
         onEditDateChange: function (oEvent) {
+            utils._LCvalidateMandatoryField(oEvent)
             const oModel = this.getView().getModel("edit");
             const sUnit = oModel.getProperty("/UnitText");
             const sStartDate = oModel.getProperty("/StartDate");
@@ -534,73 +542,101 @@ sap.ui.define([
 
         },
         onEditFacilitySave: function () {
+
             var oCustomerModel = this.getView().getModel("CustomerData");
             var oCustomerData = oCustomerModel.getData();
             var oPayload = this.getView().getModel("edit").getData();
 
-            // Format Dates
-            oPayload.StartDate = this.Formatter.DateFormat(oPayload.StartDate);
-            oPayload.EndDate = this.Formatter.DateFormat(oPayload.EndDate);
+            if (
+                utils._LCstrictValidationComboBox(sap.ui.getCore().byId("editFacilityName"), "ID") &&
+                // utils._LCstrictValidationComboBox(oView.byId("idBedType"), "ID") &&
+                (utils._LCstrictValidationComboBox(sap.ui.getCore().byId("idUnitType"), "ID")) &&
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("editStartDate"), "ID") &&
+                // utils._LCvalidateMandatoryField(oView.byId("idRoomNumber13"), "ID") &&
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("editEndDate"), "ID")
 
 
-            // BASE PRICE
-            var basePrice = Number(oPayload.Price) || 0;
-            var iDays = Number(oPayload.TotalDays) || 0;
-            var iHours = Number(oPayload.TotalHour) || 0;   // ← NEW for Per Hour
-            var finalPrice = 0;
-            const iCount = this.iCount || 1;
+            ) {
+                if (oPayload.UnitText === "Per Hour") {
+                    // Validate Start Time first
+                    if (!utils._LCvalidateMandatoryField(sap.ui.getCore().byId("editStartTime"), "ID")) {
+                        sap.m.MessageToast.show("Please enter Start Time");
+                        return; // Stop execution, only Start Time shows error
+                    }
 
-            // CALCULATE PRICE BASED ON UNIT
-            if (oPayload.UnitText === "Per Day") {
-                finalPrice = basePrice * iDays;
-            }
-            else if (oPayload.UnitText === "Per Month") {
-                finalPrice = basePrice * iCount;
-            }
-            else if (oPayload.UnitText === "Per Year") {
-                finalPrice = basePrice * iCount;
-            }
-            else if (oPayload.UnitText === "Per Hour") {
-                // ✅ Newly Added Hour Calculation
-                finalPrice = basePrice * iHours;
-            }
+                    // Validate End Time next
+                    if (!utils._LCvalidateMandatoryField(sap.ui.getCore().byId("editEndTime"), "ID")) {
+                        sap.m.MessageToast.show("Please enter End Time");
+                        return; // Stop execution, now End Time shows error
+                    }
+                }
+                // Format Dates
+                oPayload.StartDate = this.Formatter.DateFormat(oPayload.StartDate);
+                oPayload.EndDate = this.Formatter.DateFormat(oPayload.EndDate);
 
-            oPayload.FacilityPrice = finalPrice;
 
-            // Remove unwanted fields
+                // BASE PRICE
+                var basePrice = Number(oPayload.Price) || 0;
+                var iDays = Number(oPayload.TotalDays) || 0;
+                var iHours = Number(oPayload.TotalHour) || 0;   // ← NEW for Per Hour
+                var finalPrice = 0;
+                const iCount = this.iCount || 1;
 
-            // Ensure array exists
-            if (!oCustomerData.AllSelectedFacilities) {
-                oCustomerData.AllSelectedFacilities = [];
-            }
+                // CALCULATE PRICE BASED ON UNIT
+                if (oPayload.UnitText === "Per Day") {
+                    finalPrice = basePrice * iDays;
+                }
+                else if (oPayload.UnitText === "Per Month") {
+                    finalPrice = basePrice * iCount;
+                }
+                else if (oPayload.UnitText === "Per Year") {
+                    finalPrice = basePrice * iCount;
+                }
+                else if (oPayload.UnitText === "Per Hour") {
+                    // ✅ Newly Added Hour Calculation
+                    finalPrice = basePrice * iHours;
+                }
 
-            // UPDATE existing OR ADD new
-            if (this._editIndex !== undefined) {
-                oCustomerData.AllSelectedFacilities[this._editIndex] =
-                    JSON.parse(JSON.stringify(oPayload));
+                oPayload.TotalAmount = finalPrice;
+
+                // Remove unwanted fields
+
+                // Ensure array exists
+                if (!oCustomerData.AllSelectedFacilities) {
+                    oCustomerData.AllSelectedFacilities = [];
+                }
+
+                // UPDATE existing OR ADD new
+                if (this._editIndex !== undefined) {
+                    oCustomerData.AllSelectedFacilities[this._editIndex] =
+                        JSON.parse(JSON.stringify(oPayload));
+                } else {
+                    oCustomerData.AllSelectedFacilities.push(
+                        JSON.parse(JSON.stringify(oPayload))
+                    );
+                }
+
+                // Recalculate totals
+                var total = 0;
+                oCustomerData.AllSelectedFacilities.forEach(function (fac) {
+                    total += Number(fac.TotalAmount) || 0;
+                });
+
+                oCustomerData.TotalFacilityPrice = total;
+                oCustomerData.GrandTotal = total + (oCustomerData.RentPrice || 0);
+
+                // Update model
+                oCustomerModel.setData(oCustomerData);
+                oCustomerModel.refresh();
+
+                this.HM_Dialog.close();
+                sap.m.MessageToast.show("Facility updated successfully!");
+
+                this._editIndex = undefined;
+
             } else {
-                oCustomerData.AllSelectedFacilities.push(
-                    JSON.parse(JSON.stringify(oPayload))
-                );
+                sap.m.MessageToast.show("Make sure all the mandatory fields are filled and validate the entered value")
             }
-
-            // Recalculate totals
-            var total = 0;
-            oCustomerData.AllSelectedFacilities.forEach(function (fac) {
-                total += Number(fac.FacilityPrice) || 0;
-            });
-
-            oCustomerData.TotalFacilityPrice = total;
-            oCustomerData.GrandTotal = total + (oCustomerData.RentPrice || 0);
-
-            // Update model
-            oCustomerModel.setData(oCustomerData);
-            oCustomerModel.refresh();
-
-            this.HM_Dialog.close();
-            sap.m.MessageToast.show("Facility updated successfully!");
-
-            this._editIndex = undefined;
         },
         onEditBooking: function () {
             this.getView().getModel("VisibleModel").setProperty("/visible", true)
@@ -622,15 +658,19 @@ sap.ui.define([
 
 
             if (data.PaymentType !== "daily" || data.PaymentType !== "Per Day") {
-                this.byId("idMonthYearSelect").setVisible(true)
+                    this.byId("idMonthYearSelect").setVisible(false)
+            }
 
                 // Set Duration for XML binding
                 if (data.PaymentType === "monthly" || data.PaymentType === "Per Month") {
                     model.setProperty("/DurationUnit", data.Duration);
-                } else {
+                    this.byId("idMonthYearSelect").setVisible(true)
+
+                } else if(data.PaymentType === "yearly" || data.PaymentType === "Per Year") {
                     model.setProperty("/DurationUnit", data.Duration);
+                    this.byId("idMonthYearSelect").setVisible(true)
+
                 }
-            }
             var sBranchCode = data.BranchCode
 
             this.ajaxReadWithJQuery("HM_Rooms", "").then((oData) => {
@@ -880,7 +920,7 @@ sap.ui.define([
             var total = 0;
 
             (oCustomerData.AllSelectedFacilities || []).forEach(function (fac) {
-                total += Number(fac.FacilityPrice) || 0;
+                total += Number(fac.TotalAmount) || 0;
             });
 
             oCustomerData.TotalFacilityPrice = total;
@@ -961,7 +1001,8 @@ sap.ui.define([
                 oCustomerModel.setProperty("/GrandTotal", fPrice + fFacilityPrice);
             }
         },
-        onEditTimeChange: function () {
+        onEditTimeChange: function (oEvent) {
+            utils._LCvalidateMandatoryField(oEvent)
             var oModel = this.getView().getModel("edit");
             var oData = oModel.getData();
 
@@ -1007,17 +1048,22 @@ sap.ui.define([
             var formatted = diffHours.toFixed(2);
 
             oModel.setProperty("/TotalHour", formatted);
-        }
-        ,
+        },
         onSaveBooking: function () {
-            var Bookingdata = this.getView().getModel("Bookingmodel").getData()
-            var CustomerData = this.getView().getModel("CustomerData").getData()
-            var edit = this.getView().getModel("edit").getData()
+            var Bookingdata = this.getView().getModel("Bookingmodel").getData();
+            var CustomerData = this.getView().getModel("CustomerData").getData();
 
+            // Map UnitText to desired PaymentType
+            var paymentMap = {
+                "monthly": "Per Month",
+                "yearly": "Per Year",
+                "daily": "Per Day"
+            };
 
+            // Normalize UnitText: trim and lowercase
+            var unit = Bookingdata.UnitText ? Bookingdata.UnitText.trim().toLowerCase() : "";
 
             var Payload = {
-
                 "Booking": [
                     {
                         "BookingDate": this.Formatter.DateFormat(CustomerData.BookingDate).split('/').reverse().join('-'),
@@ -1025,43 +1071,50 @@ sap.ui.define([
                         "NoOfPersons": CustomerData.NoOfPersons,
                         "StartDate": Bookingdata.StartDate.split('/').reverse().join('-'),
                         "EndDate": Bookingdata.EndDate.split('/').reverse().join('-'),
-                        "Status": "Assigned",
-                        "PaymentType": Bookingdata.UnitText,
+                        "PaymentType": paymentMap[unit] || Bookingdata.UnitText, // fallback
                         "BedType": Bookingdata.BedTypeName
                     }
                 ],
-                "FacilityItems": []
+                "FacilityItems": CustomerData.AllSelectedFacilities.map(item => {
+                    // Normalize UnitText for facility as well
+                    var itemUnit = item.UnitText ? item.UnitText.trim().toLowerCase() : "";
+                    return {
+                        FacilityID: item.FacilityID,
+                        FacilityName: item.FacilityName,
+                        FacilitiPrice: item.Price,
+                        StartDate: item.StartDate.split('/').reverse().join('-'),
+                        EndDate: item.EndDate.split('/').reverse().join('-'),
+                        UnitText: paymentMap[itemUnit] || item.UnitText, // convert to Per Month/Day/Year
+                        TotalHour: item.TotalHour,
+                        BookingID: CustomerData.BookingID,
+                        CustomerID: CustomerData.CustomerID,
+                        Currency: item.Currency
+                    };
+                })
+            };
 
-            }
-
-            Payload.FacilityItems = CustomerData.AllSelectedFacilities.map(item => {
-                return {
-                    FacilityID: item.FacilityID,
-                    FacilityName: item.FacilityName,
-                    FacilitiPrice: item.Price,
-                    StartDate: item.StartDate.split('/').reverse().join('-'),
-                    EndDate: item.EndDate.split('/').reverse().join('-'),
-                    UnitText: item.UnitText,
-                    TotalHour: item.TotalHour,
-                    BookingID: CustomerData.BookingID,
-                    CustomerID: CustomerData.CustomerID,
-                    Currency: item.Currency
-
-                };
-            });
-
+            // Send payload
             this.ajaxUpdateWithJQuery("HM_Customer", {
                 data: [Payload],
-                filters: {
-                    CustomerID: CustomerData.CustomerID
-                }
-            });
-            this.getView().getModel("VisibleModel").setProperty("/visible", false)
-            this.byId("idMonthYearSelect").setVisible(false)
+                filters: { CustomerID: CustomerData.CustomerID }
+            })
+                .then(() => {
+                    sap.m.MessageToast.show("Booking saved successfully!");
 
-            sap.m.MessageToast.show("Booking saved successfully!");
-
+                    // Refresh models
+                    this.AD_onSearch();
+                    this.getView().getModel("VisibleModel").setProperty("/visible", false);
+                    this.byId("idMonthYearSelect").setVisible(false);
+                })
+                .catch(err => {
+                    sap.m.MessageToast.show("Error saving booking!");
+                    console.error(err);
+                });
         }
+
+
+
+
 
 
 

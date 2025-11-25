@@ -24,99 +24,117 @@
                     />
 
                     <!-- Booking Status and Price with Edit button -->
-                  <HBox class="sapUiSmallMarginTop" justifyContent="SpaceBetween" alignItems="Center">
+                    <HBox
+                        class="sapUiSmallMarginTop"
+                        justifyContent="SpaceBetween"
+                        alignItems="Center"
+                    >
+                        <!-- Left side -->
+                        <HBox>
+                            <VBox>
+                                <Text
+                                    text="Room Price"
+                                    class="sapUiSmallMarginBottom"
+                                />
+                                <Text
+                                    text="{CustomerData>/OrginalRentPrice}"
+                                    class="largeTextBold"
+                                />
+                            </VBox>
 
-    <!-- Left side -->
-    <HBox>
-        <VBox>
-            <Text text="Room Price" class="sapUiSmallMarginBottom"/>
-            <Text text="{CustomerData>/OrginalRentPrice}" class="largeTextBold"/>
-        </VBox>
+                            <VBox class="sapUiMediumMarginBegin">
+                                <Text
+                                    text="Bed Type"
+                                    class="sapUiSmallMarginBottom"
+                                />
+                                <Text
+                                    text="{CustomerData>/BedType}"
+                                    class="largeTextBold"
+                                />
+                            </VBox>
+                            <VBox class="sapUiMediumMarginBegin">
+                                <Text
+                                    text="Status"
+                                    class="sapUiSmallMarginBottom"
+                                />
+                                <!-- <Text text="{CustomerData>/Status}" class="largeTextBold"/> -->
 
-        <VBox class="sapUiMediumMarginBegin">
-            <Text text="Bed Type" class="sapUiSmallMarginBottom"/>
-            <Text text="{CustomerData>/BedType}" class="largeTextBold"/>
-        </VBox>
-            <VBox class="sapUiMediumMarginBegin">
-            <Text text="Status" class="sapUiSmallMarginBottom"/>
-            <!-- <Text text="{CustomerData>/Status}" class="largeTextBold"/> -->
-
-            <ObjectStatus
-                                inverted="false"
-                                text="{CustomerData>/Status}"
-                                state="{
+                                <ObjectStatus
+                                    inverted="false"
+                                    text="{CustomerData>/Status}"
+                                    state="{
                                path: 'CustomerData>/Status',
                               formatter: '.Formatter.formatObjectStatus'
                                    }"
+                                />
+                            </VBox>
+                        </HBox>
+
+                        <!-- Right side buttons -->
+                        <HBox
+                            alignItems="Center"
+                            justifyContent="End"
+                            width="30%"
+                        >
+                            <Button
+                                text="Edit"
+                                type="Transparent"
+                                icon="sap-icon://edit"
+                                press="onEditBooking"
+                                visible="{= !${VisibleModel>/visible} }"
                             />
-        </VBox>
-    </HBox>
 
-    <!-- Right side buttons -->
-    <HBox alignItems="Center" justifyContent="End" width="30%">
-        
-        <Button
-            text="Edit"
-            type="Transparent"
-            icon="sap-icon://edit"
-            press="onEditBooking"
-            visible="{= !${VisibleModel>/visible} }"
-        />
+                            <Button
+                                text="Save"
+                                type="Accept"
+                                icon="sap-icon://save"
+                                press="onSaveBooking"
+                                visible="{VisibleModel>/visible}"
+                                class="sapUiSmallMarginBegin"
+                            />
 
-        <Button
-            text="Save"
-            type="Accept"
-            icon="sap-icon://save"
-            press="onSaveBooking"
-            visible="{VisibleModel>/visible}"
-            class="sapUiSmallMarginBegin"
-        />
-
-        <Button
-            text="Cancel"
-            type="Reject"
-            icon="sap-icon://cancel"
-            press="onCancelBooking"
-            visible="{VisibleModel>/visible}"
-            class="sapUiSmallMarginBegin"
-        />
-
-    </HBox>
-</HBox>
-
+                            <Button
+                                text="Cancel"
+                                type="Reject"
+                                icon="sap-icon://cancel"
+                                press="onCancelBooking"
+                                visible="{VisibleModel>/visible}"
+                                class="sapUiSmallMarginBegin"
+                            />
+                        </HBox>
+                    </HBox>
                 </VBox>
             </content>
             <VBox class="sapUiMediumMarginBottom">
                 <Panel
-               headerText="{= 'Booking Information - ' + ${CustomerData>/CustomerID} }"
+                    headerText="{= 'Booking Information - ' + ${CustomerData>/CustomerID} }"
                     expandable="false"
                     class="customPanelHeader"
                 >
-                     <f:SimpleForm
-                                    id="idsimpleCompanyDetails"
-                                    busyIndicatorDelay="0"
-                                    editable="true"
-                                    layout="ColumnLayout"
-                                    labelSpanXL="2"
-                                    labelSpanL="3"
-                                    labelSpanM="2"
-                                    labelSpanS="12"
-                                    adjustLabelSpan="false"
-                                    emptySpanXL="0"
-                                    emptySpanL="0"
-                                    emptySpanM="0"
-                                    emptySpanS="0"
-                                    columnsXL="3"
-                                    columnsL="2"
-                                    columnsM="2"
-                                    singleContainerFullSize="false"
-                                >
+                    <f:SimpleForm
+                        id="idsimpleCompanyDetails"
+                        busyIndicatorDelay="0"
+                        editable="true"
+                        layout="ColumnLayout"
+                        labelSpanXL="2"
+                        labelSpanL="3"
+                        labelSpanM="2"
+                        labelSpanS="12"
+                        adjustLabelSpan="false"
+                        emptySpanXL="0"
+                        emptySpanL="0"
+                        emptySpanM="0"
+                        emptySpanS="0"
+                        columnsXL="3"
+                        columnsL="2"
+                        columnsM="2"
+                        singleContainerFullSize="false"
+                    >
                         <f:content>
                             <!-- Booking Details -->
 
                             <!-- Room Type -->
 
-                            
                             <Label
                                 text="Desired Room Type"
                                 required="true"
@@ -134,9 +152,7 @@
                                 visible="{VisibleModel>/visible}"
                                 selectedKey="{Bookingmodel>/BedTypeName}"
                                 selectionChange="onRoomBedChange"
-
                             >
-                            
                                 <core:ListItem
                                     key="{Availablebeds>BedTypeName}"
                                     text="{Availablebeds>BedTypeName}"
@@ -225,7 +241,6 @@
                                 width="40%"
                                 visible="{= ${Bookingmodel>/UnitText} !== 'daily'}"
                                 selectedKey="{Bookingmodel>/DurationUnit}"
-              
                                 change=".onBookMonthYearChange"
                             >
                                 <core:Item
@@ -293,15 +308,14 @@
                                 valueFormat="yyyy-MM-dd"
                                 change="onBookingEditDateChange"
                             />
-                              <Label
+                            <Label
                                 text="Duration"
                                 required="true"
                             />
                             <Text
-                             text="{= ${CustomerData>/Duration} + ' ' + ${CustomerData>/DurationUnit} }"
+                                text="{= ${CustomerData>/Duration} + ' ' + ${CustomerData>/DurationUnit} }"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                            
                         </f:content>
                     </f:SimpleForm>
                 </Panel>
@@ -388,7 +402,7 @@
                         id="Ad_id_idFacilityRoomTableDetails"
                         class="sapUiSmallMarginTop"
                         items="{path: 'CustomerData>/AllSelectedFacilities'}"
-                        mode="SingleSelectLeft"
+                        mode="{= ${VisibleModel>/visible} === true ? 'SingleSelectLeft' : 'None' }"
                         busyIndicatorDelay="0"
                         inset="false"
                         selectionChange="onTableSelection"
@@ -406,7 +420,6 @@
                                     press="onAddFacilityDetails"
                                     type="Accept"
                                     visible="{VisibleModel>/visible}"
-
                                 />
                                 <Button
                                     icon="sap-icon://edit"
@@ -414,15 +427,13 @@
                                     press="onEditFacilityDetails"
                                     type="Emphasized"
                                     visible="{VisibleModel>/visible}"
-
                                 />
-                                  <Button
+                                <Button
                                     icon="sap-icon://delete"
                                     text="Delete"
                                     press="onDeleteFacilityDetails"
                                     type="Reject"
                                     visible="{VisibleModel>/visible}"
-
                                 />
                             </Toolbar>
                         </headerToolbar>
@@ -439,7 +450,7 @@
                             <Column>
                                 <Text text="End Date" />
                             </Column>
-                             <Column>
+                            <Column>
                                 <Text text="Unit" />
                             </Column>
                             <Column>
@@ -460,14 +471,14 @@
                                     <Text
                                         text="{path:'CustomerData>EndDate'}"
                                     />
-                                    <!-- <Text 
-                                    text="{CustomerData>UnitText}" 
-
-                                    /> -->
-                                    <Text text="{path: 'CustomerData>UnitText'}" />
+                                    <!-- <Text text="{CustomerData>UnitText}" /> -->
+                                    <Text
+                                        text="{= ${CustomerData>UnitText} === 'Per Hour'  ? ${CustomerData>UnitText} + ' (' + ${CustomerData>TotalHour} + ')' : ${CustomerData>UnitText}
+                                            }"
+                                    />
 
                                     <Text text="{CustomerData>TotalDays}" />
-                                    <Text text="{CustomerData>FacilityPrice}" />
+                                    <Text text="{CustomerData>TotalAmount}" />
                                 </cells>
                             </ColumnListItem>
                         </items>

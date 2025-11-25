@@ -31,7 +31,7 @@
         value="{edit>/FacilityName}"
         change="onFacilityChange"
         width="100%"
-        valueStateText="{i18n>selectRateType}">
+        valueStateText="Plaese Select FacilityName">
         <core:Item key="{Facilities>FacilityName}" text="{Facilities>FacilityName}" />
     </ComboBox>
 
@@ -45,7 +45,7 @@
         value="{edit>/UnitText}"
         change="onUnitTextChange"
         width="100%"
-        valueStateText="{i18n>selectRateType}">
+        valueStateText="Plaese Select Unit">
         <core:Item key="{RateType>RateType}" text="{RateType>RateType}" />
     </ComboBox>
 
@@ -70,37 +70,7 @@
         placeholder="Select Currency">
         <core:Item key="{CurrencyModel>currency}" text="{CurrencyModel>currency}" />
     </ComboBox>
-    <Label text="Start Time" required="true" />
-
-  <TimePicker
-        id="editStartTime"
-        value="{edit>/StartTime}"
-        change="onEditTimeChange"
-        displayFormat="HH:mm"
-        valueFormat="HH:mm"
-        visible="{= ${edit>/UnitText} === 'Per Hour'}"  
-
-
-     />
-    <Label text="End Time" required="true" />
-
-      <TimePicker
-        id="editEndTime"
-        value="{edit>/EndTime}"
-        displayFormat="HH:mm"
-        valueFormat="HH:mm"
-        change="onEditTimeChange"
-          visible="{= ${edit>/UnitText} === 'Per Hour'}" 
-
-
-     />
-      <Label text="Hours" />
-    <Input
-        id="editHours"
-        value="{edit>/TotalHour}"
-        editable="false"
-             visible="{= ${edit>/UnitText} === 'Per Hour'}" 
-  />
+   
 
     <!-- Start Date -->
     <Label text="Start Date" />
@@ -110,6 +80,8 @@
         displayFormat="dd/MM/yyyy"
         valueFormat="yyyy-MM-dd"
         change="onEditDateChange"
+        
+         valueStateText="Plaese Select Date"
         
      />
 
@@ -151,6 +123,8 @@
         displayFormat="dd/MM/yyyy"
         valueFormat="yyyy-MM-dd"
         change="onEditDateChange"
+         valueStateText="Plaese Select Date"
+
   />
 
         
@@ -163,6 +137,40 @@
         id="editDays"
         value="{edit>/TotalDays}"
         editable="false" />
+
+         <Label text="Start Time" required="true" />
+
+  <TimePicker
+        id="editStartTime"
+        value="{edit>/StartTime}"
+        change="onEditTimeChange"
+        displayFormat="HH:mm"
+        valueFormat="HH:mm"
+        valueStateText="Please select Time"
+        visible="{= ${edit>/UnitText} === 'Per Hour'}"  
+
+
+     />
+    <Label text="End Time" required="true" />
+
+      <TimePicker
+        id="editEndTime"
+        value="{edit>/EndTime}"
+        displayFormat="HH:mm"
+        valueFormat="HH:mm"
+        change="onEditTimeChange"
+        valueStateText="Please select Time"
+          visible="{= ${edit>/UnitText} === 'Per Hour'}" 
+
+
+     />
+      <Label text="Hours" />
+    <Input
+        id="editHours"
+        value="{edit>/TotalHour}"
+        editable="false"
+             visible="{= ${edit>/UnitText} === 'Per Hour'}" 
+  />
      </f:content>
 </f:SimpleForm>
 
