@@ -30,12 +30,25 @@
     <HBox>
         <VBox>
             <Text text="Room Price" class="sapUiSmallMarginBottom"/>
-            <Text text="{CustomerData>/RentPrice}" class="largeTextBold"/>
+            <Text text="{CustomerData>/OrginalRentPrice}" class="largeTextBold"/>
         </VBox>
 
         <VBox class="sapUiMediumMarginBegin">
             <Text text="Bed Type" class="sapUiSmallMarginBottom"/>
             <Text text="{CustomerData>/BedType}" class="largeTextBold"/>
+        </VBox>
+            <VBox class="sapUiMediumMarginBegin">
+            <Text text="Status" class="sapUiSmallMarginBottom"/>
+            <!-- <Text text="{CustomerData>/Status}" class="largeTextBold"/> -->
+
+            <ObjectStatus
+                                inverted="false"
+                                text="{CustomerData>/Status}"
+                                state="{
+                               path: 'CustomerData>/Status',
+                              formatter: '.Formatter.formatObjectStatus'
+                                   }"
+                            />
         </VBox>
     </HBox>
 
@@ -52,7 +65,7 @@
 
         <Button
             text="Save"
-            type="Transparent"
+            type="Accept"
             icon="sap-icon://save"
             press="onSaveBooking"
             visible="{VisibleModel>/visible}"
@@ -61,7 +74,7 @@
 
         <Button
             text="Cancel"
-            type="Transparent"
+            type="Reject"
             icon="sap-icon://cancel"
             press="onCancelBooking"
             visible="{VisibleModel>/visible}"
@@ -75,22 +88,35 @@
             </content>
             <VBox class="sapUiMediumMarginBottom">
                 <Panel
-                    headerText="General Information"
+               headerText="{= 'Booking Information - ' + ${CustomerData>/CustomerID} }"
                     expandable="false"
                     class="customPanelHeader"
                 >
-                    <f:SimpleForm
-                        editable="true"
-                        layout="ColumnLayout"
-                        columnsM="3"
-                        columnsL="4"
-                        columnsXL="6"
-                    >
+                     <f:SimpleForm
+                                    id="idsimpleCompanyDetails"
+                                    busyIndicatorDelay="0"
+                                    editable="true"
+                                    layout="ColumnLayout"
+                                    labelSpanXL="2"
+                                    labelSpanL="3"
+                                    labelSpanM="2"
+                                    labelSpanS="12"
+                                    adjustLabelSpan="false"
+                                    emptySpanXL="0"
+                                    emptySpanL="0"
+                                    emptySpanM="0"
+                                    emptySpanS="0"
+                                    columnsXL="3"
+                                    columnsL="2"
+                                    columnsM="2"
+                                    singleContainerFullSize="false"
+                                >
                         <f:content>
                             <!-- Booking Details -->
-                            <core:Title text="Booking Details" />
 
                             <!-- Room Type -->
+
+                            
                             <Label
                                 text="Desired Room Type"
                                 required="true"
@@ -109,8 +135,8 @@
                                 selectedKey="{Bookingmodel>/BedTypeName}"
                                 selectionChange="onRoomBedChange"
 
-
                             >
+                            
                                 <core:ListItem
                                     key="{Availablebeds>BedTypeName}"
                                     text="{Availablebeds>BedTypeName}"
@@ -124,7 +150,7 @@
                             />
                             <Text
                                 id="Ad_id_idPrice4"
-                                text="{CustomerData>/RentPrice}"
+                                text="{CustomerData>/OrginalRentPrice}"
                             />
 
                             <!-- Payment -->
@@ -160,7 +186,6 @@
                             </ComboBox>
 
                             <!-- Persons -->
-                            <core:Title text="Select Person" />
                             <Label
                                 text="No of Persons"
                                 required="true"
@@ -197,7 +222,7 @@
 
                             <Select
                                 id="idMonthYearSelect"
-                                width="100%"
+                                width="40%"
                                 visible="{= ${Bookingmodel>/UnitText} !== 'daily'}"
                                 selectedKey="{Bookingmodel>/DurationUnit}"
               
@@ -414,6 +439,9 @@
                             <Column>
                                 <Text text="End Date" />
                             </Column>
+                             <Column>
+                                <Text text="Unit" />
+                            </Column>
                             <Column>
                                 <Text text="Days" />
                             </Column>
@@ -432,6 +460,12 @@
                                     <Text
                                         text="{path:'CustomerData>EndDate'}"
                                     />
+                                    <!-- <Text 
+                                    text="{CustomerData>UnitText}" 
+
+                                    /> -->
+                                    <Text text="{path: 'CustomerData>UnitText'}" />
+
                                     <Text text="{CustomerData>TotalDays}" />
                                     <Text text="{CustomerData>FacilityPrice}" />
                                 </cells>

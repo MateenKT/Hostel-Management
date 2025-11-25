@@ -76,7 +76,9 @@
         id="editStartTime"
         value="{edit>/StartTime}"
         change="onEditTimeChange"
-          visible="{= ${edit>/UnitText} === 'Per Hour'}"  
+        displayFormat="HH:mm"
+        valueFormat="HH:mm"
+        visible="{= ${edit>/UnitText} === 'Per Hour'}"  
 
 
      />
@@ -85,6 +87,8 @@
       <TimePicker
         id="editEndTime"
         value="{edit>/EndTime}"
+        displayFormat="HH:mm"
+        valueFormat="HH:mm"
         change="onEditTimeChange"
           visible="{= ${edit>/UnitText} === 'Per Hour'}" 
 
@@ -93,7 +97,7 @@
       <Label text="Hours" />
     <Input
         id="editHours"
-        value="{edit>/Hours}"
+        value="{edit>/TotalHour}"
         editable="false"
              visible="{= ${edit>/UnitText} === 'Per Hour'}" 
   />

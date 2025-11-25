@@ -203,8 +203,8 @@
                                 text="{path:'HostelModel>StartDate',formatter: '.Formatter.formatDate'}"
                             /> -->
 							<ObjectIdentifier
-                            title="{path:'HostelModel>StartDate',formatter: '.Formatter.formatDate'}"
-                            text="{path:'HostelModel>EndDate',formatter: '.Formatter.formatDate'}"
+                            title="{path:'HostelModel>Bookings/0/StartDate',formatter: '.Formatter.formatDate'}"
+                            text="{path:'HostelModel>Bookings/0/EndDate',formatter: '.Formatter.formatDate'}"
                         />
 							<!-- <Text text="{HostelModel>Bookings/0/Status}" /> -->
 							<!-- <Text text="{HostelModel>RoomType}" /> -->

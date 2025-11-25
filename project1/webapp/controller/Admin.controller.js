@@ -138,64 +138,71 @@ sap.ui.define([
                 });
             });
         },
-        HM_viewroom: function(oEvent) {
-            var oContext = oEvent.getSource().getBindingContext("HostelModel");
-            var oData = oContext.getObject();
+      HM_viewroom: function (oEvent) {
 
-            if (!oData.Documents || !oData.Documents.length) {
-                sap.m.MessageBox.error("No document found for this room!");
-                return;
+    var oContext = oEvent.getSource().getBindingContext("HostelModel");
+    var oData = oContext.getObject();
+
+    if (!oData.Documents || !oData.Documents.length) {
+        sap.m.MessageBox.error("No document found for this room!");
+        return;
+    }
+
+    var sBase64 = oData.Documents[0].File;
+
+    if (!sBase64) {
+        sap.m.MessageBox.error("No document found for this room!");
+        return;
+    }
+
+    sBase64 = sBase64.replace(/\s/g, "");
+    var decoded = "";
+
+    try {
+        decoded = atob(sBase64);
+    } catch (e) {
+        decoded = sBase64;
+    }
+
+    // Extract actual image base64 inside decoded
+    var imagePart = decoded.includes("base64,")
+        ? decoded.split("base64,")[1]
+        : decoded;
+
+    // Identify image type
+    if (imagePart.startsWith("iVB")) {
+        sBase64 = "data:image/png;base64," + imagePart;
+    } else if (imagePart.startsWith("/9j")) {
+        sBase64 = "data:image/jpeg;base64," + imagePart;
+    } else {
+        sBase64 = "data:image/jpeg;base64," + imagePart;
+    }
+
+    var oImage = new sap.m.Image({
+        src: sBase64,
+        width: "100%",
+        height: "auto"
+    });
+
+    var oDialog = new sap.m.Dialog({
+        title: "View Document",
+        contentWidth: "400px",
+        contentHeight: "500px",
+        verticalScrolling: true,
+        content: [oImage],
+        endButton: new sap.m.Button({
+            text: "Close",
+            press: function () {
+                oDialog.close();
             }
+        }),
+        afterClose: function () {
+            oDialog.destroy();
+        }
+    });
 
-            var sBase64 = oData.Documents[0].File;
-
-            if (!sBase64) {
-                sap.m.MessageBox.error("No document found for this room!");
-                return;
-            }
-
-            sBase64 = sBase64.replace(/\s/g, "");
-
-            try {
-                if (!sBase64.startsWith("iVB") && !sBase64.startsWith("data:image")) {
-                    var decoded = atob(sBase64);
-                    if (decoded.startsWith("iVB")) {
-                        sBase64 = decoded;
-                    }
-                }
-            } catch (e) {
-                console.error("Base64 decode failed:", e);
-            }
-
-            if (!sBase64.startsWith("data:image")) {
-                sBase64 = "data:image/jpeg;base64," + sBase64;
-            }
-
-            var oImage = new sap.m.Image({
-                src: sBase64,
-                width: "100%",
-                height: "auto"
-            });
-
-            var oDialog = new sap.m.Dialog({
-                title: "View Document",
-                contentWidth: "400px",
-                contentHeight: "500px",
-                verticalScrolling: true,
-                content: [oImage],
-                endButton: new sap.m.Button({
-                    text: "Close",
-                    press: function() {
-                        oDialog.close();
-                    }
-                }),
-                afterClose: function() {
-                    oDialog.destroy();
-                }
-            });
-
-            oDialog.open();
-        },
+    oDialog.open();
+},
        HM_AssignRoom: function(oEvent) {
     var table = this.byId("idPOTable");
     var selected = table.getSelectedItem();
