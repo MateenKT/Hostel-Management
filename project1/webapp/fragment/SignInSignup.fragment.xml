@@ -16,7 +16,7 @@
 		</customHeader>
 		<VBox>
 			<!-- Switch Button -->
-			<HBox justifyContent="Center" class="switch-toggle-container">
+			<HBox justifyContent="Center" class="switch-toggle-container" visible="{= ${LoginViewModel>/authFlow} === 'signin' || ${LoginViewModel>/authFlow} === 'signup' }">
 				<Button text="SIGN IN" type="Transparent" class="switch-toggle-btn {= ${LoginViewModel>/selectedAccountType} === 'personal' ? 'active' : 'inactive'}" press="onSwitchToSignIn" />
 				<Button id="signupvisible" text="SIGN UP" type="Transparent" class="switch-toggle-btn {= ${LoginViewModel>/selectedAccountType} === 'biz' ? 'active' : 'inactive'}" press="onSwitchToSignUp" />
 			</HBox>
@@ -31,20 +31,106 @@
 					<HBox alignItems="End" justifyContent="Start">
 						<RadioButton text="Password" class="sapUiTinyMarginEnd " selected="{LoginViewModel>/isPasswordSelected}" />
 						<RadioButton text="OTP" class="sapUiTinyMarginEnd " selected="{LoginViewModel>/isOtpSelected}" />
-						<Button text="Send OTP" press="onPressOTP" />
+						<!-- <Button text="Send OTP" press="onPressOTP" /> -->
+
+							<Button text="Send OTP" press="onPressOTP" visible="{LoginViewModel>/isOtpSelected}" />
 					</HBox>
-					<Label text="Password" id="id_frgnewpass" required="true" />
-					<Input id="signinPassword" placeholder="Enter Password" valueState="{}" type="Password" liveChange="SM_onChnageSetAndConfirm" showValueHelp="true" valueStateText="Enter Password" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility" submit="onSignIn" maxLength="50" />
+
+
+					<Label text="Password" id="id_frgnewpass" required="{LoginViewModel>/isPasswordSelected}" visible="{LoginViewModel>/isPasswordSelected}" />
+<Input id="signinPassword" placeholder="Enter Password" type="Password" visible="{LoginViewModel>/isPasswordSelected}" />
+
+
 					<HBox justifyContent="SpaceBetween" class="sapUiTinyMarginTop">
 						<Button text="Forgot Password?" type="Transparent" press="onForgotPassword" />
 						<Button text="Sign In" type="Accept" width="100px" press="onSignIn" />
 					</HBox>
 				</VBox>
 			</Panel>
+
+
+			<!-- Forgot / Reset Flow Panel -->
+<Panel id="forgotPasswordPanel" expandable="false" visible="false" class="forgotPanel">
+	<VBox>
+		<Label text="Enter User ID" />
+		<Input id="fpUserId" placeholder="Your User ID" />
+		<Label text="Enter User Name" />
+		<Input id="fpUserName" placeholder="Registered Name" />
+		<HBox justifyContent="SpaceBetween">
+			<Button text="Back to Login" type="Transparent" press="onBackToLogin"/>
+			<Button text="Send OTP" type="Emphasized" press="onValidateUser"/>
+		</HBox>
+	</VBox>
+</Panel>
+<!-- OTP Verify Panel -->
+<Panel id="otpVerifyPanel" expandable="false" visible="false" class="otpPanel">
+	<VBox>
+		<Label text="Enter OTP" />
+		<Input id="fpOTP" placeholder="Enter OTP"/>
+		<HBox justifyContent="SpaceBetween">
+			<Button text="Back" type="Transparent" press="onBackToForgot"/>
+			<Button text="Verify OTP" type="Accept" press="_onVerifyOTP"/>
+		</HBox>
+	</VBox>
+</Panel>
+<!-- Reset Password Panel -->
+<Panel id="resetPasswordPanel" expandable="false" visible="false">
+	<VBox>
+		<Label text="New Password"/>
+		<Input id="newPass" type="Password"/>
+		<Label text="Confirm Password"/>
+		<Input id="confPass" type="Password"/>
+		<HBox justifyContent="SpaceBetween">
+			<Button text="Back" type="Transparent" press="onBackToForgot"/>
+			<Button text="Update Password" type="Accept" press="onSubmitNewPassword"/>
+		</HBox>
+	</VBox>
+</Panel>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 			<!-- Sign Up Panel -->
 			<Panel id="signUpPanel" expandable="false" visible="false">
 				<content>
 					<f:SimpleForm id="signUpForm" editable="true" layout="ResponsiveGridLayout" labelSpanL="3" labelSpanM="3" emptySpanL="1" emptySpanM="1" columnsL="2" columnsM="1" class="sapUiNoContentPadding sapUiSmallMarginTop">
+						<Label text=""/>
 						<HBox width="100%" alignItems="Center" justifyContent="Start">
 							<VBox width="20%">
 								<Label text="Salutation" required="true"/>
