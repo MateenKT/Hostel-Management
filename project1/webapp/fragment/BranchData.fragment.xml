@@ -163,11 +163,13 @@
                 <Button
                     id="BD_id_saveButoon"
                     text="Save"
+                    class="myUnifiedBtn"
                     press="MD_onSaveButtonPress"
                 />
 
                 <Button
                     text="Cancel"
+                    class="myUnifiedBtn"
                     press="MD_onCancelButtonPress"
                 />
             </Toolbar>

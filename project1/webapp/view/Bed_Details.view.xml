@@ -66,11 +66,11 @@
 					<OverflowToolbar>
 						<Title text="Bed List ({=${BedDetails>/}.length})"/>
 						<ToolbarSpacer />
-						<Button text="Add Bed" press="HM_RoomDetails" type="Accept"/>
-						<Button text="Delete" press="HM_DeleteDetails" type="Reject"/>
+						<Button text="Add Bed" press="HM_RoomDetails" class="myUnifiedBtn"/>
+						<Button text="Delete" press="HM_DeleteDetails" class="myUnifiedBtn"/>
 						  <Button
                         press="BD_onDownload"
-                        type="Transparent"
+                        class="myUnifiedBtn"
                         text="Download"
                     />
 					</OverflowToolbar>

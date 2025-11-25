@@ -79,10 +79,10 @@
 					<OverflowToolbar>
 						<Title  text="Room List ({=${RoomDetailsModel>/}.length})"/>
 						<ToolbarSpacer />
-						<Button  text="Create Room" press="HM_AddRoom" type="Accept"/>
-						<Button text="Edit"  press="HM_EditRoom" type="Ghost"/>
-						<Button text="Delete" press="HM_DeleteRoom" type="Reject"/>
-						<Button press="RD_onDownload" type="Transparent" text="Download"/>
+						<Button  text="Create Room" press="HM_AddRoom" class="myUnifiedBtn"/>
+						<Button text="Edit"  press="HM_EditRoom" class="myUnifiedBtn"/>
+						<Button text="Delete" press="HM_DeleteRoom" class="myUnifiedBtn"/>
+						<Button text= "Download" press="RD_onDownload" class="myUnifiedBtn"/>
 					</OverflowToolbar>
 				</headerToolbar>
 				<columns>

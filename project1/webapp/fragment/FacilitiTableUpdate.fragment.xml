@@ -110,8 +110,8 @@
         </content>
 
         <buttons>
-            <Button text="Save" press=".onEditFacilitySave" type="Emphasized" />
-            <Button text="Cancel" press="onEditDialogClose" />
+            <Button text="Save" press=".onEditFacilitySave" class="myUnifiedBtn" />
+            <Button text="Cancel" press="onEditDialogClose" class="myUnifiedBtn"/>
         </buttons>
     </Dialog>
 </core:FragmentDefinition>

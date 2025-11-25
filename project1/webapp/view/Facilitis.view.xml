@@ -85,8 +85,8 @@
 					<OverflowToolbar>
 						<Title text="Facilities ({=${Facilities>/}.length})" />
 						<ToolbarSpacer />
-						<Button text="Add Facility" press="FD_RoomDetails" type="Accept"/>
-						<Button text="Delete" press="HM_DeleteDetails" type="Reject"/>
+						<Button text="Add Facility" press="FD_RoomDetails" class="myUnifiedBtn"/>
+						<Button text="Delete" press="HM_DeleteDetails" class="myUnifiedBtn"/>
 					</OverflowToolbar>
 				</headerToolbar>
 				<columns>

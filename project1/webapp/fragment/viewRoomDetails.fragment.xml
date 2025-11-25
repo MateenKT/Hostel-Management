@@ -13,7 +13,7 @@
 					<Title text="{HostelModel>/BedType}" />
 				</contentMiddle>
 				<contentRight>
-					<Button icon="sap-icon://decline" type="Transparent" press=".onCloseRoomDetail" />
+					<Button icon="sap-icon://decline" class="myUnifiedBtn" press=".onCloseRoomDetail" />
 				</contentRight>
 			</Bar>
 		</customHeader>

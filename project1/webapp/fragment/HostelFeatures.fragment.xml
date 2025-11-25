@@ -83,8 +83,8 @@
 		<footer>
 			<Toolbar>
 				<ToolbarSpacer />
-				<Button text="Save" press="HF_onsavebuttonpress" type="Accept" id="HFF_id_saveButton" class="marginRight" />
-				<Button text="Cancel" press="HF_onCancelButtonPress" type="Reject" id="HFF_id_CancelButton" class="marginRight" />
+				<Button text="Save" press="HF_onsavebuttonpress" id="HFF_id_saveButton" class="marginRight myUnifiedBtn" />
+				<Button text="Cancel" press="HF_onCancelButtonPress" id="HFF_id_CancelButton" class="marginRight myUnifiedBtn" />
 			</Toolbar>
 		</footer>
 	</Dialog>

@@ -107,8 +107,8 @@
 		<footer>
 			<Toolbar>
 				<ToolbarSpacer />
-				<Button text="Save" type="Accept" press="FD_onsavebuttonpress"/>
-				<Button text="Cancel" type="Reject" press="FD_onCancelButtonPress"/>
+				<Button text="Save" class="myUnifiedBtn" press="FD_onsavebuttonpress"/>
+				<Button text="Cancel" class="myUnifiedBtn" press="FD_onCancelButtonPress"/>
 			</Toolbar>
 		</footer>
 	</Dialog>

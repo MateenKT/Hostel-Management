@@ -100,22 +100,22 @@
                         <Button
                             text="Add"
                             press="MD_AddButtonPress"
-                            type="Accept"
+                            class="myUnifiedBtn"
                         />
                         <Button
                             text="Edit"
                             press="MD_UpdateTableRow"
-                            type="Ghost"
+                            class="myUnifiedBtn"
                         />
                         <Button
                             text="Delete"
                             press="MD_DeleteRow"
-                            type="Reject"
+                            class="myUnifiedBtn"
                         />
                         <Button
                             text="Download"
                             press="MD_onDownload"
-                            type="Transparent"
+                            class="myUnifiedBtn"
                         />
                     </OverflowToolbar>
                 </headerToolbar>

@@ -24,7 +24,7 @@
     >
     <HBox justifyContent="End" 
             width="100%">
-     <Button text="Edit" press="onPressEditSave" />
+     <Button text="Edit" press="onPressEditSave" class="myUnifiedBtn" />
     </HBox>
    
         <f:SimpleForm
@@ -166,13 +166,13 @@
                 icon=""
                 text="Add Facility"
                 press="onPressAddFaciliti"
-                type="Emphasized"
+                class="myUnifiedBtn"
             />
             <Button 
                 icon="sap-icon://edit"
                 text="Edit"
                 press="onEditFacilityDetails"
-                type="Emphasized"
+                class="myUnifiedBtn"
                 
             />
         </Toolbar>
@@ -249,11 +249,10 @@
                 <Button
                     text="Proceed to pay"
                     visible="false"
-                    type="Emphasized"
+                    class="myUnifiedBtn"
                     press="onOpenProceedtoPay"
                 />
             </OverflowToolbar>
         </footer>
     </Page>
-
 </mvc:View>

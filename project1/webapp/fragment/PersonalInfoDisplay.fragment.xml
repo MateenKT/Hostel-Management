@@ -119,7 +119,7 @@
                 <Toolbar>
                     <Title text="Booking Details" level="H5" />
                     <ToolbarSpacer />
-                    <Button icon="sap-icon://edit" text="Edit" press="onEditFacilityDetails" type="Emphasized" />
+                    <Button icon="sap-icon://edit" text="Edit" press="onEditFacilityDetails" class="myUnifiedBtn" />
                 </Toolbar>
             </headerToolbar>
 

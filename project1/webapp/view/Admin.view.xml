@@ -111,7 +111,7 @@
 						<Button
                             text="Assign Room"
                             press="HM_AssignRoom"
-                            type="Accept"
+                            class="myUnifiedBtn"
                         />
 						<!-- <Button
                             text="Edit Room"
@@ -222,7 +222,7 @@
 							<Button
                                 text="View"
                                 press="HM_viewroom"
-                                type="Transparent"
+                                class="myUnifiedBtn"
                             />
 						</cells>
 					</ColumnListItem>

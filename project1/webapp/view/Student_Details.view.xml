@@ -131,12 +131,12 @@
                         <Button
                             text="Assign Rooms"
                             press="PO_onCreatePurchaseOrder"
-                            type="Transparent"
+                            class="myUnifiedBtn"
                         />
                         <Button
                             text="Delete"
                             press="PO_onDeleteButtonPress"
-                            type="Transparent"
+                            class="myUnifiedBtn"
                         />
                    
                     </OverflowToolbar>

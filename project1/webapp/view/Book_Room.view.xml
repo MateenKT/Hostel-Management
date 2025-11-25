@@ -112,24 +112,25 @@
                 <Button
                     text="Proceed to pay"
                     visible="{OBTNModel>/Submit}"
-                    type="Emphasized"
+                    class="myUnifiedBtn"
                     press="onOpenProceedtoPay"
                 />
                 <Button
                     text="Cancel"
                     visible="{OBTNModel>/Cancel}"
-                    type="Transparent"
+                    class="myUnifiedBtn"
                     press="onCancelPress"
                 />
                 <Button
                     text="Previous"
                     visible="{OBTNModel>/PERVIOUSVIS}"
+                    class="myUnifiedBtn"
                     press="onDialogBackButton"
                 />
                 <Button
                 id="IdNextBtn"
                     text="Next"
-                    type="Emphasized"
+                    class="myUnifiedBtn"
                     enabled="{OBTNModel>/Next}"
                     visible="{OBTNModel>/NXTVis}"
                     press="onDialogNextButton"

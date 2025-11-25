@@ -197,14 +197,14 @@
                     press="AR_onsavebuttonpress"
                     type="Accept"
                     id="AR_id_saveButton"
-                    class="marginRight"
+                    class="marginRight myUnifiedBtn"
                 />
                 <Button
                     text="Cancel"
                     press="AR_onCancelButtonPress"
                     type="Reject"
                     id="AR_id_CancelButton"
-                    class="marginRight"
+                    class="marginRight myUnifiedBtn"
                 />
             </Toolbar>
         </footer>

@@ -59,9 +59,9 @@
 					<OverflowToolbar>
 						<Title text="Hostel Features ({=${HostelFeatures>/}.length})" />
 						<ToolbarSpacer />
-						<Button  text="Add Hostel Features" press="HM_AddHostelFeature" type="Accept"/>
-						<Button text="Edit"  press="HM_EditHostelFeature" type="Ghost"/>
-						<Button text="Delete" press="HM_DeleteHostelFeature" type="Reject"/>
+						<Button  text="Add Hostel Features" press="HM_AddHostelFeature" class="myUnifiedBtn"/>
+						<Button text="Edit"  press="HM_EditHostelFeature" class="myUnifiedBtn"/>
+						<Button text="Delete" press="HM_DeleteHostelFeature" class="myUnifiedBtn"/>
 					</OverflowToolbar>
 				</headerToolbar>
 				<columns>

@@ -45,8 +45,8 @@
         <footer>
             <Toolbar>
                 <ToolbarSpacer />
-                <Button text="Add" press=".onAddFacilitySave" type="Accept" />
-                <Button text="Cancel" press=".onAddFacilityCancel" type="Reject" />
+                <Button text="Add" press=".onAddFacilitySave" class="myUnifiedBtn" />
+                <Button text="Cancel" press=".onAddFacilityCancel" class="myUnifiedBtn" />
             </Toolbar>
         </footer>
     </Dialog>

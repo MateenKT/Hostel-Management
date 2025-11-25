@@ -140,14 +140,14 @@
                     press="ARNO_onsavebuttonpress"
                     type="Accept"
                     id="HM_id_saveButton"
-                    class="marginRight"
+                    class="marginRight myUnifiedBtn"
                 />
                 <Button
                     text="Cancel"
                     press="HM_onCancelButtonPress"
                     type="Reject"
                     id="HM_id_CancelButton"
-                    class="marginRight"
+                    class="marginRight myUnifiedBtn"
                 />
             </Toolbar>
         </footer>

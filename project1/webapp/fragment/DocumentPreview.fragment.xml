@@ -10,7 +10,7 @@
             <core:HTML id="pdfViewer" content="" />
         </VBox>
         <endButton>
-            <Button text="Close" press="onClosePreview"/>
+            <Button text="Close" press="onClosePreview" class="myUnifiedBtn"/>
         </endButton>
     </Dialog>
 </core:FragmentDefinition>

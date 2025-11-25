@@ -187,7 +187,7 @@
             <Button
                 id="idWizardBackBtn"
                 text="Previous"
-                type="Transparent"
+                class="myUnifiedBtn"
                 press=".onWizardBack"
                 enabled="false"
             />
@@ -195,7 +195,7 @@
             <Button
                 id="idWizardNextBtn"
                 text="Next"
-                type="Emphasized"
+                class="myUnifiedBtn"
                 press=".onWizardNext"
             />
 
@@ -203,13 +203,13 @@
                 id="idWizardSubmitBtn"
                 text="Submit"
                 visible="false"
-                type="Accept"
+                class="myUnifiedBtn"
                 press=".onSaveDialog"
             />
 
             <Button
                 text="Cancel"
-                type="Reject"
+                class="myUnifiedBtn"
                 press=".onCancelDialog"
             />
         </buttons>

@@ -203,6 +203,7 @@
                                                 style="Transparent"
                                                 tooltip="Add Image"
                                                 placeholder=" "
+                                                class="myUnifiedBtn"
                                                 buttonOnly="true"
                                                 sameFilenameAllowed="true"
                                                 visible="{= ${DisplayImagesModel>isPlaceholder} === true &amp;&amp; ${editable>/Edit} === true }"
@@ -213,7 +214,7 @@
                                         <!-- Delete icon -->
                                         <m:Button
                                             icon="sap-icon://delete"
-                                            type="Reject"
+                                            class="myUnifiedBtn"
                                             visible="{= ${editable>/Edit} === true &amp;&amp; ${DisplayImagesModel>isPlaceholder} === false }"
                                             press=".onDeleteImage"
                                             tooltip="Delete Image"
@@ -234,7 +235,7 @@
                         id="BI_ideditButton"
                         visible="{= !${editable>/Edit} }"
                         text="Edit"
-                        type="Transparent"
+                        class="myUnifiedBtn"
                         press="BI_onEditButtonPress"
                     />
 
@@ -242,7 +243,7 @@
                         id="POO_idSaveButton"
                         visible="{=${editable>/Edit}}"
                         text="Save"
-                        type="Accept"
+                        class="myUnifiedBtn"
                         press="BT_onsavebuttonpress"
                     />
                 </m:contentRight>

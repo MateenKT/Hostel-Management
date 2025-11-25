@@ -138,16 +138,12 @@
             </VBox>
 
         </f:SimpleForm>
-
-        <!-- FOOTER -->
         <footer>
             <Toolbar>
                 <ToolbarSpacer />
-                <Button text="Submit Payment" type="Emphasized" press=".onSubmitPress" />
-                <Button text="Cancel" press=".onPaymentClose" />
+                <Button text="Submit Payment" class="myUnifiedBtn" press=".onSubmitPress" />
+                <Button text="Cancel" press=".onPaymentClose" class="myUnifiedBtn"/>
             </Toolbar>
         </footer>
-
     </Dialog>
-
 </core:FragmentDefinition>

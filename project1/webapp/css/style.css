@@ -1512,3 +1512,18 @@ span.sapMBtnInner.sapMBtnEmphasized {
     box-sizing: border-box !important;
   }
 }
+
+.myUnifiedBtn .sapMBtnInner {
+    background: linear-gradient(135deg, #00b7c7, #008b96) !important;
+    color: white !important;
+}
+.myUnifiedBtn:hover .sapMBtnInner,
+.myUnifiedBtn.sapMBtnHover .sapMBtnInner {
+  background: #28c2d0 !important;
+  color: white !important;
+}
+
+.myUnifiedBtn.sapMBtnActive .sapMBtnInner {
+  background: #28c2d0 !important;
+  color: white !important;
+}
