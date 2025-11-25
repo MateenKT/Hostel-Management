@@ -56,13 +56,13 @@
                             <Image src="image/UPI.jpg" width="150px" class="UPIQRCodeBox" />
                             <Text text="Scan using any UPI app" />
 
-                            <Label text="UPI ID" />
+                            <!-- <Label text="UPI ID" />
                             <Input id="idUPIID"
                                 placeholder="Enter your UPI ID"
                                 visible="true"
                                 liveChange=".onChangeUPIID"
                                 valueStateText="{i18n>enterUPIID}"
-                                maxLength="25" />
+                                maxLength="25" /> -->
                         </VBox>
 
                         <!-- CARD SECTION -->

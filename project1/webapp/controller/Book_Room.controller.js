@@ -2371,7 +2371,7 @@ onMonthSelectionChange: function (oEvent) {
 
         const aFields = [
            "idAmount", "idPaymentTypeField", "idTransactionID",
-            "idPaymentDate",  "idUPIID", "idCardNumber", "idCardExpiry", "idCardCVV"
+            "idPaymentDate", "idCardNumber", "idCardExpiry", "idCardCVV"
         ];
         aFields.forEach(id => sap.ui.getCore().byId(id)?.setValue(""));
     },
@@ -2395,7 +2395,7 @@ onMonthSelectionChange: function (oEvent) {
     _clearAllPaymentFields: function() {
         [
              "idAmount", "idPaymentTypeField", "idTransactionID",
-            "idPaymentDate",  "idUPIID", "idCardNumber",
+            "idPaymentDate", "idCardNumber",
             "idCardExpiry", "idCardCVV"
         ].forEach(id => {
             const c = sap.ui.getCore().byId(id);
@@ -2413,7 +2413,7 @@ onMonthSelectionChange: function (oEvent) {
 
         const aFields = [
              "idAmount", "idPaymentTypeField", "idTransactionID",
-            "idPaymentDate",  "idUPIID", "idCardNumber", "idCardExpiry", "idCardCVV"
+            "idPaymentDate", "idCardNumber", "idCardExpiry", "idCardCVV"
         ];
         aFields.forEach(id => sap.ui.getCore().byId(id)?.setValue(""));
     },
@@ -2464,7 +2464,7 @@ onMonthSelectionChange: function (oEvent) {
 
      // Mandatory validation
      const isMandatoryValid = (
-         utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idUPIID"), "ID") &&
+        //  utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idUPIID"), "ID") &&
         //  utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idBankName"), "ID") &&
         //  utils._LCstrictValidationComboBox(sap.ui.getCore().byId("idCurrency"), "ID") &&
          utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idPaymentTypeField"), "ID") &&
@@ -2532,18 +2532,19 @@ onMonthSelectionChange: function (oEvent) {
                  p.Facilities.SelectedFacilities.forEach(fac => {
                   let facilityPrice = 0;
 
-if (oData.SelectedPriceType === "Per Day") {
-    facilityPrice = fac.PricePerDay || 0;
-}
-else if (oData.SelectedPriceType === "Per Month") {
-    facilityPrice = fac.PricePerMonth || 0;
-}
-else if (oData.SelectedPriceType === "Per Year") {
-    facilityPrice = fac.PricePerYear || 0;
-}
-else if (oData.SelectedPriceType === "hourly") {
-    facilityPrice = fac.PricePerHour || 0;
-}
+                      if (oData.SelectedPriceType === "Per Day") {
+                          facilityPrice = fac.PricePerDay || 0;
+                      }
+                      else if (oData.SelectedPriceType === "Per Month") {
+                          facilityPrice = fac.PricePerMonth || 0;
+                      }
+                      else if (oData.SelectedPriceType === "Per Year") {
+                          facilityPrice = fac.PricePerYear || 0;
+                      }
+                      else if (oData.SelectedPriceType === "hourly") {
+                          facilityPrice = fac.PricePerHour || 0;
+                      }
+
                      facilityData.push({
                          PaymentID: "",
                          FacilityName: typeof fac === 'string' ? fac : fac.FacilityName,
@@ -2570,13 +2571,13 @@ else if (oData.SelectedPriceType === "hourly") {
                  City: p.City,
                  PermanentAddress: p.Address,
                  Documents: (p.Documents && p.Documents.length > 0)
-    ? p.Documents.map(doc => ({
-        DocumentType: "ID Proof",
-        File: doc.Document,
-        FileName: doc.FileName,
-        FileType: doc.FileType
-    }))
-    : [],
+                  ? p.Documents.map(doc => ({
+                      DocumentType: "ID Proof",
+                      File: doc.Document,
+                      FileName: doc.FileName,
+                      FileType: doc.FileType
+                  }))
+                  : [],
 
                  Booking: bookingData,
                  FacilityItems: facilityData,
@@ -2608,28 +2609,28 @@ else if (oData.SelectedPriceType === "hourly") {
              actions: [sap.m.MessageBox.Action.OK],
           onClose: function () {
 
-    // Navigate to hostel page
-    var oRoute = this.getOwnerComponent().getRouter();
-    oRoute.navTo("RouteHostel");
+                // Navigate to hostel page
+                var oRoute = this.getOwnerComponent().getRouter();
+                oRoute.navTo("RouteHostel");
 
-     setTimeout(function () {
-      this.resetAllBookingData()
-        this.openProfileDialog();
-    }.bind(this), 500);
-    // --- SHOW AVATAR AUTOMATICALLY ---
-    const oAvatar = sap.ui.getCore().byId("ProfileAvatar");
-    if (oAvatar) {
-        oAvatar.setVisible(true);   
-    }
-}.bind(this)
+                setTimeout(function () {
+                  this.resetAllBookingData()
+                    this.openProfileDialog();
+                }.bind(this), 500);
+                // --- SHOW AVATAR AUTOMATICALLY ---
+                const oAvatar = sap.ui.getCore().byId("ProfileAvatar");
+                if (oAvatar) {
+                    oAvatar.setVisible(true);   
+                }
+            }.bind(this)
          });
         } catch (err) {
             sap.m.MessageBox.error("Error while booking: " + err);
         }
     },
-    openProfileDialog: function () {
-    this.onPressAvatar()
-},
+      openProfileDialog: function () {
+      this.onPressAvatar()
+      },
        onPressAvatar: async function () {
             const oUser = this._oLoggedInUser || {};
             const sPhoto = "./image.jpg";
