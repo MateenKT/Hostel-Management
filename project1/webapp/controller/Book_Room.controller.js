@@ -1017,7 +1017,7 @@ _createDynamicPersonsUI: function () {
         aPersons[0].CustomerEmail = oUser.EmailID || "";
         aPersons[0].MobileNo = oUser.MobileNo || "";
         aPersons[0].UserID = oUser.UserID || "";
-        aPersons[0].DateOfBirth = oUser.DateOfBirth || "";
+        aPersons[0].DateOfBirth = this.Formatter.DateFormat(oUser.DateOfBirth) || "";
         aPersons[0].Gender = oUser.Gender || "";
         aPersons[0].Country = oUser.Country || "";
         aPersons[0].State = oUser.State || "";

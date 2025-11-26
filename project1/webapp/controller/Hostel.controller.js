@@ -1778,7 +1778,7 @@ sap.ui.define([
                 oLoginModel.setProperty("/Role", aUsers.Role);
                 oLoginModel.setProperty("/BranchCode", aUsers.BranchCode || "");
                 oLoginModel.setProperty("/MobileNo", aUsers.MobileNo || "");
-                oLoginModel.setProperty("/DateofBirth", aUsers.DateOfBirth || "");
+                oLoginModel.setProperty("/DateofBirth", this.Formatter.DateFormat(aUsers.DateOfBirth) || "");
 
                 // For global access
                 this._oLoggedInUser = aUsers;
@@ -1956,12 +1956,31 @@ sap.ui.define([
         onEditProfilePic: function () {
             sap.m.MessageToast.show("Profile picture edit not implemented yet.");
         },
-         onProfileDialogClose: function () {
-    this._oProfileDialog.destroy();
 
-  this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", false);
-}
-,
+        onProfileDialogClose: function () {
+            const oLoginModel = sap.ui.getCore().getModel("LoginModel");
+            if (oLoginModel) {
+                oLoginModel.setData({
+                    EmployeeID: "",
+                    EmployeeName: "",
+                    EmailID: "",
+                    Role: "",
+                    BranchCode: "",
+                    MobileNo: "",
+                    DateofBirth: ""
+                });
+            }
+
+            this._oLoggedInUser = null;
+
+            if (this._oProfileDialog) {
+                this._oProfileDialog.destroy();
+                this._oProfileDialog = null;
+            }
+
+            this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", false);
+        },
+
         Bookfragment: function () {
             if (!this.FCIA_Dialog) {
                 var oView = this.getView();
