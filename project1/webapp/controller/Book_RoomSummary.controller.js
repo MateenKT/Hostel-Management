@@ -248,7 +248,7 @@ sap.ui.define([
             oModel.setProperty("/EndDate", sNewEndDate);
 
             /** CALCULATE TOTAL DAYS */
-            const iDays = Math.ceil((oEnd - oStart) / (1000 * 60 * 60 * 24));
+            const iDays = Math.ceil((oEnd - oStart) / (1000 * 60 * 60 * 24))+1;
             oModel.setProperty("/TotalDays", iDays);
 
             /** UPDATE MINIMUM END DATE IN UI */

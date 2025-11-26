@@ -36,7 +36,7 @@
 </HBox>
 		<!-- PASSWORD SECTION -->
 		<Label text="Password" id="lblPass" visible="{LoginViewModel>/isPasswordSelected}"/>
-		<Input id="signinPassword" placeholder="Enter Password" type="Password" visible="{LoginViewModel>/isPasswordSelected}"/>
+		<Input id="signinPassword" placeholder="Enter Password" submit="onSignIn"  type="Password" visible="{LoginViewModel>/isPasswordSelected}"/>
 		<!-- REUSED OTP FIELD FOR LOGIN -->
 		<VBox id="signInOTPBox" visible="{LoginViewModel>/isOtpSelected}">
 			<Label text="Enter OTP" />
