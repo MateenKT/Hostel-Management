@@ -51,7 +51,6 @@
 					<core:Item key="9" text="9" />
 					<core:Item key="10" text="10" />
 					<core:Item key="11" text="11" />
-					<core:Item key="12" text="12" />
 				</Select>
 
 				<Label text="End Date" />

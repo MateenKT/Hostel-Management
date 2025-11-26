@@ -84,29 +84,7 @@ sap.ui.define([
                 CustomerEmail: "",
                 RoomType: ""
             }), "HostelModel");
-
-            oView.setModel(new sap.ui.model.json.JSONModel({
-                items: [{
-                        title: "My Profile",
-                        icon: "sap-icon://person-placeholder",
-                        key: "profile"
-                    },
-                    {
-                        title: "Booking History",
-                        icon: "sap-icon://connected",
-                        key: "devices"
-                    },
-                    {
-                        title: "Logout",
-                        icon: "sap-icon://log",
-                        key: "logout"
-                    }
-                ]
-            }), "profileMenuModel");
-
-            oView.setModel(new JSONModel({
-                isEditMode: false
-            }), "saveModel");
+            oView.setModel(new JSONModel({ isEditMode: false }), "saveModel");
             // oView.setModel(new JSONModel({ isOtpSelected: false, isPasswordSelected: true }), "LoginViewModel");
             oView.setModel(new JSONModel({
                 isOtpSelected: false,
@@ -2198,7 +2176,7 @@ sap.ui.define([
                 UserName: name,
                 Type: "OTP"
             };
-            console.log("Payload data :     . . . .   .. . .", payload);
+           
             $.ajax({
                 url: url,
                 method: "POST",

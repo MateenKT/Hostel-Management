@@ -3,10 +3,12 @@ sap.ui.define([
   "sap/ui/model/json/JSONModel",
   "../model/formatter",
   "../utils/validation",
+  "sap/ui/core/BusyIndicator",
 ], function (
   BaseController,
   JSONModel,
-  Formatter, utils
+  Formatter, utils,
+  BusyIndicator
 ) {
   "use strict";
 
@@ -26,6 +28,7 @@ sap.ui.define([
       if (!oHostelModel.getProperty("/SelectedMonths")) {
     oHostelModel.setProperty("/SelectedMonths", "1");
   }
+  
       if (!oHostelModel) {
         // If not found, create a fallback model
         oHostelModel = new JSONModel({
@@ -157,6 +160,11 @@ oHostelModel.setProperty("/SelectedPerson", "1");
       this.oWizard.getSteps()[1].setValidated(false);
       this.oWizard.getSteps()[2].setValidated(false);
       // this.resetAllBookingData()
+       this.getView().setModel(new JSONModel({
+                isOtpSelected: false,
+                isPasswordSelected: true,
+                authFlow: "signin"   // [signin, forgot, otp, reset]
+            }), "LoginViewModel");
     },
     Roomdetails: async function () {
       try {
@@ -2156,35 +2164,51 @@ onMonthSelectionChange: function (oEvent) {
     oBTN.refresh(true);
     oHostelModel.refresh(true);
 },
-  
- 
-    // onSwitchToSignIn: function () {
-    //   var oSignInPanel = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInPanel");
-    //   var oSignUpPanel = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpPanel");
 
-    //   oSignInPanel.setVisible(true);
-    //   oSignUpPanel.setVisible(false);
+//login
+  _validateFPFields: function () {
+            let id = sap.ui.getCore().byId("fpUserId").getValue();
+            let name = sap.ui.getCore().byId("fpUserName").getValue();
+            let btn = this._oForgotDialog.getBeginButton();
 
-    //   this.getView().getModel("LoginViewModel").setProperty("/selectedAccountType", "personal");
-    // },
+            btn.setEnabled(id !== "" && name !== "");
+        },
 
-    // onSwitchToSignUp: function () {
-    //   var oSignInPanel = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInPanel");
-    //   var oSignUpPanel = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpPanel");
+        onSelectLoginMode: function () {
+            const vm = this.getView().getModel("LoginViewModel");
+            const pass = vm.getProperty("/isPasswordSelected");
+            vm.setProperty("/isOtpSelected", !pass);
+            vm.setProperty("/isPasswordSelected", !vm.getProperty("/isOtpSelected"));
+        },
+        _clearAllAuthFields: function () {
+            const ids = [
+                "signInuserid", "signInusername", "signinPassword",
+                "fpUserId", "fpUserName", "fpOTP",
+                "newPass", "confPass", "loginOTP"
+            ];
+            ids.forEach(id => {
+                const c = sap.ui.getCore().byId(id);
+                if (c) { c.setValue(""); c.setValueState("None"); }
+            });
+            this._storedLoginCreds = null;
+            this._oResetUser = null;
+        },
+        onFPValidate: function () {
+            const id = sap.ui.getCore().byId("fpUserId").getValue().trim();
+            const name = sap.ui.getCore().byId("fpUserName").getValue().trim();
+            sap.ui.getCore().byId("btnFPNext").setEnabled(id !== "" && name !== "");
+        },
 
-    //   oSignInPanel.setVisible(false);
-    //   oSignUpPanel.setVisible(true);
-
-    //   this.getView().getModel("LoginViewModel").setProperty("/selectedAccountType", "biz");
-    // },
-
+        onOtpLive: function (e) {
+            const v = e.getParameter("value").trim();
+            sap.ui.getCore().byId("btnOtpVerify").setEnabled(v !== "");
+        },
     // Sign In
     onSignIn: async function () {
       var oLoginModel = this.getView().getModel("LoginModel");
       var oLoginViewModel = this.getView().getModel("LoginViewModel");
       var oFragment = this._oLoginAlertDialog; // Correct reference to fragment dialog
-
-      // Get input values using Fragment.byId
+       
       var sUserid = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInuserid").getValue();
       var sUsername = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInusername").getValue();
       var sPassword = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signinPassword").getValue();
@@ -2201,14 +2225,30 @@ onMonthSelectionChange: function (oEvent) {
       }
 
       try {
-        const oResponse = await this.ajaxReadWithJQuery("HM_Login", "");
-        const aUsers = oResponse?.commentData || [];
+      
+        const payload = { UserID: sUserid, UserName: sUsername, Password: btoa(sPassword)};
+          BusyIndicator.show(0)
+        const oResponse = await this.ajaxReadWithJQuery("HM_Login", payload);
 
-        const oMatchedUser = aUsers.find(user =>
-          user.UserID === sUserid &&
-          user.UserName === sUsername &&
-          (user.Password === sPassword || user.Password === btoa(sPassword))
-        );
+       
+       let aUsers = [];
+
+if (Array.isArray(oResponse.data)) {
+    if (Array.isArray(oResponse.data[0])) {
+        aUsers = oResponse.data[0];
+    } else {
+        aUsers = oResponse.data;
+    }
+} else {
+    console.error("Unexpected backend response format", oResponse);
+}
+
+          BusyIndicator.hide()
+       const oMatchedUser = aUsers.find(user =>
+    user.UserID === sUserid &&
+    user.UserName === sUsername
+);
+
 
         if (!oMatchedUser) {
           sap.m.MessageToast.show("Invalid credentials. Please try again.");
@@ -2275,17 +2315,234 @@ onMonthSelectionChange: function (oEvent) {
             oCheck.setSelected(true);
         }
     }
-} else if (oMatchedUser.Role === "Admin" || oMatchedUser.Role === "Employee") {
-          this.getOwnerComponent().getRouter().navTo("TilePage");
-        } else {
-          sap.m.MessageToast.show("Invalid credentials. Please try again.");
-        }
-
+       }
       } catch (err) {
         console.error("Login Error:", err);
         sap.m.MessageToast.show("Failed to fetch login data: " + err);
       }
     },
+    //   onValidateUser: async function () {
+    //         let sUserId = sap.ui.getCore().byId("fpUserId").getValue().trim();
+    //         let sUserName = sap.ui.getCore().byId("fpUserName").getValue().trim();
+
+    //         const payload = { UserID: sUserId, UserName: sUserName, Type: "OTP" };
+
+    //         sap.ui.core.BusyIndicator.show(0);
+    //         try {
+    //             const oResp = await $.ajax({
+    //                 url: "https://rest.kalpavrikshatechnologies.com/HostelSendOTP",
+    //                 method: "POST",
+    //                 contentType: "application/json",
+    //                 headers: {
+    //                     name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+    //                     password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+    //                 },
+    //                 data: JSON.stringify(payload)
+    //             });
+
+    //             if (oResp?.success) {
+    //                 this._oResetUser = { UserID: sUserId, UserName: sUserName };
+
+    //                 // 👇 MUST stay “forgot” until OTP verified
+    //                 this.getView().getModel("LoginViewModel").setProperty("/authFlow", "forgot");
+
+    //                 this._showPanel("otpVerifyPanel");
+    //             } else {
+    //                 sap.m.MessageToast.show("User not found or OTP failed");
+    //             }
+    //         } catch (err) {
+    //             sap.m.MessageToast.show("Unable to send OTP, try again later.");
+    //         } finally {
+    //             sap.ui.core.BusyIndicator.hide();
+    //         }
+    //     },
+
+    //     _verifyOTPWithBackend: async function (otp) {
+    //         sap.ui.core.BusyIndicator.show(0);
+    //         try {
+    //             const oResp = await $.ajax({
+    //                 url: "https://rest.kalpavrikshatechnologies.com/HM_Login",
+    //                 method: "GET",
+    //                 contentType: "application/json",
+    //                 headers: {
+    //                     name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+    //                     password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+    //                 },
+    //                 data: {
+    //                     UserID: this._oResetUser.UserID,
+    //                     UserName: this._oResetUser.UserName,
+    //                     OTP: otp.trim()
+    //                 }
+    //             });
+    //             console.log("OTP SENT FOR VERIFICATION:", otp.trim());
+
+    //             console.log("Verify OTP Response:", oResp);
+    //             return oResp?.success === true;
+
+    //         } catch (err) {
+    //             console.error("OTP Verify Error:", err);
+    //             return false;
+
+    //         } finally {
+    //             sap.ui.core.BusyIndicator.hide();
+    //         }
+    //     },
+    //  onPressOTP: async function () {
+    //     var sUserId = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInuserid").getValue();
+    //     var  sUserName = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInusername").getValue();
+           
+    //          if (
+    //     !utils._LCvalidateMandatoryField(sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInuserid"), "ID") ||
+    //     !utils._LCvalidateMandatoryField(sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInusername"), "ID") 
+    //   ) {
+    //     sap.m.MessageToast.show(" Enter valid User ID and User Name");
+    //     return;
+    //   }
+
+          
+    //         sap.ui.core.BusyIndicator.show(0);
+    //              const oPayload = {
+    //         UserID: sUserId,
+    //         UserName: sUserName,
+    //         Type: "OTP"
+    //               };
+    //         try {
+    //          var Response =  await this.ajaxCreateWithJQuery("HostelSendOTP", oPayload)
+    //             if (Response?.success) {
+    //                 sap.m.MessageToast.show("OTP sent! Check your email");
+    //                 // this._openOTPLoginDialog(sUserId, sUserName);
+    //                 BusyIndicator.hide()
+    //                 this._oResetUser = { UserID: sUserId, UserName: sUserName };
+    //                 this.getView().getModel("LoginViewModel").setProperty("/authFlow", "otp");
+    //                 this._showPanel("otpVerifyPanel");
+
+    //             } else {
+    //                 sap.m.MessageToast.show("User not found or cannot send OTP.");
+    //             }
+
+    //         } catch (err) {
+    //             sap.m.MessageToast.show("OTP sending failed!");
+    //         } finally {
+    //             BusyIndicator.hide();
+    //         }
+    //     },
+    //      onForgotPassword: function () {
+    //         this.getView().getModel("LoginViewModel").setProperty("/authFlow", "forgot");
+    //         this._showPanel("forgotPasswordPanel");
+    //         this._clearAllAuthFields();
+    //     },
+    //     _sendOTPToBackend: function (id, name) {
+    //         let url = "https://rest.kalpavrikshatechnologies.com/HostelSendOTP";
+
+    //         let payload = {
+    //             UserID: id,
+    //             UserName: name,
+    //             Type: "OTP"
+    //         };
+           
+    //         $.ajax({
+    //             url: url,
+    //             method: "POST",
+    //             contentType: "application/json",
+    //             headers: {                 // as provided
+    //                 name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+    //                 password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+    //             },
+    //             data: JSON.stringify(payload),
+    //             success: function () {
+    //                 sap.m.MessageToast.show("OTP sent to email");
+    //                 this._oForgotDialog.close();
+    //                 this._openOTPDialog(id, name);
+    //             }.bind(this),
+    //             error: function () {
+    //                 sap.m.MessageToast.show("Failed to send OTP");
+    //             }
+    //         });
+    //     },
+
+
+    //     _openOTPDialog: function () {
+    //         this._oOTPDialog = new sap.m.Dialog({
+    //             title: "Enter OTP",
+    //             type: "Message",
+    //             content: [
+    //                 new sap.m.Label({ text: "OTP", required: true }),
+    //                 new sap.m.Input("fpOTP", { placeholder: "Enter OTP" })
+    //             ],
+    //             beginButton: new sap.m.Button({
+    //                 text: "Verify",
+    //                 type: "Accept",
+    //                 press: this._onVerifyOTP.bind(this)
+    //             }),
+    //             endButton: new sap.m.Button({
+    //                 text: "Cancel",
+    //                 press: function () { this._oOTPDialog.close(); }.bind(this)
+    //             })
+    //         });
+    //         let btn = this._oOTPDialog.getBeginButton();
+    //         btn.setEnabled(false);
+
+    //         sap.ui.getCore().byId("fpOTP").attachLiveChange(function (oEvt) {
+    //             btn.setEnabled(oEvt.getParameter("value").trim() !== "");
+    //         });
+
+
+    //         this._oOTPDialog.open();
+    //     },
+    //        _onVerifyOTP: async function () {
+    //         const otp = sap.ui.getCore().byId("fpOTP").getValue().trim();
+    //         if (!otp) { sap.m.MessageToast.show("Enter OTP"); return; }
+
+    //         const vm = this.getView().getModel("LoginViewModel");
+    //         const flow = vm.getProperty("/authFlow");
+
+    //         const isValid = await this._verifyOTPWithBackend(otp);
+    //         if (!isValid) { sap.m.MessageToast.show("Incorrect OTP"); return; }
+
+    //         // 👉 CASE 1: Forgot Password → Go to Reset Panel
+    //         if (flow === "forgot") {
+    //             vm.setProperty("/authFlow", "reset");
+    //             this._showPanel("resetPasswordPanel");
+    //             return; // ❗ STOP HERE
+    //         }
+
+    //         // 👉 CASE 2: Normal OTP Login → Login User
+    //         if (flow === "otp") {
+    //             const resp = await $.ajax({
+    //                 url: "https://rest.kalpavrikshatechnologies.com/HM_Login",
+    //                 method: "GET",
+    //                 contentType: "application/json",
+    //                 headers: {
+    //                     name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+    //                     password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+    //                 },
+    //                 data: {
+    //                     UserID: this._oResetUser.UserID,
+    //                     UserName: this._oResetUser.UserName,
+    //                     OTP: otp
+    //                 }
+    //             });
+
+    //             sap.m.MessageToast.show("Login Successful!");
+    //             this._setLoggedInUser(resp.data[0]);
+    //             this._resetAllAuthFields();
+    //             this._oSignDialog.close();
+    //             return;
+    //         }
+    //     },
+
+    //     onForgotPassword: function () {
+    //         this.getView().getModel("LoginViewModel").setProperty("/authFlow", "forgot");
+    //         this._showPanel("forgotPasswordPanel");
+    //         this._clearAllAuthFields();
+    //     },
+    //     _showPanel: function (panelId) {
+    //         ["signInPanel", "forgotPasswordPanel", "otpVerifyPanel", "resetPasswordPanel"].forEach(id => {
+    //             const c = sap.ui.getCore().byId(id);
+    //             if (c) c.setVisible(id === panelId);
+    //         });
+    //     },
+
      SM_onTogglePasswordVisibility: function (oEvent) {
             var oInput = oEvent.getSource();
             var sType = oInput.getType() === "Password" ? "Text" : "Password";
@@ -2293,7 +2550,7 @@ onMonthSelectionChange: function (oEvent) {
             // Toggle the value help icon properly without losing the value
             var sIcon =
                 sType === "Password" ? "sap-icon://show" : "sap-icon://hide";
-            oInput.setValueHelpIconSrc(sIcon);
+            oInput.setVaMakelueHelpIconSrc(sIcon);
             // Ensure the current value of the password is retained
             var sCurrentValue = oInput.getValue();
             oInput.setValue(sCurrentValue);
@@ -2304,33 +2561,7 @@ onMonthSelectionChange: function (oEvent) {
 		onUserlivechange: function (oEvent) {
 			utils._LCvalidateMandatoryField(oEvent);
 		},
-		onEmailliveChange: function (oEvent) {
-			utils._LCvalidateEmail(oEvent);
-		},
-		onMobileLivechnage: function (oEvent) {
-			utils._LCvalidateMobileNumber(oEvent)
-		},
-		SM_onChnageSetAndConfirm: function (oEvent) {
-			utils._LCvalidatePassword(oEvent);
-		},
-		FSM_onConfirm: function () {
-			const oFragModel = this.getView().getModel("LoginMode");
-
-      const sPassword = oFragModel.getProperty("/password");
-      const sConfirm = oFragModel.getProperty("/comfirmpass");
-
-      // Get the input using Fragment.byId
-      const oConfirmInput = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpConfirmPassword");
-
-      if (sPassword !== sConfirm) {
-        oConfirmInput.setValueState("Error");
-        sap.m.MessageToast.show("Password Mismatch");
-        return;
-      } else {
-        oConfirmInput.setValueState("None");
-      }
-    },
-
+	
     onOpenProceedtoPay: function () {
     if (!this._oPaymentDialog) {
         this._oPaymentDialog = sap.ui.xmlfragment(
@@ -2461,7 +2692,6 @@ onMonthSelectionChange: function (oEvent) {
     onSubmitPress: async function() {
      const oModel = this.getView().getModel("HostelModel");
      const oData = oModel.getData();
-
      // Mandatory validation
      const isMandatoryValid = (
          utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idPaymentTypeField"), "ID") &&
@@ -2521,43 +2751,41 @@ onMonthSelectionChange: function (oEvent) {
              oData.PaymentDetails = paymentDetails;
 
              //  Handle both object and string facility formats
-             if (p.Facilities && p.Facilities.SelectedFacilities && p.Facilities.SelectedFacilities.length > 0) {
-                 p.Facilities.SelectedFacilities.forEach(fac => {
-                  let facilityPrice = 0;
+           const aSelectedFacilities = p.AllSelectedFacilities || [];
 
-                      if (oData.SelectedPriceType === "Per Day") {
-                          facilityPrice = fac.PricePerDay || 0;
-                      }
-                      else if (oData.SelectedPriceType === "Per Month") {
-                          facilityPrice = fac.PricePerMonth || 0;
-                      }
-                      else if (oData.SelectedPriceType === "Per Year") {
-                          facilityPrice = fac.PricePerYear || 0;
-                      }
-                      else if (oData.SelectedPriceType === "hourly") {
-                          facilityPrice = fac.PricePerHour || 0;
-                      }
+aSelectedFacilities.forEach(fac => {
+    let facilityPrice = 0;
 
-                     facilityData.push({
-                         PaymentID: "",
-                         FacilityName: typeof fac === 'string' ? fac : fac.FacilityName,
-                         FacilitiPrice:facilityPrice,
-                         StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
-                         EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
-                         PaidStatus: "Pending",
-                         UnitText:fac.UnitText,
-                         TotalHour:fac.TotalTime,
-                         Currency:fac.Currency
-                     });
-                 });
-             }
+    if (fac.UnitText === "Per Day") facilityPrice = fac.Price
+ || 0;
+    else if (fac.UnitText === "Per Month") facilityPrice = fac.Price
+ || 0;
+    else if (fac.UnitText === "Per Year") facilityPrice = fac.Price
+ || 0;
+    else if (fac.UnitText === "Per Hour") facilityPrice = fac.Price || 0;
+
+    facilityData.push({
+        PaymentID: "",
+        FacilityName: fac.FacilityName,
+        FacilitiPrice: facilityPrice,
+        StartDate: fac.StartDate ? fac.StartDate.split("/").reverse().join("-") : "",
+        EndDate: fac.EndDate ? fac.EndDate.split("/").reverse().join("-") : "",
+        PaidStatus: "Pending",
+        UnitText: fac.UnitText,
+        StartTime: fac.StartTime,
+        EndTime: fac.EndTime,
+        TotalHour: fac.TotalTime,
+        Currency: fac.Currency
+    });
+});
+
 
              // Return formatted entry
              return {
                  Salutation: p.Salutation,
                  CustomerName: p.FullName,
                  UserID: p.UserID,
-                 STDCode: p.StdCode,
+                 STDCode: p.STDCode,
                  MobileNo: p.MobileNo,
                  Gender: p.Gender,
                  DateOfBirth: p.DateOfBirth ? p.DateOfBirth.split("/").reverse().join("-") : "",
@@ -3165,6 +3393,10 @@ onSelectionChange: function (oEvent) {
 },
  onProfileDialogClose: function () {
             this._oProfileDialog.close()
+        },
+         onProfileclose: function () {
+            // Close the dialog and perform logout logic
+            if (this._oProfileDialog) this._oProfileDialog.close();
         },
   onCancelPress: function () {
             this.resetAllBookingData()
