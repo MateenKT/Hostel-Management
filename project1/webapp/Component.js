@@ -36,6 +36,18 @@
                     });
                     this.setModel(oUIModel, "UIModel");
 
+                     // Login model setup
+                    var omodel = new sap.ui.model.json.JSONModel({
+                        url: "https://rest.kalpavrikshatechnologies.com/",
+                        headers: {
+                            name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                            password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
+                            "Content-Type": "application/json"
+                        },
+                        isRadioVisible: false
+                    });
+                    this.setModel(omodel, "LoginModel");
+
                     this._fetchCommonData("City", "CityModel");                   
                     this._fetchCommonData("State", "StateModel");
                     this._fetchCommonData("Country", "CountryModel");

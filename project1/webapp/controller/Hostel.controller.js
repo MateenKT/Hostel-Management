@@ -57,23 +57,10 @@ sap.ui.define([
         _onRouteMatched: async function() {
             const oView = this.getView();
 
-            // Login model setup
-            const omodel = new JSONModel({
-                url: "https://rest.kalpavrikshatechnologies.com/",
-                headers: {
-                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
-                    "Content-Type": "application/json"
-                },
-                isRadioVisible: false
-            });
-            this.getOwnerComponent().setModel(omodel, "LoginModel");
-
             //  Disable controls initially
             this.byId("id_Branch").setEnabled(true);
             this.byId("id_Area").setEnabled(true);
             this.byId("id_Roomtype").setEnabled(true);
-
 
             //  Create all static local models
             oView.setModel(new sap.ui.model.json.JSONModel({

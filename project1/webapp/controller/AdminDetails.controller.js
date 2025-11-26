@@ -78,26 +78,15 @@ sap.ui.define([
             const oLoginModel = this.getView().getModel("LoginModel");
             const sRole = oLoginModel?.getProperty("/Role") || "";
             const sEmpID = oLoginModel?.getProperty("/EmployeeID") || "";
-
             if (sRole === "Customer") {
-
-                // Store for BaseController usage in next onPressAvatar call
                 this._sLoggedUserID = sEmpID;
-
-                // if (this._oProfileDialog) {
-                //     this._oProfileDialog.open();
-                // } else {
-                //     this.onPressAvatar();
-                // }
                 const oUIModel = this.getOwnerComponent().getModel("UIModel");
                 oUIModel.setProperty("/isLoggedIn", true);
                 this.getOwnerComponent().getRouter().navTo("RouteHostel");
-
             } else {
                 this.getOwnerComponent().getRouter().navTo("RouteAdmin");
             }
-        }
-        ,
+        },
         AD_onSearch: async function () {
             try {
                 sap.ui.core.BusyIndicator.show(0);
