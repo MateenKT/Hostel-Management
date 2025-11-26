@@ -235,7 +235,7 @@ sap.ui.define([
                     // Calculate Days
                     // -------------------------------
                     const dayDiff = facEnd - facStart;
-                    const days = Math.ceil(dayDiff / (1000 * 3600 * 24));
+                    const days = Math.ceil(dayDiff / (1000 * 3600 * 24)) + 1;
 
                     if (days <= 0) {
                         console.warn("Invalid facility date range:", f);
@@ -276,7 +276,7 @@ sap.ui.define([
                         otherFacilitiesTotal += fTotal;
                     } else if (unit === "Per Hour") {
                         const totalHours = f.TotalHour || 0;
-                        fTotal = fPrice * parseFloat(totalHours);
+                        fTotal = fPrice * parseFloat(totalHours) * days;
                         otherFacilitiesTotal += fTotal;
                     }
 
@@ -462,74 +462,68 @@ sap.ui.define([
             editdata.setProperty("/EndDate", "")
 
             editdata.setProperty("/TotalDays", "")
-            sap.ui.getCore().byId("idMonthYearSelect").setSelectedKey("1")
+            sap.ui.getCore().byId("idMonthYearSelectFragment").setSelectedKey("1")
 
         },
-        onEditDateChange: function (oEvent) {
-            utils._LCvalidateMandatoryField(oEvent)
-            const oModel = this.getView().getModel("edit");
-            const sUnit = oModel.getProperty("/UnitText");
-            const sStartDate = oModel.getProperty("/StartDate");
-            let sEndDate = oModel.getProperty("/EndDate"); // for manual edit
+       onEditDateChange: function (oEvent) {
+    utils._LCvalidateMandatoryField(oEvent);
+    const oModel = this.getView().getModel("edit");
+    const sUnit = oModel.getProperty("/UnitText");
+    let sStartDate = oModel.getProperty("/StartDate"); // use let to allow reassignment
+    let sEndDate = oModel.getProperty("/EndDate");     // use let
 
-            if (!sUnit || !sStartDate) return;
+    if (!sUnit || !sStartDate) return;
 
-            const oSelect =
-                this.byId("idMonthYearSelect") ||
-                sap.ui.getCore().byId(this.getView().createId("idMonthYearSelect"));
+    const oSelect =
+        this.byId("idMonthYearSelectFragment") ||
+        sap.ui.getCore().byId(this.getView().createId("idMonthYearSelectFragment"));
 
-            let iCount = 1;
-            if (oSelect) {
-                const sKey = oSelect.getSelectedKey();
-                iCount = sKey ? Number(sKey) : 1;
-            } else {
-                iCount = this.iCount || 1;
-            }
+    let iCount = 1;
+    if (oSelect) {
+        const sKey = oSelect.getSelectedKey();
+        iCount = sKey ? Number(sKey) : 1;
+    } else {
+        iCount = this.iCount || 1;
+    }
 
-            if (!iCount || iCount <= 0) return;
+    if (!iCount || iCount <= 0) return;
 
-            let oStart = new Date(sStartDate);
-            let oEnd = sEndDate ? new Date(sEndDate) : null;
-            let iDays = 0;
-
-            if (sUnit === "Per Month") {
-                oEnd = new Date(oStart);
-                oEnd.setMonth(oEnd.getMonth() + iCount);
-                iDays = iCount * 30;
-            } else if (sUnit === "Per Year") {
-                oEnd = new Date(oStart);
-                oEnd.setFullYear(oEnd.getFullYear() + iCount);
-                iDays = iCount * 365;
-            } else if (sUnit === "Per Day") {
-                if (!oEnd) {
-                    // First time end date empty → default days = 1
-                    iDays = 1;
-                } else if (oStart <= oEnd) {
-                    // Start date <= end date → calculate days
-                    iDays = Math.ceil((oEnd - oStart) / (1000 * 60 * 60 * 24)) + 1; // include start day
-                } else {
-                    // Start date > end date → clear end date
-                    oEnd = null;
-                    iDays = 0;
-                }
-            } else if (sUnit === "Per Hour") {
-                if (!oEnd) {
-                    // First time end date empty → default days = 1
-                    iDays = 1;
-                } else if (oStart <= oEnd) {
-                    // Start date <= end date → calculate days
-                    iDays = Math.ceil((oEnd - oStart) / (1000 * 60 * 60 * 24)) + 1; // include start day
-                } else {
-                    // Start date > end date → clear end date
-                    oEnd = null;
-                    iDays = 0;
-                }
-            }
-
-            // Update model
-            oModel.setProperty("/EndDate", oEnd ? oEnd.toISOString().split("T")[0] : "");
-            oModel.setProperty("/TotalDays", iDays);
+    // ✅ Correct date conversion
+    if (sStartDate.includes("/")) {
+        sStartDate = sStartDate.split("/").reverse().join("-");
+        if (sEndDate) {
+            sEndDate = sEndDate.split("/").reverse().join("-");
         }
+    }
+
+    let oStart = new Date(sStartDate);
+    let oEnd = sEndDate ? new Date(sEndDate) : null;
+    let iDays = 0;
+
+    if (sUnit === "Per Month" || sUnit === "monthly") {
+        oEnd = new Date(oStart);
+        oEnd.setMonth(oEnd.getMonth() + iCount);
+        iDays = iCount * 30;
+    } else if (sUnit === "Per Year" || sUnit === "yearly") {
+        oEnd = new Date(oStart);
+        oEnd.setFullYear(oEnd.getFullYear() + iCount);
+        iDays = iCount * 365;
+    } else if (sUnit === "Per Day" || sUnit === "daily" || sUnit === "Per Hour") {
+        if (!oEnd) {
+            iDays = 1;
+        } else if (oStart <= oEnd) {
+            iDays = Math.ceil((oEnd - oStart) / (1000 * 60 * 60 * 24)) + 1;
+        } else {
+            oEnd = null;
+            iDays = 0;
+        }
+    }
+
+    // Update model
+    oModel.setProperty("/EndDate", oEnd ? oEnd.toISOString().split("T")[0] : "");
+    oModel.setProperty("/TotalDays", iDays);
+}
+
         ,
 
         onMonthYearChange: function (oEvent) {
@@ -640,7 +634,7 @@ sap.ui.define([
                 }
                 else if (oPayload.UnitText === "Per Hour") {
                     // ✅ Newly Added Hour Calculation
-                    finalPrice = basePrice * iHours;
+                    finalPrice = basePrice * iHours * iDays;
                 }
 
                 oPayload.TotalAmount = finalPrice;
@@ -812,7 +806,7 @@ sap.ui.define([
 
         // Calculate day difference
         var diffTime = oEnd - oStart;
-        var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+        var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1 || 1;
 
         oCustomerModel.setProperty("/RentPrice", diffDays * originalRent);
         oCustomerModel.setProperty("/Duration", diffDays);
@@ -1249,9 +1243,9 @@ sap.ui.define([
                 "City": Bookingdata.City,
                 "STDCode": Bookingdata.STDCode,
                 "Salutation": CustomerData.Salutation || "Mr.",
-                "Booking": [
+                "Booking": [    
                     {
-                        "BookingDate": this.Formatter.DateFormat(CustomerData.BookingDate).split('/').reverse().join('-'),
+                        "BookingDate": new Date().toISOString().split('T')[0], // current date
                         "RentPrice": CustomerData.RentPrice,
                         "NoOfPersons": CustomerData.NoOfPersons,
                         "StartDate": Bookingdata.StartDate.split('/').reverse().join('-'),
