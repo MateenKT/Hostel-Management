@@ -132,7 +132,7 @@ sap.ui.define([
                     let oDate = new Date(parts[2], parts[1] - 1, parts[0]);
                     oCustomer.BookingDate = oDate;
                 }
-                this.byId("editStartDate").setMinDate(oCustomer.BookingDate)
+                this.byId("Ad_id_editStartDate").setMinDate(oCustomer.BookingDate)
                 this.byId("editEndDate").setMinDate(oCustomer.BookingDate)
 
 
@@ -587,7 +587,7 @@ sap.ui.define([
                 utils._LCstrictValidationComboBox(sap.ui.getCore().byId("editFacilityName"), "ID") &&
                 // utils._LCstrictValidationComboBox(oView.byId("idBedType"), "ID") &&
                 (utils._LCstrictValidationComboBox(sap.ui.getCore().byId("idUnitType"), "ID")) &&
-                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("editStartDate"), "ID") &&
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("Ad_id_editStartDate"), "ID") &&
                 // utils._LCvalidateMandatoryField(oView.byId("idRoomNumber13"), "ID") &&
                 utils._LCvalidateMandatoryField(sap.ui.getCore().byId("editEndDate"), "ID")
 
@@ -747,7 +747,8 @@ sap.ui.define([
 
             })
         },
-      onBookingEditDateChange: function () {
+    onBookingEditDateChange: function(oEvent) {
+            utils._LCvalidateMandatoryField(oEvent);
     var oBookingModel = this.getView().getModel("Bookingmodel");
     var oCustomerModel = this.getView().getModel("CustomerData");
     var oData = oBookingModel.getData();
@@ -1025,7 +1026,30 @@ sap.ui.define([
             oCustomerData.GrandTotal = total + (oCustomerData.RentPrice || 0);
         }
         ,
-        onRoomDurationChange: function (oEvent) {
+
+
+         onRoomDurationChange: function (oEvent) {
+            utils._LCvalidateMandatoryField(oEvent);
+            var oSelectedItem = oEvent.getParameter("selectedItem");
+
+            // If user cleared selection or typed manually
+            if (!oSelectedItem) {
+                var oCustomerModel = this.getView().getModel("CustomerData");
+                var oBookingModel = this.getView().getModel("Bookingmodel");
+
+                // Reset values
+                oCustomerModel.setProperty("/PaymentType", "");
+                oCustomerModel.setProperty("/RentPrice", 0);
+                oCustomerModel.setProperty("/OrginalRentPrice", 0);
+                oCustomerModel.setProperty("/GrandTotal", 0);
+
+                oBookingModel.setProperty("/DurationUnit", "");
+                oBookingModel.setProperty("/StartDate", "");
+                oBookingModel.setProperty("/EndDate", "");
+
+                return; // stop execution here
+            }
+
             var sUnit = oEvent.getParameter("selectedItem").getKey(); // daily / monthly / yearly
             var oBookingModel = this.getView().getModel("Bookingmodel");
             var oCustomerModel = this.getView().getModel("CustomerData");
@@ -1071,6 +1095,17 @@ sap.ui.define([
             }
         },
       onRoomBedChange: function (oEvent) {
+          utils._LCvalidateMandatoryField(oEvent);
+            var oSelectedItem = oEvent.getParameter("selectedItem");
+
+            if (!oSelectedItem) {
+                // Clear operation
+                var oCustomerModel = this.getView().getModel("CustomerData");
+                oCustomerModel.setProperty("/RentPrice", 0);
+                oCustomerModel.setProperty("/GrandTotal", 0);
+                return;
+            }
+
     var sBedType = oEvent.getParameter("selectedItem").getKey(); // Selected bed type
     var oBookingModel = this.getView().getModel("Bookingmodel");
     var oCustomerModel = this.getView().getModel("CustomerData");
@@ -1122,13 +1157,14 @@ sap.ui.define([
     }
 }
 ,
-        onEditTimeChange: function (oEvent) {
+
+        onEditTimeChange: function(oEvent) {
             utils._LCvalidateMandatoryField(oEvent)
             var oModel = this.getView().getModel("edit");
             var oData = oModel.getData();
 
             var sStart = oData.StartTime; // "HH:mm:ss"
-            var sEnd = oData.EndTime;     // "HH:mm:ss"
+            var sEnd = oData.EndTime; // "HH:mm:ss"
 
             if (!sStart || !sEnd) {
                 return;
@@ -1170,7 +1206,8 @@ sap.ui.define([
 
             oModel.setProperty("/TotalHour", formatted);
         },
-        onCountrySelectionChange: function (oEvent) {
+        onCountrySelectionChange: function(oEvent) {
+            utils._LCvalidateMandatoryField(oEvent);
             const oView = this.getView();
             const oModel = oView.getModel("Bookingmodel");
 
@@ -1209,7 +1246,8 @@ sap.ui.define([
                 new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
             ]);
         },
-        CC_onChangeState: function (oEvent) {
+        CC_onChangeState: function(oEvent) {
+            utils._LCvalidateMandatoryField(oEvent);
             const oView = this.getView();
             const oModel = oView.getModel("Bookingmodel");
             const oItem = oEvent.getSource().getSelectedItem();
@@ -1239,9 +1277,43 @@ sap.ui.define([
                 new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
             ]);
         },
-        onSaveBooking: function () {
+
+
+        onChange: function(oEvent) {
+            const oInput = oEvent.getSource();
+            utils._LCvalidateMandatoryField(oEvent);
+            if (oInput.getValue() === "") oInput.setValueState("None");
+        },
+
+        onDateChange: function(oEvent) {
+            const oInput = oEvent.getSource();
+            utils._LCvalidateDate(oEvent);
+            if (oInput.getValue() === "") oInput.setValueState("None");
+        },
+
+        onSaveBooking: function() {
             var Bookingdata = this.getView().getModel("Bookingmodel").getData();
             var CustomerData = this.getView().getModel("CustomerData").getData();
+
+            // Mandatory validation
+            const isMandatoryValid = (
+                utils._LCvalidateMandatoryField(this.byId("Ad_id_RoomType"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("idPaymentMethod1"), "ID") &&
+                utils._LCvalidateDate(this.byId("Ad_id_editStartDate"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("AD_id_CustomerName"), "ID") &&
+                utils._LCvalidateDate(this.byId("AD_id_Date"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("Ad_id_gender"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("Ad_id_CustomerEmail"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("CC_id_Country"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("CC_id_State"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("CC_id_City"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("CD_ID_idPhone"), "ID")
+            );
+
+            if (!isMandatoryValid) {
+                sap.m.MessageToast.show("Please fill all mandatory fields.");
+                return;
+            }
 
             // Map UnitText to desired PaymentType
             var paymentMap = {
@@ -1265,17 +1337,16 @@ sap.ui.define([
                 "City": Bookingdata.City,
                 "STDCode": Bookingdata.STDCode,
                 "Salutation": CustomerData.Salutation || "Mr.",
-                "Booking": [    
+               "Booking": [    
                     {
                         "BookingDate": new Date().toISOString().split('T')[0], // current date
-                        "RentPrice": CustomerData.RentPrice,
-                        "NoOfPersons": CustomerData.NoOfPersons,
-                        "StartDate": Bookingdata.StartDate.split('/').reverse().join('-'),
-                        "EndDate": Bookingdata.EndDate.split('/').reverse().join('-'),
-                        "PaymentType": paymentMap[unit] || Bookingdata.UnitText, // fallback
-                        "BedType": Bookingdata.BedTypeName
-                    }
-                ],
+                    "RentPrice": CustomerData.RentPrice,
+                    "NoOfPersons": CustomerData.NoOfPersons,
+                    "StartDate": Bookingdata.StartDate.split('/').reverse().join('-'),
+                    "EndDate": Bookingdata.EndDate.split('/').reverse().join('-'),
+                    "PaymentType": paymentMap[unit] || Bookingdata.UnitText, // fallback
+                    "BedType": Bookingdata.BedTypeName
+                }],
                 "FacilityItems": CustomerData.AllSelectedFacilities.map(item => {
                     // Normalize UnitText for facility as well
                     var itemUnit = item.UnitText ? item.UnitText.trim().toLowerCase() : "";
@@ -1299,9 +1370,11 @@ sap.ui.define([
 
             // Send payload
             this.ajaxUpdateWithJQuery("HM_Customer", {
-                data: [Payload],
-                filters: { CustomerID: CustomerData.CustomerID }
-            })
+                    data: [Payload],
+                    filters: {
+                        CustomerID: CustomerData.CustomerID
+                    }
+                })
                 .then(() => {
                     sap.m.MessageToast.show("Booking saved successfully!");
 
@@ -1316,101 +1389,102 @@ sap.ui.define([
                 });
         },
 
-        onPressCancelBooking: async function (oEvent) {
+        onPressCancelBooking: async function(oEvent) {
             var oHostelModel = this.getView().getModel("CustomerData");
             var oData = oHostelModel.getData();
             var that = this;
 
             sap.m.MessageBox.confirm(
                 "Are you sure you want to cancel this booking?", {
-                title: "Confirm Cancellation",
-                icon: sap.m.MessageBox.Icon.WARNING,
-                actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO],
-                onClose: async function (oAction) {
-                    if (oAction !== sap.m.MessageBox.Action.YES) {
-                        return;
-                    }
-
-                    try {
-                        var today = new Date();
-                        var sCancelDate = today.toISOString().split("T")[0]; // YYYY-MM-DD
-
-                        //------ Booking Payload including Status and CancelDate ------
-                        const bookingData = [{
-                            BookingDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
-                            RentPrice: oData.GrandTotal ? oData.GrandTotal.toString() : "0",
-                            RoomPrice: oData.RoomPrice || "0",
-                            NoOfPersons: oData.noofperson || 1,
-                            Customerid: oData.CustomerId,
-                            StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
-                            EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
-                            Status: "Cancelled",                 // UPDATED
-                            CancelDate: sCancelDate,              // UPDATED
-                            PaymentType: oData.PaymentType || "",
-                            BedType: oData.BedType || ""
-                        }];
-
-                        //------ Facility Payload ------
-                        const facilityData = [];
-                        if (oData.AllSelectedFacilities?.length > 0) {
-                            oData.AllSelectedFacilities.forEach(fac => {
-                                facilityData.push({
-                                    PaymentID: "",
-                                    FacilityName: fac.FacilityName,
-                                    FacilitiPrice: fac.Price,
-                                    StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
-                                    EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
-                                    PaidStatus: "Cancelled" // UPDATED (optional)
-                                });
-                            });
+                    title: "Confirm Cancellation",
+                    icon: sap.m.MessageBox.Icon.WARNING,
+                    actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO],
+                    onClose: async function(oAction) {
+                        if (oAction !== sap.m.MessageBox.Action.YES) {
+                            return;
                         }
 
-                        //------ Final Payload ------
-                        const personData = [{
-                            Salutation: oData.Salutation || "",
-                            CustomerName: oData.FullName || "",
-                            UserID: oData.UserID || "",
-                            CustomerID: oData.CustomerID || "",
-                            STDCode: oData.STDCode || "",
-                            MobileNo: oData.MobileNo || "",
-                            Gender: oData.Gender || "",
-                            DateOfBirth: oData.DateOfBirth ? oData.DateOfBirth.split("/").reverse().join("-") : "",
-                            CustomerEmail: oData.CustomerEmail || "",
-                            Country: oData.Country || "",
-                            State: oData.State || "",
-                            City: oData.City || "",
-                            PermanentAddress: oData.Address || "",
-                            Booking: bookingData,                  // Making sure included
-                            FacilityItems: facilityData
-                        }];
+                        try {
+                            var today = new Date();
+                            var sCancelDate = today.toISOString().split("T")[0]; // YYYY-MM-DD
 
-                        sap.ui.core.BusyIndicator.show(0);
-                        const custid = oData.CustomerID;         // FIXED
+                            //------ Booking Payload including Status and CancelDate ------
+                            const bookingData = [{
+                                BookingDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
+                                RentPrice: oData.GrandTotal ? oData.GrandTotal.toString() : "0",
+                                RoomPrice: oData.RoomPrice || "0",
+                                NoOfPersons: oData.noofperson || 1,
+                                Customerid: oData.CustomerId,
+                                StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
+                                EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
+                                Status: "Cancelled", // UPDATED
+                                CancelDate: sCancelDate, // UPDATED
+                                PaymentType: oData.PaymentType || "",
+                                BedType: oData.BedType || ""
+                            }];
 
-                        await that.ajaxUpdateWithJQuery("HM_Customer", {
-                            data: personData,
-                            filters: { CustomerID: custid }
-                        });
+                            //------ Facility Payload ------
+                            const facilityData = [];
+                            if (oData.AllSelectedFacilities?.length > 0) {
+                                oData.AllSelectedFacilities.forEach(fac => {
+                                    facilityData.push({
+                                        PaymentID: "",
+                                        FacilityName: fac.FacilityName,
+                                        FacilitiPrice: fac.Price,
+                                        StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
+                                        EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
+                                        PaidStatus: "Cancelled" // UPDATED (optional)
+                                    });
+                                });
+                            }
 
-                        that.AD_onSearch();
-                        that.getView().getModel("VisibleModel").setProperty("/visible", false);
-                        that.byId("idMonthYearSelect").setVisible(false);
-                        sap.m.MessageToast.show("Booking cancelled successfully!");
+                            //------ Final Payload ------
+                            const personData = [{
+                                Salutation: oData.Salutation || "",
+                                CustomerName: oData.FullName || "",
+                                UserID: oData.UserID || "",
+                                CustomerID: oData.CustomerID || "",
+                                STDCode: oData.STDCode || "",
+                                MobileNo: oData.MobileNo || "",
+                                Gender: oData.Gender || "",
+                                DateOfBirth: oData.DateOfBirth ? oData.DateOfBirth.split("/").reverse().join("-") : "",
+                                CustomerEmail: oData.CustomerEmail || "",
+                                Country: oData.Country || "",
+                                State: oData.State || "",
+                                City: oData.City || "",
+                                PermanentAddress: oData.Address || "",
+                                Booking: bookingData, // Making sure included
+                                FacilityItems: facilityData
+                            }];
 
-                        // Hide Extra Buttons after Cancel
-                        that.byId("idedit")?.setVisible(false);
-                        that.byId("idcancel")?.setVisible(false);
+                            sap.ui.core.BusyIndicator.show(0);
+                            const custid = oData.CustomerID; // FIXED
 
-                    } catch (err) {
-                        sap.ui.core.BusyIndicator.hide();
-                        sap.m.MessageToast.show(err.message || err.responseText);
-                    } finally {
-                        sap.ui.core.BusyIndicator.hide();
+                            await that.ajaxUpdateWithJQuery("HM_Customer", {
+                                data: personData,
+                                filters: {
+                                    CustomerID: custid
+                                }
+                            });
+
+                            that.AD_onSearch();
+                            that.getView().getModel("VisibleModel").setProperty("/visible", false);
+                            that.byId("idMonthYearSelect").setVisible(false);
+                            sap.m.MessageToast.show("Booking cancelled successfully!");
+
+                            // Hide Extra Buttons after Cancel
+                            that.byId("idedit")?.setVisible(false);
+                            that.byId("idcancel")?.setVisible(false);
+
+                        } catch (err) {
+                            sap.ui.core.BusyIndicator.hide();
+                            sap.m.MessageToast.show(err.message || err.responseText);
+                        } finally {
+                            sap.ui.core.BusyIndicator.hide();
+                        }
                     }
                 }
-            }
             );
         }
     });
 });
-

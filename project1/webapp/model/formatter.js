@@ -143,13 +143,11 @@ sap.ui.define([
             return code ? formatted + " " + code : formatted;
         },
 
-       getImageSrc: function (value) {
-            if (!value) return "";
-            if (value.startsWith("data:image")) {
-                return value;
+        getImageSrc: function (base64Str) {
+            if (base64Str) {
+                return "data:image/png;base64," + base64Str;
             }
-
-            return "data:image/png;base64," + value;
-        }
+            return ""; // fallback
+        },
     }
 });

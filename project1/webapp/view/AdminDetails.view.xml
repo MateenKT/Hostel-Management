@@ -154,7 +154,7 @@
                                 showClearIcon="true"
                                 visible="{VisibleModel>/visible}"
                                 selectedKey="{Bookingmodel>/BedTypeName}"
-                                selectionChange="onRoomBedChange"
+                                selectionChange="onRoomBedChange" valueStateText="Select Room Type"
                             >
                                 <core:ListItem
                                     key="{Availablebeds>BedTypeName}"
@@ -188,7 +188,7 @@
                                 selectedKey="{Bookingmodel>/UnitText}"
                                 width="100%"
                                 selectionChange="onRoomDurationChange"
-                                visible="{VisibleModel>/visible}"
+                                visible="{VisibleModel>/visible}" valueStateText="Select Payment Type" change="onChange"
                             >
                                 <core:ListItem
                                     key="daily"
@@ -225,12 +225,12 @@
                             />
 
                             <DatePicker
-                                id="editStartDate"
+                                id="Ad_id_editStartDate"
                                 visible="{VisibleModel>/visible}"
                                 value="{Bookingmodel>/StartDate}"
                                 displayFormat="dd/MM/yyyy"
-                                valueFormat="yyyy-MM-dd"
-                                change="onBookingEditDateChange"
+                                valueFormat="dd/MM/yyyy"
+                                change="onBookingEditDateChange" valueStateText="Select Star Date" 
                             />
 
                             <!-- Month/Year Select -->
@@ -308,7 +308,7 @@
                                 editable="{= ${Bookingmodel>/UnitText} === 'daily' }"
                                 value="{Bookingmodel>/EndDate}"
                                 displayFormat="dd/MM/yyyy"
-                                valueFormat="yyyy-MM-dd"
+                                valueFormat="dd/MM/yyyy"
                                 change="onBookingEditDateChange"
                             />
                             <Label
@@ -377,7 +377,8 @@
                             <Input
                                 value="{Bookingmodel>/CustomerName}"
                                 maxLength="50"
-                                visible="{VisibleModel>/visible}"
+                                visible="{VisibleModel>/visible}" id="AD_id_CustomerName" valueStateText="Enter Customer Name"
+                                change="onChange"
                             />
                             <Label text="Date of Birth" />
                             <Text
@@ -388,7 +389,7 @@
                                 value="{Bookingmodel>/DateOfBirth}"
                                 displayFormat="dd/MM/yyyy"
                                 valueFormat="dd/MM/yyyy"
-                                visible="{VisibleModel>/visible}"
+                                visible="{VisibleModel>/visible}" id="AD_id_Date" valueStateText="Enter Date of Birth" change="onDateChange"
                             />
                             <Label text="Gender" />
                             <Text
@@ -397,7 +398,7 @@
                             />
                             <ComboBox
                                 selectedKey="{Bookingmodel>/Gender}"
-                                visible="{VisibleModel>/visible}"
+                                visible="{VisibleModel>/visible}" id="Ad_id_gender" valueStateText="Select Gender" change="onChange"
                             >
                                 <core:Item
                                     key="Male"
@@ -422,12 +423,12 @@
                                 value="{Bookingmodel>/CustomerEmail}"
                                 type="Email"
                                 maxLength="50"
-                                visible="{VisibleModel>/visible}"
+                                visible="{VisibleModel>/visible}" id="Ad_id_CustomerEmail" valueStateText="Enter Email Id" change="onChange"
                             />
                             <Label text="Country" />
                             <Text
                                 text="{CustomerData>/Country}"
-                                visible="{= !${VisibleModel>/visible} }"
+                                visible="{= !${VisibleModel>/visible} }" 
                             />
                             <ComboBox
                                 id="CC_id_Country"
@@ -438,7 +439,7 @@
                                 selectedKey="{Bookingmodel>/Country}"
                                 showSecondaryValues="true"
                                 visible="{VisibleModel>/visible}"
-                                selectionChange="onCountrySelectionChange"
+                                selectionChange="onCountrySelectionChange" 
                             >
                                 <core:ListItem
                                     key="{CountryModel>countryName}"
@@ -474,7 +475,7 @@
                             />
                             <ComboBox
                                 id="CC_id_City"
-                                change="MC_onChangeCity"
+                                change="onChange"
                                 valueStateText="Select City"
                                 placeholder="Enter City"
                                 items="{path:'CityModel>/',length:1000}"
@@ -511,7 +512,7 @@
                                 value="{Bookingmodel>/MobileNo}"
                                 placeholder="Enter Contact Number"
                                 maxLength="10"
-                                liveChange="onPhoneInputLiveChange"
+                                liveChange="onChange"
                                 valueStateText="Enter Contact Number"
                                 type="Number"
                                 visible="{VisibleModel>/visible}"
