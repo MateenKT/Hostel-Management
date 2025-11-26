@@ -854,7 +854,7 @@ sap.ui.define([
             const oCustomerData = this.getView().getModel("CustomerData");
 
             // Store original RentPrice once if not already stored
-            let originalRent = oCustomerData.getProperty("/OriginalRentPrice1");
+            let originalRent = oCustomerData.getProperty("/OriginalRentPrice");
             if (!originalRent) {
                 originalRent = oCustomerData.getProperty("/OrginalRentPrice") || 0;
                 oCustomerData.setProperty("/OriginalRentPrice1", originalRent);
@@ -1069,37 +1069,58 @@ sap.ui.define([
                 oCustomerModel.setProperty("/GrandTotal", fPrice + fFacilityPrice);
             }
         },
-        onRoomBedChange: function (oEvent) {
-            var sBedType = oEvent.getParameter("selectedItem").getKey(); // Selected bed type
-            var oBookingModel = this.getView().getModel("Bookingmodel");
-            var oCustomerModel = this.getView().getModel("CustomerData");
+      onRoomBedChange: function (oEvent) {
+    var sBedType = oEvent.getParameter("selectedItem").getKey(); // Selected bed type
+    var oBookingModel = this.getView().getModel("Bookingmodel");
+    var oCustomerModel = this.getView().getModel("CustomerData");
 
-            // Update selected bed in Bookingmodel
-            oBookingModel.setProperty("/BedTypeName", sBedType);
+    // Update selected bed in Bookingmodel
+    oBookingModel.setProperty("/BedTypeName", sBedType);
 
-            var aAvailableBeds = this.getView().getModel("Availablebeds").getData(); // all available beds
-            var sUnit = oCustomerModel.getProperty("/PaymentType"); // daily / monthly / yearly
+    var aAvailableBeds = this.getView().getModel("Availablebeds").getData(); // all available beds
+    var sUnit = oCustomerModel.getProperty("/PaymentType"); // daily / monthly / yearly
 
-            // Find the bed object
-            var oSelectedBed = aAvailableBeds.find(bed => bed.BedTypeName === sBedType);
+    // Find the bed object
+    var oSelectedBed = aAvailableBeds.find(bed => bed.BedTypeName === sBedType);
 
-            if (oSelectedBed) {
-                // Determine price based on unit
-                var fPrice = 0;
-                if (sUnit === "daily" || sUnit === "Per Day") fPrice = parseFloat(oSelectedBed.Price || 0);
-                else if (sUnit === "monthly" || sUnit === "Per Month") fPrice = parseFloat(oSelectedBed.MonthPrice || 0);
-                else if (sUnit === "yearly" || sUnit === "Per Year") fPrice = parseFloat(oSelectedBed.YearPrice || 0);
+    if (oSelectedBed) {
+        var fPrice = 0;
+        var iDuration = 1; // default duration
 
-                // Update RentPrice
-                oCustomerModel.setProperty("/RentPrice", fPrice);
-                oCustomerModel.setProperty("/OrginalRentPrice", fPrice);
-
-
-                // Recalculate GrandTotal
-                var fFacilityPrice = parseFloat(oCustomerModel.getProperty("/TotalFacilityPrice") || 0);
-                oCustomerModel.setProperty("/GrandTotal", fPrice + fFacilityPrice);
+        if (sUnit === "daily" || sUnit === "Per Day") {
+            fPrice = parseFloat(oSelectedBed.Price || 0);
+            // Calculate number of days
+            var sStart = oBookingModel.getProperty("/StartDate");
+            var sEnd = oBookingModel.getProperty("/EndDate");
+            if (sStart && sEnd) {
+                var dStart = new Date(sStart);
+                var dEnd = new Date(sEnd);
+                // +1 to include start and end day
+                iDuration = Math.ceil((dEnd - dStart) / (1000 * 60 * 60 * 24)) + 1;
             }
-        },
+        } else if (sUnit === "monthly" || sUnit === "Per Month") {
+            fPrice = parseFloat(oSelectedBed.Price || 0);
+            // Get selected months
+            iDuration = parseInt(oBookingModel.getProperty("/DurationUnit")) || 1;
+        } else if (sUnit === "yearly" || sUnit === "Per Year") {
+            fPrice = parseFloat(oSelectedBed.Price || 0);
+            // Get selected years
+            iDuration = parseInt(oBookingModel.getProperty("/DurationUnit")) || 1;
+        }
+
+        // Multiply by duration
+        var fOriginalRentPrice = fPrice * iDuration;
+
+        // Update model
+        oCustomerModel.setProperty("/RentPrice", fOriginalRentPrice);
+        oCustomerModel.setProperty("/OrginalRentPrice", fPrice);
+
+        // Recalculate GrandTotal
+        var fFacilityPrice = parseFloat(oCustomerModel.getProperty("/TotalFacilityPrice") || 0);
+        oCustomerModel.setProperty("/GrandTotal", fOriginalRentPrice + fFacilityPrice);
+    }
+}
+,
         onEditTimeChange: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent)
             var oModel = this.getView().getModel("edit");
