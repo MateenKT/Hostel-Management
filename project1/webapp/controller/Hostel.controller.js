@@ -1089,67 +1089,67 @@ sap.ui.define([
             oInput.setValueStateText("Passwords matched");
         },
 
-        // onSignIn: async function() {
-        //     var oModel = this.getView().getModel("LoginMode");
-        //     var oData = oModel.getData();
-        //     const oLoginModel = this.getView().getModel("LoginModel");
+        onSignIn: async function() {
+            var oModel = this.getView().getModel("LoginMode");
+            var oData = oModel.getData();
+            const oLoginModel = this.getView().getModel("LoginModel");
 
-        //     const sUserid = sap.ui.getCore().byId("signInuserid").getValue();
-        //     const sUsername = sap.ui.getCore().byId("signInusername").getValue();
-        //     const sPassword = sap.ui.getCore().byId("signinPassword").getValue();
+            const sUserid = sap.ui.getCore().byId("signInuserid").getValue();
+            const sUsername = sap.ui.getCore().byId("signInusername").getValue();
+            const sPassword = sap.ui.getCore().byId("signinPassword").getValue();
 
-        //     if (!utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInuserid"), "ID") ||
-        //         !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID") ||
-        //         !utils._LCvalidatePassword(sap.ui.getCore().byId("signinPassword"), "ID")
-        //     ) {
-        //         sap.m.MessageToast.show("Make sure all mandatory fields are filled correctly");
-        //         return;
-        //     }
+            if (!utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInuserid"), "ID") ||
+                !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID") ||
+                !utils._LCvalidatePassword(sap.ui.getCore().byId("signinPassword"), "ID")
+            ) {
+                sap.m.MessageToast.show("Make sure all mandatory fields are filled correctly");
+                return;
+            }
 
-        //     try {
-        //         const payload = {
-        //             UserID: sUserid,
-        //             UserName: sUsername,
-        //             Password: btoa(sPassword)
-        //         };
-        //         sap.ui.core.BusyIndicator.show(0);
-        //         const oResponse = await this.ajaxReadWithJQuery("HM_Login", payload);
-        //         const aUsers = oResponse.data[0] || [];
+            try {
+                const payload = {
+                    UserID: sUserid,
+                    UserName: sUsername,
+                    Password: btoa(sPassword)
+                };
+                sap.ui.core.BusyIndicator.show(0);
+                const oResponse = await this.ajaxReadWithJQuery("HM_Login", payload);
+                const aUsers = oResponse.data[0] || [];
 
-        //         oLoginModel.setProperty("/EmployeeID", aUsers.UserID);
-        //         oLoginModel.setProperty("/EmployeeName", aUsers.UserName);
-        //         oLoginModel.setProperty("/EmailID", aUsers.EmailID);
-        //         oLoginModel.setProperty("/Role", aUsers.Role);
-        //         oLoginModel.setProperty("/BranchCode", aUsers.BranchCode || "");
-        //         oLoginModel.setProperty("/MobileNo", aUsers.MobileNo || "");
-        //         oLoginModel.setProperty("/DateofBirth", this.Formatter.DateFormat(aUsers.DateOfBirth) || "");
+                oLoginModel.setProperty("/EmployeeID", aUsers.UserID);
+                oLoginModel.setProperty("/EmployeeName", aUsers.UserName);
+                oLoginModel.setProperty("/EmailID", aUsers.EmailID);
+                oLoginModel.setProperty("/Role", aUsers.Role);
+                oLoginModel.setProperty("/BranchCode", aUsers.BranchCode || "");
+                oLoginModel.setProperty("/MobileNo", aUsers.MobileNo || "");
+                oLoginModel.setProperty("/DateofBirth", this.Formatter.DateFormat(aUsers.DateOfBirth) || "");
 
-        //         // For global access
-        //         this._oLoggedInUser = aUsers;
+                // For global access
+                this._oLoggedInUser = aUsers;
 
-        //         sap.ui.getCore().byId("signInusername").setValue("");
-        //         sap.ui.getCore().byId("signinPassword").setValue("");
+                sap.ui.getCore().byId("signInusername").setValue("");
+                sap.ui.getCore().byId("signinPassword").setValue("");
 
-        //         if (this._oSignDialog) {
-        //             this._oSignDialog.close();
-        //         }
+                if (this._oSignDialog) {
+                    this._oSignDialog.close();
+                }
 
-        //         if (aUsers.Role === "Customer") {
-        //             const oUserModel = new JSONModel(aUsers);
-        //             sap.ui.getCore().setModel(oUserModel, "LoginModel");
-        //             this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", true);
-        //         } else if (aUsers.Role === "Admin" || aUsers.Role === "Employee") {
-        //             this.getOwnerComponent().getRouter().navTo("TilePage");
-        //         } else {
-        //             sap.m.MessageToast.show("Invalid credentials. Please try again.");
-        //         }
-        //     } catch (err) {
-        //         sap.ui.core.BusyIndicator.hide();
-        //         sap.m.MessageToast.show(err.message || err.responseText);
-        //     } finally {
-        //         sap.ui.core.BusyIndicator.hide();
-        //     }
-        // },
+                if (aUsers.Role === "Customer") {
+                    const oUserModel = new JSONModel(aUsers);
+                    sap.ui.getCore().setModel(oUserModel, "LoginModel");
+                    this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", true);
+                } else if (aUsers.Role === "Admin" || aUsers.Role === "Employee") {
+                    this.getOwnerComponent().getRouter().navTo("TilePage");
+                } else {
+                    sap.m.MessageToast.show("Invalid credentials. Please try again.");
+                }
+            } catch (err) {
+                sap.ui.core.BusyIndicator.hide();
+                sap.m.MessageToast.show(err.message || err.responseText);
+            } finally {
+                sap.ui.core.BusyIndicator.hide();
+            }
+        },
 
         onCloseManageProfile: function () {
             if (this._oProfileDialog) {
@@ -1172,6 +1172,10 @@ sap.ui.define([
                 const filter = {
                     UserID: sUserID
                 };
+                // Use already available login data
+                    // const fullUserData = this._oLoggedInUser || {};
+                    // console.log("🔥 FULL HM_Login DATA:", fullUserData);
+
                 //  Fetch only the logged-in user's data
                 sap.ui.core.BusyIndicator.show(0);
                 const response = await this.ajaxReadWithJQuery("HM_Customer", filter);
@@ -1276,6 +1280,7 @@ sap.ui.define([
 
                 //  Create and bind the Profile Model
                 const oProfileModel = new JSONModel({
+                    //   ...fullUserData, 
                     photo: finalImage || "",  
                     initials: oUser.UserName ? oUser.UserName.charAt(0).toUpperCase() : "",
                     name: oUser.UserName || "",
@@ -1305,8 +1310,10 @@ sap.ui.define([
                     this._oProfileDialog = oDialog;
                     this.getView().addDependent(oDialog);
                 }
-
+                  const base64Image = this.arrayBufferToBase64(oUser.FileContent.data);
+                const finalImage = "data:image/png;base64," + base64Image;
                 const oProfileModel = new sap.ui.model.json.JSONModel({
+                    //  ...fullUserData, 
                     photo: finalImage || "", 
                     initials: oUser.UserName ? oUser.UserName.charAt(0).toUpperCase() : "",
                     name: oUser.UserName || "",
@@ -3098,95 +3105,95 @@ sap.ui.define([
             sap.ui.getCore().byId("previewProfileImage").setSrc(sPhoto);
             this._oPreviewDialog.open();
         },
-        onSignIn: async function () {
+        // onSignIn: async function () {
 
-            const vm = this.getView().getModel("LoginViewModel");
-            const isOTP = vm.getProperty("/isOtpSelected");
+        //     const vm = this.getView().getModel("LoginViewModel");
+        //     const isOTP = vm.getProperty("/isOtpSelected");
 
-            const sUserid = sap.ui.getCore().byId("signInuserid").getValue().trim();
-            const sUsername = sap.ui.getCore().byId("signInusername").getValue().trim();
-            const sPassword = sap.ui.getCore().byId("signinPassword").getValue().trim();
-            const sOTP = sap.ui.getCore().byId("signInOTP").getValue().trim();
+        //     const sUserid = sap.ui.getCore().byId("signInuserid").getValue().trim();
+        //     const sUsername = sap.ui.getCore().byId("signInusername").getValue().trim();
+        //     const sPassword = sap.ui.getCore().byId("signinPassword").getValue().trim();
+        //     const sOTP = sap.ui.getCore().byId("signInOTP").getValue().trim();
 
-            // 🔐 Common mandatory fields (UserID + UserName)
-            if (!utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInuserid"), "ID") ||
-                !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID")) {
-                sap.m.MessageToast.show("Enter valid User ID and User Name");
-                return;
-            }
+        //     // 🔐 Common mandatory fields (UserID + UserName)
+        //     if (!utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInuserid"), "ID") ||
+        //         !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID")) {
+        //         sap.m.MessageToast.show("Enter valid User ID and User Name");
+        //         return;
+        //     }
 
-            // 📌 LOGIN WITH OTP MODE
-            if (isOTP) {
+        //     // 📌 LOGIN WITH OTP MODE
+        //     if (isOTP) {
 
-                // OTP must be entered
-                if (!sOTP) {
-                    sap.m.MessageToast.show("Enter OTP to Login");
-                    return;
-                }
+        //         // OTP must be entered
+        //         if (!sOTP) {
+        //             sap.m.MessageToast.show("Enter OTP to Login");
+        //             return;
+        //         }
 
-                const isValid = await this._verifyOTPWithBackend(sOTP);
-                if (!isValid) {
-                    sap.m.MessageToast.show("Incorrect OTP");
-                    return;
-                }
+        //         const isValid = await this._verifyOTPWithBackend(sOTP);
+        //         if (!isValid) {
+        //             sap.m.MessageToast.show("Incorrect OTP");
+        //             return;
+        //         }
 
-                // OTP Verified → Login using backend
-                const resp = await $.ajax({
-                    url: "https://rest.kalpavrikshatechnologies.com/HM_Login",
-                    method: "GET",
-                    contentType: "application/json",
-                    headers: {
-                        name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                        password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-                    },
-                    data: {
-                        UserID: sUserid,
-                        UserName: sUsername,
-                        OTP: sOTP
-                    }
-                });
+        //         // OTP Verified → Login using backend
+        //         const resp = await $.ajax({
+        //             url: "https://rest.kalpavrikshatechnologies.com/HM_Login",
+        //             method: "GET",
+        //             contentType: "application/json",
+        //             headers: {
+        //                 name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+        //                 password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+        //             },
+        //             data: {
+        //                 UserID: sUserid,
+        //                 UserName: sUsername,
+        //                 OTP: sOTP
+        //             }
+        //         });
 
-                sap.m.MessageToast.show("Login Successful!");
-                this._setLoggedInUser(resp.data[0]);
-                this._resetAllAuthFields();
-                this._oSignDialog.close();
-                return; // done
-            }
+        //         sap.m.MessageToast.show("Login Successful!");
+        //         this._setLoggedInUser(resp.data[0]);
+        //         this._resetAllAuthFields();
+        //         this._oSignDialog.close();
+        //         return; // done
+        //     }
 
-            // 🔐 LOGIN WITH PASSWORD MODE
-            if (!utils._LCvalidatePassword(sap.ui.getCore().byId("signinPassword"))) {
-                sap.m.MessageToast.show("Enter valid password");
-                return;
-            }
+        //     // 🔐 LOGIN WITH PASSWORD MODE
+        //     if (!utils._LCvalidatePassword(sap.ui.getCore().byId("signinPassword"))) {
+        //         sap.m.MessageToast.show("Enter valid password");
+        //         return;
+        //     }
 
-            try {
-                const payload = {
-                    UserID: sUserid,
-                    UserName: sUsername,
-                    Password: btoa(sPassword)
-                };
+        //     try {
+        //         const payload = {
+        //             UserID: sUserid,
+        //             UserName: sUsername,
+        //             Password: btoa(sPassword)
+        //         };
 
-                sap.ui.core.BusyIndicator.show(0);
-                const oResponse = await this.ajaxReadWithJQuery("HM_Login", payload);
-                const aUsers = oResponse.data[0] || [];
+        //         sap.ui.core.BusyIndicator.show(0);
+        //         const oResponse = await this.ajaxReadWithJQuery("HM_Login", payload);
+        //         const aUsers = oResponse.data[0] || [];
 
-                if (!aUsers?.UserID) {
-                    sap.m.MessageToast.show("Invalid credentials");
-                    return;
-                }
+        //         if (!aUsers?.UserID) {
+        //             sap.m.MessageToast.show("Invalid credentials");
+        //             return;
+        //         }
 
-                sap.m.MessageToast.show("Login Successful!");
-                this._setLoggedInUser(aUsers);
-                this._resetAllAuthFields();
-                this._oSignDialog.close();
+        //         sap.m.MessageToast.show("Login Successful!");
+        //         this._setLoggedInUser(aUsers);
+        //         this._resetAllAuthFields();
+        //         this._oSignDialog.close();
 
-            } catch (err) {
-                sap.ui.core.BusyIndicator.hide();
-                sap.m.MessageToast.show(err.message || "Login failed");
-            } finally {
-                sap.ui.core.BusyIndicator.hide();
-            }
-        },
+        //     } catch (err) {
+        //         sap.ui.core.BusyIndicator.hide();
+        //         sap.m.MessageToast.show(err.message || "Login failed");
+        //     } finally {
+        //         sap.ui.core.BusyIndicator.hide();
+        //     }
+        // },
 
     });
 });
