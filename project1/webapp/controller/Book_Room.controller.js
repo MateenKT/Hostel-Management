@@ -2144,9 +2144,9 @@ aSelectedFacilities.forEach(fac => {
         EndDate: fac.EndDate ? fac.EndDate.split("/").reverse().join("-") : "",
         PaidStatus: "Pending",
         UnitText: fac.UnitText,
-        StartTime: fac.StartTime,
-        EndTime: fac.EndTime,
-        TotalHour: fac.TotalTime,
+        StartTime: fac.StartTime || "",
+        EndTime: fac.EndTime || "",
+        TotalHour: fac.TotalTime || "",
         Currency: fac.Currency
     });
 });
@@ -2455,7 +2455,9 @@ aSelectedFacilities.forEach(fac => {
             this.getOwnerComponent().setModel(oHostelModel, "HostelModel");
 
             // Navigate
-            this.getOwnerComponent().getRouter().navTo("EditBookingDetails");
+             this.getOwnerComponent().getRouter().navTo("RouteAdminDetails", {
+                sPath: encodeURIComponent(sCustomerID)
+            });
         },
 
 resetAllBookingData: function () {

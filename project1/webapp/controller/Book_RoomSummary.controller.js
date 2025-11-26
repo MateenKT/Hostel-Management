@@ -391,7 +391,21 @@ sap.ui.define([
             // 2. Update global list so table refreshes
             aFacilities[iIndex] = oUpdatedData;
             oHostelModel.setProperty("/AllSelectedFacilities", aFacilities);
+            // --- FIX FOR PER HOUR FACILITY (ensures TotalTime goes to payload) ---
+if (oUpdatedData.UnitText === "Per Hour") {
 
+    // Update global list
+    aFacilities[iIndex].TotalTime = oUpdatedData.TotalTime || "";
+
+    // Update person-wise list
+    if (aPersons[oUpdatedData.ID] &&
+        aPersons[oUpdatedData.ID].AllSelectedFacilities &&
+        aPersons[oUpdatedData.ID].AllSelectedFacilities[iIndex]) {
+
+        aPersons[oUpdatedData.ID].AllSelectedFacilities[iIndex].TotalTime =
+            oUpdatedData.TotalTime || "";
+    }
+}
             // 3. Apply model refresh
             oHostelModel.refresh(true);
 
@@ -413,16 +427,23 @@ sap.ui.define([
 
             var overAllTotal = 0;
             // Per-person recalculation
-            aPersons.forEach((oPerson, idx) => {
-                const facs = oPerson.AllSelectedFacilities || [];
-                const totalAmount = facs.reduce((sum, facility) => {
-                    return sum + (facility.TotalAmount || 0);
-                }, 0);
-                oHostelModel.setProperty(`/Persons/${idx}/TotalFacilityPrice`, totalAmount);
-                oHostelModel.setProperty(`/Persons/${idx}/RoomRentPerPerson`, perPersonRent);
-                oHostelModel.setProperty(`/Persons/${idx}/GrandTotal`, totalAmount + perPersonRent);
-                overAllTotal += totalAmount + perPersonRent;
-            });
+           aPersons.forEach((oPerson, idx) => {
+    const facs = oPerson.AllSelectedFacilities || [];
+    const totalAmount = facs.reduce((sum, facility) => {
+        return sum + (facility.TotalAmount || 0);
+    }, 0);
+
+    // Update only facility price
+    oHostelModel.setProperty(`/Persons/${idx}/TotalFacilityPrice`, totalAmount);
+
+    // DO NOT override room rent
+    const oldRoomRent = oPerson.RoomRentPerPerson || 0;
+
+    // Recalculate grand total
+    oHostelModel.setProperty(`/Persons/${idx}/GrandTotal`, totalAmount + oldRoomRent);
+    overAllTotal += totalAmount + oldRoomRent;
+});
+
 
             oHostelModel.setProperty("/OverallTotalCost", overAllTotal);
             let aSummary = oHostelModel.getProperty("/PersonFacilitiesSummary") || [];
