@@ -1159,7 +1159,7 @@ sap.ui.define([
             this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", false);
         },
 
-        onPressAvatar: async function () {
+       onPressAvatar: async function () {
             const oUser = this._oLoggedInUser || {};
             const sPhoto = "./image.jpg";
 
@@ -1271,9 +1271,12 @@ sap.ui.define([
                     this.getView().addDependent(oDialog);
                 }
 
+                const base64Image = this.arrayBufferToBase64(oUser.FileContent.data);
+                const finalImage = "data:image/png;base64," + base64Image;
+
                 //  Create and bind the Profile Model
                 const oProfileModel = new JSONModel({
-                    photo: sPhoto,
+                    photo: finalImage || "",  
                     initials: oUser.UserName ? oUser.UserName.charAt(0).toUpperCase() : "",
                     name: oUser.UserName || "",
                     email: oUser.EmailID || "",
@@ -1304,7 +1307,7 @@ sap.ui.define([
                 }
 
                 const oProfileModel = new sap.ui.model.json.JSONModel({
-                    photo: sPhoto,
+                    photo: finalImage || "", 
                     initials: oUser.UserName ? oUser.UserName.charAt(0).toUpperCase() : "",
                     name: oUser.UserName || "",
                     email: oUser.EmailID || "",
@@ -1323,6 +1326,16 @@ sap.ui.define([
             } finally {
                 sap.ui.core.BusyIndicator.hide();
             }
+        },
+
+        arrayBufferToBase64: function (buffer) {
+            let binary = "";
+            let bytes = new Uint8Array(buffer);
+            let len = bytes.byteLength;
+            for (let i = 0; i < len; i++) {
+                binary += String.fromCharCode(bytes[i]);
+            }
+            return window.btoa(binary);
         },
 
         onProfileclose: function () {
@@ -2922,24 +2935,23 @@ sap.ui.define([
                 this.oCameraDialog.open();
             }
         },
+
         IC_onCapturePress: function () {
-            var oCanvas = document.getElementById("canvas");
             var oVideo = document.getElementById("video");
 
-            if (!oCanvas || !oVideo || !this.latestSegmentation) return;
+            if (!oVideo || !this.latestSegmentation) return;
 
+            const oCanvas = document.createElement("canvas");
             const oContext = oCanvas.getContext("2d");
+
             oCanvas.width = oVideo.videoWidth;
             oCanvas.height = oVideo.videoHeight;
 
-            // Fill background with white
             oContext.fillStyle = "white";
             oContext.fillRect(0, 0, oCanvas.width, oCanvas.height);
 
-            // Draw original image
             oContext.drawImage(oVideo, 0, 0, oCanvas.width, oCanvas.height);
 
-            // Apply segmentation mask
             const mask = this.latestSegmentation.segmentationMask;
             oContext.globalCompositeOperation = "destination-in";
             oContext.drawImage(mask, 0, 0, oCanvas.width, oCanvas.height);
@@ -2947,15 +2959,28 @@ sap.ui.define([
             oContext.fillStyle = "white";
             oContext.fillRect(0, 0, oCanvas.width, oCanvas.height);
             oContext.globalCompositeOperation = "source-over";
+
             var base64Image = oCanvas.toDataURL("image/png");
             var mimeType = "image/png";
             var imageName = "captured_image.png";
-            base64Image = base64Image.replace(`data:${mimeType};base64,`, "");
 
-            var oModel = this.getView().getModel("profileData");
+            // remove base64 prefix
+            var rawBase64 = base64Image.replace(`data:${mimeType};base64,`, "");
+
+            var oModel = this._oProfileDialog.getModel("profileData");
             oModel.setProperty("/fileName", imageName);
             oModel.setProperty("/fileType", mimeType);
-            oModel.setProperty("/fileContent", base64Image);
+            oModel.setProperty("/fileContent", rawBase64);
+
+            // Add this to update UI avatar
+            oModel.setProperty("/photo", base64Image);
+
+            // Upload to backend
+            this.updateUserPhoto({
+                fileName: imageName,
+                fileType: mimeType,
+                fileContent: rawBase64
+            });
 
             this._StopCamera();
             this.oCameraDialog.close();

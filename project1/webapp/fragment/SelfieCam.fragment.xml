@@ -21,13 +21,13 @@
                 <Button
                     text="Capture"
                     press="IC_onCapturePress"
-                    type="Transparent"
+                    class="myUnifiedBtn"
                     width="8rem"
                 />
                 <Button
                     text="Close"
                     press="IC_onPressCloseCameraDialog"
-                    type="Transparent"
+                     class="myUnifiedBtn"
                     width="8rem"
                 />
             </FlexBox>

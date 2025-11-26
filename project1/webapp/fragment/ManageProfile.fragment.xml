@@ -53,10 +53,10 @@
                             direction="Column"
                             alignItems="Center"
                             class="avatarWrapper"
-                            width="180px"
+                            width="180px" 
                         >
                             <Avatar
-                                src="{profileData>/photo}"
+                                src="{path: 'profileData>/photo', formatter: '.Formatter.getImageSrc'}"
                                 initials="{profileData>/initials}"
                                 displayShape="Circle"
                                 displaySize="XL"
