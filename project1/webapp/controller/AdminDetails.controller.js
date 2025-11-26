@@ -102,6 +102,8 @@ sap.ui.define([
                     Country: oCustomer.Country,
                     State: oCustomer.State,
                     City: oCustomer.City,
+                    STDCode: oCustomer.STDCode || "",
+                    Salutation: oCustomer.Salutation || "Mr.",
                     RentPrice: oCustomer.Bookings?.[0]?.RentPrice || 0,
                     OrginalRentPrice: oCustomer.Bookings?.[0]?.RentPrice || 0,
                     BedType: oCustomer.Bookings?.[0]?.BedType || "",
@@ -257,7 +259,7 @@ sap.ui.define([
                         fTotal = fPrice * totalYears;
                         otherFacilitiesTotal += fTotal;
                     } else if (unit === "Per Hour") {
-                        const totalHours = f.TotalHour || 0; 
+                        const totalHours = f.TotalHour || 0;
                         fTotal = fPrice * totalHours;
                         otherFacilitiesTotal += fTotal;
                     }
@@ -279,7 +281,9 @@ sap.ui.define([
                         TotalAmount: fTotal,
                         TotalHour: f.TotalHour,
                         Image: f.Image,
-                        Currency:f.Currency
+                        Currency: f.Currency,
+                        EndTime: f.EndTime,
+                        StartTime: f.StartTime
                     });
 
                 });
@@ -522,7 +526,15 @@ sap.ui.define([
             }
 
             // Convert start date
-            const oStart = new Date(sStartDate);
+             let oStart;
+    if (sStartDate.includes("/")) {
+        const parts = sStartDate.split("/").reverse().join("-");
+    
+        oStart = new Date(parts);
+    } else {
+        // Already yyyy-mm-dd
+        oStart = new Date(sStartDate);
+    }
             let oEnd = new Date(oStart);
             let iDays = 0;
 
@@ -571,8 +583,13 @@ sap.ui.define([
                     }
                 }
                 // Format Dates
+                if(oPayload.StartDate.includes("-")){
                 oPayload.StartDate = this.Formatter.DateFormat(oPayload.StartDate);
                 oPayload.EndDate = this.Formatter.DateFormat(oPayload.EndDate);
+                }else{  
+                oPayload.StartDate = oPayload.StartDate;
+                oPayload.EndDate = oPayload.EndDate;
+                }
 
 
                 // BASE PRICE
@@ -646,6 +663,26 @@ sap.ui.define([
 
             model.setProperty("/StartDate", data.StartDate)
             model.setProperty("/EndDate", data.EndDate)
+            model.setProperty("/CustomerName", data.CustomerName)
+
+            model.setProperty("/DateOfBirth", data.DateOfBirth)
+
+            model.setProperty("/Gender", data.Gender)
+
+            model.setProperty("/CustomerEmail", data.CustomerEmail)
+
+            model.setProperty("/Country", data.Country)
+            model.setProperty("/State", data.State)
+
+            model.setProperty("/City", data.City)
+            model.setProperty("/STDCode", data.STDCode)
+            model.setProperty("/MobileNo", data.MobileNo)
+            model.setProperty("/Salutation", data.Salutation)
+
+
+
+
+
 
             if (data.PaymentType === "Per Month") {
                 model.setProperty("/UnitText", "monthly")
@@ -658,19 +695,19 @@ sap.ui.define([
 
 
             if (data.PaymentType !== "daily" || data.PaymentType !== "Per Day") {
-                    this.byId("idMonthYearSelect").setVisible(false)
+                this.byId("idMonthYearSelect").setVisible(false)
             }
 
-                // Set Duration for XML binding
-                if (data.PaymentType === "monthly" || data.PaymentType === "Per Month") {
-                    model.setProperty("/DurationUnit", data.Duration);
-                    this.byId("idMonthYearSelect").setVisible(true)
+            // Set Duration for XML binding
+            if (data.PaymentType === "monthly" || data.PaymentType === "Per Month") {
+                model.setProperty("/DurationUnit", data.Duration);
+                this.byId("idMonthYearSelect").setVisible(true)
 
-                } else if(data.PaymentType === "yearly" || data.PaymentType === "Per Year") {
-                    model.setProperty("/DurationUnit", data.Duration);
-                    this.byId("idMonthYearSelect").setVisible(true)
+            } else if (data.PaymentType === "yearly" || data.PaymentType === "Per Year") {
+                model.setProperty("/DurationUnit", data.Duration);
+                this.byId("idMonthYearSelect").setVisible(true)
 
-                }
+            }
             var sBranchCode = data.BranchCode
 
             this.ajaxReadWithJQuery("HM_Rooms", "").then((oData) => {
@@ -1049,6 +1086,75 @@ sap.ui.define([
 
             oModel.setProperty("/TotalHour", formatted);
         },
+        onCountrySelectionChange: function (oEvent) {
+            const oView = this.getView();
+            const oModel = oView.getModel("Bookingmodel");
+
+            const oStateCB = oView.byId("CC_id_State");
+            const oCityCB = oView.byId("CC_id_City");
+            const oSTD = oView.byId("CC_id_STDCode");
+
+            const oItem = oEvent.getSource().getSelectedItem();
+            if (!oItem) return;
+
+            // Clear state + city
+            oModel.setProperty("/State", "");
+            oModel.setProperty("/City", "");
+
+            oStateCB.setSelectedKey("");
+            oCityCB.setSelectedKey("");
+            oCityCB.setValue("");
+
+            oStateCB.getBinding("items")?.filter([]);
+            oCityCB.getBinding("items")?.filter([]);
+            oSTD.setValue("");
+
+            const sCountryName = oItem.getText();
+            const sCountryCode = oItem.getAdditionalText();
+
+            oModel.setProperty("/country", sCountryName);
+
+            // Fetch country STD code
+            const aCountryData = this.getOwnerComponent().getModel("CountryModel").getData();
+            const oCountryObj = aCountryData.find(c => c.countryName === sCountryName);
+            oModel.setProperty("/STDCode", oCountryObj?.stdCode || "");
+            oSTD.setValue(oCountryObj?.stdCode || "");
+
+            // Filter state list
+            oStateCB.getBinding("items")?.filter([
+                new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+            ]);
+        },
+        CC_onChangeState: function (oEvent) {
+            const oView = this.getView();
+            const oModel = oView.getModel("Bookingmodel");
+            const oItem = oEvent.getSource().getSelectedItem();
+            const oCityCB = oView.byId("CC_id_City");
+            const oCountryCB = oView.byId("CC_id_Country");
+
+            // Reset
+            oModel.setProperty("/City", "");
+            oCityCB.setSelectedKey("");
+            oCityCB.setValue("");
+
+            oCityCB.getBinding("items")?.filter([]);
+
+            if (!oItem) {
+                oModel.setProperty("/State", "");
+                return;
+            }
+
+            const sStateName = oItem.getKey();
+            const sCountryCode = oCountryCB.getSelectedItem()?.getAdditionalText();
+
+            oModel.setProperty("/State", sStateName);
+
+            // Apply city filter
+            oCityCB.getBinding("items")?.filter([
+                new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, sStateName),
+                new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+            ]);
+        },
         onSaveBooking: function () {
             var Bookingdata = this.getView().getModel("Bookingmodel").getData();
             var CustomerData = this.getView().getModel("CustomerData").getData();
@@ -1064,6 +1170,17 @@ sap.ui.define([
             var unit = Bookingdata.UnitText ? Bookingdata.UnitText.trim().toLowerCase() : "";
 
             var Payload = {
+                "CustomerName": Bookingdata.CustomerName,
+                "UserID": CustomerData.UserID,
+                "MobileNo": Bookingdata.MobileNo,
+                "Gender": Bookingdata.Gender,
+                "DateOfBirth": Bookingdata.DateOfBirth.split('/').reverse().join('-'),
+                "CustomerEmail": Bookingdata.CustomerEmail,
+                "Country": Bookingdata.Country,
+                "State": Bookingdata.State,
+                "City": Bookingdata.City,
+                "STDCode": Bookingdata.STDCode,
+                "Salutation": CustomerData.Salutation || "Mr.",
                 "Booking": [
                     {
                         "BookingDate": this.Formatter.DateFormat(CustomerData.BookingDate).split('/').reverse().join('-'),
@@ -1088,7 +1205,10 @@ sap.ui.define([
                         TotalHour: item.TotalHour,
                         BookingID: CustomerData.BookingID,
                         CustomerID: CustomerData.CustomerID,
-                        Currency: item.Currency
+                        Currency: item.Currency,
+                        StartTime: item.StartTime,
+                        EndTime: item.EndTime
+                      
                     };
                 })
             };
@@ -1111,25 +1231,6 @@ sap.ui.define([
                     console.error(err);
                 });
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     });
 });
