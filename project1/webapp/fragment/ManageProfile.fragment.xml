@@ -15,7 +15,7 @@
         horizontalScrolling="false"
         verticalScrolling="true"
         resizable="true"
-        draggable="true" afterClose=".onCloseManageProfile"> 
+        draggable="true"> 
     
         <customHeader>
             <Bar class="profileHeaderBar">
@@ -27,6 +27,11 @@
                 </contentMiddle>
 
                 <contentRight>
+                 <Button
+                        text="Logout"
+                        press="onLogout"
+                        class="myUnifiedBtn"
+                    />
                     <Button
                         icon="sap-icon://decline"
                         press="onProfileDialogClose"
@@ -212,15 +217,5 @@
                 </items>
             </Table>
         </VBox>
-        <footer>
-            <Toolbar>
-                <ToolbarSpacer />
-                <Button
-                    text="Logout"
-                    press="onProfileDialogClose"
-                    class="myUnifiedBtn"
-                />
-            </Toolbar>
-        </footer>
     </Dialog>
 </core:FragmentDefinition>

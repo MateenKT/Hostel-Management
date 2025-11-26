@@ -5,17 +5,17 @@ sap.ui.define([
     "sap/m/MessageBox",
     "../utils/validation",
     "../model/formatter",
-], function(BaseController, JSONModel, MessageToast, MessageBox, utils, Formatter) {
+], function (BaseController, JSONModel, MessageToast, MessageBox, utils, Formatter) {
     "use strict";
     const $C = (id) => sap.ui.getCore().byId(id);
     const $V = (id) => $C(id)?.getValue()?.trim() || "";
     return BaseController.extend("sap.ui.com.project1.controller.Hostel", {
         Formatter: Formatter,
-        onInit: function() {
+        onInit: function () {
             this.getOwnerComponent().getRouter().getRoute("RouteHostel").attachMatched(this._onRouteMatched, this);
             this._getBrowserLocation();
         },
-        _getBrowserLocation: function() {
+        _getBrowserLocation: function () {
             if (!navigator.geolocation) {
                 sap.m.MessageToast.show("Geolocation not supported!");
                 return;
@@ -31,7 +31,7 @@ sap.ui.define([
                 }
             );
         },
-        _getLocationName: function(lat, lng) {
+        _getLocationName: function (lat, lng) {
             let url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
 
             $.ajax({
@@ -54,7 +54,7 @@ sap.ui.define([
                 }
             });
         },
-        _onRouteMatched: async function() {
+        _onRouteMatched: async function () {
             const oView = this.getView();
 
             //  Disable controls initially
@@ -92,28 +92,28 @@ sap.ui.define([
 
             //  Hardcoded branches (initial fallback)
             const aBranches = [{
-                    BranchCode: "KLB01",
-                    BranchName: "Kalaburagi"
-                },
-                {
-                    BranchCode: "BR002",
-                    BranchName: "Mumbai"
-                },
-                {
-                    BranchCode: "BR003",
-                    BranchName: "Nagpur"
-                },
-                {
-                    BranchCode: "BR004",
-                    BranchName: "Nashik"
-                }
+                BranchCode: "KLB01",
+                BranchName: "Kalaburagi"
+            },
+            {
+                BranchCode: "BR002",
+                BranchName: "Mumbai"
+            },
+            {
+                BranchCode: "BR003",
+                BranchName: "Nagpur"
+            },
+            {
+                BranchCode: "BR004",
+                BranchName: "Nashik"
+            }
             ];
             oView.setModel(new JSONModel({
                 Branches: aBranches
             }), "BranchModel");
         },
 
-        CustomerDetails: async function() {
+        CustomerDetails: async function () {
             try {
                 const oData = await this.ajaxReadWithJQuery("HM_Customer", {});
                 const aCustomers = Array.isArray(oData.Customers) ? oData.Customers : [oData.Customers];
@@ -126,16 +126,16 @@ sap.ui.define([
             }
         },
 
-        onUserlivechange: function(oEvent) {
+        onUserlivechange: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
         },
 
-        onReadcallforRoom: async function() {
+        onReadcallforRoom: async function () {
             try {
                 const oView = this.getView();
                 const oResponse = await this.ajaxReadWithJQuery("HM_Rooms", {});
                 const aRooms = oResponse?.commentData || [];
-                const oRoomModel = new JSONModel({Rooms: aRooms});
+                const oRoomModel = new JSONModel({ Rooms: aRooms });
                 oView.setModel(oRoomModel, "RoomCountModel"); //  Bind model to the view
             } catch (err) {
                 console.error("Error reading rooms:", err);
@@ -143,7 +143,7 @@ sap.ui.define([
             }
         },
 
-        _loadBranchCode: async function() {
+        _loadBranchCode: async function () {
             try {
                 const oView = this.getView();
                 const oResponse = await this.ajaxReadWithJQuery("HM_Branch", {});
@@ -157,8 +157,8 @@ sap.ui.define([
             }
         },
 
-        _populateUniqueFilterValues: function(data) {
-            let uniqueValues = { id_Branch: new Set(),};
+        _populateUniqueFilterValues: function (data) {
+            let uniqueValues = { id_Branch: new Set(), };
 
             data.forEach(item => {
                 uniqueValues.id_Branch.add(item.City);
@@ -177,7 +177,7 @@ sap.ui.define([
             });
         },
 
-        onSelectPricePlan: function(oEvent) {
+        onSelectPricePlan: function (oEvent) {
             const oTile = oEvent.getSource();
             const sType = oTile.data("type"); // "daily", "monthly", or "yearly"
             const oView = this.getView();
@@ -236,7 +236,7 @@ sap.ui.define([
             );
         },
 
-        onConfirmBooking: function() {
+        onConfirmBooking: function () {
             const oView = this.getView();
             const oLocalModel = oView.getModel("HostelModel"); // Local model bound to dialog
             const oData = oLocalModel?.getData?.() || {};
@@ -269,7 +269,7 @@ sap.ui.define([
                 Source: "UI5_HostelApp",
                 Status: "Pending"
             };
-           
+
             //  Merge and clean
             const oMergedData = {
                 ...oGlobalModel.getData(),
@@ -311,7 +311,7 @@ sap.ui.define([
             oRouter.navTo("RouteBookRoom");
         },
 
-        _clearRoomDetailDialog: function() {
+        _clearRoomDetailDialog: function () {
             if (!this._oRoomDetailFragment) return;
 
             const oFrag = this._oRoomDetailFragment;
@@ -348,7 +348,7 @@ sap.ui.define([
             }
         },
 
-        _bindCarousel: function() {
+        _bindCarousel: function () {
             const oCarousel = this._oRoomDetailFragment
                 .findAggregatedObjects(true, obj => obj.isA && obj.isA("sap.m.Carousel"))[0];
 
@@ -366,7 +366,7 @@ sap.ui.define([
             });
         },
 
-        _LoadFacilities: function(sBranchCode) {
+        _LoadFacilities: function (sBranchCode) {
             const oView = this.getView();
             if (!this._oRoomDetailFragment) return; // Safety check
 
@@ -377,8 +377,8 @@ sap.ui.define([
 
             oFacilityModel.setProperty("/loading", true);
             this.ajaxReadWithJQuery("HM_Facilities", {
-                    BranchCode: sBranchCode
-                })
+                BranchCode: sBranchCode
+            })
                 .then((Response) => {
                     console.log("Facility Response:", Response);
                     const aFacilities = (Response && Response.data) ? Response.data : [];
@@ -411,7 +411,7 @@ sap.ui.define([
                 });
         },
 
-        viewDetails: function(oEvent) {
+        viewDetails: function (oEvent) {
             try {
                 const oView = this.getView();
                 const oSelected = oEvent.getSource().getBindingContext("VisibilityModel").getObject();
@@ -431,10 +431,10 @@ sap.ui.define([
                     SelectedPriceType: "",
                     SelectedPriceValue: ""
                 };
-              
+
                 const oHostelModel = new sap.ui.model.json.JSONModel(oFullDetails);
                 oView.setModel(oHostelModel, "HostelModel");
-        
+
                 oView.setModel(new sap.ui.model.json.JSONModel({
                     loading: true,
                     Facilities: []
@@ -487,7 +487,7 @@ sap.ui.define([
             }
         },
 
-        _LoadAmenities: async function(sBranchCode) {
+        _LoadAmenities: async function (sBranchCode) {
             const oAmenityModel = new sap.ui.model.json.JSONModel({
                 loading: true,
                 Amenities: []
@@ -524,7 +524,7 @@ sap.ui.define([
             oAmenityModel.setProperty("/loading", false);
         },
 
-        _convertAmenities: function(list) {
+        _convertAmenities: function (list) {
             return list.map(item => ({
                 ...item,
                 ImageSrc: item.Photo1 ?
@@ -532,7 +532,7 @@ sap.ui.define([
             }));
         },
 
-        onRoomDetailOpened: function() {
+        onRoomDetailOpened: function () {
             // Get the branch code from the dialog's model
             if (this._oRoomDetailFragment) {
                 const oModel = this._oRoomDetailFragment.getModel("HostelModel");
@@ -543,7 +543,7 @@ sap.ui.define([
             }
         },
 
-        onImageLoadError: function(oEvent) {
+        onImageLoadError: function (oEvent) {
             const oImage = oEvent.getSource();
             const sFallback = sap.ui.require.toUrl("sap/ui/com/project1/image/no-image.png");
 
@@ -555,7 +555,7 @@ sap.ui.define([
             }
         },
 
-        onCloseRoomDetail: function() {
+        onCloseRoomDetail: function () {
             if (this._oRoomDetailFragment) {
                 this._oRoomDetailFragment.close(); // close FIRST
             }
@@ -563,7 +563,7 @@ sap.ui.define([
             this._clearRoomDetailDialog(); // destroy AFTER
         },
 
-        onDialogAfterClose: function() {
+        onDialogAfterClose: function () {
             if (this._oRoomDetailFragment) {
                 this._oRoomDetailFragment.close(); // close FIRST
             }
@@ -571,7 +571,7 @@ sap.ui.define([
             this._clearRoomDetailDialog();
         },
 
-        onTabSelect: async function(oEvent) {
+        onTabSelect: async function (oEvent) {
             var oItem = oEvent.getParameter("item");
             const sKey = oItem.getKey();
 
@@ -585,7 +585,7 @@ sap.ui.define([
             }
         },
 
-        _loadRoomsPageData: async function() {
+        _loadRoomsPageData: async function () {
             const oContainer = this.byId("idBedTypeFlex");
             const oBranch = this.byId("id_Branch");
             const oArea = this.byId("id_Area");
@@ -626,7 +626,7 @@ sap.ui.define([
             }
         },
 
-        onpressFilter: function() {
+        onpressFilter: function () {
             var oView = this.getView();
             if (!this.ARD_Dialog) {
 
@@ -643,7 +643,7 @@ sap.ui.define([
             this.ARD_Dialog.open();
         },
 
-        onpressBookrooms: async function() {
+        onpressBookrooms: async function () {
             var oTabHeader = this.byId("mainTabHeader");
             oTabHeader.setSelectedKey("idRooms");
             this.byId("pageContainer").to(this.byId("idRooms"));
@@ -718,33 +718,33 @@ sap.ui.define([
 
 
 
-        onDialogClose: function() {
+        onDialogClose: function () {
             if (this._oSignDialog) this._oSignDialog.close();
         },
 
-        _onFieldclear: function() {
+        _onFieldclear: function () {
             var ofield
         },
 
-        onSwitchToSignIn: function() {
+        onSwitchToSignIn: function () {
             var oSignInPanel = sap.ui.getCore().byId("signInPanel");
             var oSignUpPanel = sap.ui.getCore().byId("signUpPanel");
             oSignInPanel.setVisible(true);
             oSignUpPanel.setVisible(false);
         },
 
-        onSwitchToSignUp: function() {
+        onSwitchToSignUp: function () {
             var oSignInPanel = sap.ui.getCore().byId("signInPanel");
             var oSignUpPanel = sap.ui.getCore().byId("signUpPanel");
             oSignInPanel.setVisible(false);
             oSignUpPanel.setVisible(true);
         },
 
-        onEmailliveChange: function(oEvent) {
+        onEmailliveChange: function (oEvent) {
             utils._LCvalidateEmail(oEvent);
         },
 
-        SM_onTogglePasswordVisibility: function(oEvent) {
+        SM_onTogglePasswordVisibility: function (oEvent) {
             var oInput = oEvent.getSource();
             var sType = oInput.getType() === "Password" ? "Text" : "Password";
             oInput.setType(sType);
@@ -756,11 +756,11 @@ sap.ui.define([
             var sCurrentValue = oInput.getValue();
             oInput.setValue(sCurrentValue);
         },
-        SM_onChnageSetAndConfirm: function(oEvent) {
+        SM_onChnageSetAndConfirm: function (oEvent) {
             utils._LCvalidatePassword(oEvent);
         },
 
-        onSignUp: async function() {
+        onSignUp: async function () {
 
             const oModel = this.getView().getModel("LoginMode");
             const oData = oModel.getData();
@@ -896,7 +896,7 @@ sap.ui.define([
             }
         },
 
-        onChangeSalutation: function(oEvent) {
+        onChangeSalutation: function (oEvent) {
             const $C = (id) => sap.ui.getCore().byId(id);
             const oCombo = oEvent.getSource();
             const sal = oCombo.getValue(); // user typed or selected text
@@ -927,7 +927,7 @@ sap.ui.define([
             }
         },
 
-        onChangeGender: function(oEvent) {
+        onChangeGender: function (oEvent) {
             const oSel = oEvent.getSource();
             const val = oSel.getSelectedKey();
 
@@ -940,7 +940,7 @@ sap.ui.define([
             }
         },
 
-        onChangeDOB: function(oEvent) {
+        onChangeDOB: function (oEvent) {
             const oDP = oEvent.getSource();
             const dobValue = oDP.getDateValue();
 
@@ -953,7 +953,7 @@ sap.ui.define([
             }
         },
 
-        onChangeCountry: function(oEvent) {
+        onChangeCountry: function (oEvent) {
             const $C = (id) => sap.ui.getCore().byId(id);
             const oModel = this.getView().getModel("LoginMode");
 
@@ -1000,12 +1000,12 @@ sap.ui.define([
             ]);
         },
 
-        onMobileLivechnage: function(oEvent) {
+        onMobileLivechnage: function (oEvent) {
             const sSTD = sap.ui.getCore().byId("signUpSTD").getSelectedKey() || "";
             utils._LCvalidateInternationalMobileNumberWithSTD(oEvent, sSTD);
         },
 
-        onAddressChange: function(oEvent) {
+        onAddressChange: function (oEvent) {
             const oInput = oEvent.getSource();
             const sValue = oInput.getValue().trim();
 
@@ -1025,7 +1025,7 @@ sap.ui.define([
             oInput.setValueStateText("");
         },
 
-        onChangeState: function(oEvent) {
+        onChangeState: function (oEvent) {
             const $C = (id) => sap.ui.getCore().byId(id);
             const oModel = this.getView().getModel("LoginMode");
 
@@ -1046,7 +1046,7 @@ sap.ui.define([
             ]);
         },
 
-        onChangeCity: function(oEvent) {
+        onChangeCity: function (oEvent) {
             const oCityCB = oEvent.getSource();
             if (!utils._LCstrictValidationComboBox(oCityCB, "ID")) return;
             oCityCB.setValueState("None");
@@ -1055,11 +1055,11 @@ sap.ui.define([
             this.getView().getModel("LoginMode").setProperty("/City", value);
         },
 
-        _LCvalidateName: function(oEvent) {
+        _LCvalidateName: function (oEvent) {
             utils._LCvalidateName(oEvent);
         },
 
-        FSM_onConfirm: function(oEvent) {
+        FSM_onConfirm: function (oEvent) {
             const oModel = this.getView().getModel("LoginMode");
 
             // Get confirm directly from the control (live accurate value)
@@ -1151,7 +1151,7 @@ sap.ui.define([
         //     }
         // },
 
-         onCloseManageProfile: function() {
+        onCloseManageProfile: function () {
             if (this._oProfileDialog) {
                 this._oProfileDialog.destroy();
                 this._oProfileDialog = null;
@@ -1159,7 +1159,7 @@ sap.ui.define([
             this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", false);
         },
 
-        onPressAvatar: async function() {
+        onPressAvatar: async function () {
             const oUser = this._oLoggedInUser || {};
             const sPhoto = "./image.jpg";
 
@@ -1210,7 +1210,6 @@ sap.ui.define([
                 today.setHours(0, 0, 0, 0); // avoid timezone issues
 
                 if (aAllBookings.length === 0) {
-                    sap.m.MessageToast.show("No booking history found.");
                 } else {
                     aBookingData = aAllBookings.map(booking => {
                         const oStart = booking.StartDate ? new Date(booking.StartDate) : null;
@@ -1321,22 +1320,27 @@ sap.ui.define([
                 this._oProfileDialog.setModel(oProfileModel, "profileData");
 
                 this._oProfileDialog.open();
-                sap.m.MessageToast.show("No booking history found.");
             } finally {
                 sap.ui.core.BusyIndicator.hide();
             }
         },
 
-        onProfileclose: function() {
+        onProfileclose: function () {
             // Close the dialog and perform logout logic
             if (this._oProfileDialog) this._oProfileDialog.close();
         },
 
-        onEditProfilePic: function() {
+        onEditProfilePic: function () {
             sap.m.MessageToast.show("Profile picture edit not implemented yet.");
         },
 
-        onProfileDialogClose: function() {
+        onProfileDialogClose: function () {
+            if (this._oProfileDialog) {
+                this._oProfileDialog.close();
+            }
+        },
+
+        onLogout: function () {
             const oLoginModel = sap.ui.getCore().getModel("LoginModel");
             if (oLoginModel) {
                 oLoginModel.setData({
@@ -1360,7 +1364,7 @@ sap.ui.define([
             this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", false);
         },
 
-        Bookfragment: function() {
+        Bookfragment: function () {
             if (!this.FCIA_Dialog) {
                 var oView = this.getView();
                 this.FCIA_Dialog = sap.ui.xmlfragment("sap.ui.com.project1.fragment.Book_Room", this);
@@ -1373,7 +1377,7 @@ sap.ui.define([
             }
         },
 
-        onRoomBookPress: function(oEvent) {
+        onRoomBookPress: function (oEvent) {
             this.getOwnerComponent().getRouter().navTo("TilePage")
             // try {
             //     // Get the clicked button and its custom data
@@ -1428,16 +1432,16 @@ sap.ui.define([
             // }
         },
 
-        onCancelDialog: function() {
+        onCancelDialog: function () {
             this.FCIA_Dialog.close();
         },
-        
-        onAdminPress: function() {
+
+        onAdminPress: function () {
             var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
             oRouter.navTo("RouteStudentDetails");
         },
 
-        onWizardNext: function() {
+        onWizardNext: function () {
             const oDialog = this.FCIA_Dialog;
             const oWizard = sap.ui.getCore().byId("idHostelWizard");
             const oNextButton = sap.ui.getCore().byId("idWizardNextBtn");
@@ -1463,7 +1467,7 @@ sap.ui.define([
             oBackButton.setEnabled(true);
         },
 
-        onWizardBack: function() {
+        onWizardBack: function () {
             const oWizard = sap.ui.getCore().byId("idHostelWizard");
             const oNextButton = sap.ui.getCore().byId("idWizardNextBtn");
             const oBackButton = sap.ui.getCore().byId("idWizardBackBtn");
@@ -1479,16 +1483,16 @@ sap.ui.define([
             oSubmitButton.setVisible(false);
         },
 
-        onWizardComplete: function() {
+        onWizardComplete: function () {
             MessageToast.show("Wizard completed successfully!");
         },
 
-        onCancelDialog: function() {
+        onCancelDialog: function () {
             this.FCIA_Dialog.close();
             sap.ui.getCore().byId("idHostelWizardDialog").close();
         },
 
-        onDoubleRoomPress: function(oEvent) {
+        onDoubleRoomPress: function (oEvent) {
 
             // var oRouter = this.getOwnerComponent().getRouter();
             // oRouter.navTo("TilePage");
@@ -1511,7 +1515,7 @@ sap.ui.define([
 
         },
 
-        SectionPress: function(oEvent) {
+        SectionPress: function (oEvent) {
             var oSelectedItem = oEvent.getParameter("listItem");
             if (!oSelectedItem) return;
 
@@ -1536,7 +1540,7 @@ sap.ui.define([
             }
         },
 
-        onSearchChange: function(oEvent) {
+        onSearchChange: function (oEvent) {
             var sBranchCode = oEvent.getParameter("value").trim();
             if (!sBranchCode) {
                 sap.m.MessageToast.show("Please enter a location to search.");
@@ -1546,7 +1550,7 @@ sap.ui.define([
             this._loadFilteredData(sBranchCode);
         },
 
-        FC_onPressClear: function() {
+        FC_onPressClear: function () {
             const oView = this.getView();
             const oBranchCombo = oView.byId("id_Branch");
             const oAreaTypeCombo = oView.byId("id_Area");
@@ -1562,7 +1566,7 @@ sap.ui.define([
             if (oRoomTypeCombo) oRoomTypeCombo.setEnabled(true);
         },
 
-        onPressBookingRow: function(oEvent) {
+        onPressBookingRow: function (oEvent) {
             var oContext = oEvent.getSource().getBindingContext("profileData");
             var oBookingData = oContext.getObject();
 
@@ -1646,7 +1650,7 @@ sap.ui.define([
         },
 
         //  Separated calculation function
-        calculateTotals: function(aPersons, sStartDate, sEndDate, RoomPrice) {
+        calculateTotals: function (aPersons, sStartDate, sEndDate, RoomPrice) {
             const oStartDate = this._parseDate(sStartDate);
             const oEndDate = this._parseDate(sEndDate);
 
@@ -1703,7 +1707,7 @@ sap.ui.define([
         },
 
         // 🗓️ Helper date parser
-        _parseDate: function(sDate) {
+        _parseDate: function (sDate) {
             if (!sDate) return null;
 
             // If it's already a Date object
@@ -1720,7 +1724,7 @@ sap.ui.define([
             }
         },
 
-        onBranchSelectionChange: function(oEvent) {
+        onBranchSelectionChange: function (oEvent) {
             const oView = this.getView();
             const oAreaCombo = oView.byId("id_Area");
             const oRoomType = oView.byId("id_Roomtype");
@@ -1739,7 +1743,7 @@ sap.ui.define([
             const oModelData = oView.getModel("sBRModel").getData();
 
             // 🔹 Filter the data for the selected branch name
-            const aFiltered = oModelData.filter(function(item) {
+            const aFiltered = oModelData.filter(function (item) {
                 return item.City === sSelectedBranch;
             });
 
@@ -1752,7 +1756,7 @@ sap.ui.define([
         },
 
         // 🔹 When Area is selected, enable Room Type combo
-        onAreaSelectionChange: function(oEvent) {
+        onAreaSelectionChange: function (oEvent) {
             utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
 
             const oRoomType = this.byId("id_Roomtype");
@@ -1765,7 +1769,7 @@ sap.ui.define([
             }
         },
 
-        onSearchRooms: async function() {
+        onSearchRooms: async function () {
             const oContainer = this.byId("idBedTypeFlex");
             oContainer.setBusy(true);
 
@@ -1815,7 +1819,7 @@ sap.ui.define([
             }
         },
 
-        _loadFilteredData: async function(Scity, sBranchCode, sACType) {
+        _loadFilteredData: async function (Scity, sBranchCode, sACType) {
 
             if (sACType === "All") {
                 sACType = "";
@@ -1864,14 +1868,14 @@ sap.ui.define([
                 if (sBranchCode && sBranchCode.trim() !== "") {
                     matchedRooms = matchedRooms.filter(
                         room =>
-                        room.BranchCode?.toLowerCase() === sBranchCode.toLowerCase()
+                            room.BranchCode?.toLowerCase() === sBranchCode.toLowerCase()
                     );
                 } else {
                     matchedRooms = matchedRooms.filter(
                         room =>
-                        aBranchCodes
-                        .map(code => code.toLowerCase())
-                        .includes(room.BranchCode?.toLowerCase())
+                            aBranchCodes
+                                .map(code => code.toLowerCase())
+                                .includes(room.BranchCode?.toLowerCase())
                     );
                 }
 
@@ -1893,7 +1897,7 @@ sap.ui.define([
                             const decoded = atob(sBase64);
                             if (decoded.startsWith("iVB")) sBase64 = decoded;
                         }
-                    } catch (e) {}
+                    } catch (e) { }
 
                     const mimeType = fileType || "image/jpeg";
                     if (sBase64.startsWith("data:image")) return sBase64;
@@ -1903,11 +1907,11 @@ sap.ui.define([
                 const aBedTypes = matchedRooms.map(room => {
                     const matchingRooms = roomDetails.filter(
                         rd =>
-                        rd.BranchCode?.toLowerCase() === room.BranchCode?.toLowerCase() &&
-                        rd.BedTypeName?.trim().toLowerCase() ===
-                        (room.Name?.trim().toLowerCase() +
-                            " - " +
-                            room.ACType?.trim().toLowerCase())
+                            rd.BranchCode?.toLowerCase() === room.BranchCode?.toLowerCase() &&
+                            rd.BedTypeName?.trim().toLowerCase() ===
+                            (room.Name?.trim().toLowerCase() +
+                                " - " +
+                                room.ACType?.trim().toLowerCase())
                     );
 
                     const firstRoom = matchingRooms[0];
@@ -1969,8 +1973,8 @@ sap.ui.define([
 
 
                 oView.setModel(new sap.ui.model.json.JSONModel({
-                        BedTypes: aBedTypes
-                    }),
+                    BedTypes: aBedTypes
+                }),
                     "VisibilityModel");
                 oView.getModel("VisibilityModel").setProperty("/NoData", false);
             } catch (err) {
@@ -1980,7 +1984,7 @@ sap.ui.define([
         },
 
 
-        onBookNow: function(oEvent) {
+        onBookNow: function (oEvent) {
 
             // Get selected bed type object
             const oItem = oEvent.getSource().getBindingContext("VisibilityModel").getObject();
@@ -2008,7 +2012,7 @@ sap.ui.define([
             oRouter.navTo("RouteBookRoom");
         },
 
-        onFormEdit: async function() {
+        onFormEdit: async function () {
             var oSaveModel = this.getView().getModel("saveModel");
             var oedit = oSaveModel.getProperty("/isEditMode");
             var oEdit = this._oProfileDialog.getModel("profileData").getData();
@@ -2036,7 +2040,7 @@ sap.ui.define([
                 sap.m.MessageToast.show("Failed");
             }
         },
-        OnpressBookingDetails: function() {
+        OnpressBookingDetails: function () {
 
         },
 
@@ -2096,7 +2100,7 @@ sap.ui.define([
         //     this._oForgotDialog.open();
         // },
 
-        _validateFPFields: function() {
+        _validateFPFields: function () {
             let id = sap.ui.getCore().byId("fpUserId").getValue();
             let name = sap.ui.getCore().byId("fpUserName").getValue();
             let btn = this._oForgotDialog.getBeginButton();
@@ -2118,7 +2122,7 @@ sap.ui.define([
             sap.ui.getCore().byId("btnSignInSendOTP").setVisible(selected === "OTP");
         },
 
-        _clearAllAuthFields: function() {
+        _clearAllAuthFields: function () {
             const ids = [
                 "signInuserid", "signInusername", "signinPassword",
                 "fpUserId", "fpUserName", "fpOTP",
@@ -2144,7 +2148,7 @@ sap.ui.define([
 
 
 
-        _sendOTPToBackend: function(id, name) {
+        _sendOTPToBackend: function (id, name) {
             let url = "https://rest.kalpavrikshatechnologies.com/HostelSendOTP";
 
             let payload = {
@@ -2152,7 +2156,7 @@ sap.ui.define([
                 UserName: name,
                 Type: "OTP"
             };
-           
+
             $.ajax({
                 url: url,
                 method: "POST",
@@ -2162,18 +2166,18 @@ sap.ui.define([
                     password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
                 },
                 data: JSON.stringify(payload),
-                success: function() {
+                success: function () {
                     sap.m.MessageToast.show("OTP sent to email");
                     this._oForgotDialog.close();
                     this._openOTPDialog(id, name);
                 }.bind(this),
-                error: function() {
+                error: function () {
                     sap.m.MessageToast.show("Failed to send OTP");
                 }
             });
         },
 
-        _openOTPDialog: function() {
+        _openOTPDialog: function () {
             this._oOTPDialog = new sap.m.Dialog({
                 title: "Enter OTP",
                 type: "Message",
@@ -2193,7 +2197,7 @@ sap.ui.define([
                 }),
                 endButton: new sap.m.Button({
                     text: "Cancel",
-                    press: function() {
+                    press: function () {
                         this._oOTPDialog.close();
                     }.bind(this)
                 })
@@ -2201,7 +2205,7 @@ sap.ui.define([
             let btn = this._oOTPDialog.getBeginButton();
             btn.setEnabled(false);
 
-            sap.ui.getCore().byId("fpOTP").attachLiveChange(function(oEvt) {
+            sap.ui.getCore().byId("fpOTP").attachLiveChange(function (oEvt) {
                 btn.setEnabled(oEvt.getParameter("value").trim() !== "");
             });
 
@@ -2323,7 +2327,7 @@ sap.ui.define([
         //     this._oResetDialog.open();
         // },
 
-        _clearForgotFlow: function() {
+        _clearForgotFlow: function () {
             ["fpUserId", "fpUserName", "fpOTP", "newPass", "confPass"].forEach(id => {
                 const c = sap.ui.getCore().byId(id);
                 if (c) {
