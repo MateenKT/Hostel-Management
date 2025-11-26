@@ -367,21 +367,44 @@ sap.ui.define([], function() {
             }
         },
 
-        _LCvalidatePassword: function(oEvent, type) {
-            var oField = type === "ID" ? oEvent : oEvent.getSource();
-            if (!oField) return false;
+        // _LCvalidatePassword: function(oEvent, type) {
+        //     var oField = type === "ID" ? oEvent : oEvent.getSource();
+        //     if (!oField) return false;
 
-            var oValue = oField.getValue();
-            var regex = /^(?=.*[A-Z])(?=.*[!@#$%^&*+-])[A-Za-z\d!+-@#$%^&*()_=]{6,}$/;
+        //     var oValue = oField.getValue();
+        //     var regex = /^(?=.*[A-Z])(?=.*[!@#$%^&*+-])[A-Za-z\d!+-@#$%^&*()_=]{6,}$/;
+
+        //     if (!regex.test(oValue)) {
+        //         oField.setValueState("Error").focus();
+        //         return false;
+        //     } else {
+        //         oField.setValueState("None");
+        //         return true;
+        //     }
+        // },
+        _LCvalidatePassword: function (oEventOrInput) {
+            // Detect whether event or direct Input control was passed
+            var oField = (oEventOrInput.getSource)
+                ? oEventOrInput.getSource()      // liveChange event
+                : oEventOrInput;                // direct control
+
+            if (!oField || !oField.getValue) return false;
+
+            var oValue = oField.getValue().trim();
+
+            // Strong password rule
+            var regex = /^(?=.*[A-Z])(?=.*[!@#$%^&*+\-])[A-Za-z\d!+\-@#$%^&*()_=]{6,}$/;
 
             if (!regex.test(oValue)) {
-                oField.setValueState("Error").focus();
+                oField.setValueState("Error");
+                oField.setValueStateText("Password must contain uppercase and special character, min 6 chars");
                 return false;
             } else {
                 oField.setValueState("None");
                 return true;
             }
         },
+
 
         // LUT Number Validation
         _LCvalidateLutNumber: function(oEvent, type) {
