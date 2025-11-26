@@ -77,12 +77,15 @@
                             width="30%"
                         >
                             <Button
-                                text="Edit"
+                                text="Edit" id="idedit"
                                 type="Transparent"
                                 icon="sap-icon://edit"
                                 press="onEditBooking"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
+
+                               <Button id="idcancel" text="Cancel" press="onPressCancelBooking" visible="{= !${VisibleModel>/visible} }"
+                                class="myUnifiedBtn"  />
 
                             <Button
                                 text="Save"

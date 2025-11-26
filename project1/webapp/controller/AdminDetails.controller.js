@@ -53,9 +53,7 @@ sap.ui.define([
             });
             this.getView().setModel(model, "VisibleModel")
 
-
-
-
+             this._sLoggedUserID = "";
 
             this.getView().setModel(new sap.ui.model.json.JSONModel({
                 editable: true,
@@ -76,10 +74,30 @@ sap.ui.define([
                 this.getView().setModel(model, "Facilities")
             })
         },
-        onNavBack: function () {
-            var oRouter = this.getOwnerComponent().getRouter();
-            oRouter.navTo("RouteAdmin");
-        },
+         onNavBack: function () {
+            const oLoginModel = this.getView().getModel("LoginModel");
+            const sRole = oLoginModel?.getProperty("/Role") || "";
+            const sEmpID = oLoginModel?.getProperty("/EmployeeID") || "";
+
+            if (sRole === "Customer") {
+
+                // Store for BaseController usage in next onPressAvatar call
+                this._sLoggedUserID = sEmpID;
+
+                // if (this._oProfileDialog) {
+                //     this._oProfileDialog.open();
+                // } else {
+                //     this.onPressAvatar();
+                // }
+                const oUIModel = this.getOwnerComponent().getModel("UIModel");
+                oUIModel.setProperty("/isLoggedIn", true);
+                this.getOwnerComponent().getRouter().navTo("RouteHostel");
+
+            } else {
+                this.getOwnerComponent().getRouter().navTo("RouteAdmin");
+            }
+        }
+        ,
         AD_onSearch: async function () {
             try {
                 sap.ui.core.BusyIndicator.show(0);
@@ -1245,7 +1263,104 @@ sap.ui.define([
                     sap.m.MessageToast.show("Error saving booking!");
                     console.error(err);
                 });
-        }
+        },
 
+          onPressCancelBooking: async function(oEvent) {
+        var oHostelModel = this.getView().getModel("CustomerData");
+        var oData = oHostelModel.getData();
+        var that = this;
+
+        sap.m.MessageBox.confirm(
+            "Are you sure you want to cancel this booking?", {
+                title: "Confirm Cancellation",
+                icon: sap.m.MessageBox.Icon.WARNING,
+                actions: [sap.m.MessageBox.Action.YES, sap.m.MessageBox.Action.NO],
+                onClose: async function(oAction) {
+                    if (oAction !== sap.m.MessageBox.Action.YES) {
+                        return;
+                    }
+
+                    try {
+                        var today = new Date();
+                        var sCancelDate = today.toISOString().split("T")[0]; // YYYY-MM-DD
+
+                        //------ Booking Payload including Status and CancelDate ------
+                        const bookingData = [{
+                            BookingDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
+                            RentPrice: oData.GrandTotal ? oData.GrandTotal.toString() : "0",
+                            RoomPrice: oData.RoomPrice || "0",
+                            NoOfPersons: oData.noofperson || 1,
+                            Customerid: oData.CustomerId,
+                            StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
+                            EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
+                            Status: "Cancelled",                 // UPDATED
+                            CancelDate: sCancelDate,              // UPDATED
+                            PaymentType: oData.PaymentType || "",
+                            BedType: oData.BedType || ""
+                        }];
+
+                        //------ Facility Payload ------
+                        const facilityData = [];
+                        if (oData.AllSelectedFacilities?.length > 0) {
+                            oData.AllSelectedFacilities.forEach(fac => {
+                                facilityData.push({
+                                    PaymentID: "",
+                                    FacilityName: fac.FacilityName,
+                                    FacilitiPrice: fac.Price,
+                                    StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
+                                    EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
+                                    PaidStatus: "Cancelled" // UPDATED (optional)
+                                });
+                            });
+                        }
+
+                        //------ Final Payload ------
+                        const personData = [{
+                            Salutation: oData.Salutation || "",
+                            CustomerName: oData.FullName || "",
+                            UserID: oData.UserID || "",
+                            CustomerID: oData.CustomerID || "",
+                            STDCode: oData.STDCode || "",
+                            MobileNo: oData.MobileNo || "",
+                            Gender: oData.Gender || "",
+                            DateOfBirth: oData.DateOfBirth ? oData.DateOfBirth.split("/").reverse().join("-") : "",
+                            CustomerEmail: oData.CustomerEmail || "",
+                            Country: oData.Country || "",
+                            State: oData.State || "",
+                            City: oData.City || "",
+                            PermanentAddress: oData.Address || "",
+                            Booking: bookingData,                  // Making sure included
+                            FacilityItems: facilityData
+                        }];
+
+                        sap.ui.core.BusyIndicator.show(0);
+                        const custid = oData.CustomerID;         // FIXED
+
+                        await that.ajaxUpdateWithJQuery("HM_Customer", {
+                            data: personData,
+                            filters: { CustomerID: custid }
+                        });
+
+                        that.AD_onSearch();
+                        that.getView().getModel("VisibleModel").setProperty("/visible", false);
+                        that.byId("idMonthYearSelect").setVisible(false);
+                        sap.m.MessageToast.show("Booking cancelled successfully!");
+
+                        // Hide Extra Buttons after Cancel
+                        that.byId("idedit")?.setVisible(false);
+                        that.byId("idcancel")?.setVisible(false);
+
+                    } catch (err) {
+                        sap.ui.core.BusyIndicator.hide();
+                        sap.m.MessageToast.show(err.message || err.responseText);
+                    } finally {
+                        sap.ui.core.BusyIndicator.hide();
+                    }
+                }
+            }
+        );
+    }
     });
 });
+
+  

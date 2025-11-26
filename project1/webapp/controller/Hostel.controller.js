@@ -1225,6 +1225,14 @@ sap.ui.define([
             }
         },
 
+         onCloseManageProfile: function() {
+            if (this._oProfileDialog) {
+                this._oProfileDialog.destroy();
+                this._oProfileDialog = null;
+            }
+            this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", false);
+        },
+
         onPressAvatar: async function() {
             const oUser = this._oLoggedInUser || {};
             const sPhoto = "./image.jpg";
@@ -1706,7 +1714,9 @@ sap.ui.define([
             this.getOwnerComponent().setModel(oHostelModel, "HostelModel");
 
             // Navigate
-            this.getOwnerComponent().getRouter().navTo("EditBookingDetails");
+            this.getOwnerComponent().getRouter().navTo("RouteAdminDetails", {
+                sPath: encodeURIComponent(sCustomerID)
+            });
         },
 
         //  Separated calculation function

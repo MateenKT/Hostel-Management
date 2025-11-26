@@ -15,8 +15,8 @@
         horizontalScrolling="false"
         verticalScrolling="true"
         resizable="true"
-        draggable="true"
-    >
+        draggable="true" afterClose=".onCloseManageProfile"> 
+    
         <customHeader>
             <Bar class="profileHeaderBar">
                 <contentMiddle>
