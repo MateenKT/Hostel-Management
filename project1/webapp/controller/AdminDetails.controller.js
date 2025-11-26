@@ -1100,11 +1100,11 @@ sap.ui.define([
                 iDuration = Math.ceil((dEnd - dStart) / (1000 * 60 * 60 * 24)) + 1;
             }
         } else if (sUnit === "monthly" || sUnit === "Per Month") {
-            fPrice = parseFloat(oSelectedBed.Price || 0);
+            fPrice = parseFloat(oSelectedBed.MonthPrice || 0);
             // Get selected months
             iDuration = parseInt(oBookingModel.getProperty("/DurationUnit")) || 1;
         } else if (sUnit === "yearly" || sUnit === "Per Year") {
-            fPrice = parseFloat(oSelectedBed.Price || 0);
+            fPrice = parseFloat(oSelectedBed.YearPrice || 0);
             // Get selected years
             iDuration = parseInt(oBookingModel.getProperty("/DurationUnit")) || 1;
         }
