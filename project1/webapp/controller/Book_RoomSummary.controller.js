@@ -11,11 +11,11 @@ sap.ui.define([
 
         },
 
-        onNavBack: function() {
+        onNavBack: function () {
             this.getOwnerComponent().getRouter().navTo("RouteHomePage");
         },
 
-        onTableSelection: function(oEvent) {
+        onTableSelection: function (oEvent) {
             const oSelectedItem = oEvent.getParameter("listItem");
             if (!oSelectedItem) {
                 sap.m.MessageToast.show("No row selected");
@@ -52,7 +52,7 @@ sap.ui.define([
         },
 
         // --- Open edit dialog for selected facility ---
-        onEditFacilityDetails: function() {
+        onEditFacilityDetails: function () {
             if (!this._oSelectedFacility) {
                 sap.m.MessageToast.show("Please select a row to edit.");
                 return;
@@ -65,9 +65,10 @@ sap.ui.define([
                 PersonName: oFacilityData.PersonName || oFacilityData.PersonName || "",
                 BranchCode: sBranchCode
             });
+            // Booking Start Date from main model (dd/MM/yyyy)
 
             // Create / set edit model
-            this._oEditModel = new sap.ui.model.json.JSONModel(oSafeCopy);
+            this._oEditModel = new JSONModel(oSafeCopy);
             this.getView().setModel(this._oEditModel, "edit");
             this.getView().getModel("edit").setProperty("/NewStartDate", new Date(this.getView().getModel("HostelModel").getProperty("/StartDate").split("/").reverse().join("-")));
             this.getView().getModel("edit").setProperty("/NewEndDate", new Date(this.getView().getModel("HostelModel").getProperty("/EndDate").split("/").reverse().join("-")));
@@ -107,7 +108,7 @@ sap.ui.define([
             }
         },
 
-        _parsePossibleDateString: function(s) {
+        _parsePossibleDateString: function (s) {
             if (!s) return null;
             // If already a Date
             if (s instanceof Date) return s;
@@ -126,7 +127,7 @@ sap.ui.define([
             return isNaN(d.getTime()) ? null : d;
         },
 
-        onEditDialogClose: function() {
+        onEditDialogClose: function () {
             const oView = this.getView();
             const oTable = this._oSelectedTable || oView.byId("idFacilitySummaryTable");
             if (oTable) {
@@ -148,7 +149,7 @@ sap.ui.define([
             this._oEditDialog.close();
         },
 
-        onMonthSelectionChange: function(oEvent) {
+        onMonthSelectionChange: function (oEvent) {
             const oView = this.getView();
             const oHostelModel = oView.getModel("edit");
 
@@ -195,7 +196,7 @@ sap.ui.define([
             oHostelModel.setProperty("/TotalDays", iTotalDays);
         },
 
-        onEditDateChange: function(oEvent) {
+        onEditDateChange: function (oEvent) {
             const oView = this.getView();
             const oModel = oView.getModel("edit");
 
@@ -262,14 +263,14 @@ sap.ui.define([
         },
 
         // Utility function to format date
-        _formatDateToDDMMYYYY: function(oDate) {
+        _formatDateToDDMMYYYY: function (oDate) {
             const dd = String(oDate.getDate()).padStart(2, '0');
             const mm = String(oDate.getMonth() + 1).padStart(2, '0'); // Months start at 0
             const yyyy = oDate.getFullYear();
             return dd + "/" + mm + "/" + yyyy;
         },
 
-        onEditFacilitySave: function() {
+        onEditFacilitySave: function () {
             const oView = this.getView();
             const oHostelModel = oView.getModel("HostelModel");
             const oEditModel = oView.getModel("edit");
@@ -299,13 +300,13 @@ sap.ui.define([
                 const oTotalTime = sap.ui.core.Fragment.byId(sViewId, "editTotalTime");
 
                 if (!oStartTime.getValue()) {
-                     oStartTime.setValueState("Error");
+                    oStartTime.setValueState("Error");
                     sap.m.MessageToast.show("Start Time is required");
                     return;
                 }
 
                 if (!oEndTime.getValue()) {
-                     oEndTime.setValueState("Error");
+                    oEndTime.setValueState("Error");
                     sap.m.MessageToast.show("End Time is required");
                     return;
                 }
@@ -424,6 +425,16 @@ sap.ui.define([
             });
 
             oHostelModel.setProperty("/OverallTotalCost", overAllTotal);
+            let aSummary = oHostelModel.getProperty("/PersonFacilitiesSummary") || [];
+
+            const iSummaryIndex = aSummary.findIndex(f => {
+                return String(f.FacilityID) === String(oUpdatedData.FacilityID);
+            });
+
+            if (iSummaryIndex !== -1) {
+                aSummary[iSummaryIndex] = Object.assign({}, aSummary[iSummaryIndex], oUpdatedData);
+                oHostelModel.setProperty("/PersonFacilitiesSummary", aSummary);
+            }
             // Refresh bindings (table)
             const oTable = this._oSelectedTable || oView.byId("idFacilitySummaryTable");
             if (oTable) {
@@ -462,7 +473,7 @@ sap.ui.define([
             sap.m.MessageToast.show("Facility updated successfully!");
         },
 
-        _formatDateToDDMMYYYY: function(oDate) {
+        _formatDateToDDMMYYYY: function (oDate) {
             if (!(oDate instanceof Date)) {
                 oDate = new Date(oDate);
             }
@@ -472,7 +483,7 @@ sap.ui.define([
             return `${day}/${month}/${year}`;
         },
 
-        calculateTotals: function(aPersons, roomRentPrice) {
+        calculateTotals: function (aPersons, roomRentPrice) {
             const msPerDay = 1000 * 60 * 60 * 24;
             // helper: parse a date string (supports dd/MM/yyyy, yyyy-MM-dd or Date object)
             const parseDateSafe = (v) => {
@@ -495,7 +506,7 @@ sap.ui.define([
                 try {
                     const d = new Date(v);
                     if (!isNaN(d)) return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-                } catch (e) {}
+                } catch (e) { }
                 return null;
             };
 
@@ -639,7 +650,7 @@ sap.ui.define([
             };
         },
 
-        _parseDate: function(sDate) {
+        _parseDate: function (sDate) {
             // If already a Date object → return as-is
             if (sDate instanceof Date) {
                 return sDate;
@@ -659,7 +670,7 @@ sap.ui.define([
             return new Date(aParts[2], aParts[1] - 1, aParts[0]);
         },
 
-        onUnitTextChange: function(oEvent) {
+        onUnitTextChange: function (oEvent) {
             const oEditModel = this.getView().getModel("edit");
             const oFacilityModel = this.getView().getModel("FacilityModel");
 
@@ -701,18 +712,24 @@ sap.ui.define([
             if (sSelectedUnit === "Per Month") {
                 oEditModel.setProperty("/TotalMonths", "1");
                 oEditModel.setProperty("/TotalYears", ""); // clear year
+                oEditModel.setProperty("/StartTime", ""); 
+                oEditModel.setProperty("/EndTime", ""); 
+                oEditModel.setProperty("/TotalTime", ""); 
             }
 
             if (sSelectedUnit === "Per Year") {
                 oEditModel.setProperty("/TotalYears", "1");
-                oEditModel.setProperty("/TotalMonths", ""); // clear month
+                oEditModel.setProperty("/TotalMonths", ""); 
+                oEditModel.setProperty("/StartTime", ""); 
+                oEditModel.setProperty("/EndTime", ""); 
+                oEditModel.setProperty("/TotalTime", ""); 
             }
 
             // Update price in dialog
             oEditModel.setProperty("/Price", price);
         },
 
-        onOpenDocumentPreview: function(oEvent) {
+        onOpenDocumentPreview: function (oEvent) {
             const oCtx = oEvent.getSource().getBindingContext("HostelModel");
             const oDoc = oCtx && oCtx.getObject();
 
@@ -811,12 +828,12 @@ sap.ui.define([
 
                 beginButton: new sap.m.Button({
                     text: "Close",
-                    press: function() {
+                    press: function () {
                         this._oImageDialog.close();
                     }.bind(this)
                 }),
 
-                afterClose: function() {
+                afterClose: function () {
                     this._oImageDialog.destroy();
                     this._oImageDialog = null;
                 }.bind(this)
@@ -828,20 +845,20 @@ sap.ui.define([
         },
 
         // Close preview
-        onClosePreview: function() {
+        onClosePreview: function () {
             if (this._oDocPreviewDialog) {
                 this._oDocPreviewDialog.close();
             }
         },
 
-        onTimeChange: function() {
+        onTimeChange: function () {
             const oEditModel = this.getView().getModel("edit");
 
             const sStart = oEditModel.getProperty("/StartTime");
             const sEnd = oEditModel.getProperty("/EndTime");
             const sViewId = this.getView().getId();
             const oStartCtrl = sap.ui.core.Fragment.byId(sViewId, "FT_id_editStartTime");
-            const oEndCtrl   = sap.ui.core.Fragment.byId(sViewId, "FT_id_editEndTime");
+            const oEndCtrl = sap.ui.core.Fragment.byId(sViewId, "FT_id_editEndTime");
 
             // Morning or Evening
             if (sStart) {
@@ -881,7 +898,7 @@ sap.ui.define([
             oEditModel.setProperty("/TotalTime", finalTime);
         },
 
-        _getTimePeriod: function(sTime) {
+        _getTimePeriod: function (sTime) {
             if (!sTime) return "";
             const [hour] = sTime.split(":").map(Number);
             return hour < 12 ? "Morning" : "Evening";

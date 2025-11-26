@@ -94,7 +94,7 @@
             class="sapUiSmallMarginTop"
          
             items="{
-                path: 'HostelModel>PersonFacilitiesSummary'
+                path: 'HostelModel>AllSelectedFacilities'
             }">
             <VBox width="200px" height="200px" class="sapUiSmallMargin serviceCard"
                   alignItems="Center" justifyContent="Center"
