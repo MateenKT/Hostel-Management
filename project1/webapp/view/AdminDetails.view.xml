@@ -653,10 +653,21 @@
                                 design="Bold"
                                 class="sapUiSmallMarginEnd"
                             />
-                            <Text
+                            <!-- <Text
                                 text="{path: 'CustomerData>/TotalFacilityPrice', formatter: '.Formatter.formatCurrency'}"
                                 class="sapUiSmallMarginEnd"
-                            />
+                            /> -->
+
+                            <Text
+    text="{
+        parts: [
+            { path: 'CustomerData>/TotalFacilityPrice' },
+            { path: 'CustomerData>/AllSelectedFacilities/0/Currency' }
+        ],
+        formatter: '.Formatter.formatCurrency'
+    }"
+    class="sapUiSmallMarginEnd totalColumnBold1"
+/>
                         </HBox>
                         <HBox
                             justifyContent="End"
@@ -667,10 +678,21 @@
                                 design="Bold"
                                 class="sapUiSmallMarginEnd"
                             />
-                            <Text
+                            <!-- <Text
                                 text="{CustomerData>/RentPrice}"
                                 class="sapUiSmallMarginEnd"
-                            />
+                            /> -->
+
+                                 <Text
+    text="{
+        parts: [
+            { path: 'CustomerData>/RentPrice' },
+            { path: 'CustomerData>/AllSelectedFacilities/0/Currency' }
+        ],
+        formatter: '.Formatter.formatCurrency'
+    }"
+    class="sapUiSmallMarginEnd totalColumnBold1"
+/>
                         </HBox>
                         <HBox
                             justifyContent="End"
@@ -681,10 +703,20 @@
                                 design="Bold"
                                 class="sapUiSmallMarginEnd"
                             />
-                            <Text
+                            <!-- <Text
                                 text="{path: 'CustomerData>/GrandTotal', formatter: '.Formatter.formatCurrency'}"
                                 class="sapUiSmallMarginEnd"
-                            />
+                            /> -->
+                            <Text
+    text="{
+        parts: [
+            { path: 'CustomerData>/GrandTotal' },
+            { path: 'CustomerData>/AllSelectedFacilities/0/Currency' }
+        ],
+        formatter: '.Formatter.formatCurrency'
+    }"
+    class="sapUiSmallMarginEnd totalColumnBold1"
+/> 
                         </HBox>
                     </VBox>
                 </Panel>

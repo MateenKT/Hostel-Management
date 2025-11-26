@@ -267,7 +267,7 @@ sap.ui.define([
                         otherFacilitiesTotal += fTotal;
                     } else if (unit === "Per Hour") {
                         const totalHours = f.TotalHour || 0;
-                        fTotal = fPrice * totalHours;
+                        fTotal = fPrice * parseFloat(totalHours);
                         otherFacilitiesTotal += fTotal;
                     }
 
