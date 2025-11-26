@@ -5,23 +5,21 @@ sap.ui.define([
     "sap/m/MessageBox",
     "../utils/validation",
     "../model/formatter",
-], function (BaseController, JSONModel, MessageToast, MessageBox, utils, Formatter) {
+], function(BaseController, JSONModel, MessageToast, MessageBox, utils, Formatter) {
     "use strict";
     const $C = (id) => sap.ui.getCore().byId(id);
     const $V = (id) => $C(id)?.getValue()?.trim() || "";
     return BaseController.extend("sap.ui.com.project1.controller.Hostel", {
         Formatter: Formatter,
-        onInit: function () {
+        onInit: function() {
             this.getOwnerComponent().getRouter().getRoute("RouteHostel").attachMatched(this._onRouteMatched, this);
             this._getBrowserLocation();
-
         },
-        _getBrowserLocation: function () {
+        _getBrowserLocation: function() {
             if (!navigator.geolocation) {
                 sap.m.MessageToast.show("Geolocation not supported!");
                 return;
             }
-
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
                     let lat = pos.coords.latitude;
@@ -33,8 +31,7 @@ sap.ui.define([
                 }
             );
         },
-
-        _getLocationName: function (lat, lng) {
+        _getLocationName: function(lat, lng) {
             let url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`;
 
             $.ajax({
@@ -46,32 +43,21 @@ sap.ui.define([
                         return;
                     }
 
-                    let city = data.address.city
-                        || data.address.town
-                        || data.address.village
-                        || data.address.municipality;
-
-                    let state = data.address.state;
-                    let country = data.address.country;
-
-                    console.log("City:", city);
-                    console.log("State:", state);
-                    console.log("Country:", country);
-
-                    console.log("Full Location:", `${city}, ${state}, ${country}`);
-
+                    let city = data.address.city ||
+                        data.address.town ||
+                        data.address.village ||
+                        data.address.municipality;
                     this.City = city
                 },
                 error: (err) => {
                     console.error("Reverse geocoding failed", err);
                 }
             });
-        }
-        ,
-        _onRouteMatched: async function () {
+        },
+        _onRouteMatched: async function() {
             const oView = this.getView();
 
-            // 1️⃣ Login model setup
+            // Login model setup
             const omodel = new JSONModel({
                 url: "https://rest.kalpavrikshatechnologies.com/",
                 headers: {
@@ -83,13 +69,13 @@ sap.ui.define([
             });
             this.getOwnerComponent().setModel(omodel, "LoginModel");
 
-            // 2️⃣ Disable controls initially
+            //  Disable controls initially
             this.byId("id_Branch").setEnabled(true);
             this.byId("id_Area").setEnabled(true);
             this.byId("id_Roomtype").setEnabled(true);
 
 
-            // 4️⃣ Create all static local models
+            //  Create all static local models
             oView.setModel(new sap.ui.model.json.JSONModel({
                 CustomerName: "",
                 MobileNo: "",
@@ -100,35 +86,69 @@ sap.ui.define([
             }), "HostelModel");
 
             oView.setModel(new sap.ui.model.json.JSONModel({
-                items: [
-                    { title: "My Profile", icon: "sap-icon://person-placeholder", key: "profile" },
-                    { title: "Booking History", icon: "sap-icon://connected", key: "devices" },
-                    { title: "Logout", icon: "sap-icon://log", key: "logout" }
+                items: [{
+                        title: "My Profile",
+                        icon: "sap-icon://person-placeholder",
+                        key: "profile"
+                    },
+                    {
+                        title: "Booking History",
+                        icon: "sap-icon://connected",
+                        key: "devices"
+                    },
+                    {
+                        title: "Logout",
+                        icon: "sap-icon://log",
+                        key: "logout"
+                    }
                 ]
             }), "profileMenuModel");
 
-            oView.setModel(new JSONModel({ isEditMode: false }), "saveModel");
+            oView.setModel(new JSONModel({
+                isEditMode: false
+            }), "saveModel");
             // oView.setModel(new JSONModel({ isOtpSelected: false, isPasswordSelected: true }), "LoginViewModel");
             oView.setModel(new JSONModel({
                 isOtpSelected: false,
                 isPasswordSelected: true,
-                authFlow: "signin"   // [signin, forgot, otp, reset]
+                authFlow: "signin" // [signin, forgot, otp, reset]
             }), "LoginViewModel");
 
-            oView.setModel(new JSONModel({ fullname: "", Email: "", Mobileno: "", password: "", comfirmpass: "" }), "LoginMode");
-            oView.setModel(new JSONModel({ selectedSection: "profile" }), "profileSectionModel");
+            oView.setModel(new JSONModel({
+                fullname: "",
+                Email: "",
+                Mobileno: "",
+                password: "",
+                comfirmpass: ""
+            }), "LoginMode");
+            oView.setModel(new JSONModel({
+                selectedSection: "profile"
+            }), "profileSectionModel");
 
-            // 5️⃣ Hardcoded branches (initial fallback)
-            const aBranches = [
-                { BranchCode: "KLB01", BranchName: "Kalaburagi" },
-                { BranchCode: "BR002", BranchName: "Mumbai" },
-                { BranchCode: "BR003", BranchName: "Nagpur" },
-                { BranchCode: "BR004", BranchName: "Nashik" }
+            //  Hardcoded branches (initial fallback)
+            const aBranches = [{
+                    BranchCode: "KLB01",
+                    BranchName: "Kalaburagi"
+                },
+                {
+                    BranchCode: "BR002",
+                    BranchName: "Mumbai"
+                },
+                {
+                    BranchCode: "BR003",
+                    BranchName: "Nagpur"
+                },
+                {
+                    BranchCode: "BR004",
+                    BranchName: "Nashik"
+                }
             ];
-            oView.setModel(new JSONModel({ Branches: aBranches }), "BranchModel");
+            oView.setModel(new JSONModel({
+                Branches: aBranches
+            }), "BranchModel");
         },
 
-        CustomerDetails: async function () {
+        CustomerDetails: async function() {
             try {
                 const oData = await this.ajaxReadWithJQuery("HM_Customer", {});
                 const aCustomers = Array.isArray(oData.Customers) ? oData.Customers : [oData.Customers];
@@ -136,64 +156,44 @@ sap.ui.define([
                 const oCustomerModel = new JSONModel(aCustomers);
                 this.getView().setModel(oCustomerModel, "CustomerModel");
 
-                console.log("Customer details loaded successfully");
             } catch (err) {
                 console.error("Error while fetching Customer details:", err);
             }
         },
 
-
-
-
-        onUserlivechange: function (oEvent) {
+        onUserlivechange: function(oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
         },
-        onReadcallforRoom: async function () {
+
+        onReadcallforRoom: async function() {
             try {
                 const oView = this.getView();
-
-                //  Call backend to get all room data
                 const oResponse = await this.ajaxReadWithJQuery("HM_Rooms", {});
                 const aRooms = oResponse?.commentData || [];
-                const oRoomModel = new JSONModel({
-                    Rooms: aRooms
-                });
-                //  Bind model to the view
-                oView.setModel(oRoomModel, "RoomCountModel");
-
-
+                const oRoomModel = new JSONModel({Rooms: aRooms});
+                oView.setModel(oRoomModel, "RoomCountModel"); //  Bind model to the view
             } catch (err) {
                 console.error("Error reading rooms:", err);
                 sap.m.MessageToast.show("Failed to load room data.");
             }
         },
 
-        _loadBranchCode: async function () {
+        _loadBranchCode: async function() {
             try {
                 const oView = this.getView();
-
                 const oResponse = await this.ajaxReadWithJQuery("HM_Branch", {});
-
-                const aBranches = Array.isArray(oResponse?.data)
-                    ? oResponse.data
-                    : (oResponse?.data ? [oResponse.data] : []);
+                const aBranches = Array.isArray(oResponse?.data) ? oResponse.data : (oResponse?.data ? [oResponse.data] : []);
 
                 const oBranchModel = new sap.ui.model.json.JSONModel(aBranches);
                 oView.setModel(oBranchModel, "sBRModel");
                 this._populateUniqueFilterValues(aBranches);
-
-
-                console.log("oBranchModel:", oBranchModel.getData());
-                console.log("Branch data loaded successfully");
             } catch (err) {
                 console.error("Error while loading branch data:", err);
             }
         },
-        _populateUniqueFilterValues: function (data) {
-            let uniqueValues = {
-                id_Branch: new Set(),
 
-            };
+        _populateUniqueFilterValues: function(data) {
+            let uniqueValues = { id_Branch: new Set(),};
 
             data.forEach(item => {
                 uniqueValues.id_Branch.add(item.City);
@@ -212,168 +212,7 @@ sap.ui.define([
             });
         },
 
-
-
-        //         _loadFilteredData: async function (sBranchCode, sACType) {
-
-        //     try {
-        //         const oView = this.getView();
-        //         // Call backend to get all room data for this branch
-        //         const response = await this.ajaxReadWithJQuery("HM_BedType", {
-        //             BranchCode: sBranchCode
-        //         });
-
-        //         const allRooms = response?.data || [];
-
-        //         //  Apply BOTH filters: BranchCode + ACType (if ACType provided)
-        //         const matchedRooms = allRooms.filter(room => {
-        //             const branchMatch =
-        //                 room.BranchCode &&
-        //                 room.BranchCode.toLowerCase() === sBranchCode.toLowerCase();
-
-        //             const acTypeMatch = sACType
-        //                 ? room.ACType &&
-        //                   room.ACType.toLowerCase() === sACType.toLowerCase()
-        //                 : true; // if no ACType selected, match all
-
-        //             return branchMatch && acTypeMatch;
-        //         });
-
-        //         // Identify room types
-        //         const singleRoom = matchedRooms.find(room => room.Name === "Single Bed");
-        //         const doubleRoom = matchedRooms.find(room => room.Name === "Double Bed");
-        //         const fourRoom = matchedRooms.find(room => room.Name === "Four Bed");
-
-        //         // Base64 image helper
-        //         const convertBase64ToImage = (base64String, fileType) => {
-        //             if (!base64String) return "./image/Fallback.png";
-        //             let sBase64 = base64String.replace(/\s/g, "");
-        //             try {
-        //                 if (!sBase64.startsWith("iVB") && !sBase64.startsWith("data:image")) {
-        //                     const decoded = atob(sBase64);
-        //                     if (decoded.startsWith("iVB")) sBase64 = decoded;
-        //                 }
-        //             } catch (e) {
-        //                 console.warn("Base64 decode error:", e);
-        //             }
-        //             const mimeType = fileType || "image/jpeg";
-        //             if (sBase64.startsWith("data:image")) return sBase64;
-        //             return `data:${mimeType};base64,${sBase64}`;
-        //         };
-
-        //         // Prepare VisibilityModel
-        //         const oVisibilityData = {
-
-        //             singleName: singleRoom?.Name || "Single Bed",
-        //             doubleName: doubleRoom?.Name || "Double Bed",
-        //             fourName: fourRoom?.Name || "Four Bed",
-        //             singleVisible: !!singleRoom,
-        //             doubleVisible: !!doubleRoom,
-        //             fourVisible: !!fourRoom,
-        //             singleDesc: singleRoom?.Description || "",
-        //             doubleDesc: doubleRoom?.Description || "",
-        //             fourDesc: fourRoom?.Description || "",
-        //             singlePrice: singleRoom?.Price || "",
-        //             doublePrice: doubleRoom?.Price || "",
-        //             fourPrice: fourRoom?.Price || "",
-        //             singleImg: singleRoom?.RoomPhotos
-        //                 ? convertBase64ToImage(singleRoom.RoomPhotos, singleRoom.MimeType || singleRoom.FileType)
-        //                 : "./image/SingleBed.png",
-        //             doubleImg: doubleRoom?.RoomPhotos
-        //                 ? convertBase64ToImage(doubleRoom.RoomPhotos, doubleRoom.MimeType || doubleRoom.FileType)
-        //                 : "./image/DoubleBed.png",
-        //             fourImg: fourRoom?.RoomPhotos
-        //                 ? convertBase64ToImage(fourRoom.RoomPhotos, fourRoom.MimeType || fourRoom.FileType)
-        //                 : "./image/4Bed.png"
-        //         };
-
-        //         // Bind models
-        //         oView.setModel(new JSONModel(oVisibilityData), "VisibilityModel");
-        //         oView.setModel(new JSONModel({ Rooms: matchedRooms }), "RoomModel");
-
-        //     } catch (error) {
-        //         console.error("Data Load Failed:", error);
-        //         sap.m.MessageToast.show("Error fetching room data.");
-        //     }
-        // },
-        // _loadFilteredData: async function (sBranchCode, sACType) {
-        //     try {
-        //         const oView = this.getView();
-
-        //         // 🔹 Fetch all bed type data for selected branch
-        //         const response = await this.ajaxReadWithJQuery("HM_BedType", {
-        //             BranchCode: sBranchCode
-        //         });
-
-        //         const allRooms = response?.data || [];
-
-        //         // 🔹 Filter based on BranchCode + ACType
-        //         const matchedRooms = allRooms.filter(room => {
-        //             const branchMatch =
-        //                 room.BranchCode &&
-        //                 room.BranchCode.toLowerCase() === sBranchCode.toLowerCase();
-
-        //             const acTypeMatch = sACType
-        //                 ? room.ACType &&
-        //                   room.ACType.toLowerCase() === sACType.toLowerCase()
-        //                 : true;
-
-        //             return branchMatch && acTypeMatch;
-        //         });
-
-        //         // 🔹 Extract unique bed types (avoid duplicates)
-        //         const uniqueRooms = [];
-        //         const seenNames = new Set();
-        //         matchedRooms.forEach(room => {
-        //             const key = room.Name?.trim().toLowerCase();
-        //             if (key && !seenNames.has(key)) {
-        //                 seenNames.add(key);
-        //                 uniqueRooms.push(room);
-        //             }
-        //         });
-
-        //         // 🔹 Safe Base64 image converter
-        //           const convertBase64ToImage = (base64String, fileType) => {
-        //             if (!base64String) return "./image/Fallback.png";
-        //             let sBase64 = base64String.replace(/\s/g, "");
-        //             try {
-        //                 if (!sBase64.startsWith("iVB") && !sBase64.startsWith("data:image")) {
-        //                     const decoded = atob(sBase64);
-        //                     if (decoded.startsWith("iVB")) sBase64 = decoded;
-        //                 }
-        //             } catch (e) {
-        //                 console.warn("Base64 decode error:", e);
-        //             }
-        //             const mimeType = fileType || "image/jpeg";
-        //             if (sBase64.startsWith("data:image")) return sBase64;
-        //             return `data:${mimeType};base64,${sBase64}`;
-        //         };
-
-        //         // 🔹 Prepare array for cards (dynamic binding)
-        //         const aBedTypes = uniqueRooms.map(room => ({
-        //             Name: room.Name,
-        //             Description: room.Description || "",
-        //             Price: room.Price
-        //                 ? "₹ " + room.Price + " / month"
-        //                 : "",
-        //             Image: convertBase64ToImage(
-        //                 room.RoomPhotos,
-        //                 room.MimeType || room.FileType
-        //             )
-        //         }));
-
-        //         // 🔹 Bind model for dynamic UI
-        //         oView.setModel(
-        //             new sap.ui.model.json.JSONModel({ BedTypes: aBedTypes }),
-        //             "VisibilityModel"
-        //         );
-        //     } catch (err) {
-        //         console.error("Error loading data:", err);
-        //         sap.m.MessageToast.show("Failed to load bed type data.");
-        //     }
-        // },
-
-        onSelectPricePlan: function (oEvent) {
+        onSelectPricePlan: function(oEvent) {
             const oTile = oEvent.getSource();
             const sType = oTile.data("type"); // "daily", "monthly", or "yearly"
             const oView = this.getView();
@@ -432,12 +271,7 @@ sap.ui.define([
             );
         },
 
-
-
-
-
-
-        onConfirmBooking: function () {
+        onConfirmBooking: function() {
             const oView = this.getView();
             const oLocalModel = oView.getModel("HostelModel"); // Local model bound to dialog
             const oData = oLocalModel?.getData?.() || {};
@@ -447,14 +281,14 @@ sap.ui.define([
                 return;
             }
 
-            // 1️⃣ Get or create global model
+            //  Get or create global model
             let oGlobalModel = sap.ui.getCore().getModel("HostelModel");
             if (!oGlobalModel) {
                 oGlobalModel = new sap.ui.model.json.JSONModel({});
                 sap.ui.getCore().setModel(oGlobalModel, "HostelModel");
             }
 
-            // 2️⃣ Build booking data
+            //  Build booking data
             const oBookingData = {
                 BookingDate: new Date().toISOString(),
                 RoomNo: oData.RoomNo || "",
@@ -470,9 +304,8 @@ sap.ui.define([
                 Source: "UI5_HostelApp",
                 Status: "Pending"
             };
-            console.log("📌 FINAL BOOKING PAYLOAD:", oBookingData);
-
-            // 3️⃣ Merge and clean
+           
+            //  Merge and clean
             const oMergedData = {
                 ...oGlobalModel.getData(),
                 ...oBookingData
@@ -482,9 +315,11 @@ sap.ui.define([
             delete oMergedData.MonthPrice;
             delete oMergedData.YearPrice;
 
-            // ✅ 4️⃣ Dynamically create dropdown items for Capacity
+            //  Dynamically create dropdown items for Capacity
             const iCapacity = oMergedData.Capacity || 1;
-            const aPersonsList = Array.from({ length: iCapacity }, (_, i) => ({
+            const aPersonsList = Array.from({
+                length: iCapacity
+            }, (_, i) => ({
                 key: (i + 1).toString(),
                 text: (i + 1).toString()
             }));
@@ -501,104 +336,17 @@ sap.ui.define([
 
             // Close dialog
             if (this._oRoomDetailFragment) {
-                this._oRoomDetailFragment.close();   // close FIRST
+                this._oRoomDetailFragment.close(); // close FIRST
             }
 
             this._clearRoomDetailDialog();
 
-
-
-            // this._clearRoomDetailDialog();
-            // if (this._oRoomDetailFragment) this._oRoomDetailFragment.close();
-
-            // ✅ 6️⃣ Navigate to booking view
+            //  Navigate to booking view
             const oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("RouteBookRoom");
         },
 
-
-
-
-        // BedTypedetails: async function () {
-        //     try {
-        //         const oResponse = await this.ajaxReadWithJQuery("HM_BedType", "");
-        //         const aData = Array.isArray(oResponse?.data) ? oResponse.data : [];
-        //         const oBedTypeModel = new sap.ui.model.json.JSONModel(aData);
-        //         this.getView().setModel(oBedTypeModel, "BedTypeModel");
-        //         console.log("Bed Type details loaded successfully", aData);
-        //     } catch (err) {
-        //         console.error("❌ Failed to load BedType details:", err);
-        //     }
-        // },
-
-
-
-
-        // _getBedTypeImages: async function (sBedTypeID) {
-        //     try {
-        //         if (!sBedTypeID) {
-        //             console.warn("⚠️ No BedType ID provided for image lookup");
-        //             return [sap.ui.require.toUrl("sap/ui/com/project1/image/no-image.png")];
-        //         }
-
-        //         // 🔹 Initialize cache store (first-time)
-        //         this._imageCache = this._imageCache || {};
-
-        //         // 🔹 Serve from cache if available
-        //         if (this._imageCache[sBedTypeID]) {
-        //             console.log(`🧠 Cached images returned for BedType ID: ${sBedTypeID}`);
-        //             return this._imageCache[sBedTypeID];
-        //         }
-
-        //         // 🔹 Fetch from backend
-        //         const oResponse = await this.ajaxReadWithJQuery("HM_BedTypeDetails", {
-        //             filters: { ID: sBedTypeID }
-        //         });
-        //         console.log("🧾 HM_BedTypeDetails raw response:", oResponse);
-
-        //         const oData = Array.isArray(oResponse?.data)
-        //             ? oResponse.data.find(item => item.ID === sBedTypeID)
-        //             : oResponse?.data;
-
-        //         if (!oData) {
-        //             console.warn("⚠️ No image data returned for BedType ID:", sBedTypeID);
-        //             return [sap.ui.require.toUrl("sap/ui/com/project1/image/no-image.png")];
-        //         }
-
-        //         // 🔹 Extract Photo1–Photo5 safely
-        //         const aImages = [];
-        //         for (let i = 1; i <= 5; i++) {
-        //             const sPhoto = oData[`Photo${i}`];
-        //             const sType = oData[`Photo${i}Type`] || "image/jpeg";
-        //             if (sPhoto && sPhoto.trim() !== "") {
-        //                 const sDataUrl = sPhoto.startsWith("data:image")
-        //                     ? sPhoto
-        //                     : `data:${sType};base64,${sPhoto.trim()}`;
-        //                 aImages.push(sDataUrl);
-        //             }
-        //         }
-
-        //         // 🔹 If empty, use fallback
-        //         const aFinal = aImages.length
-        //             ? aImages
-        //             : [sap.ui.require.toUrl("sap/ui/com/project1/image/no-image.png")];
-
-        //         console.log(`📸 Extracted ${aFinal.length} images for BedType ID: ${sBedTypeID}`);
-
-        //         // 🔹 Cache it
-        //         this._imageCache[sBedTypeID] = aFinal;
-
-        //         return aFinal;
-        //     } catch (err) {
-        //         console.error("❌ Error fetching bed type images:", err);
-        //         return [sap.ui.require.toUrl("sap/ui/com/project1/image/no-image.png")];
-        //     }
-        // },
-
-
-
-
-        _clearRoomDetailDialog: function () {
+        _clearRoomDetailDialog: function() {
             if (!this._oRoomDetailFragment) return;
 
             const oFrag = this._oRoomDetailFragment;
@@ -633,14 +381,9 @@ sap.ui.define([
                 clearInterval(this._carouselInterval);
                 this._carouselInterval = null;
             }
-
-
-            console.log("🧨 Fragment destroyed — fresh state guaranteed.");
         },
 
-
-
-        _bindCarousel: function () {
+        _bindCarousel: function() {
             const oCarousel = this._oRoomDetailFragment
                 .findAggregatedObjects(true, obj => obj.isA && obj.isA("sap.m.Carousel"))[0];
 
@@ -658,67 +401,19 @@ sap.ui.define([
             });
         },
 
-
-        // _bindCarousel: function () {
-        //     const oCarousel = this._oRoomDetailFragment
-        //         .findAggregatedObjects(true, obj => obj.isA && obj.isA("sap.m.Carousel"))[0];
-
-        //     if (!oCarousel) return;
-
-        //     oCarousel.unbindAggregation("pages");
-        //     oCarousel.bindAggregation("pages", {
-        //         path: "HostelModel>/ImageList",
-        //         template: new sap.m.Image({
-        //             src: "{HostelModel>}",
-        //             width: "100%",
-        //             densityAware: false,
-        //             decorative: false
-        //         })
-        //     });
-
-        //     if (this._carouselInterval) {
-        //         clearInterval(this._carouselInterval);
-        //         this._carouselInterval = null;
-        //     }
-
-        //     const that = this;
-        //     setTimeout(() => {
-        //         that._carouselInterval = setInterval(() => {
-        //             const aPages = oCarousel.getPages();
-        //             if (aPages.length <= 1) return;
-
-        //             const sCurrent = oCarousel.getActivePage();
-        //             const oCurrent = sap.ui.getCore().byId(sCurrent);
-        //             if (!oCurrent) return;
-
-        //             const iIndex = aPages.indexOf(oCurrent);
-        //             const iNext = (iIndex + 1) % aPages.length;
-
-        //             oCarousel.setActivePage(aPages[iNext]);
-
-        //         }, 3500);
-        //     }, 400);
-        // },
-
-
-
-
-
-
-        _LoadFacilities: function (sBranchCode) {
+        _LoadFacilities: function(sBranchCode) {
             const oView = this.getView();
             if (!this._oRoomDetailFragment) return; // Safety check
 
             if (!sBranchCode) return;
 
-            // Set loading state ON for facility container
-            // const oFacilityModel = oView.getModel("FacilityModel");
-            // 🎯 Get the model directly from the fragment
             const oFacilityModel = this._oRoomDetailFragment.getModel("FacilityModel");
             if (!oFacilityModel) return; // Model might not be set yet
 
             oFacilityModel.setProperty("/loading", true);
-            this.ajaxReadWithJQuery("HM_Facilities", { BranchCode: sBranchCode })
+            this.ajaxReadWithJQuery("HM_Facilities", {
+                    BranchCode: sBranchCode
+                })
                 .then((Response) => {
                     console.log("Facility Response:", Response);
                     const aFacilities = (Response && Response.data) ? Response.data : [];
@@ -744,7 +439,6 @@ sap.ui.define([
                     oFacilityModel.setProperty("/loading", false);
 
                     oFacilityModel.refresh(true);
-
                 })
                 .catch(err => {
                     console.error("Failed to load facilities:", err);
@@ -752,14 +446,10 @@ sap.ui.define([
                 });
         },
 
-
-        viewDetails: function (oEvent) {
+        viewDetails: function(oEvent) {
             try {
                 const oView = this.getView();
-
                 const oSelected = oEvent.getSource().getBindingContext("VisibilityModel").getObject();
-
-
                 const oFullDetails = {
                     RoomNo: oSelected.RoomNo || "",
                     BedType: oSelected.Name || "",
@@ -776,18 +466,14 @@ sap.ui.define([
                     SelectedPriceType: "",
                     SelectedPriceValue: ""
                 };
-                console.log(" oSelected.BranchCode  oSelected.BranchCode  oSelected.BranchCode ", oSelected.BranchCode);
-
-                // Set HostelModel
+              
                 const oHostelModel = new sap.ui.model.json.JSONModel(oFullDetails);
                 oView.setModel(oHostelModel, "HostelModel");
-                console.log("oHostelModel:", oHostelModel.getData());
-
-                // Always set an EMPTY FacilityModel BEFORE opening fragment
-                // oView.setModel(new sap.ui.model.json.JSONModel({ Facilities: [] }), "FacilityModel");
-
-
-                oView.setModel(new sap.ui.model.json.JSONModel({ loading: true, Facilities: [] }), "FacilityModel");
+        
+                oView.setModel(new sap.ui.model.json.JSONModel({
+                    loading: true,
+                    Facilities: []
+                }), "FacilityModel");
 
                 // Load / reuse fragment
                 if (!this._oRoomDetailFragment) {
@@ -807,7 +493,7 @@ sap.ui.define([
 
                         // Bind carousel
                         this._bindCarousel();
-                        
+
 
                         // Now load facilities in background
                         this._LoadFacilities(oSelected.BranchCode);
@@ -819,7 +505,7 @@ sap.ui.define([
                 // Fragment already exists (2nd, 3rd, nth time)
 
                 this._oRoomDetailFragment.setModel(oHostelModel, "HostelModel");
-                this._oRoomDetailFragment.setModel(oView.getModel("FacilityModel"), "FacilityModel");   
+                this._oRoomDetailFragment.setModel(oView.getModel("FacilityModel"), "FacilityModel");
 
                 // Open instantly
                 this._oRoomDetailFragment.open();
@@ -831,12 +517,11 @@ sap.ui.define([
                 this._LoadFacilities(oSelected.BranchCode);
 
             } catch (err) {
-                console.error("❌ viewDetails error:", err);
+                console.error(" viewDetails error:", err);
             }
         },
 
-        _LoadAmenities: async function (sBranchCode) {
-            console.log("📌 Amenity load for branch:", sBranchCode); //      sBranchCode
+        _LoadAmenities: async function(sBranchCode) {
             const oAmenityModel = new sap.ui.model.json.JSONModel({
                 loading: true,
                 Amenities: []
@@ -856,12 +541,12 @@ sap.ui.define([
                     // ✔ Branch exists → show only branch amenities
                     console.log("🎯 Showing branch amenities:", branchList);
                     oAmenityModel.setProperty("/Amenities", this._convertAmenities(branchList));
-                // } else {
-                //     // 🔄 Branch not found → show ONLY blank fallback
-                //     const fallbackList = allList.filter(x => (x.BranchCode || "").trim() === "");
-                //     console.warn("↩️ Showing fallback amenities:", fallbackList);
-                //     oAmenityModel.setProperty("/Amenities", this._convertAmenities(fallbackList));
-                // }
+                    // } else {
+                    //     // 🔄 Branch not found → show ONLY blank fallback
+                    //     const fallbackList = allList.filter(x => (x.BranchCode || "").trim() === "");
+                    //     console.warn("↩️ Showing fallback amenities:", fallbackList);
+                    //     oAmenityModel.setProperty("/Amenities", this._convertAmenities(fallbackList));
+                    // }
                 } else {
                     console.warn("🚫 No amenities found for this branch:", sBranchCode);
                     oAmenityModel.setProperty("/Amenities", []); // show nothing
@@ -870,20 +555,18 @@ sap.ui.define([
             } catch (err) {
                 console.error("❌ Amenity load error:", err);
             }
-
             oAmenityModel.setProperty("/loading", false);
         },
 
-        _convertAmenities: function (list) {
+        _convertAmenities: function(list) {
             return list.map(item => ({
                 ...item,
-                ImageSrc: item.Photo1
-                    ? `data:${item.Photo1Type || "image/jpeg"};base64,${item.Photo1}`
-                    : ""
+                ImageSrc: item.Photo1 ?
+                    `data:${item.Photo1Type || "image/jpeg"};base64,${item.Photo1}` : ""
             }));
         },
 
-        onRoomDetailOpened: function () {
+        onRoomDetailOpened: function() {
             // Get the branch code from the dialog's model
             if (this._oRoomDetailFragment) {
                 const oModel = this._oRoomDetailFragment.getModel("HostelModel");
@@ -894,40 +577,35 @@ sap.ui.define([
             }
         },
 
-        onImageLoadError: function (oEvent) {
+        onImageLoadError: function(oEvent) {
             const oImage = oEvent.getSource();
             const sFallback = sap.ui.require.toUrl("sap/ui/com/project1/image/no-image.png");
 
             if (!oImage.data("hasFallback")) {
                 oImage.data("hasFallback", true);
                 setTimeout(() => oImage.setSrc(sFallback), 0); // Agar image load nahi hui, toh fallback set hoga
-            }
-
-            else {
+            } else {
                 console.warn("⚠️ Final fallback image also failed to load:", sFallback);
             }
         },
 
-
-
-
-        onCloseRoomDetail: function () {
+        onCloseRoomDetail: function() {
             if (this._oRoomDetailFragment) {
-                this._oRoomDetailFragment.close();   // close FIRST
+                this._oRoomDetailFragment.close(); // close FIRST
             }
 
-            this._clearRoomDetailDialog();           // destroy AFTER
+            this._clearRoomDetailDialog(); // destroy AFTER
         },
 
-        onDialogAfterClose: function () {
+        onDialogAfterClose: function() {
             if (this._oRoomDetailFragment) {
-                this._oRoomDetailFragment.close();   // close FIRST
+                this._oRoomDetailFragment.close(); // close FIRST
             }
 
             this._clearRoomDetailDialog();
         },
 
-        onTabSelect: async function (oEvent) {
+        onTabSelect: async function(oEvent) {
             var oItem = oEvent.getParameter("item");
             const sKey = oItem.getKey();
 
@@ -941,7 +619,7 @@ sap.ui.define([
             }
         },
 
-        _loadRoomsPageData: async function () {
+        _loadRoomsPageData: async function() {
             const oContainer = this.byId("idBedTypeFlex");
             const oBranch = this.byId("id_Branch");
             const oArea = this.byId("id_Area");
@@ -982,7 +660,7 @@ sap.ui.define([
             }
         },
 
-        onpressFilter: function () {
+        onpressFilter: function() {
             var oView = this.getView();
             if (!this.ARD_Dialog) {
 
@@ -999,76 +677,7 @@ sap.ui.define([
             this.ARD_Dialog.open();
         },
 
-        //        onpressFilter: function () {
-        //         var that = this;
-
-        //     // Destroy old dialog (optional safety) if you want a fresh one each time
-        //     if (this._oLocationDialog) {
-        //         this._oLocationDialog.destroy();
-        //         this._oLocationDialog = null;
-        //     }
-
-        //     // Create new dialog dynamically
-        //     this._oLocationDialog = new sap.m.Dialog({
-        //         title: "Search Rooms by Location",
-        //         type: "Message",
-        //         contentWidth: "400px",
-        //         draggable: true,
-        //         resizable: true,
-        //         content: [
-        //             new sap.m.VBox({
-        //                 width: "100%",
-        //                 items: [
-        //                     new sap.m.Label({ text: "Select Location", labelFor: "idBranchCombo" }),
-        //                     new sap.m.ComboBox("idBranchCombo", {
-        //                         width: "100%",
-        //                         placeholder: "Select City...",
-        //                         items: {
-        //                             path: "sBRModel>/",
-        //                             template: new sap.ui.core.Item({
-        //                                 key: "{sBRModel>BranchID}",
-        //                                 text: "{sBRModel>Name}"
-        //                             })
-        //                         }
-        //                     }),
-
-        //                     //  This section (AC Type ComboBox) only visible if user is logged in
-        //                     new sap.m.Label("idACLabel", {
-        //                         text: "Select Bed Type",
-        //                         // visible: !!that._oLoggedInUser // dynamically controlled
-        //                     }),
-        //                     new sap.m.ComboBox("idACTypeCombo", {
-        //                         width: "100%",
-        //                         placeholder: "Select Bed Type...",
-        //                         // visible: !!that._oLoggedInUser, // show only if logged in
-        //                         items: {
-        //                               path: "RoomCountModel>/Rooms",
-        //                             template: new sap.ui.core.Item({
-        //                                 key: "{RoomCountModel>BranchCode}",
-        //                                 text: "{RoomCountModel>BedTypeName}"
-        //                             })
-        //                         }
-        //                     }), 
-
-        //                     new sap.m.Button({
-        //                         text: "Search",
-        //                         type: "Emphasized",
-        //                         icon: "sap-icon://search",
-        //                         press: function () {
-        //                             that.onSearchRooms();
-        //                         }
-        //                     })
-        //                 ]
-        //             })
-        //         ]
-        //     });
-
-        //     this.getView().addDependent(this._oLocationDialog);
-        //     this._oLocationDialog.open();
-        // },
-
-
-        onpressBookrooms: async function () {
+        onpressBookrooms: async function() {
             var oTabHeader = this.byId("mainTabHeader");
             oTabHeader.setSelectedKey("idRooms");
             this.byId("pageContainer").to(this.byId("idRooms"));
@@ -1081,7 +690,7 @@ sap.ui.define([
             await this._loadRoomsPageData();
         },
 
-        onpressLogin: function () {
+        onpressLogin: function() {
             if (!this._oSignDialog) {
                 this._oSignDialog = sap.ui.xmlfragment(
                     "sap.ui.com.project1.fragment.SignInSignup",
@@ -1107,10 +716,10 @@ sap.ui.define([
             const oDOB = sap.ui.getCore().byId("signUpDOB");
             const today = new Date();
 
-            const maxDOB = new Date();  // Minimum age = 10
+            const maxDOB = new Date(); // Minimum age = 10
             maxDOB.setFullYear(today.getFullYear() - 10);
 
-            const minDOB = new Date();  // Maximum age = 118
+            const minDOB = new Date(); // Maximum age = 118
             minDOB.setFullYear(today.getFullYear() - 118);
 
             oDOB.setMaxDate(maxDOB);
@@ -1123,18 +732,18 @@ sap.ui.define([
             return;
         },
 
-        _resetAuthDialog: function () {
+        _resetAuthDialog: function() {
             const $C = (id) => sap.ui.getCore().byId(id);
             const oModel = this.getView().getModel("LoginMode");
 
-            // 🔄 Reset Model Data
+            //  Reset Model Data
             oModel.setData({
                 Salutation: "",
                 fullname: "",
-                Email: "",        // <<<<< Clear Email Model
+                Email: "", // <<<<< Clear Email Model
                 STDCode: "",
                 Mobileno: "",
-                password: "",     // <<<<< Clear Password Model
+                password: "", // <<<<< Clear Password Model
                 comfirmpass: "",
                 UserID: "",
                 Gender: "",
@@ -1145,8 +754,8 @@ sap.ui.define([
                 DateOfBirth: ""
             });
 
-            // 🧹 Reset UI controls
-            // 🧹 Reset Sign-Up controls
+            //  Reset UI controls
+            //  Reset Sign-Up controls
             [
                 "signUpSalutation", "signUpName", "signUpEmail", "signUpPassword",
                 "signUpConfirmPassword", "signUpDOB", "signUpGender", "signUpCountry",
@@ -1160,7 +769,7 @@ sap.ui.define([
                 }
             });
 
-            // 🧹 Reset Sign-In controls
+            //  Reset Sign-In controls
             ["signInuserid", "signInusername", "signinPassword"].forEach(id => {
                 const ctrl = $C(id);
                 if (ctrl) {
@@ -1182,33 +791,33 @@ sap.ui.define([
         },
 
 
-        onDialogClose: function () {
+        onDialogClose: function() {
             if (this._oSignDialog) this._oSignDialog.close();
         },
 
-
-        _onFieldclear: function () {
+        _onFieldclear: function() {
             var ofield
         },
-        onSwitchToSignIn: function () {
+
+        onSwitchToSignIn: function() {
             var oSignInPanel = sap.ui.getCore().byId("signInPanel");
             var oSignUpPanel = sap.ui.getCore().byId("signUpPanel");
             oSignInPanel.setVisible(true);
             oSignUpPanel.setVisible(false);
         },
 
-        onSwitchToSignUp: function () {
+        onSwitchToSignUp: function() {
             var oSignInPanel = sap.ui.getCore().byId("signInPanel");
             var oSignUpPanel = sap.ui.getCore().byId("signUpPanel");
             oSignInPanel.setVisible(false);
             oSignUpPanel.setVisible(true);
         },
-        onEmailliveChange: function (oEvent) {
+
+        onEmailliveChange: function(oEvent) {
             utils._LCvalidateEmail(oEvent);
         },
 
-
-        SM_onTogglePasswordVisibility: function (oEvent) {
+        SM_onTogglePasswordVisibility: function(oEvent) {
             var oInput = oEvent.getSource();
             var sType = oInput.getType() === "Password" ? "Text" : "Password";
             oInput.setType(sType);
@@ -1220,187 +829,17 @@ sap.ui.define([
             var sCurrentValue = oInput.getValue();
             oInput.setValue(sCurrentValue);
         },
-        SM_onChnageSetAndConfirm: function (oEvent) {
+        SM_onChnageSetAndConfirm: function(oEvent) {
             utils._LCvalidatePassword(oEvent);
         },
 
-        // onSignUp: async function () {
-
-
-        //     const oModel = this.getView().getModel("LoginMode");
-        //     const oData = oModel.getData();
-
-        //     /* ========= CONTROL GETTER ========= */
-        //     const $C = (id) => sap.ui.getCore().byId(id);
-
-        //     /* ========= SEQUENTIAL VALIDATION (follow UI order) ========= */
-
-        //     // 1) Salutation
-        //     if (!utils._LCstrictValidationComboBox($C("signUpSalutation"), "ID")) return;
-
-        //     // 2) Full Name
-        //     if (!utils._LCvalidateName($C("signUpName"), "ID")) return;
-
-        //     // 3) Email
-        //     if (!utils._LCvalidateEmail($C("signUpEmail"), "ID")) return;
-
-        //     // 4) Create Password
-        //     if (!utils._LCvalidatePassword($C("signUpPassword"), "ID")) return;
-
-        //     // 5) Confirm Password
-        //     if ($C("signUpPassword").getValue() !== $C("signUpConfirmPassword").getValue()) {
-        //         $C("signUpConfirmPassword").setValueState("Error");
-        //         $C("signUpConfirmPassword").setValueStateText("Passwords do not match");
-        //         sap.m.MessageToast.show("Passwords do not match");
-        //         return;
-        //     }
-        //     $C("signUpConfirmPassword").setValueState("Success");
-
-        //     /* ===== 6) Date of Birth + Age Check ===== */
-        //     const oDOB = $C("signUpDOB");
-        //     const dobValue = oDOB.getDateValue();
-
-        //     if (!dobValue) {
-        //         oDOB.setValueState("Error");
-        //         oDOB.setValueStateText("Date of Birth is required");
-        //         return;
-        //     }
-
-        //     // Prevent future dates
-        //     const today = new Date();
-        //     today.setHours(0, 0, 0, 0);
-        //     if (dobValue > today) {
-        //         oDOB.setValueState("Error");
-        //         oDOB.setValueStateText("Future date not allowed");
-        //         sap.m.MessageToast.show("Future date not allowed!");
-        //         return;
-        //     }
-
-        //     // Age calculation
-        //     let age = today.getFullYear() - dobValue.getFullYear();
-        //     const m = today.getMonth() - dobValue.getMonth();
-        //     if (m < 0 || (m === 0 && today.getDate() < dobValue.getDate())) age--;
-
-        //     // Strict age limits: 10–118
-        //     if (age < 10 || age > 118) {
-        //         oDOB.setValueState("Error");
-        //         oDOB.setValueStateText("Age must be between 10 and 118 years");
-        //         sap.m.MessageToast.show("Age must be between 10 and 118 years");
-        //         return;
-        //     }
-
-        //     // Valid age
-        //     oDOB.setValueState("None");
-        //     const DateOfBirth = dobValue.toISOString().split("T")[0];
-
-        //     /* ===== 7) Gender Validation + Dr Rule ===== */
-        //     const sSalutation = $C("signUpSalutation").getSelectedKey();
-        //     const sGender = $C("signUpGender").getSelectedKey();
-
-        //     if (sSalutation === "Dr." && !sGender) {
-        //         $C("signUpGender").setValueState("Error");
-        //         $C("signUpGender").setValueStateText("Please select gender");
-        //         sap.m.MessageToast.show("Please select gender");
-        //         return;
-        //     }
-
-        //     // Strict validation for Mr./Ms./Mrs.
-        //     if (!utils._LCstrictValidationSelect($C("signUpGender"))) return;
-
-        //     // 8) Country → State → City
-        //     if (!utils._LCstrictValidationComboBox($C("signUpCountry"), "ID")) return;
-        //     if (!utils._LCstrictValidationComboBox($C("signUpState"), "ID")) return;
-        //     if (!utils._LCstrictValidationComboBox($C("signUpCity"), "ID")) return;
-
-        //     // 9) Mobile Number (After location – correct UI order)
-        //     if (!utils._LCstrictValidationComboBox($C("signUpSTD"), "ID")) return;
-        //     const sSTD = $C("signUpSTD").getSelectedKey();
-        //     if (!utils._LCvalidateInternationalMobileNumberWithSTD($C("signUpPhone"), sSTD)) return;
-
-        //     // 10) Address
-        //     const addrInput = $C("signUpAddress");
-        //     const addr = addrInput.getValue().trim();
-        //     if (!addr) {
-        //         addrInput.setValueState("Error");
-        //         addrInput.setValueStateText("Address is required");
-        //         return;
-        //     }
-        //     if (addr.length < 8) {
-        //         addrInput.setValueState("Error");
-        //         addrInput.setValueStateText("Address must be at least 8 characters long");
-        //         return;
-        //     }
-
-
-        //     /* ===================== 14) TIMESTAMP ======================== */
-        //     const now = new Date();
-        //     const TimeDate =
-        //         `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")} ` +
-        //         `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}:${String(now.getSeconds()).padStart(2, "0")}`;
-
-        //     /* ===================== 15) FINAL PAYLOAD ==================== */
-        //     const payload = {
-        //         data: {
-        //             Salutation: $C("signUpSalutation").getSelectedKey(),
-        //             UserName: oData.fullname,
-        //             Role: "Customer",
-        //             EmailID: oData.Email,
-        //             Password: btoa(oData.password),
-        //             STDCode: oData.STDCode,
-        //             MobileNo: oData.Mobileno,
-        //             Status: "Active",
-        //             TimeDate,
-        //             DateOfBirth,
-        //             Gender: $C("signUpGender").getSelectedKey(),
-        //             Country: oData.Country,
-        //             State: oData.State,
-        //             City: oData.City,
-        //             Address: oData.Address
-        //         }
-        //     };
-
-        //     try {
-        //         await this.ajaxCreateWithJQuery("HM_Login", payload);
-        //         sap.m.MessageToast.show("Sign Up successful!");
-
-        //         // oModel.setData({
-        //         //     Salutation: "Mr.",
-        //         //     fullname: "",
-        //         //     Email: "",
-        //         //     STDCode: "+91",
-        //         //     Mobileno: "",
-        //         //     password: "",
-        //         //     comfirmpass: "",
-        //         //     UserID: "",
-        //         //     Gender: "",
-        //         //     Country: "",
-        //         //     State: "",
-        //         //     City: "",
-        //         //     Address: "",
-        //         //     DateOfBirth: ""
-        //         // });
-        //         this._resetAuthDialog();
-        //         this._oSignDialog.close();
-
-        //     } catch (err) {
-        //         sap.m.MessageToast.show("Sign Up failed!" + err);
-        //         console.error("SignUp Error:", err);
-        //     }
-        // },
-
-
-
-        onSignUp: async function () {
+        onSignUp: async function() {
 
             const oModel = this.getView().getModel("LoginMode");
             const oData = oModel.getData();
 
             /* ========= CONTROL GETTER ========= */
             const $C = (id) => sap.ui.getCore().byId(id);
-
-            /* =======================================================
-             *                1) IDENTITY VALIDATION
-             * ======================================================= */
 
             // 1) Salutation
             if (!utils._LCstrictValidationComboBox($C("signUpSalutation"), "ID")) return;
@@ -1454,11 +893,6 @@ sap.ui.define([
 
             if (!utils._LCstrictValidationSelect($C("signUpGender"))) return;
 
-
-            /* =======================================================
-             *             2) CONTACT DETAILS VALIDATION
-             * ======================================================= */
-
             // 5) Email
             if (!utils._LCvalidateEmail($C("signUpEmail"), "ID")) return;
 
@@ -1471,11 +905,6 @@ sap.ui.define([
             if (!utils._LCstrictValidationComboBox($C("signUpSTD"), "ID")) return;
             const sSTD = $C("signUpSTD").getSelectedKey();
             if (!utils._LCvalidateInternationalMobileNumberWithSTD($C("signUpPhone"), sSTD)) return;
-
-
-            /* =======================================================
-             *             3) ADDRESS VALIDATION
-             * ======================================================= */
 
             const addrInput = $C("signUpAddress");
             const addr = addrInput.getValue().trim();
@@ -1492,10 +921,6 @@ sap.ui.define([
             }
 
 
-            /* =======================================================
-             *            4) ACCOUNT SECURITY VALIDATION
-             * ======================================================= */
-
             // 8) Create Password
             if (!utils._LCvalidatePassword($C("signUpPassword"), "ID")) return;
 
@@ -1507,11 +932,6 @@ sap.ui.define([
                 return;
             }
             $C("signUpConfirmPassword").setValueState("Success");
-
-
-            /* =======================================================
-             *              5) TIMESTAMP & FINAL PAYLOAD
-             * ======================================================= */
 
             const now = new Date();
             const TimeDate =
@@ -1538,10 +958,6 @@ sap.ui.define([
                 }
             };
 
-
-            /* =======================================================
-             *                      SUBMIT
-             * ======================================================= */
             try {
                 await this.ajaxCreateWithJQuery("HM_Login", payload);
                 sap.m.MessageToast.show("Sign Up successful!");
@@ -1553,11 +969,10 @@ sap.ui.define([
             }
         },
 
-
-        onChangeSalutation: function (oEvent) {
+        onChangeSalutation: function(oEvent) {
             const $C = (id) => sap.ui.getCore().byId(id);
             const oCombo = oEvent.getSource();
-            const sal = oCombo.getValue();           // user typed or selected text
+            const sal = oCombo.getValue(); // user typed or selected text
             const oGender = $C("signUpGender");
 
             // 🔍 Strict Combo Validation (Check must match list)
@@ -1567,30 +982,25 @@ sap.ui.define([
                 oGender.setSelectedKey("");
                 oGender.setEnabled(false);
                 oGender.setValueState("None");
-                return;   // 🔥 stop, don't auto assign!
+                return; // 🔥 stop, don't auto assign!
             }
 
             // 🎯 If valid selection → apply Gender Autoselect Rules
             if (sal === "Mr.") {
                 oGender.setSelectedKey("Male");
                 oGender.setEnabled(false);
-            }
-            else if (sal === "Ms." || sal === "Mrs.") {
+            } else if (sal === "Ms." || sal === "Mrs.") {
                 oGender.setSelectedKey("Female");
                 oGender.setEnabled(false);
-            }
-            else { // Dr.
+            } else { // Dr.
                 oGender.setSelectedKey("");
                 oGender.setEnabled(true);
                 oGender.setValueState("Error");
                 oGender.setValueStateText("Please select gender");
             }
-        },  
+        },
 
-
-     
-
-        onChangeGender: function (oEvent) {
+        onChangeGender: function(oEvent) {
             const oSel = oEvent.getSource();
             const val = oSel.getSelectedKey();
 
@@ -1602,7 +1012,8 @@ sap.ui.define([
                 oSel.setValueStateText("Please select gender");
             }
         },
-        onChangeDOB: function (oEvent) {
+
+        onChangeDOB: function(oEvent) {
             const oDP = oEvent.getSource();
             const dobValue = oDP.getDateValue();
 
@@ -1615,11 +1026,7 @@ sap.ui.define([
             }
         },
 
-
-
-
-
-        onChangeCountry: function (oEvent) {
+        onChangeCountry: function(oEvent) {
             const $C = (id) => sap.ui.getCore().byId(id);
             const oModel = this.getView().getModel("LoginMode");
 
@@ -1634,15 +1041,21 @@ sap.ui.define([
             oCountryCB.setValueState("None"); // Clear previous error
 
             /** RESET CHILD CONTROLS */
-            oModel.setProperty("/State", ""); oStateCB.setValue("");
-            oModel.setProperty("/City", ""); oCityCB.setValue("");
+            oModel.setProperty("/State", "");
+            oStateCB.setValue("");
+            oModel.setProperty("/City", "");
+            oCityCB.setValue("");
 
             oStateCB.getBinding("items")?.filter([]);
             oCityCB.getBinding("items")?.filter([]);
 
             /** RESET PHONE + STD */
-            oPhone.setValue(""); oPhone.setValueState("None"); oPhone.setMaxLength(18);
-            oStdCB.setEnabled(true); oStdCB.setSelectedKey(""); oStdCB.setValueState("None");
+            oPhone.setValue("");
+            oPhone.setValueState("None");
+            oPhone.setMaxLength(18);
+            oStdCB.setEnabled(true);
+            oStdCB.setSelectedKey("");
+            oStdCB.setValueState("None");
 
             /** SET STD FROM COUNTRY LIST */
             const name = oCountryCB.getSelectedKey();
@@ -1660,11 +1073,12 @@ sap.ui.define([
             ]);
         },
 
-        onMobileLivechnage: function (oEvent) {
+        onMobileLivechnage: function(oEvent) {
             const sSTD = sap.ui.getCore().byId("signUpSTD").getSelectedKey() || "";
             utils._LCvalidateInternationalMobileNumberWithSTD(oEvent, sSTD);
         },
-        onAddressChange: function (oEvent) {
+
+        onAddressChange: function(oEvent) {
             const oInput = oEvent.getSource();
             const sValue = oInput.getValue().trim();
 
@@ -1683,7 +1097,8 @@ sap.ui.define([
             oInput.setValueState("None");
             oInput.setValueStateText("");
         },
-        onChangeState: function (oEvent) {
+
+        onChangeState: function(oEvent) {
             const $C = (id) => sap.ui.getCore().byId(id);
             const oModel = this.getView().getModel("LoginMode");
 
@@ -1704,8 +1119,7 @@ sap.ui.define([
             ]);
         },
 
-
-        onChangeCity: function (oEvent) {
+        onChangeCity: function(oEvent) {
             const oCityCB = oEvent.getSource();
             if (!utils._LCstrictValidationComboBox(oCityCB, "ID")) return;
             oCityCB.setValueState("None");
@@ -1714,13 +1128,11 @@ sap.ui.define([
             this.getView().getModel("LoginMode").setProperty("/City", value);
         },
 
-
-
-        _LCvalidateName: function (oEvent) {
+        _LCvalidateName: function(oEvent) {
             utils._LCvalidateName(oEvent);
         },
 
-        FSM_onConfirm: function (oEvent) {
+        FSM_onConfirm: function(oEvent) {
             const oModel = this.getView().getModel("LoginMode");
 
             // Get confirm directly from the control (live accurate value)
@@ -1749,7 +1161,8 @@ sap.ui.define([
             oInput.setValueState("Success");
             oInput.setValueStateText("Passwords matched");
         },
-         onSignIn: async function () {
+
+        onSignIn: async function() {
             var oModel = this.getView().getModel("LoginMode");
             var oData = oModel.getData();
             const oLoginModel = this.getView().getModel("LoginModel");
@@ -1767,7 +1180,11 @@ sap.ui.define([
             }
 
             try {
-                const payload = { UserID: sUserid, UserName: sUsername, Password: btoa(sPassword)};
+                const payload = {
+                    UserID: sUserid,
+                    UserName: sUsername,
+                    Password: btoa(sPassword)
+                };
                 sap.ui.core.BusyIndicator.show(0);
                 const oResponse = await this.ajaxReadWithJQuery("HM_Login", payload);
                 const aUsers = oResponse.data[0] || [];
@@ -1793,11 +1210,8 @@ sap.ui.define([
                 if (aUsers.Role === "Customer") {
                     const oUserModel = new JSONModel(aUsers);
                     sap.ui.getCore().setModel(oUserModel, "LoginModel");
-                  this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", true);
-
-
-
-                } else if (aUsers.Role === "Admin" ||aUsers.Role === "Employee") {
+                    this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", true);
+                } else if (aUsers.Role === "Admin" || aUsers.Role === "Employee") {
                     this.getOwnerComponent().getRouter().navTo("TilePage");
                 } else {
                     sap.m.MessageToast.show("Invalid credentials. Please try again.");
@@ -1810,7 +1224,7 @@ sap.ui.define([
             }
         },
 
-        onPressAvatar: async function () {
+        onPressAvatar: async function() {
             const oUser = this._oLoggedInUser || {};
             const sPhoto = "./image.jpg";
 
@@ -1824,7 +1238,7 @@ sap.ui.define([
                     UserID: sUserID
                 };
                 //  Fetch only the logged-in user's data
-                 sap.ui.core.BusyIndicator.show(0);
+                sap.ui.core.BusyIndicator.show(0);
                 const response = await this.ajaxReadWithJQuery("HM_Customer", filter);
                 // Handle correct structure
                 const aCustomers = response?.commentData || response?.Customers || response?.value || [];
@@ -1849,8 +1263,7 @@ sap.ui.define([
                     gender: response.Gender,
                     Address: response.PermanentAddress
 
-                })
-                );
+                }));
                 // Combine all bookings from all customers
                 const aAllBookings = aCustomers.flatMap(customer =>
                     Array.isArray(customer.Bookings) ? customer.Bookings : []
@@ -1863,7 +1276,7 @@ sap.ui.define([
                     sap.m.MessageToast.show("No booking history found.");
                 }
 
-               const today = new Date();
+                const today = new Date();
                 today.setHours(0, 0, 0, 0); // avoid timezone issues
                 const aBookingData = aAllBookings.map(booking => {
                     const oStart = booking.StartDate ? new Date(booking.StartDate) : null;
@@ -1881,14 +1294,14 @@ sap.ui.define([
                         }
                     }
                     const customer = aCustomers.find(c => c.CustomerID === booking.CustomerID);
-                         const sSalutation = customer?.Salutation || "";
-    const sFullName = customer?.CustomerName || "N/A";
+                    const sSalutation = customer?.Salutation || "";
+                    const sFullName = customer?.CustomerName || "N/A";
                     return {
-                        salutation: sSalutation,                // ✔ Add salutation
-        customerName: `${sSalutation} ${sFullName}`.trim(),
+                        salutation: sSalutation, // ✔ Add salutation
+                        customerName: `${sSalutation} ${sFullName}`.trim(),
                         Startdate: oStart ? oStart.toLocaleDateString("en-GB") : "N/A",
-                        EndDate: booking.EndDate
-                            ? new Date(booking.EndDate).toLocaleDateString("en-GB") : "N/A",
+                        EndDate: booking.EndDate ?
+                            new Date(booking.EndDate).toLocaleDateString("en-GB") : "N/A",
                         room: booking.BedType || "N/A",
                         amount: booking.RentPrice || "N/A",
                         status: booking.Status || "N/A",
@@ -1931,7 +1344,7 @@ sap.ui.define([
                     phone: oUser.MobileNo || "",
                     dob: this.Formatter.DateFormat(oUser.DateOfBirth) || "",
                     gender: oUser.Gender || "",
-                    address : oUser.Address || "",
+                    address: oUser.Address || "",
                     bookings: aBookingData,
                     facility: aFacilitiData,
                     aCustomers: aCustomerDetails
@@ -1948,16 +1361,17 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide();
             }
         },
-        onProfileclose: function () {
+
+        onProfileclose: function() {
             // Close the dialog and perform logout logic
             if (this._oProfileDialog) this._oProfileDialog.close();
         },
 
-        onEditProfilePic: function () {
+        onEditProfilePic: function() {
             sap.m.MessageToast.show("Profile picture edit not implemented yet.");
         },
 
-        onProfileDialogClose: function () {
+        onProfileDialogClose: function() {
             const oLoginModel = sap.ui.getCore().getModel("LoginModel");
             if (oLoginModel) {
                 oLoginModel.setData({
@@ -1981,7 +1395,7 @@ sap.ui.define([
             this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", false);
         },
 
-        Bookfragment: function () {
+        Bookfragment: function() {
             if (!this.FCIA_Dialog) {
                 var oView = this.getView();
                 this.FCIA_Dialog = sap.ui.xmlfragment("sap.ui.com.project1.fragment.Book_Room", this);
@@ -1994,7 +1408,7 @@ sap.ui.define([
             }
         },
 
-        onRoomBookPress: function (oEvent) {
+        onRoomBookPress: function(oEvent) {
             this.getOwnerComponent().getRouter().navTo("TilePage")
             // try {
             //     // Get the clicked button and its custom data
@@ -2049,16 +1463,16 @@ sap.ui.define([
             // }
         },
 
-
-
-        onCancelDialog: function () {
+        onCancelDialog: function() {
             this.FCIA_Dialog.close();
         },
-        onAdminPress: function () {
+        
+        onAdminPress: function() {
             var oRouter = sap.ui.core.UIComponent.getRouterFor(this);
             oRouter.navTo("RouteStudentDetails");
         },
-        onWizardNext: function () {
+
+        onWizardNext: function() {
             const oDialog = this.FCIA_Dialog;
             const oWizard = sap.ui.getCore().byId("idHostelWizard");
             const oNextButton = sap.ui.getCore().byId("idWizardNextBtn");
@@ -2084,14 +1498,11 @@ sap.ui.define([
             oBackButton.setEnabled(true);
         },
 
-        onWizardBack: function () {
-
+        onWizardBack: function() {
             const oWizard = sap.ui.getCore().byId("idHostelWizard");
             const oNextButton = sap.ui.getCore().byId("idWizardNextBtn");
             const oBackButton = sap.ui.getCore().byId("idWizardBackBtn");
             const oSubmitButton = sap.ui.getCore().byId("idWizardSubmitBtn");
-
-
             oWizard.previousStep();
 
             const aSteps = oWizard.getSteps();
@@ -2103,16 +1514,16 @@ sap.ui.define([
             oSubmitButton.setVisible(false);
         },
 
-        onWizardComplete: function () {
+        onWizardComplete: function() {
             MessageToast.show("Wizard completed successfully!");
         },
 
-        onCancelDialog: function () {
+        onCancelDialog: function() {
             this.FCIA_Dialog.close();
             sap.ui.getCore().byId("idHostelWizardDialog").close();
         },
 
-        onDoubleRoomPress: function (oEvent) {
+        onDoubleRoomPress: function(oEvent) {
 
             // var oRouter = this.getOwnerComponent().getRouter();
             // oRouter.navTo("TilePage");
@@ -2135,7 +1546,7 @@ sap.ui.define([
 
         },
 
-        SectionPress: function (oEvent) {
+        SectionPress: function(oEvent) {
             var oSelectedItem = oEvent.getParameter("listItem");
             if (!oSelectedItem) return;
 
@@ -2160,7 +1571,7 @@ sap.ui.define([
             }
         },
 
-        onSearchChange: function (oEvent) {
+        onSearchChange: function(oEvent) {
             var sBranchCode = oEvent.getParameter("value").trim();
             if (!sBranchCode) {
                 sap.m.MessageToast.show("Please enter a location to search.");
@@ -2169,7 +1580,8 @@ sap.ui.define([
             // Call your function with new search value
             this._loadFilteredData(sBranchCode);
         },
-        FC_onPressClear: function () {
+
+        FC_onPressClear: function() {
             const oView = this.getView();
             const oBranchCombo = oView.byId("id_Branch");
             const oAreaTypeCombo = oView.byId("id_Area");
@@ -2185,71 +1597,7 @@ sap.ui.define([
             if (oRoomTypeCombo) oRoomTypeCombo.setEnabled(true);
         },
 
-        // onAfterRendering: function () {
-        //     setTimeout(() => {
-        //         this._startCarouselAutoSlide();
-        //     }, 500);
-        // },
-
-        // _startCarouselAutoSlide: function () {
-        //     const oView = this.getView();
-
-        //     // Find all Carousel controls rendered in the view
-        //     const aCarousels = oView.findAggregatedObjects(true, control => control.isA("sap.m.Carousel"));
-
-        //     aCarousels.forEach(carousel => {
-        //         let currentIndex = 0;
-
-        //         // Clear existing timers to avoid duplicates
-        //         if (carousel._autoSlideInterval) {
-        //             clearInterval(carousel._autoSlideInterval);
-        //         }
-
-        //         const iSlideCount = carousel.getPages().length;
-        //         if (iSlideCount <= 1) return; // Skip if only one image
-
-        //         // Start auto-slide
-        //         carousel._autoSlideInterval = setInterval(() => {
-        //             if (!carousel || carousel.bIsDestroyed) return;
-
-        //             currentIndex = (currentIndex + 1) % iSlideCount;
-        //             carousel.setActivePage(carousel.getPages()[currentIndex]);
-        //         }, 3000);
-        //     });
-        // },
-        // onAfterRendering: function () {
-        //     const oView = this.getView();
-        //     const aCarousels = oView.findAggregatedObjects(true, c => c.isA("sap.m.Carousel"));
-
-        //     aCarousels.forEach(carousel => {
-        //         const oBinding = carousel.getBinding("pages");
-        //         if (oBinding) {
-        //             // When data arrives and pages are created
-        //             oBinding.attachEventOnce("dataReceived", () => {
-        //                 setTimeout(() => this._startAllCarouselsAutoSlide(3000), 200);
-        //             });
-
-        //             // Also run if pages already available (local data, static, cached)
-        //             setTimeout(() => this._startAllCarouselsAutoSlide(3000), 200);
-        //         }
-        //     });
-        // },
-
-
-
-
-        // onExit: function () {
-        //     // Clear all intervals when leaving view
-        //     const oView = this.getView();
-        //     const aCarousels = oView.findAggregatedObjects(true, c => c.isA("sap.m.Carousel"));
-        //     aCarousels.forEach(c => {
-        //         if (c._autoSlideInterval) {
-        //             clearInterval(c._autoSlideInterval);
-        //         }
-        //     });
-        // },
-        onPressBookingRow: function (oEvent) {
-
+        onPressBookingRow: function(oEvent) {
             var oContext = oEvent.getSource().getBindingContext("profileData");
             var oBookingData = oContext.getObject();
 
@@ -2282,7 +1630,12 @@ sap.ui.define([
 
             // Calculate totals
             var oTotals = this.calculateTotals(
-                [{ FullName: oCustomer.customerName, Facilities: { SelectedFacilities: aCustomerFacilities } }],
+                [{
+                    FullName: oCustomer.customerName,
+                    Facilities: {
+                        SelectedFacilities: aCustomerFacilities
+                    }
+                }],
                 oBookingData.Startdate,
                 oBookingData.EndDate,
                 oBookingData.RoomPrice
@@ -2323,11 +1676,10 @@ sap.ui.define([
 
             // Navigate
             this.getOwnerComponent().getRouter().navTo("EditBookingDetails");
-        }
-        ,
+        },
 
-        // 🧮 Separated calculation function
-        calculateTotals: function (aPersons, sStartDate, sEndDate, RoomPrice) {
+        //  Separated calculation function
+        calculateTotals: function(aPersons, sStartDate, sEndDate, RoomPrice) {
             const oStartDate = this._parseDate(sStartDate);
             const oEndDate = this._parseDate(sEndDate);
 
@@ -2381,11 +1733,10 @@ sap.ui.define([
                 GrandTotal: grandTotal,
                 AllSelectedFacilities: aAllFacilities
             };
-        }
-        ,
+        },
 
         // 🗓️ Helper date parser
-        _parseDate: function (sDate) {
+        _parseDate: function(sDate) {
             if (!sDate) return null;
 
             // If it's already a Date object
@@ -2402,7 +1753,7 @@ sap.ui.define([
             }
         },
 
-        onBranchSelectionChange: function (oEvent) {
+        onBranchSelectionChange: function(oEvent) {
             const oView = this.getView();
             const oAreaCombo = oView.byId("id_Area");
             const oRoomType = oView.byId("id_Roomtype");
@@ -2421,7 +1772,7 @@ sap.ui.define([
             const oModelData = oView.getModel("sBRModel").getData();
 
             // 🔹 Filter the data for the selected branch name
-            const aFiltered = oModelData.filter(function (item) {
+            const aFiltered = oModelData.filter(function(item) {
                 return item.City === sSelectedBranch;
             });
 
@@ -2433,9 +1784,8 @@ sap.ui.define([
             oAreaCombo.setEnabled(true);
         },
 
-
         // 🔹 When Area is selected, enable Room Type combo
-        onAreaSelectionChange: function (oEvent) {
+        onAreaSelectionChange: function(oEvent) {
             utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
 
             const oRoomType = this.byId("id_Roomtype");
@@ -2448,13 +1798,13 @@ sap.ui.define([
             }
         },
 
-        onSearchRooms: async function () {
+        onSearchRooms: async function() {
             const oContainer = this.byId("idBedTypeFlex");
             oContainer.setBusy(true);
 
             // City
-            var oBranchcity = this.byId("id_Branch").getSelectedKey()
-                || this.byId("id_Branch").getValue();
+            var oBranchcity = this.byId("id_Branch").getSelectedKey() ||
+                this.byId("id_Branch").getValue();
 
             if (!oBranchcity) {
                 MessageToast.show("Please Select City");
@@ -2498,7 +1848,7 @@ sap.ui.define([
             }
         },
 
-        _loadFilteredData: async function (Scity, sBranchCode, sACType) {
+        _loadFilteredData: async function(Scity, sBranchCode, sACType) {
 
             if (sACType === "All") {
                 sACType = "";
@@ -2525,13 +1875,9 @@ sap.ui.define([
 
                     aBranchCodes = (Array.isArray(aBranches.data) ? aBranches.data : [aBranches.data])
                         .map(branch => branch.BranchID);
-                }
-
-                else if (Scity && sBranchCode) {
+                } else if (Scity && sBranchCode) {
                     aBranchCodes = [sBranchCode];
-                }
-
-                else if (!Scity && sBranchCode) {
+                } else if (!Scity && sBranchCode) {
                     aBranchCodes = [sBranchCode];
                 }
 
@@ -2551,14 +1897,14 @@ sap.ui.define([
                 if (sBranchCode && sBranchCode.trim() !== "") {
                     matchedRooms = matchedRooms.filter(
                         room =>
-                            room.BranchCode?.toLowerCase() === sBranchCode.toLowerCase()
+                        room.BranchCode?.toLowerCase() === sBranchCode.toLowerCase()
                     );
                 } else {
                     matchedRooms = matchedRooms.filter(
                         room =>
-                            aBranchCodes
-                                .map(code => code.toLowerCase())
-                                .includes(room.BranchCode?.toLowerCase())
+                        aBranchCodes
+                        .map(code => code.toLowerCase())
+                        .includes(room.BranchCode?.toLowerCase())
                     );
                 }
 
@@ -2580,7 +1926,7 @@ sap.ui.define([
                             const decoded = atob(sBase64);
                             if (decoded.startsWith("iVB")) sBase64 = decoded;
                         }
-                    } catch (e) { }
+                    } catch (e) {}
 
                     const mimeType = fileType || "image/jpeg";
                     if (sBase64.startsWith("data:image")) return sBase64;
@@ -2590,11 +1936,11 @@ sap.ui.define([
                 const aBedTypes = matchedRooms.map(room => {
                     const matchingRooms = roomDetails.filter(
                         rd =>
-                            rd.BranchCode?.toLowerCase() === room.BranchCode?.toLowerCase() &&
-                            rd.BedTypeName?.trim().toLowerCase() ===
-                            (room.Name?.trim().toLowerCase() +
-                                " - " +
-                                room.ACType?.trim().toLowerCase())
+                        rd.BranchCode?.toLowerCase() === room.BranchCode?.toLowerCase() &&
+                        rd.BedTypeName?.trim().toLowerCase() ===
+                        (room.Name?.trim().toLowerCase() +
+                            " - " +
+                            room.ACType?.trim().toLowerCase())
                     );
 
                     const firstRoom = matchingRooms[0];
@@ -2655,7 +2001,9 @@ sap.ui.define([
                 });
 
 
-                oView.setModel(new sap.ui.model.json.JSONModel({ BedTypes: aBedTypes }),
+                oView.setModel(new sap.ui.model.json.JSONModel({
+                        BedTypes: aBedTypes
+                    }),
                     "VisibilityModel");
                 oView.getModel("VisibilityModel").setProperty("/NoData", false);
             } catch (err) {
@@ -2665,14 +2013,11 @@ sap.ui.define([
         },
 
 
-        onBookNow: function (oEvent) {
+        onBookNow: function(oEvent) {
 
             // Get selected bed type object
             const oItem = oEvent.getSource().getBindingContext("VisibilityModel").getObject();
 
-            // sap.m.MessageToast.show(`Booking started for ${oItem.Name}`);
-
-            //  Get or create the HostelModel
             let oHostelModel = sap.ui.getCore().getModel("HostelModel");
             if (!oHostelModel) {
                 oHostelModel = new sap.ui.model.json.JSONModel({});
@@ -2696,7 +2041,7 @@ sap.ui.define([
             oRouter.navTo("RouteBookRoom");
         },
 
-        onFormEdit: async function () {
+        onFormEdit: async function() {
             var oSaveModel = this.getView().getModel("saveModel");
             var oedit = oSaveModel.getProperty("/isEditMode");
             var oEdit = this._oProfileDialog.getModel("profileData").getData();
@@ -2714,34 +2059,25 @@ sap.ui.define([
                 UserID: ID
             };
             try {
-                await this.ajaxUpdateWithJQuery("HM_Login", { data: oPayload, filters: filter });
+                await this.ajaxUpdateWithJQuery("HM_Login", {
+                    data: oPayload,
+                    filters: filter
+                });
                 sap.m.MessageToast.show("Data Saved successfully ");
                 oSaveModel.setProperty("/isEditMode", false);
-            }
-            catch (error) {
+            } catch (error) {
                 sap.m.MessageToast.show("Failed");
             }
         },
-        OnpressBookingDetails: function () {
+        OnpressBookingDetails: function() {
 
         },
 
-
-        // onFPValidate: function () {
-        //     const id = $V("fpUserId");
-        //     const name = $V("fpUserName");
-        //     $C("btnFPNext").setEnabled(id !== "" && name !== "");
-        // },
-
-        onOtpLive: function (oEvt) {
+        onOtpLive: function(oEvt) {
             $C("btnOtpVerify").setEnabled(oEvt.getParameter("value").trim() !== "");
         },
 
-
-
-
-
-        onBackToForgot: function () {
+        onBackToForgot: function() {
             this._showPanel("forgotPasswordPanel");
         },
 
@@ -2770,7 +2106,8 @@ sap.ui.define([
         //     }
         //     this._oForgotDialog.open();
         // },
-        _validateFPFields: function () {
+
+        _validateFPFields: function() {
             let id = sap.ui.getCore().byId("fpUserId").getValue();
             let name = sap.ui.getCore().byId("fpUserName").getValue();
             let btn = this._oForgotDialog.getBeginButton();
@@ -2778,13 +2115,14 @@ sap.ui.define([
             btn.setEnabled(id !== "" && name !== "");
         },
 
-        onSelectLoginMode: function () {
+        onSelectLoginMode: function() {
             const vm = this.getView().getModel("LoginViewModel");
             const pass = vm.getProperty("/isPasswordSelected");
             vm.setProperty("/isOtpSelected", !pass);
             vm.setProperty("/isPasswordSelected", !vm.getProperty("/isOtpSelected"));
         },
-        _clearAllAuthFields: function () {
+
+        _clearAllAuthFields: function() {
             const ids = [
                 "signInuserid", "signInusername", "signinPassword",
                 "fpUserId", "fpUserName", "fpOTP",
@@ -2792,25 +2130,26 @@ sap.ui.define([
             ];
             ids.forEach(id => {
                 const c = sap.ui.getCore().byId(id);
-                if (c) { c.setValue(""); c.setValueState("None"); }
+                if (c) {
+                    c.setValue("");
+                    c.setValueState("None");
+                }
             });
             this._storedLoginCreds = null;
             this._oResetUser = null;
         },
-        onFPValidate: function () {
+        onFPValidate: function() {
             const id = sap.ui.getCore().byId("fpUserId").getValue().trim();
             const name = sap.ui.getCore().byId("fpUserName").getValue().trim();
             sap.ui.getCore().byId("btnFPNext").setEnabled(id !== "" && name !== "");
         },
 
-        onOtpLive: function (e) {
+        onOtpLive: function(e) {
             const v = e.getParameter("value").trim();
             sap.ui.getCore().byId("btnOtpVerify").setEnabled(v !== "");
         },
 
-
-
-        _sendOTPToBackend: function (id, name) {
+        _sendOTPToBackend: function(id, name) {
             let url = "https://rest.kalpavrikshatechnologies.com/HostelSendOTP";
 
             let payload = {
@@ -2823,30 +2162,34 @@ sap.ui.define([
                 url: url,
                 method: "POST",
                 contentType: "application/json",
-                headers: {                 // as provided
+                headers: { // as provided
                     name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
                     password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
                 },
                 data: JSON.stringify(payload),
-                success: function () {
+                success: function() {
                     sap.m.MessageToast.show("OTP sent to email");
                     this._oForgotDialog.close();
                     this._openOTPDialog(id, name);
                 }.bind(this),
-                error: function () {
+                error: function() {
                     sap.m.MessageToast.show("Failed to send OTP");
                 }
             });
         },
 
-
-        _openOTPDialog: function () {
+        _openOTPDialog: function() {
             this._oOTPDialog = new sap.m.Dialog({
                 title: "Enter OTP",
                 type: "Message",
                 content: [
-                    new sap.m.Label({ text: "OTP", required: true }),
-                    new sap.m.Input("fpOTP", { placeholder: "Enter OTP" })
+                    new sap.m.Label({
+                        text: "OTP",
+                        required: true
+                    }),
+                    new sap.m.Input("fpOTP", {
+                        placeholder: "Enter OTP"
+                    })
                 ],
                 beginButton: new sap.m.Button({
                     text: "Verify",
@@ -2855,28 +2198,28 @@ sap.ui.define([
                 }),
                 endButton: new sap.m.Button({
                     text: "Cancel",
-                    press: function () { this._oOTPDialog.close(); }.bind(this)
+                    press: function() {
+                        this._oOTPDialog.close();
+                    }.bind(this)
                 })
             });
             let btn = this._oOTPDialog.getBeginButton();
             btn.setEnabled(false);
 
-            sap.ui.getCore().byId("fpOTP").attachLiveChange(function (oEvt) {
+            sap.ui.getCore().byId("fpOTP").attachLiveChange(function(oEvt) {
                 btn.setEnabled(oEvt.getParameter("value").trim() !== "");
             });
 
 
             this._oOTPDialog.open();
         },
-        _showPanel: function (panelId) {
+
+        _showPanel: function(panelId) {
             ["signInPanel", "forgotPasswordPanel", "otpVerifyPanel", "resetPasswordPanel"].forEach(id => {
                 const c = sap.ui.getCore().byId(id);
                 if (c) c.setVisible(id === panelId);
             });
         },
-
-
-
 
         // _openResetPasswordDialog: function () {
         //     this._oResetDialog = new sap.m.Dialog({
@@ -2910,16 +2253,19 @@ sap.ui.define([
         //     this._oResetDialog.open();
         // },
 
-        _clearForgotFlow: function () {
+        _clearForgotFlow: function() {
             ["fpUserId", "fpUserName", "fpOTP", "newPass", "confPass"].forEach(id => {
                 const c = sap.ui.getCore().byId(id);
-                if (c) { c.setValue(""); c.setValueState("None"); }
+                if (c) {
+                    c.setValue("");
+                    c.setValueState("None");
+                }
             });
             this._oResetUser = null;
         },
 
 
-        onSubmitNewPassword: async function () {
+        onSubmitNewPassword: async function() {
             let pass = sap.ui.getCore().byId("newPass").getValue().trim();
             let confirm = sap.ui.getCore().byId("confPass").getValue().trim();
 
@@ -2930,8 +2276,12 @@ sap.ui.define([
 
             try {
                 await this.ajaxUpdateWithJQuery("HM_Login", {
-                    data: { Password: btoa(pass) },
-                    filters: { UserID: this._oResetUser.UserID }
+                    data: {
+                        Password: btoa(pass)
+                    },
+                    filters: {
+                        UserID: this._oResetUser.UserID
+                    }
                 });
 
                 sap.m.MessageToast.show("Password Updated Successfully");
@@ -2946,22 +2296,27 @@ sap.ui.define([
         },
 
 
-        _resetAllAuthFields: function () {
+        _resetAllAuthFields: function() {
             ["signInuserid", "signInusername", "signinPassword",
-                "fpUserId", "fpUserName", "fpOTP", "newPass", "confPass", "loginOTP"]
-                .forEach(id => {
-                    let o = sap.ui.getCore().byId(id);
-                    if (o) o.setValue("");
-                });
+                "fpUserId", "fpUserName", "fpOTP", "newPass", "confPass", "loginOTP"
+            ]
+            .forEach(id => {
+                let o = sap.ui.getCore().byId(id);
+                if (o) o.setValue("");
+            });
         },
 
 
 
-        onValidateUser: async function () {
+        onValidateUser: async function() {
             let sUserId = sap.ui.getCore().byId("fpUserId").getValue().trim();
             let sUserName = sap.ui.getCore().byId("fpUserName").getValue().trim();
 
-            const payload = { UserID: sUserId, UserName: sUserName, Type: "OTP" };
+            const payload = {
+                UserID: sUserId,
+                UserName: sUserName,
+                Type: "OTP"
+            };
 
             sap.ui.core.BusyIndicator.show(0);
             try {
@@ -2977,7 +2332,10 @@ sap.ui.define([
                 });
 
                 if (oResp?.success) {
-                    this._oResetUser = { UserID: sUserId, UserName: sUserName };
+                    this._oResetUser = {
+                        UserID: sUserId,
+                        UserName: sUserName
+                    };
 
                     // 👇 MUST stay “forgot” until OTP verified
                     this.getView().getModel("LoginViewModel").setProperty("/authFlow", "forgot");
@@ -2993,7 +2351,7 @@ sap.ui.define([
             }
         },
 
-        _verifyOTPWithBackend: async function (otp) {
+        _verifyOTPWithBackend: async function(otp) {
             sap.ui.core.BusyIndicator.show(0);
             console.log("OTP SENT FOR VERIFICATION:", otp.trim());
 
@@ -3026,18 +2384,7 @@ sap.ui.define([
             }
         },
 
-
-
-
-
-
-
-
-
-
-
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        onPressOTP: async function () {
+        onPressOTP: async function() {
             const sUserId = sap.ui.getCore().byId("signInuserid").getValue().trim();
             const sUserName = sap.ui.getCore().byId("signInusername").getValue().trim();
 
@@ -3070,7 +2417,10 @@ sap.ui.define([
                 if (oResp?.success) {
                     sap.m.MessageToast.show("OTP sent! Check your email.");
                     // this._openOTPLoginDialog(sUserId, sUserName);
-                    this._oResetUser = { UserID: sUserId, UserName: sUserName };
+                    this._oResetUser = {
+                        UserID: sUserId,
+                        UserName: sUserName
+                    };
                     this.getView().getModel("LoginViewModel").setProperty("/authFlow", "otp");
                     this._showPanel("otpVerifyPanel");
 
@@ -3139,15 +2489,21 @@ sap.ui.define([
         //     }
         // },
 
-        _onVerifyOTP: async function () {
+        _onVerifyOTP: async function() {
             const otp = sap.ui.getCore().byId("fpOTP").getValue().trim();
-            if (!otp) { sap.m.MessageToast.show("Enter OTP"); return; }
+            if (!otp) {
+                sap.m.MessageToast.show("Enter OTP");
+                return;
+            }
 
             const vm = this.getView().getModel("LoginViewModel");
             const flow = vm.getProperty("/authFlow");
 
             const isValid = await this._verifyOTPWithBackend(otp);
-            if (!isValid) { sap.m.MessageToast.show("Incorrect OTP"); return; }
+            if (!isValid) {
+                sap.m.MessageToast.show("Incorrect OTP");
+                return;
+            }
 
             // 👉 CASE 1: Forgot Password → Go to Reset Panel
             if (flow === "forgot") {
@@ -3181,7 +2537,7 @@ sap.ui.define([
             }
         },
 
-        onForgotPassword: function () {
+        onForgotPassword: function() {
             this.getView().getModel("LoginViewModel").setProperty("/authFlow", "forgot");
             this._showPanel("forgotPasswordPanel");
             this._clearAllAuthFields();
@@ -3190,20 +2546,23 @@ sap.ui.define([
 
 
 
-
-        onBackToLogin: function () {
+        onBackToLogin: function() {
             this._clearAllAuthFields();
             this.getView().getModel("LoginViewModel").setProperty("/authFlow", "signin");
             this._showPanel("signInPanel");
         },
 
 
-        _openOTPLoginDialog: function (id, name) {
+        _openOTPLoginDialog: function(id, name) {
             this._oLoginOTPDialog = new sap.m.Dialog({
                 title: "Enter OTP to Login",
                 content: [
-                    new sap.m.Label({ text: "OTP" }),
-                    new sap.m.Input("loginOTP", { placeholder: "Enter OTP" })
+                    new sap.m.Label({
+                        text: "OTP"
+                    }),
+                    new sap.m.Input("loginOTP", {
+                        placeholder: "Enter OTP"
+                    })
                 ],
                 beginButton: new sap.m.Button({
                     text: "Login",
@@ -3216,7 +2575,10 @@ sap.ui.define([
                 })
             });
 
-            this._storedLoginCreds = { UserID: id, UserName: name };
+            this._storedLoginCreds = {
+                UserID: id,
+                UserName: name
+            };
             sap.ui.getCore().byId("loginOTP").attachLiveChange((oEvt) => {
                 this._oLoginOTPDialog.getBeginButton().setEnabled(oEvt.getParameter("value").trim() !== "");
             });
@@ -3224,7 +2586,7 @@ sap.ui.define([
             this._oLoginOTPDialog.open();
         },
 
-        _verifyLoginOTP: async function () {
+        _verifyLoginOTP: async function() {
             const otp = sap.ui.getCore().byId("loginOTP").getValue().trim();
 
             sap.ui.core.BusyIndicator.show(0);
@@ -3260,7 +2622,7 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide();
             }
         },
-        _setLoggedInUser: function (user) {
+        _setLoggedInUser: function(user) {
             const oLoginModel = this.getView().getModel("LoginModel");
 
             oLoginModel.setProperty("/EmployeeID", user.UserID);
@@ -3283,4 +2645,3 @@ sap.ui.define([
 
     });
 });
-
