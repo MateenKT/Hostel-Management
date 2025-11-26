@@ -393,6 +393,10 @@ sap.ui.define([
             sap.ui.getCore().byId("editStartTime").setVisible(false)
             sap.ui.getCore().byId("editEndTime").setVisible(false)
             sap.ui.getCore().byId("editHours").setVisible(false)
+            sap.ui.getCore().byId("idMonthYearSelect").setSelectedKey("1")
+
+            this._editIndex=undefined;
+
 
         },
         onEditDialogClose: function () {
@@ -559,6 +563,15 @@ sap.ui.define([
             var oCustomerData = oCustomerModel.getData();
             var oPayload = this.getView().getModel("edit").getData();
 
+            if(oPayload.UnitText==="Per Month"){
+            var Month = sap.ui.getCore().byId("idMonthYearSelect").getSelectedKey();
+            oPayload.TotalHour=Month || "1";
+            }else if(oPayload.UnitText==="Per Year"){
+            var Month = sap.ui.getCore().byId("idMonthYearSelect").getSelectedKey();
+            oPayload.TotalHour= Month || "1";
+              }
+
+
             if (
                 utils._LCstrictValidationComboBox(sap.ui.getCore().byId("editFacilityName"), "ID") &&
                 // utils._LCstrictValidationComboBox(oView.byId("idBedType"), "ID") &&
@@ -597,7 +610,7 @@ sap.ui.define([
                 var iDays = Number(oPayload.TotalDays) || 0;
                 var iHours = Number(oPayload.TotalHour) || 0;   // ← NEW for Per Hour
                 var finalPrice = 0;
-                const iCount = this.iCount || 1;
+                const iCount = oPayload.TotalHour || 1;
 
                 // CALCULATE PRICE BASED ON UNIT
                 if (oPayload.UnitText === "Per Day") {
@@ -864,6 +877,8 @@ sap.ui.define([
                 oView.addDependent(this.HM_Dialog);
             }
             sap.ui.getCore().byId("idUnitType").setVisible(true)
+
+            
             this.HM_Dialog.open();
 
         },
