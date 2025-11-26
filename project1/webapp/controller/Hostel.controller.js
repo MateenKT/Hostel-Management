@@ -2448,7 +2448,6 @@ sap.ui.define([
         },
 
 
-
         onValidateUser: async function () {
             const oIdCtrl = sap.ui.getCore().byId("fpUserId");
             const oNameCtrl = sap.ui.getCore().byId("fpUserName");
@@ -2501,6 +2500,24 @@ sap.ui.define([
                     // Enable only OTP input, disable verify until typing starts
                     sap.ui.getCore().byId("fpOTP").setEnabled(true);
                     sap.ui.getCore().byId("btnOtpVerify").setEnabled(false);
+                    sap.ui.getCore().byId("fpStepOtp").setVisible(true);
+
+                    /////
+                    sap.ui.getCore().byId("fpStepOtp").setVisible(true);
+
+                    // disable Step 1 inputs & button
+                    sap.ui.getCore().byId("fpUserId").setEnabled(false);
+                    sap.ui.getCore().byId("fpUserName").setEnabled(false);
+                    sap.ui.getCore().byId("btnFPNext").setEnabled(false);
+
+                    // enable Step 2
+                    sap.ui.getCore().byId("fpOTP").setEnabled(true);
+                    sap.ui.getCore().byId("btnOtpVerify").setEnabled(true);
+
+                    // show Back to Login (only here & step-1)
+                    sap.ui.getCore().byId("forgotFlowPanel").$().find("button[text='Back to Login']").show();
+                    //////
+
 
                 } else {
                     sap.m.MessageToast.show("No user found with given ID / Name");
@@ -2511,7 +2528,6 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide();
             }
         },
-
 
         _showForgotSection: function (section) {
             ["secForgotUser", "secForgotOTP", "secForgotReset"].forEach(id => {
@@ -2585,6 +2601,8 @@ sap.ui.define([
 
 
 
+
+
         _onVerifyOTP: async function () {
 
             const vm = this.getView().getModel("LoginViewModel");
@@ -2615,6 +2633,30 @@ sap.ui.define([
                 sap.ui.getCore().byId("newPass").setEnabled(true).setValueState("None");
                 sap.ui.getCore().byId("confPass").setEnabled(true).setValueState("None");
                 sap.ui.getCore().byId("btnUpdatePass").setEnabled(true);
+                sap.ui.getCore().byId("fpStepReset").setVisible(true);
+                // 👉 Place it ONLY here, AFTER UI enabled and visible
+                ////// this._enableForgotStep("fpStepReset");
+
+                // show Step 3
+                sap.ui.getCore().byId("fpStepReset").setVisible(true);
+
+                // disable Step 1 & Step 2 completely
+                sap.ui.getCore().byId("fpOTP").setEnabled(false);
+                sap.ui.getCore().byId("btnOtpVerify").setEnabled(false);
+
+                sap.ui.getCore().byId("fpUserId").setEnabled(false);
+                sap.ui.getCore().byId("fpUserName").setEnabled(false);
+                sap.ui.getCore().byId("btnFPNext").setEnabled(false);
+
+                // enable Step 3
+                sap.ui.getCore().byId("newPass").setEnabled(true);
+                sap.ui.getCore().byId("confPass").setEnabled(true);
+                sap.ui.getCore().byId("btnUpdatePass").setEnabled(true);
+
+                // HIDE Back to Login in Step-3
+                sap.ui.getCore().byId("forgotFlowPanel").$().find("button[text='Back to Login']").hide();
+
+                ///////////
 
                 return;
             }
@@ -2652,14 +2694,40 @@ sap.ui.define([
 
 
 
-
-
         onBackToLogin: function () {
+
+            // Clear fields + internal vars
             this._clearAllAuthFields();
+
+            ////
+            // reset UI values
+            sap.ui.getCore().byId("fpUserId").setValue("");
+            sap.ui.getCore().byId("fpUserName").setValue("");
+            sap.ui.getCore().byId("fpOTP").setValue("");
+            sap.ui.getCore().byId("newPass").setValue("");
+            sap.ui.getCore().byId("confPass").setValue("");
+
+            // hide Step 2 and Step 3 completely
+            sap.ui.getCore().byId("fpStepOtp").setVisible(false);
+            sap.ui.getCore().byId("fpStepReset").setVisible(false);
+
+            // re-enable Step 1
+            sap.ui.getCore().byId("fpUserId").setEnabled(true);
+            sap.ui.getCore().byId("fpUserName").setEnabled(true);
+            sap.ui.getCore().byId("btnFPNext").setEnabled(false); // disabled until valid
+
+
+
+            // Switch VM flow
             const vm = this.getView().getModel("LoginViewModel");
             vm.setProperty("/authFlow", "signin");
+
+            // Show Sign-In panel
             this._showPanel("signInPanel");
         },
+
+
+
 
         _openOTPLoginDialog: function (id, name) {
             this._oLoginOTPDialog = new sap.m.Dialog({
