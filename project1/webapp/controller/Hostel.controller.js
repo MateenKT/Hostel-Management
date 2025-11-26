@@ -495,6 +495,7 @@ sap.ui.define([
                         this._bindCarousel();
 
 
+
                         // Now load facilities in background
                         this._LoadFacilities(oSelected.BranchCode);
                     });
@@ -1245,7 +1246,6 @@ sap.ui.define([
 
                 if (!Array.isArray(aCustomers) || aCustomers.length === 0) {
                     sap.m.MessageToast.show("No customer data found for this user.");
-                    return;
                 }
 
                 const aCustomerDetails = aCustomers.flatMap(response => ({
@@ -1271,49 +1271,52 @@ sap.ui.define([
                 const aAllFacilitis = aCustomers.flatMap(customer =>
                     Array.isArray(customer.FaciltyItems) ? customer.FaciltyItems : []
                 );
+                let aBookingData = [];
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // avoid timezone issues
 
                 if (aAllBookings.length === 0) {
                     sap.m.MessageToast.show("No booking history found.");
-                }
-
-                const today = new Date();
-                today.setHours(0, 0, 0, 0); // avoid timezone issues
-                const aBookingData = aAllBookings.map(booking => {
-                    const oStart = booking.StartDate ? new Date(booking.StartDate) : null;
-                    if (oStart) oStart.setHours(0, 0, 0, 0);
-
-                    let bookingGroup = "Others";
-
-                    if (booking.Status === "Completed") {
-                        bookingGroup = "Completed";
-                    } else if (booking.Status === "New" || booking.Status === "Assigned") {
-                        if (oStart <= today) {
-                            bookingGroup = "Ongoing";
-                        } else {
-                            bookingGroup = "Upcoming";
+                } else {
+                    aBookingData = aAllBookings.map(booking => {
+                        const oStart = booking.StartDate ? new Date(booking.StartDate) : null;
+                        if (oStart) {
+                            oStart.setHours(0, 0, 0, 0);
                         }
-                    }
-                    const customer = aCustomers.find(c => c.CustomerID === booking.CustomerID);
-                    const sSalutation = customer?.Salutation || "";
-                    const sFullName = customer?.CustomerName || "N/A";
-                    return {
-                        salutation: sSalutation, // ✔ Add salutation
-                        customerName: `${sSalutation} ${sFullName}`.trim(),
-                        Startdate: oStart ? oStart.toLocaleDateString("en-GB") : "N/A",
-                        EndDate: booking.EndDate ?
-                            new Date(booking.EndDate).toLocaleDateString("en-GB") : "N/A",
-                        room: booking.BedType || "N/A",
-                        amount: booking.RentPrice || "N/A",
-                        status: booking.Status || "N/A",
-                        bookingGroup: bookingGroup,
-                        cutomerid: booking.CustomerID,
-                        branchCode: booking.BranchCode,
-                        noofperson: booking.NoOfPersons,
-                        grandTotal: booking.RentPrice,
-                        paymenytype: booking.PaymentType,
-                        RoomPrice: booking.RoomPrice
-                    };
-                });
+
+                        let bookingGroup = "Others";
+
+                        if (booking.Status === "Completed") {
+                            bookingGroup = "Completed";
+                        } else if (booking.Status === "New" || booking.Status === "Assigned") {
+                            if (oStart && oStart <= today) {
+                                bookingGroup = "Ongoing";
+                            } else {
+                                bookingGroup = "Upcoming";
+                            }
+                        }
+                        const customer = aCustomers.find(c => c.CustomerID === booking.CustomerID);
+                        const sSalutation = customer?.Salutation || "";
+                        const sFullName = customer?.CustomerName || "N/A";
+                        return {
+                            salutation: sSalutation,                // ✔ Add salutation
+                            customerName: `${sSalutation} ${sFullName}`.trim(),
+                            Startdate: oStart ? oStart.toLocaleDateString("en-GB") : "N/A",
+                            EndDate: booking.EndDate
+                                ? new Date(booking.EndDate).toLocaleDateString("en-GB") : "N/A",
+                            room: booking.BedType || "N/A",
+                            amount: booking.RentPrice || "N/A",
+                            status: booking.Status || "N/A",
+                            bookingGroup: bookingGroup,
+                            cutomerid: booking.CustomerID,
+                            branchCode: booking.BranchCode,
+                            noofperson: booking.NoOfPersons,
+                            grandTotal: booking.RentPrice,
+                            paymenytype: booking.PaymentType,
+                            RoomPrice: booking.RoomPrice
+                        };
+                    });
+                }
                 const aFacilitiData = aAllFacilitis.map(faciliti => ({
                     startdate: faciliti.StartDate ? new Date(faciliti.StartDate).toLocaleDateString("en-GB") : "N/A",
                     bookingid: faciliti.BookingID,
@@ -1355,8 +1358,36 @@ sap.ui.define([
                 this._oProfileDialog.open();
 
             } catch (err) {
-                sap.ui.core.BusyIndicator.hide();
-                sap.m.MessageToast.show(err.message || err.responseText);
+                console.error("Profile Load Error:", err);
+
+                // Always open fragment even when error (like no customer found)
+                if (!this._oProfileDialog) {
+                    const oDialog = await sap.ui.core.Fragment.load({
+                        name: "sap.ui.com.project1.fragment.ManageProfile",
+                        controller: this
+                    });
+                    this._oProfileDialog = oDialog;
+                    this.getView().addDependent(oDialog);
+                }
+
+                const oProfileModel = new sap.ui.model.json.JSONModel({
+                    photo: sPhoto,
+                    initials: oUser.UserName ? oUser.UserName.charAt(0).toUpperCase() : "",
+                    name: oUser.UserName || "",
+                    email: oUser.EmailID || "",
+                    phone: oUser.MobileNo || "",
+                    dob: this.Formatter.DateFormat(oUser.DateOfBirth) || "",
+                    gender: oUser.Gender || "",
+                    address: oUser.Address || "",
+                    bookings: [],
+                    facility: [],
+                    aCustomers: []
+                });
+
+                this._oProfileDialog.setModel(oProfileModel, "profileData");
+
+                this._oProfileDialog.open();
+                sap.m.MessageToast.show("No booking history found.");
             } finally {
                 sap.ui.core.BusyIndicator.hide();
             }
@@ -2643,5 +2674,251 @@ sap.ui.define([
             }
         },
 
+        onPressAvatarEdit: function () {
+            if (!this._oAvatarActionSheet) {
+                this._oAvatarActionSheet = new sap.m.ActionSheet({
+                    buttons: [
+                        new sap.m.Button({
+                            text: "Take Photo",
+                            icon: "sap-icon://camera",
+                            press: this.onTakePhoto.bind(this)
+                        }),
+                        new sap.m.Button({
+                            text: "Upload from Gallery",
+                            icon: "sap-icon://add-photo",
+                            press: this.onUploadPhoto.bind(this)
+                        }),
+                        new sap.m.Button({
+                            text: "Remove Photo",
+                            icon: "sap-icon://delete",
+                            type: "Reject",
+                            press: this.onRemovePhoto.bind(this)
+                        })
+                    ],
+                    placement: "Bottom"
+                });
+                this.getView().addDependent(this._oAvatarActionSheet);
+            }
+            this._oAvatarActionSheet.openBy(sap.ui.getCore().byId("avatarEditBtn"));
+        },
+
+        _StartCamera: function () {
+            var oVideo = document.getElementById("video");
+            if (!oVideo) return;
+
+            // Create segmentation instance only once
+            if (!this.selfieSegmentation) {
+                this.selfieSegmentation = new SelfieSegmentation({
+                    locateFile: (file) => {
+                        return `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`;
+                    },
+                });
+
+                this.selfieSegmentation.setOptions({
+                    modelSelection: 1, // 0 = general, 1 = landscape
+                });
+
+                // Store segmentation results
+                this.latestSegmentation = null;
+                this.selfieSegmentation.onResults((results) => {
+                    this.latestSegmentation = results;
+                });
+            }
+
+            // Always create a new Camera instance when starting
+            this.camera = new Camera(oVideo, {
+                onFrame: async () => {
+                    await this.selfieSegmentation.send({ image: oVideo });
+                },
+                width: 640,
+                height: 480,
+            });
+            this.camera.start();
+        },
+
+        _StopCamera: function () {
+            if (this.camera) {
+                this.camera.stop();
+                this.camera = null;
+            }
+            if (this._cameraStream) {
+                this._cameraStream.getTracks().forEach((track) => track.stop());
+                this._cameraStream = null;
+            }
+            var oVideo = document.getElementById("video");
+            if (oVideo) {
+                oVideo.srcObject = null;
+            }
+        },
+
+        onTakePhoto: function () {
+            if (!this.oCameraDialog) {
+                sap.ui.core.Fragment.load({
+                    name: "sap.ui.com.project1.fragment.SelfieCam",
+                    controller: this,
+                }).then(
+                    function (oDialog) {
+                        this.oCameraDialog = oDialog;
+                        this.getView().addDependent(this.oCameraDialog);
+                        this.oCameraDialog.attachAfterOpen(this._StartCamera.bind(this));
+                        this.oCameraDialog.attachAfterClose(this._StopCamera.bind(this));
+                        this.oCameraDialog.open();
+                    }.bind(this)
+                );
+            } else {
+                this.oCameraDialog.open();
+            }
+        },
+        IC_onCapturePress: function () {
+            var oCanvas = document.getElementById("canvas");
+            var oVideo = document.getElementById("video");
+
+            if (!oCanvas || !oVideo || !this.latestSegmentation) return;
+
+            const oContext = oCanvas.getContext("2d");
+            oCanvas.width = oVideo.videoWidth;
+            oCanvas.height = oVideo.videoHeight;
+
+            // Fill background with white
+            oContext.fillStyle = "white";
+            oContext.fillRect(0, 0, oCanvas.width, oCanvas.height);
+
+            // Draw original image
+            oContext.drawImage(oVideo, 0, 0, oCanvas.width, oCanvas.height);
+
+            // Apply segmentation mask
+            const mask = this.latestSegmentation.segmentationMask;
+            oContext.globalCompositeOperation = "destination-in";
+            oContext.drawImage(mask, 0, 0, oCanvas.width, oCanvas.height);
+            oContext.globalCompositeOperation = "destination-over";
+            oContext.fillStyle = "white";
+            oContext.fillRect(0, 0, oCanvas.width, oCanvas.height);
+            oContext.globalCompositeOperation = "source-over";
+            var base64Image = oCanvas.toDataURL("image/png");
+            var mimeType = "image/png";
+            var imageName = "captured_image.png";
+            base64Image = base64Image.replace(`data:${mimeType};base64,`, "");
+
+            var oModel = this.getView().getModel("profileData");
+            oModel.setProperty("/fileName", imageName);
+            oModel.setProperty("/fileType", mimeType);
+            oModel.setProperty("/fileContent", base64Image);
+
+            this._StopCamera();
+            this.oCameraDialog.close();
+        },
+
+        IC_onPressCloseCameraDialog: function () {
+            this._StopCamera();
+            if (this.oCameraDialog) {
+                this.oCameraDialog.close();
+            }
+        },
+
+        onUploadPhoto: function () {
+            const uploader = sap.ui.getCore().byId("fileUploaderAvatar");
+            if (!uploader) return;
+
+            setTimeout(() => {
+                const oInput = uploader.getFocusDomRef();
+                if (!oInput) {
+                    console.error("Uploader input not ready");
+                    return;
+                }
+                uploader.clear();
+                uploader.setValue("");
+                oInput.value = "";
+                oInput.accept = "image/*";
+                oInput.capture = "";   // remove camera request → gallery
+                oInput.click();
+            }, 200);
+        },
+
+        onAvatarFileSelected: function (oEvent) {
+            const file = oEvent.getParameter("files")[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const fullDataURL = e.target.result;
+                const base64 = fullDataURL.split(",")[1]; // remove prefix
+
+                const oModel = this._oProfileDialog.getModel("profileData");
+                oModel.setProperty("/photo", fullDataURL);
+                await this.updateUserPhoto({
+                    fileName: file.name,
+                    fileType: file.type,
+                    fileContent: base64
+                });
+            };
+            reader.readAsDataURL(file);
+        },
+
+        onRemovePhoto: async function () {
+            const oModel = this._oProfileDialog.getModel("profileData");
+            const initials = oModel.getProperty("/initials");
+
+            oModel.setProperty("/photo", "");
+            oModel.setProperty("/initials", initials);
+            await this.updateUserPhoto({
+                fileName: "",
+                fileType: "",
+                fileContent: ""
+            });
+        },
+
+        updateUserPhoto: async function ({ fileName, fileType, fileContent }) {
+            try {
+                const sUserID = this._oLoggedInUser?.UserID;
+                if (!sUserID) {
+                    sap.m.MessageToast.show("User not logged in");
+                    return;
+                }
+                const payload = {
+                    data: {
+                        FileName: fileName,
+                        FileType: fileType,
+                        FileContent: fileContent
+                    },
+                    filters: { UserID: sUserID }
+                };
+                console.log("📤 Sent to Backend:", payload);
+                await this.ajaxUpdateWithJQuery("HM_Login", payload);
+                sap.m.MessageToast.show("Profile photo updated!");
+
+            } catch (err) {
+                console.error(err);
+                sap.m.MessageToast.show("Failed to update profile photo");
+            }
+        },
+
+        onPreviewProfilePhoto: function () {
+            const sPhoto = this._oProfileDialog.getModel("profileData").getProperty("/photo");
+            if (!sPhoto) {
+                sap.m.MessageToast.show("No profile photo available");
+                return;
+            }
+            if (!this._oPreviewDialog) {
+                this._oPreviewDialog = new sap.m.Dialog({
+                    title: "Profile Photo",
+                    contentWidth: "auto",
+                    contentHeight: "auto",
+                    verticalScrolling: true,
+                    content: new sap.m.Image({
+                        id: "previewProfileImage",
+                        width: "auto",
+                        height: "auto",
+                        src: ""
+                    }),
+                    beginButton: new sap.m.Button({
+                        text: "Close",
+                        press: () => this._oPreviewDialog.close()
+                    })
+                });
+                this.getView().addDependent(this._oPreviewDialog);
+            }
+            sap.ui.getCore().byId("previewProfileImage").setSrc(sPhoto);
+            this._oPreviewDialog.open();
+        }
     });
 });

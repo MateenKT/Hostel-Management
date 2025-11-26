@@ -1,147 +1,226 @@
-<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:l="sap.ui.layout"
-    xmlns:f="sap.f" xmlns:layout="sap.ui.layout"
-    xmlns:g="sap.f"
-    xmlns:card="sap.f.cards"
-    xmlns:m="sap.m">
+<core:FragmentDefinition
+    xmlns="sap.m"
+    xmlns:core="sap.ui.core"
+    xmlns:f="sap.f"
+    xmlns:u="sap.ui.unified"
+    xmlns:l="sap.ui.layout"
+    xmlns:form="sap.ui.layout.form"
+    xmlns:m="sap.m"
+>
+    <Dialog
+        id="profileDialog"
+        stretch="{= ${device>/system/phone} }"
+        contentWidth="90%"
+        contentHeight="auto"
+        horizontalScrolling="false"
+        verticalScrolling="true"
+        resizable="true"
+        draggable="true"
+    >
+        <customHeader>
+            <Bar class="profileHeaderBar">
+                <contentMiddle>
+                    <Title
+                        text="My Account"
+                        level="H4"
+                    />
+                </contentMiddle>
 
-<Dialog id="profileDialog"
-    horizontalScrolling="false"
-    verticalScrolling="true"
-    contentWidth="1000px"
-    contentHeight="500px"
-    resizable="true"
-    draggable="true">
+                <contentRight>
+                    <Button
+                        icon="sap-icon://decline"
+                        press="onProfileDialogClose"
+                        type="Transparent"
+                    />
+                </contentRight>
+            </Bar>
+        </customHeader>
 
-    <!-- HEADER -->
-    <customHeader>
-        <Bar class="profileHeaderBar">
-            <contentMiddle>
-                <Title text="My Account" level="H4" />
-            </contentMiddle>
-            <contentRight>
-                <Button type="Reject" text="Logout" press="onProfileDialogClose" />
-                <Button icon="sap-icon://decline" type="Transparent" press="onProfileclose" />
-            </contentRight>
-        </Bar>
-    </customHeader>
+        <VBox class="sapUiSmallMargin profileMainContainer">
+            <f:Card class="profileCard">
+                <f:content>
+                    <FlexBox
+                        alignItems="Start"
+                        wrap="Wrap"
+                        class="profileTopBox"
+                    >
+                        <FlexBox
+                            direction="Column"
+                            alignItems="Center"
+                            class="avatarWrapper"
+                            width="180px"
+                        >
+                            <Avatar
+                                src="{profileData>/photo}"
+                                initials="{profileData>/initials}"
+                                displayShape="Circle"
+                                displaySize="XL"
+                                press="onPreviewProfilePhoto"
+                                class="sapUiTinyMargin"
+                            />
+                            <Button
+                                id="avatarEditBtn"
+                                icon="sap-icon://edit"
+                                type="Transparent"
+                                class="avatarEditIcon"
+                                press="onPressAvatarEdit"
+                            />
+                            <u:FileUploader
+                                id="fileUploaderAvatar"
+                                uploadOnChange="false"
+                                change="onAvatarFileSelected"
+                                fileType="png,jpg,jpeg"
+                                class="hiddenUploader"
+                                buttonOnly="true"
+                                iconOnly="true"
+                            />
+                        </FlexBox>
 
-    <VBox class="profileMainContainer sapUiSmallMargin">
-    
-        <!-- PROFILE CARD -->
-      <f:Card class="profileCard">
-    <f:content>
+                        <VBox
+                            width="auto"
+                            class="detailsContainer"
+                        >
+                            <HBox class="detailRow">
+                                <Label
+                                    text="Name:"
+                                    class="detailLabel"
+                                />
+                                <Text
+                                    text="{profileData>/name}"
+                                    class="detailValue"
+                                />
+                            </HBox>
+                            <HBox class="detailRow">
+                                <Label
+                                    text="DOB:"
+                                    class="detailLabel"
+                                />
+                                <Text
+                                    text="{profileData>/dob}"
+                                    class="detailValue"
+                                />
+                            </HBox>
+                            <HBox class="detailRow">
+                                <Label
+                                    text="Gender:"
+                                    class="detailLabel"
+                                />
+                                <Text
+                                    text="{profileData>/gender}"
+                                    class="detailValue"
+                                />
+                            </HBox>
+                            <HBox class="detailRow">
+                                <Label
+                                    text="Mobile:"
+                                    class="detailLabel"
+                                />
+                                <Text
+                                    text="{profileData>/phone}"
+                                    class="detailValue"
+                                />
+                            </HBox>
+                            <HBox class="detailRow">
+                                <Label
+                                    text="Email:"
+                                    class="detailLabel"
+                                />
+                                <Text
+                                    text="{profileData>/email}"
+                                    class="detailValue"
+                                />
+                            </HBox>
+                            <HBox
+                                class="detailRow"
+                                alignItems="Start"
+                            >
+                                <Label
+                                    text="Address:"
+                                    class="detailLabel"
+                                />
+                                <Text
+                                    text="{profileData>/address}"
+                                    class="detailValue"
+                                    wrapping="true"
+                                />
+                            </HBox>
+                        </VBox>
+                    </FlexBox>
+                </f:content>
+            </f:Card>
 
-        <m:FlexBox
-            busyIndicatorDelay="0"
-            wrap="Wrap"
-            alignItems="Center"
-            fitContainer="true"
-            class="profileTopBox">
+            <Table
+                id="IdProfileaTable"
+                mode="SingleSelectLeft"
+                noDataText="No booking history found"
+                items="{
+                    path: 'profileData>/bookings',
+                    sorter: [
+                        { path: 'bookingGroup', descending: false, group: true },
+                        { path: 'Startdate', descending: true }
+                    ]
+                }"
+            >
+                <headerToolbar>
+                    <OverflowToolbar>
+                        <Title
+                            text="Booking History ({=${profileData>/bookings}.length})"
+                        />
+                        <ToolbarSpacer />
+                    </OverflowToolbar>
+                </headerToolbar>
 
-            <!-- Avatar -->
-            <m:Avatar
-                class="sapUiMediumMarginEnd sapUiTinyMarginBottom sapUiTinyMarginBegin"
-                displayShape="Circle"
-                displaySize="XL"
-                src="{profileData>/photo}"
-                initials="{profileData>/initials}" />
+                <columns>
+                    <Column demandPopin="true">
+                        <Text text="Customer Name" />
+                    </Column>
+                    <Column demandPopin="true">
+                        <Text text="Start Date" />
+                    </Column>
+                    <Column demandPopin="true">
+                        <Text text="Room" />
+                    </Column>
+                    <Column
+                        demandPopin="true"
+                        minScreenWidth="Tablet"
+                    >
+                        <Text text="Amount" />
+                    </Column>
+                    <Column
+                        demandPopin="true"
+                        minScreenWidth="Tablet"
+                    >
+                        <Text text="Status" />
+                    </Column>
+                </columns>
 
-            <!-- COLUMN 1 -->
-            <layout:VerticalLayout class="sapUiTinyMarginBegin sapUiTinyMarginEnd sapUiTinyMarginBottom">
-
-                <layout:HorizontalLayout class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
-                    <m:Label text="Name :" />
-                    <m:Text class="sapUiTinyMarginBegin" text="{profileData>/name}" />
-                </layout:HorizontalLayout>
-
-                <layout:HorizontalLayout class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
-                    <m:Label text="DOB :" />
-                    <m:Text class="sapUiTinyMarginBegin" text="{profileData>/dob}" />
-                </layout:HorizontalLayout>
-
-                <layout:HorizontalLayout class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
-                    <m:Label text="Gender :" />
-                    <m:Text class="sapUiTinyMarginBegin" text="{profileData>/gender}" />
-                </layout:HorizontalLayout>
-
-            </layout:VerticalLayout>
-
-            <!-- COLUMN 2 -->
-            <layout:VerticalLayout class="sapUiTinyMarginBegin sapUiTinyMarginEnd sapUiTinyMarginBottom">
-
-                <layout:HorizontalLayout class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
-                    <m:Label text="Mobile :" />
-                    <m:Text class="sapUiTinyMarginBegin" text="{profileData>/phone}" />
-                </layout:HorizontalLayout>
-
-                <layout:HorizontalLayout class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
-                    <m:Label text="Email :" />
-                    <m:Text class="sapUiTinyMarginBegin" text="{profileData>/email}" />
-                </layout:HorizontalLayout>
-
-                <layout:HorizontalLayout class="sapUiSmallMarginBeginEnd sapUiTinyMarginBottom">
-                    <m:Label text="Address :" />
-                    <m:Text class="sapUiTinyMarginBegin" text="{profileData>/address}" />
-                </layout:HorizontalLayout>
-
-            </layout:VerticalLayout>
-
-        </m:FlexBox>
-
-    </f:content>
-</f:Card>
-
-
-
-        <!-- BOOKING HISTORY -->
-       <Table 
-       mode="SingleSelectLeft"
-    id="IdProfileaTable"
-    items="{
-        path: 'profileData>/bookings',
-        sorter: [
-           {
-        path: 'bookingGroup',
-        descending: false,
-        group: true
-    },
-    {
-        path: 'Startdate',
-        descending: true
-    }
-        ]
-    }">
-        <headerToolbar>
-            <OverflowToolbar>
-						<Title text="Booking History ({=${profileData>/bookings}.length})" />
-						<ToolbarSpacer />
-						 <Button text="Delete"  press="onDeleteBooking" type="Emphasized"/>
-					</OverflowToolbar>
-        </headerToolbar>
-
-        <columns>
-            <Column><Text text="Customer Name"/></Column>
-            <Column><Text text="Start Date"/></Column>
-            <Column><Text text="Room"/></Column>
-            <Column><Text text="Amount"/></Column>
-            <Column><Text text="Status"/></Column>
-
-        </columns>
-
-        <items>
-            <ColumnListItem type="Navigation" press="onPressBookingRow">
-                <cells>
-                    <Text text="{profileData>customerName}"/>
-                    <Text text="{path:'profileData>Startdate'}"/>
-                    <Text text="{profileData>room}"/>
-                    <Text text="{path:'profileData>amount', formatter: '.Formatter.formatCurrency'}"/>
-                    <Text text="{path:'profileData>status'}"/>
-                </cells>
-            </ColumnListItem>
-        </items>
-    </Table>
-
-    </VBox>
-
-</Dialog>
+                <items>
+                    <ColumnListItem
+                        type="Navigation"
+                        press="onPressBookingRow"
+                    >
+                        <cells>
+                            <Text text="{profileData>customerName}" />
+                            <Text text="{profileData>Startdate}" />
+                            <Text text="{profileData>room}" />
+                            <Text
+                                text="{path:'profileData>amount', formatter: '.Formatter.formatCurrency'}"
+                            />
+                            <Text text="{profileData>status}" />
+                        </cells>
+                    </ColumnListItem>
+                </items>
+            </Table>
+        </VBox>
+        <footer>
+            <Toolbar>
+                <ToolbarSpacer />
+                <Button
+                    text="Logout"
+                    press="onProfileDialogClose"
+                    class="myUnifiedBtn"
+                />
+            </Toolbar>
+        </footer>
+    </Dialog>
 </core:FragmentDefinition>

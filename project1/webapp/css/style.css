@@ -1532,3 +1532,65 @@ span.sapMBtnInner.sapMBtnEmphasized {
     font-weight: bold;
     font-size: 1.5rem; /* optional, adjust size */
 }
+/* .profileAvatar {
+    width: 100% !important;
+    height: 100% !important;
+    border-radius: 50% !important;
+} */
+   .avatarWrapper {
+    position: relative;
+}
+
+.avatarEditIcon {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    padding: 4px;
+}
+
+/* .avatarEditIcon .sapMBtnInner {
+    border-radius: 50% !important;
+    padding: 3px !important;
+} */
+/* Hide UI5 FileUploader completely but KEEP input clickable */
+.hiddenUploader .sapMBtn {
+    display: none !important;
+}
+
+/* DO NOT use display:none on the input — this breaks camera */
+.hiddenUploader input[type="file"] {
+    opacity: 0 !important;
+    width: 1px !important;
+    height: 1px !important;
+    position: absolute !important;
+    z-index: -1 !important;
+}
+
+/* Avatar center on small devices */
+@media (max-width: 768px) {
+    .avatarWrapper {
+        width: 100%;
+        margin: auto;
+    }
+}
+.detailRow {
+  padding-bottom: 10px;
+}
+
+.detailLabel {
+  font-weight: bold;
+  width: 120px;
+  display: inline-block;
+}
+
+.detailValue {
+  max-width: 450px;
+  word-wrap: break-word;
+}
+
+.detailsContainer {
+  padding: 10px 16px;
+}
