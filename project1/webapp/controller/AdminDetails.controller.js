@@ -385,6 +385,7 @@ sap.ui.define([
             }
         },
         onAddFacilityDetails: function () {
+             this._editIndex = undefined;
             this.byId("Ad_id_idFacilityRoomTableDetails").removeSelections()
             if (!this.HM_Dialog) {
                 var oView = this.getView();
@@ -411,7 +412,7 @@ sap.ui.define([
             sap.ui.getCore().byId("editHours").setVisible(false)
             sap.ui.getCore().byId("idMonthYearSelect").setSelectedKey("1")
 
-            this._editIndex = undefined;
+           
 
 
         },
@@ -574,10 +575,10 @@ sap.ui.define([
             var oPayload = this.getView().getModel("edit").getData();
 
             if (oPayload.UnitText === "Per Month") {
-                var Month = sap.ui.getCore().byId("idMonthYearSelect").getSelectedKey();
+                var Month = sap.ui.getCore().byId("idMonthYearSelectFragment").getSelectedKey();
                 oPayload.TotalHour = Month || "1";
             } else if (oPayload.UnitText === "Per Year") {
-                var Month = sap.ui.getCore().byId("idMonthYearSelect").getSelectedKey();
+                var Month = sap.ui.getCore().byId("idMonthYearSelectFragment").getSelectedKey();
                 oPayload.TotalHour = Month || "1";
             }
 
@@ -606,7 +607,7 @@ sap.ui.define([
                     }
                 }
                 // Format Dates
-                if (oPayload.StartDate.includes("-")) {
+                if (oPayload.StartDate.includes("-") || oPayload.EndDate.includes("-")) {
                     oPayload.StartDate = this.Formatter.DateFormat(oPayload.StartDate);
                     oPayload.EndDate = this.Formatter.DateFormat(oPayload.EndDate);
                 } else {
