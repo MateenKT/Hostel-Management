@@ -25,9 +25,9 @@
 			<Panel id="signInPanel" expandable="false">
 	<VBox>
 		<Label text="User ID" required="true" />
-		<Input id="signInuserid" placeholder="User ID" valueLiveUpdate="true" liveChange="onUserlivechange" />
+		<Input id="signInuserid" placeholder="User ID" valueLiveUpdate="true" liveChange="onUserlivechange" valueStateText="Please enter a valid User ID" />
 		<Label text="User Name" required="true" />
-		<Input id="signInusername" placeholder="User Name" valueLiveUpdate="true" liveChange="onUserlivechange" />
+		<Input id="signInusername" placeholder="User Name" valueLiveUpdate="true" liveChange="onUserlivechange" valueStateText="Please enter a valid User Name"/>
 		<Label text="Login with" />
 <HBox alignItems="End" justifyContent="Start">
 	<RadioButton text="Password" groupName="loginType" selected="{LoginViewModel>/isPasswordSelected}" select="onSelectLoginMode" />
@@ -35,17 +35,18 @@
 	<Button id="btnSignInSendOTP" text="Send OTP" visible="{LoginViewModel>/isOtpSelected}" press="onPressOTP" />
 </HBox>
 		<!-- PASSWORD SECTION -->
-		<Label text="Password" id="lblPass" visible="{LoginViewModel>/isPasswordSelected}"/>
-		<Input id="signinPassword" placeholder="Enter Password" submit="onSignIn"  type="Password" visible="{LoginViewModel>/isPasswordSelected}"/>
+		<Label text="Password" required="true" id="lblPass" visible="{LoginViewModel>/isPasswordSelected}"/>
+		<Input id="signinPassword" placeholder="Enter Password" submit="onSignIn"  type="Password" visible="{LoginViewModel>/isPasswordSelected}" showValueHelp="true" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility" liveChange="onSigninPasswordLive" />
 		<!-- REUSED OTP FIELD FOR LOGIN -->
-		<VBox id="signInOTPBox" visible="{LoginViewModel>/isOtpSelected}">
-			<Label text="Enter OTP" />
-			<Input id="signInOTP" placeholder="Enter OTP" liveChange="onLoginOtpLive"/>
+		<VBox id="signInOTPBox" visible="{LoginViewModel>/isOtpBoxVisible}">
+			<Label text="Enter OTP" required="true" />
+			<Input id="signInOTP" placeholder="Enter OTP" liveChange="onLoginOtpLive" maxLength="6" type="Number" />
 		</VBox>
 		<HBox justifyContent="SpaceBetween" class="sapUiTinyMarginTop">
 			<Button text="Forgot Password?" type="Transparent" press="onForgotPassword"/>
 			<!-- <Button text="Sign In" type="Accept" width="100px" press="onSignIn"/> -->
-			<Button text="Sign In" type="Accept" width="100px" enabled="{= ${LoginViewModel>/isPasswordSelected} || ${LoginViewModel>/isOtpSelected} &amp;&amp; ${LoginViewModel>/isOtpEntered} }" press="onSignIn"/>
+			<Button text="Sign In" type="Accept" width="100px" 
+			enabled="{= ${LoginViewModel>/isPasswordSelected} || ${LoginViewModel>/isOtpSelected} &amp;&amp; ${LoginViewModel>/isOtpEntered} }" press="onSignIn"/>
 		</HBox>
 	</VBox>
 </Panel>
@@ -54,9 +55,9 @@
 
 <!-- FORGOT FLOW IN ONE PANEL -->
 <Panel id="forgotFlowPanel" expandable="false" visible="false" class="forgotPanel">
-<HBox justifyContent="Center" class="switch-toggle-container" >
-<Title  text="Reset Password"/>
-</HBox>
+<HBox justifyContent="Center" class="switch-toggle-container" />
+<!-- <Title  text=""/>
+</HBox> -->
 	<VBox id="forgotVBox">
 		<!-- STEP 1: SEND OTP -->
 		<VBox id="fpStepUser">
@@ -79,9 +80,9 @@
 		<!-- STEP 3: RESET PASSWORD (Initially hidden) -->
 		<VBox id="fpStepReset" visible="false" class="sapUiSmallMarginTop">
 			<Label text="New Password"/>
-			<Input id="newPass" type="Password"/>
+			<Input id="newPass" type="Password" showValueHelp="true" valueHelpIconSrc="sap-icon://show" valueHelpRequest=".SM_onTogglePasswordVisibility" />
 			<Label text="Confirm Password"/>
-			<Input id="confPass" type="Password"/>
+		<Input id="confPass" type="Password" showValueHelp="true" valueHelpIconSrc="sap-icon://show" valueHelpRequest=".SM_onTogglePasswordVisibility" />
 			<HBox justifyContent="End">
 			<Button id="btnUpdatePass" text="Update Password" type="Accept" press="onSubmitNewPassword"/>
 			</HBox>

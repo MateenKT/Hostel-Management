@@ -76,7 +76,9 @@ sap.ui.define([
             oView.setModel(new JSONModel({
                 isOtpSelected: false,
                 isPasswordSelected: true,
-                authFlow: "signin" // [signin, forgot, otp, reset]
+                authFlow: "signin", // [signin, forgot, otp, reset]
+                isOtpBoxVisible: false
+
             }), "LoginViewModel");
 
             oView.setModel(new JSONModel({
@@ -727,11 +729,34 @@ sap.ui.define([
         },
 
         onSwitchToSignIn: function () {
-            var oSignInPanel = sap.ui.getCore().byId("signInPanel");
-            var oSignUpPanel = sap.ui.getCore().byId("signUpPanel");
-            oSignInPanel.setVisible(true);
-            oSignUpPanel.setVisible(false);
+            const vm = this.getView().getModel("LoginViewModel");
+
+            // Show / Hide panels
+            sap.ui.getCore().byId("signInPanel").setVisible(true);
+            sap.ui.getCore().byId("signUpPanel").setVisible(false);
+
+            // Reset Login mode to PASSWORD
+            vm.setProperty("/authFlow", "signin");
+            vm.setProperty("/isPasswordSelected", true);
+            vm.setProperty("/isOtpSelected", false);
+            vm.setProperty("/isOtpBoxVisible", false);
+
+            // Reset Sign-In UI states
+            sap.ui.getCore().byId("signinPassword").setEnabled(true).setValue("");
+            sap.ui.getCore().byId("signInOTP").setEnabled(false).setValue("");
+            sap.ui.getCore().byId("btnSignInSendOTP").setVisible(false);
+
+            // Clear Sign-In fields (NOT Sign-Up fields)
+            sap.ui.getCore().byId("signInuserid").setValue("");
+            sap.ui.getCore().byId("signInusername").setValue("");
+
+            // Restore dialog header title
+            sap.ui.getCore().byId("authDialog")
+                .getCustomHeader()
+                .getContentMiddle()[0]
+                .setText("Hostel Access Portal");
         },
+
 
         onSwitchToSignUp: function () {
             var oSignInPanel = sap.ui.getCore().byId("signInPanel");
@@ -744,18 +769,26 @@ sap.ui.define([
             utils._LCvalidateEmail(oEvent);
         },
 
+        // SM_onTogglePasswordVisibility: function (oEvent) {
+        //     var oInput = oEvent.getSource();
+        //     var sType = oInput.getType() === "Password" ? "Text" : "Password";
+        //     oInput.setType(sType);
+        //     // Toggle the value help icon properly without losing the value
+        //     var sIcon =
+        //         sType === "Password" ? "sap-icon://show" : "sap-icon://hide";
+        //     oInput.setValueHelpIconSrc(sIcon);
+        //     // Ensure the current value of the password is retained
+        //     var sCurrentValue = oInput.getValue();
+        //     oInput.setValue(sCurrentValue);
+        // },
         SM_onTogglePasswordVisibility: function (oEvent) {
-            var oInput = oEvent.getSource();
-            var sType = oInput.getType() === "Password" ? "Text" : "Password";
-            oInput.setType(sType);
-            // Toggle the value help icon properly without losing the value
-            var sIcon =
-                sType === "Password" ? "sap-icon://show" : "sap-icon://hide";
-            oInput.setValueHelpIconSrc(sIcon);
-            // Ensure the current value of the password is retained
-            var sCurrentValue = oInput.getValue();
-            oInput.setValue(sCurrentValue);
+            const oInput = oEvent.getSource();
+            const isPassword = oInput.getType() === "Password";
+
+            oInput.setType(isPassword ? "Text" : "Password");
+            oInput.setValueHelpIconSrc(isPassword ? "sap-icon://hide" : "sap-icon://show");
         },
+
         SM_onChnageSetAndConfirm: function (oEvent) {
             utils._LCvalidatePassword(oEvent);
         },
@@ -1089,67 +1122,67 @@ sap.ui.define([
             oInput.setValueStateText("Passwords matched");
         },
 
-        onSignIn: async function() {
-            var oModel = this.getView().getModel("LoginMode");
-            var oData = oModel.getData();
-            const oLoginModel = this.getView().getModel("LoginModel");
+        // onSignIn: async function() {
+        //     var oModel = this.getView().getModel("LoginMode");
+        //     var oData = oModel.getData();
+        //     const oLoginModel = this.getView().getModel("LoginModel");
 
-            const sUserid = sap.ui.getCore().byId("signInuserid").getValue();
-            const sUsername = sap.ui.getCore().byId("signInusername").getValue();
-            const sPassword = sap.ui.getCore().byId("signinPassword").getValue();
+        //     const sUserid = sap.ui.getCore().byId("signInuserid").getValue();
+        //     const sUsername = sap.ui.getCore().byId("signInusername").getValue();
+        //     const sPassword = sap.ui.getCore().byId("signinPassword").getValue();
 
-            if (!utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInuserid"), "ID") ||
-                !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID") ||
-                !utils._LCvalidatePassword(sap.ui.getCore().byId("signinPassword"), "ID")
-            ) {
-                sap.m.MessageToast.show("Make sure all mandatory fields are filled correctly");
-                return;
-            }
+        //     if (!utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInuserid"), "ID") ||
+        //         !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID") ||
+        //         !utils._LCvalidatePassword(sap.ui.getCore().byId("signinPassword"), "ID")
+        //     ) {
+        //         sap.m.MessageToast.show("Make sure all mandatory fields are filled correctly");
+        //         return;
+        //     }
 
-            try {
-                const payload = {
-                    UserID: sUserid,
-                    UserName: sUsername,
-                    Password: btoa(sPassword)
-                };
-                sap.ui.core.BusyIndicator.show(0);
-                const oResponse = await this.ajaxReadWithJQuery("HM_Login", payload);
-                const aUsers = oResponse.data[0] || [];
+        //     try {
+        //         const payload = {
+        //             UserID: sUserid,
+        //             UserName: sUsername,
+        //             Password: btoa(sPassword)
+        //         };
+        //         sap.ui.core.BusyIndicator.show(0);
+        //         const oResponse = await this.ajaxReadWithJQuery("HM_Login", payload);
+        //         const aUsers = oResponse.data[0] || [];
 
-                oLoginModel.setProperty("/EmployeeID", aUsers.UserID);
-                oLoginModel.setProperty("/EmployeeName", aUsers.UserName);
-                oLoginModel.setProperty("/EmailID", aUsers.EmailID);
-                oLoginModel.setProperty("/Role", aUsers.Role);
-                oLoginModel.setProperty("/BranchCode", aUsers.BranchCode || "");
-                oLoginModel.setProperty("/MobileNo", aUsers.MobileNo || "");
-                oLoginModel.setProperty("/DateofBirth", this.Formatter.DateFormat(aUsers.DateOfBirth) || "");
+        //         oLoginModel.setProperty("/EmployeeID", aUsers.UserID);
+        //         oLoginModel.setProperty("/EmployeeName", aUsers.UserName);
+        //         oLoginModel.setProperty("/EmailID", aUsers.EmailID);
+        //         oLoginModel.setProperty("/Role", aUsers.Role);
+        //         oLoginModel.setProperty("/BranchCode", aUsers.BranchCode || "");
+        //         oLoginModel.setProperty("/MobileNo", aUsers.MobileNo || "");
+        //         oLoginModel.setProperty("/DateofBirth", this.Formatter.DateFormat(aUsers.DateOfBirth) || "");
 
-                // For global access
-                this._oLoggedInUser = aUsers;
+        //         // For global access
+        //         this._oLoggedInUser = aUsers;
 
-                sap.ui.getCore().byId("signInusername").setValue("");
-                sap.ui.getCore().byId("signinPassword").setValue("");
+        //         sap.ui.getCore().byId("signInusername").setValue("");
+        //         sap.ui.getCore().byId("signinPassword").setValue("");
 
-                if (this._oSignDialog) {
-                    this._oSignDialog.close();
-                }
+        //         if (this._oSignDialog) {
+        //             this._oSignDialog.close();
+        //         }
 
-                if (aUsers.Role === "Customer") {
-                    const oUserModel = new JSONModel(aUsers);
-                    sap.ui.getCore().setModel(oUserModel, "LoginModel");
-                    this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", true);
-                } else if (aUsers.Role === "Admin" || aUsers.Role === "Employee") {
-                    this.getOwnerComponent().getRouter().navTo("TilePage");
-                } else {
-                    sap.m.MessageToast.show("Invalid credentials. Please try again.");
-                }
-            } catch (err) {
-                sap.ui.core.BusyIndicator.hide();
-                sap.m.MessageToast.show(err.message || err.responseText);
-            } finally {
-                sap.ui.core.BusyIndicator.hide();
-            }
-        },
+        //         if (aUsers.Role === "Customer") {
+        //             const oUserModel = new JSONModel(aUsers);
+        //             sap.ui.getCore().setModel(oUserModel, "LoginModel");
+        //             this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", true);
+        //         } else if (aUsers.Role === "Admin" || aUsers.Role === "Employee") {
+        //             this.getOwnerComponent().getRouter().navTo("TilePage");
+        //         } else {
+        //             sap.m.MessageToast.show("Invalid credentials. Please try again.");
+        //         }
+        //     } catch (err) {
+        //         sap.ui.core.BusyIndicator.hide();
+        //         sap.m.MessageToast.show(err.message || err.responseText);
+        //     } finally {
+        //         sap.ui.core.BusyIndicator.hide();
+        //     }
+        // },
 
         onCloseManageProfile: function () {
             if (this._oProfileDialog) {
@@ -2081,44 +2114,24 @@ sap.ui.define([
 
 
 
-
         onForgotPassword: function () {
             const vm = this.getView().getModel("LoginViewModel");
             vm.setProperty("/authFlow", "forgot");
 
             this._clearAllAuthFields();
 
+            // 🔥 Change Title to “Recover Password”
+            sap.ui.getCore().byId("authDialog")
+                .getCustomHeader()
+                .getContentMiddle()[0]
+                .setText("Recover Password");
+
             this._showPanel("forgotFlowPanel");
-            this._showForgotSection("secForgotUser"); // <---- VERY IMPORTANT
+            this._showForgotSection("secForgotUser");
         },
 
 
 
-        // onForgotPassword: function () {
-        //     if (!this._oForgotDialog) {
-        //         this._oForgotDialog = new sap.m.Dialog({
-        //             title: "Forgot Password",
-        //             type: "Message",
-        //             content: [
-        //                 new sap.m.Label({ text: "User ID", required: true }),
-        //                 new sap.m.Input("fpUserId", { placeholder: "Enter User ID", liveChange: this._validateFPFields.bind(this) }),
-        //                 new sap.m.Label({ text: "User Name", required: true }),
-        //                 new sap.m.Input("fpUserName", { placeholder: "Enter User Name", liveChange: this._validateFPFields.bind(this) })
-        //             ],
-        //             beginButton: new sap.m.Button({
-        //                 text: "Continue",
-        //                 type: "Emphasized",
-        //                 enabled: false,                       // disabled at start
-        //                 press: this.onValidateUser.bind(this) // verify before OTP
-        //             }),
-        //             endButton: new sap.m.Button({
-        //                 text: "Cancel",
-        //                 press: function () { this._oForgotDialog.close(); }.bind(this)
-        //             })
-        //         });
-        //     }
-        //     this._oForgotDialog.open();
-        // },
 
         _validateFPFields: function () {
             let id = sap.ui.getCore().byId("fpUserId").getValue();
@@ -2134,6 +2147,8 @@ sap.ui.define([
 
             vm.setProperty("/isPasswordSelected", selected === "Password");
             vm.setProperty("/isOtpSelected", selected === "OTP");
+            vm.setProperty("/isOtpBoxVisible", false); // reset OTP box visibility
+
 
 
             sap.ui.getCore().byId("signinPassword").setEnabled(vm.getProperty("/isPasswordSelected"));
@@ -2292,6 +2307,22 @@ sap.ui.define([
             oVM.setProperty("/authFlow", "signin");
             oVM.setProperty("/isPasswordSelected", true);
             oVM.setProperty("/isOtpSelected", false);
+
+            oVM.setProperty("/isOtpBoxVisible", false);  
+
+
+
+
+            sap.ui.getCore().byId("authDialog")
+                .getCustomHeader()
+                .getContentMiddle()[0]
+                .setText("Hostel Access Portal");
+
+            sap.ui.getCore().byId("signinPassword").setEnabled(true);
+            sap.ui.getCore().byId("signInOTP").setEnabled(false);
+            sap.ui.getCore().byId("signInOTP").setValue("");     // 👈 prevent old OTP from showing
+            sap.ui.getCore().byId("btnSignInSendOTP").setVisible(false);
+
 
             // Clear all fields including forgot/otp/reset
             this._clearAllAuthFields();
@@ -2596,24 +2627,44 @@ sap.ui.define([
                     data: JSON.stringify(payload)
                 });
 
+                // if (oResp?.success) {
+                //     sap.m.MessageToast.show("OTP sent! Check your email.");
+                //     alert(oResp.OTP);////
+
+                //     this._oResetUser = { UserID: sUserId, UserName: sUserName };
+
+                    
+
+                //     // ❗Stay in Sign-In Flow (do NOT set to 'otp')
+                //     this.getView().getModel("LoginViewModel").setProperty("/authFlow", "signin");
+
+                //     this._showPanel("signInPanel");
+                //     sap.ui.getCore().byId("signInOTP").setEnabled(true);
+                //     sap.ui.getCore().byId("signInOTP").focus();
+                // }
                 if (oResp?.success) {
                     sap.m.MessageToast.show("OTP sent! Check your email.");
+                    alert(oResp.OTP); //// remove in production
 
                     this._oResetUser = { UserID: sUserId, UserName: sUserName };
 
-                    // ❗Stay in Sign-In Flow (do NOT set to 'otp')
-                    this.getView().getModel("LoginViewModel").setProperty("/authFlow", "signin");
+                    const vm = this.getView().getModel("LoginViewModel");
 
-                    this._showPanel("signInPanel");
-                    sap.ui.getCore().byId("signInOTP").setEnabled(true);
+                    // Show OTP box ONLY now
+                    vm.setProperty("/isOtpBoxVisible", true);
+
+                    // Allow typing in OTP
+                    sap.ui.getCore().byId("signInOTP").setEnabled(true).setValue("");
+
                     sap.ui.getCore().byId("signInOTP").focus();
                 }
+
                 else {
                     sap.m.MessageToast.show("User not found or cannot send OTP.");
                 }
 
             } catch (err) {
-                sap.m.MessageToast.show("OTP sending failed!");
+                sap.m.MessageToast.show("Invalid credentials, Please try again");
             } finally {
                 sap.ui.core.BusyIndicator.hide();
             }
@@ -2735,6 +2786,10 @@ sap.ui.define([
             sap.ui.getCore().byId("fpUserId").setEnabled(true);
             sap.ui.getCore().byId("fpUserName").setEnabled(true);
             sap.ui.getCore().byId("btnFPNext").setEnabled(false); // disabled until valid
+            sap.ui.getCore().byId("authDialog")
+                .getCustomHeader()
+                .getContentMiddle()[0]
+                .setText("Hostel Access Portal");
 
 
 
@@ -3194,6 +3249,123 @@ sap.ui.define([
         //         sap.ui.core.BusyIndicator.hide();
         //     }
         // },
+
+        onSigninPasswordLive: function (oEvent) {
+            utils._LCvalidatePassword(oEvent.getSource());
+        },
+        onSignIn: async function () {
+
+            const vm = this.getView().getModel("LoginViewModel");
+            const isOTP = vm.getProperty("/isOtpSelected");
+
+            const oLoginModel = this.getView().getModel("LoginModel");
+
+            const sUserid = sap.ui.getCore().byId("signInuserid").getValue().trim();
+            const sUsername = sap.ui.getCore().byId("signInusername").getValue().trim();
+            const sPassword = sap.ui.getCore().byId("signinPassword").getValue().trim();
+            const sOTP = sap.ui.getCore().byId("signInOTP").getValue().trim();
+
+            // Common mandatory fields
+            if (!utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInuserid"), "ID") ||
+                !utils._LCvalidateMandatoryField(sap.ui.getCore().byId("signInusername"), "ID")) {
+                sap.m.MessageToast.show("Enter valid User ID and Name");
+                return;
+            }
+
+            try {
+                sap.ui.core.BusyIndicator.show(0);
+
+                let payload, oResponse;
+
+                // ----------------------------- OTP MODE -----------------------------
+                if (isOTP) {
+
+                    if (!sOTP) {
+                        sap.m.MessageToast.show("Generate and enter OTP to Login");
+                        return;
+                    }
+
+                    const isValid = await this._verifyOTPWithBackend(sOTP);
+                    if (!isValid) {
+                        sap.m.MessageToast.show("Incorrect OTP");
+                        return;
+                    }
+
+                    payload = { UserID: sUserid, UserName: sUsername, OTP: sOTP };
+                    oResponse = await $.ajax({
+                        url: "https://rest.kalpavrikshatechnologies.com/HM_Login",
+                        method: "GET",
+                        contentType: "application/json",
+                        headers: {
+                            name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+                            password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+                        },
+                        data: payload
+                    });
+
+                } else {
+                    // -------------------------- PASSWORD MODE -------------------------
+                    if (!utils._LCvalidatePassword(sap.ui.getCore().byId("signinPassword"))) {
+                        sap.m.MessageToast.show("Enter valid password");
+                        return;
+                    }
+
+                    payload = {
+                        UserID: sUserid,
+                        UserName: sUsername,
+                        Password: btoa(sPassword)
+                    };
+
+                    oResponse = await this.ajaxReadWithJQuery("HM_Login", payload);
+                }
+
+                // ---------------------------- HANDLE RESPONSE ----------------------------
+                const user = oResponse?.data?.[0];
+                if (!user?.UserID) {
+                    sap.m.MessageToast.show("Invalid credentials");
+                    return;
+                }
+
+                sap.m.MessageToast.show("Login Successful!");
+
+                // Global access + Model update
+                this._oLoggedInUser = user;
+                oLoginModel.setProperty("/EmployeeID", user.UserID);
+                oLoginModel.setProperty("/EmployeeName", user.UserName);
+                oLoginModel.setProperty("/EmailID", user.EmailID);
+                oLoginModel.setProperty("/Role", user.Role);
+                oLoginModel.setProperty("/BranchCode", user.BranchCode || "");
+                oLoginModel.setProperty("/MobileNo", user.MobileNo || "");
+                oLoginModel.setProperty("/DateofBirth", this.Formatter.DateFormat(user.DateOfBirth) || "");
+
+                // Role Based Access
+                if (user.Role === "Customer") {
+                    const oUserModel = new sap.ui.model.json.JSONModel(user);
+                    sap.ui.getCore().setModel(oUserModel, "LoginModel");
+                    this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", true);
+                } else if (user.Role === "Admin" || user.Role === "Employee") {
+                    this.getOwnerComponent().getRouter().navTo("TilePage");
+                } else {
+                    sap.m.MessageToast.show("Invalid credentials found");
+                    return;
+                }
+
+                // Reset login fields
+                sap.ui.getCore().byId("signInusername").setValue("");
+                sap.ui.getCore().byId("signinPassword").setValue("");
+                sap.ui.getCore().byId("signInOTP").setValue("");
+
+                // Close dialog
+                if (this._oSignDialog) {
+                    this._oSignDialog.close();
+                }
+
+            } catch (err) {
+                sap.m.MessageToast.show(err.message || "Invalid credentials, Please try again");
+            } finally {
+                sap.ui.core.BusyIndicator.hide();
+            }
+        },
 
     });
 });
