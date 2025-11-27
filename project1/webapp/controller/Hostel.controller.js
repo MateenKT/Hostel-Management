@@ -1195,7 +1195,8 @@ sap.ui.define([
 
         onPressAvatar: async function (oEvent) {
             const oUser = this._oLoggedInUser || {};
-            const sPhoto = "./image.jpg";
+            const fullUserData = this._oLoggedInUser || {};
+            console.log(" FULL HM_Login DATA:", fullUserData);
             try {
                 const sUserID = oUser.UserID || "";
                 if (!sUserID) {
@@ -1205,14 +1206,10 @@ sap.ui.define([
                 const filter = {
                     UserID: sUserID
                 };
-                // Use already available login data
-                const fullUserData = this._oLoggedInUser || {};
-                console.log("🔥 FULL HM_Login DATA:", fullUserData);
-                //  let fullUserData = {};
                 if (!this._isProfileRequested) {
                     this.createAvatarActionSheet();
                     this._oProfileActionSheet.openBy(oEvent.getSource());
-                    return;   // ❗ Stop execution, do NOT run rest of code yet
+                    return;
                 }
                 this._isProfileRequested = false;
                 //  Fetch only the logged-in user's data
@@ -1314,20 +1311,26 @@ sap.ui.define([
                     this.getView().addDependent(oDialog);
                 }
 
-                const base64Image = this.arrayBufferToBase64(oUser.FileContent.data);
-                const finalImage = "data:image/png;base64," + base64Image;
-
                 //  Create and bind the Profile Model
                 const oProfileModel = new JSONModel({
                     ...fullUserData,
-                    photo: finalImage || "",
+                    isEditMode: false,
+                    photo: "data:image/png;base64," + oUser.FileContent || "",
                     initials: oUser.UserName ? oUser.UserName.charAt(0).toUpperCase() : "",
                     name: oUser.UserName || "",
+                    UserID: oUser.UserID,
+                    Salutation: oUser.Salutation,
                     email: oUser.EmailID || "",
                     phone: oUser.MobileNo || "",
                     dob: this.Formatter.DateFormat(oUser.DateOfBirth) || "",
                     gender: oUser.Gender || "",
                     address: oUser.Address || "",
+                    state: oUser.State,
+                    country: oUser.Country,
+                    city: oUser.City,
+                    stdCode: oUser.STDCode,
+                    branchCode: oUser.BranchCode,
+                    role: oUser.Role,
                     bookings: aBookingData,
                     facility: aFacilitiData,
                     aCustomers: aCustomerDetails
@@ -1349,11 +1352,10 @@ sap.ui.define([
                     this._oProfileDialog = oDialog;
                     this.getView().addDependent(oDialog);
                 }
-                const base64Image = this.arrayBufferToBase64(oUser.FileContent.data);
-                const finalImage = "data:image/png;base64," + base64Image;
+
                 const oProfileModel = new sap.ui.model.json.JSONModel({
                     ...fullUserData,
-                    photo: finalImage || "",
+                    photo: "data:image/png;base64," + oUser.FileContent || "",
                     initials: oUser.UserName ? oUser.UserName.charAt(0).toUpperCase() : "",
                     name: oUser.UserName || "",
                     email: oUser.EmailID || "",
@@ -1372,14 +1374,64 @@ sap.ui.define([
             }
         },
 
-        arrayBufferToBase64: function (buffer) {
-            let binary = "";
-            let bytes = new Uint8Array(buffer);
-            let len = bytes.byteLength;
-            for (let i = 0; i < len; i++) {
-                binary += String.fromCharCode(bytes[i]);
+        onEditSaveProfile: async function () {
+            const oModel = this._oProfileDialog.getModel("profileData");
+            const isEditMode = oModel.getProperty("/isEditMode");
+
+            if (!isEditMode) {
+                oModel.setProperty("/isEditMode", true);
+                return;
             }
-            return window.btoa(binary);
+            const isMandatoryValid = (
+                utils._LCvalidateMandatoryField(this.byId("id_Name"), "ID") &&
+                utils._LCvalidateDate(this.byId("id_dob"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_gender"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_mail"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_country"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_state"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_city"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_phone"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_address"), "ID")
+            );
+
+            if (!isMandatoryValid) {
+                sap.m.MessageToast.show("Please fill all mandatory fields.");
+                return;
+            }
+            const payload = {
+                data: {
+                    UserName: oModel.getProperty("/name"),
+                    Salutation: oModel.getProperty("/Salutation"),
+                    MobileNo: oModel.getProperty("/phone"),
+                    EmailID: oModel.getProperty("/email"),
+                    DateOfBirth: oModel.getProperty("/dob"),
+                    Gender: oModel.getProperty("/gender"),
+                    Address: oModel.getProperty("/address"),
+                    City: oModel.getProperty("/city"),
+                    State: oModel.getProperty("/state"),
+                    Country: oModel.getProperty("/country"),
+                    STDCode: oModel.getProperty("/stdCode")
+                },
+                filters: { UserID: oModel.getProperty("/UserID") }
+            };
+
+            try {
+                sap.ui.core.BusyIndicator.show(0);
+
+                await this.ajaxUpdateWithJQuery("HM_Login", payload);
+
+                // update global user object
+                Object.assign(this._oLoggedInUser, payload.data);
+
+                sap.m.MessageToast.show("Profile Updated Successfully!");
+
+            } catch (err) {
+                console.error(err);
+                sap.m.MessageToast.show("Error updating profile");
+            } finally {
+                sap.ui.core.BusyIndicator.hide();
+                oModel.setProperty("/isEditMode", false);
+            }
         },
 
         onProfileclose: function () {
@@ -1451,13 +1503,16 @@ sap.ui.define([
                         new sap.m.Button({
                             text: "Enter into Profile",
                             icon: "sap-icon://customer",
+                            class: "myUnifiedBtn",
                             press: this._onEnterProfile.bind(this)
-                        }),
+                        }).addStyleClass("myUnifiedBtn"),
+
                         new sap.m.Button({
                             text: "Logout",
+                            class: "myUnifiedBtn",
                             icon: "sap-icon://log",
                             press: this._onLogout.bind(this)
-                        })
+                        }).addStyleClass("myUnifiedBtn")
                     ]
                 });
 
@@ -2948,8 +3003,6 @@ sap.ui.define([
             }
         },
 
-
-
         onPressAvatarEdit: function () {
             if (!this._oAvatarActionSheet) {
                 this._oAvatarActionSheet = new sap.m.ActionSheet({
@@ -3189,13 +3242,13 @@ sap.ui.define([
             if (!this._oPreviewDialog) {
                 this._oPreviewDialog = new sap.m.Dialog({
                     title: "Profile Photo",
-                    contentWidth: "auto",
-                    contentHeight: "auto",
+                    contentWidth: "300px",
+                    contentHeight: "300px",
                     verticalScrolling: true,
                     content: new sap.m.Image({
                         id: "previewProfileImage",
-                        width: "auto",
-                        height: "auto",
+                        width: "300px",
+                        height: "300px",
                         src: ""
                     }),
                     beginButton: new sap.m.Button({
@@ -3415,5 +3468,89 @@ sap.ui.define([
             }
         },
 
+         onChange: function(oEvent) {
+            const oInput = oEvent.getSource();
+            utils._LCvalidateMandatoryField(oEvent);
+            if (oInput.getValue() === "") oInput.setValueState("None");
+        },
+
+         onDateChange: function(oEvent) {
+            const oInput = oEvent.getSource();
+            utils._LCvalidateDate(oEvent);
+            if (oInput.getValue() === "") oInput.setValueState("None");
+        },
+
+        onCountrySelectionChange: function(oEvent) {
+            utils._LCvalidateMandatoryField(oEvent);
+            const oView = this.getView();
+            const oModel = oView.getModel("profileData");
+
+            const oStateCB = oView.byId("id_state");
+            const oCityCB = oView.byId("id_city");
+            const oSTD = oView.byId("id_std");
+
+            const oItem = oEvent.getSource().getSelectedItem();
+            if (!oItem) return;
+
+            // Clear state + city
+            oModel.setProperty("/State", "");
+            oModel.setProperty("/City", "");
+
+            oStateCB.setSelectedKey("");
+            oCityCB.setSelectedKey("");
+            oCityCB.setValue("");
+
+            oStateCB.getBinding("items")?.filter([]);
+            oCityCB.getBinding("items")?.filter([]);
+            oSTD.setValue("");
+
+            const sCountryName = oItem.getText();
+            const sCountryCode = oItem.getAdditionalText();
+
+            oModel.setProperty("/country", sCountryName);
+
+            // Fetch country STD code
+            const aCountryData = this.getOwnerComponent().getModel("CountryModel").getData();
+            const oCountryObj = aCountryData.find(c => c.countryName === sCountryName);
+            oModel.setProperty("/STDCode", oCountryObj?.stdCode || "");
+            oSTD.setValue(oCountryObj?.stdCode || "");
+
+            // Filter state list
+            oStateCB.getBinding("items")?.filter([
+                new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+            ]);
+        },
+
+         CC_onChangeState: function(oEvent) {
+            utils._LCvalidateMandatoryField(oEvent);
+            const oView = this.getView();
+            const oModel = oView.getModel("profileData");
+            const oItem = oEvent.getSource().getSelectedItem();
+            const oCityCB = oView.byId("id_city");
+            const oCountryCB = oView.byId("id_country");
+
+            // Reset
+            oModel.setProperty("/City", "");
+            oCityCB.setSelectedKey("");
+            oCityCB.setValue("");
+
+            oCityCB.getBinding("items")?.filter([]);
+
+            if (!oItem) {
+                oModel.setProperty("/State", "");
+                return;
+            }
+
+            const sStateName = oItem.getKey();
+            const sCountryCode = oCountryCB.getSelectedItem()?.getAdditionalText();
+
+            oModel.setProperty("/State", sStateName);
+
+            // Apply city filter
+            oCityCB.getBinding("items")?.filter([
+                new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, sStateName),
+                new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+            ]);
+        },
     });
 });
