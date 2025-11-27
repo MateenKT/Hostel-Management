@@ -2229,7 +2229,6 @@ aSelectedFacilities.forEach(fac => {
       },
        onPressAvatar: async function () {
             const oUser = this._oLoggedInUser || {};
-            const sPhoto = "./image.jpg";
             try {
                 const sUserID = oUser.UserID || "";
                 if (!sUserID) {
@@ -2239,10 +2238,9 @@ aSelectedFacilities.forEach(fac => {
                 const filter = {
                     UserID: sUserID
                 };
+                sap.ui.core.BusyIndicator.show(0);
                 //  Fetch only the logged-in user's data
                 const response = await this.ajaxReadWithJQuery("HM_Customer", filter);
-
-                console.log("HM_Customer Response:", response);
 
                 // Handle correct structure
                 const aCustomers = response?.commentData || response?.Customers || response?.value || [];
@@ -2266,55 +2264,59 @@ aSelectedFacilities.forEach(fac => {
                     DOB: response.DateOfBirth,
                     gender: response.Gender,
                     Address: response.PermanentAddress
-
-                })
-                );
-                // Combine all bookings from all customers
+                }));
+                 // Combine all bookings from all customers
                 const aAllBookings = aCustomers.flatMap(customer =>
                     Array.isArray(customer.Bookings) ? customer.Bookings : []
                 );
                 const aAllFacilitis = aCustomers.flatMap(customer =>
                     Array.isArray(customer.FaciltyItems) ? customer.FaciltyItems : []
                 );
+                let aBookingData = [];
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // avoid timezone issues
 
                 if (aAllBookings.length === 0) {
-                    sap.m.MessageToast.show("No booking history found.");
-                }
-
-               const today = new Date();
-                today.setHours(0, 0, 0, 0); // avoid timezone issues
-                const aBookingData = aAllBookings.map(booking => {
-                    const oStart = booking.StartDate ? new Date(booking.StartDate) : null;
-                    if (oStart) oStart.setHours(0, 0, 0, 0);
-
-                    let bookingGroup = "Others";
-
-                    if (booking.Status === "Completed") {
-                        bookingGroup = "Completed";
-                    } else if (booking.Status === "New" || booking.Status === "Assigned") {
-                        if (oStart <= today) {
-                            bookingGroup = "Ongoing";
-                        } else {
-                            bookingGroup = "Upcoming";
+                } else {
+                    aBookingData = aAllBookings.map(booking => {
+                        const oStart = booking.StartDate ? new Date(booking.StartDate) : null;
+                        if (oStart) {
+                            oStart.setHours(0, 0, 0, 0);
                         }
-                    }
 
-                    return {
-                        Startdate: oStart ? oStart.toLocaleDateString("en-GB") : "N/A",
-                        EndDate: booking.EndDate
-                            ? new Date(booking.EndDate).toLocaleDateString("en-GB") : "N/A",
-                        room: booking.BedType || "N/A",
-                        amount: booking.RentPrice || "N/A",
-                        status: booking.Status || "N/A",
-                        bookingGroup: bookingGroup,
-                        cutomerid: booking.CustomerID,
-                        branchCode: booking.BranchCode,
-                        noofperson: booking.NoOfPersons,
-                        grandTotal: booking.RentPrice,
-                        paymenytype: booking.PaymentType,
-                        RoomPrice: booking.RoomPrice
-                    };
-                });
+                        let bookingGroup = "Others";
+
+                        if (booking.Status === "Completed") {
+                            bookingGroup = "Completed";
+                        } else if (booking.Status === "New" || booking.Status === "Assigned") {
+                            if (oStart && oStart <= today) {
+                                bookingGroup = "Ongoing";
+                            } else {
+                                bookingGroup = "Upcoming";
+                            }
+                        }
+                        const customer = aCustomers.find(c => c.CustomerID === booking.CustomerID);
+                        const sSalutation = customer?.Salutation || "";
+                        const sFullName = customer?.CustomerName || "N/A";
+                        return {
+                            salutation: sSalutation,                // ✔ Add salutation
+                            customerName: `${sSalutation} ${sFullName}`.trim(),
+                            Startdate: oStart ? oStart.toLocaleDateString("en-GB") : "N/A",
+                            EndDate: booking.EndDate
+                                ? new Date(booking.EndDate).toLocaleDateString("en-GB") : "N/A",
+                            room: booking.BedType || "N/A",
+                            amount: booking.RentPrice || "N/A",
+                            status: booking.Status || "N/A",
+                            bookingGroup: bookingGroup,
+                            cutomerid: booking.CustomerID,
+                            branchCode: booking.BranchCode,
+                            noofperson: booking.NoOfPersons,
+                            grandTotal: booking.RentPrice,
+                            paymenytype: booking.PaymentType,
+                            RoomPrice: booking.RoomPrice
+                        };
+                    });
+                }
                 const aFacilitiData = aAllFacilitis.map(faciliti => ({
                     startdate: faciliti.StartDate ? new Date(faciliti.StartDate).toLocaleDateString("en-GB") : "N/A",
                     bookingid: faciliti.BookingID,
@@ -2325,7 +2327,6 @@ aSelectedFacilities.forEach(fac => {
                     facilitiPrice: faciliti.FacilitiPrice || "N/A",
                     status: faciliti.PaidStatus || "N/A"
                 }));
-
                 //  Load fragment if not already loaded
                 if (!this._oProfileDialog) {
                     const oDialog = await sap.ui.core.Fragment.load({
@@ -2338,7 +2339,7 @@ aSelectedFacilities.forEach(fac => {
 
                 //  Create and bind the Profile Model
                 const oProfileModel = new JSONModel({
-                    photo: sPhoto,
+                    photo: oUser.FileContent,
                     initials: oUser.UserName ? oUser.UserName.charAt(0).toUpperCase() : "",
                     name: oUser.UserName || "",
                     email: oUser.EmailID || "",
@@ -2370,9 +2371,11 @@ aSelectedFacilities.forEach(fac => {
                 //  Open the dialog
                 this._oProfileDialog.open();
 
-            } catch (error) {
-                console.error("Profile data load failed:", error);
-                sap.m.MessageToast.show("Error fetching profile details.");
+            } catch (err) {
+                sap.ui.core.BusyIndicator.hide();
+                sap.m.MessageToast.show(err.message || err.responseText);
+            } finally {
+                sap.ui.core.BusyIndicator.hide();
             }
         },
             onCancelPress: function () {
