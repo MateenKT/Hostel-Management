@@ -167,6 +167,15 @@ oHostelModel.setProperty("/SelectedPerson", "1");
                 authFlow: "signin" ,  // [signin, forgot, otp, reset]
                 isOtpBoxVisible: false
             }), "LoginViewModel");
+             oView.setModel(new JSONModel({
+                CustomerName: "",
+                MobileNo: "",
+                Gender: "",
+                DateOfBirth: "",
+                CustomerEmail: "",
+                RoomType: ""
+            }), "HostelModel");
+            oView.setModel(new JSONModel({ isEditMode: false }), "saveModel");
     },
     Roomdetails: async function () {
       try {
@@ -1243,8 +1252,7 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
   const diffTime = oEndDate - oStartDate;
 
   const iDays = Math.ceil(diffTime / (1000 * 3600 * 24));
-  const diffHours = Math.ceil(diffTime / (1000 * 60 * 60)); // ⭐ NEW: Total Hours
-
+  const diffHours = 1;
   if (iDays <= 0 && diffHours <= 0) {
     sap.m.MessageToast.show("End Date must be after Start Date");
     return null;
@@ -2419,6 +2427,7 @@ aSelectedFacilities.forEach(fac => {
 
                 //  Create and bind the Profile Model
                 const oProfileModel = new JSONModel({
+                  isEditMode: false,
                     photo: oUser.FileContent,
                     initials: oUser.UserName ? oUser.UserName.charAt(0).toUpperCase() : "",
                     name: oUser.UserName || "",
@@ -2463,6 +2472,93 @@ aSelectedFacilities.forEach(fac => {
       var oRouter = this.getOwnerComponent().getRouter()
       oRouter.navTo("RouteHostel")
     },
+     onFormEdit: async function () {
+            var oSaveModel = this.getView().getModel("saveModel");
+            var oedit = oSaveModel.getProperty("/isEditMode");
+            var oEdit = this._oProfileDialog.getModel("profileData").getData();
+            if (!oedit) {
+                oSaveModel.setProperty("/isEditMode", true);
+                return;
+            }
+            var oPayload = {
+                UserName: oEdit.name
+            }
+
+            const oId = this._oLoggedInUser || {};
+            const ID = oId.UserID || "";
+            const filter = {
+                UserID: ID
+            };
+            try {
+                await this.ajaxUpdateWithJQuery("HM_Login", {
+                    data: oPayload,
+                    filters: filter
+                });
+                sap.m.MessageToast.show("Data Saved successfully ");
+                oSaveModel.setProperty("/isEditMode", false);
+            } catch (error) {
+                sap.m.MessageToast.show("Failed");
+            }
+        },
+         onEditSaveProfile: async function () {
+            const oModel = this._oProfileDialog.getModel("profileData");
+            const isEditMode = oModel.getProperty("/isEditMode");
+
+            if (!isEditMode) {
+                oModel.setProperty("/isEditMode", true);
+                return;
+            }
+            const isMandatoryValid = (
+                utils._LCvalidateMandatoryField(this.byId("id_Name"), "ID") &&
+                utils._LCvalidateDate(this.byId("id_dob"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_gender"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_mail"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_country"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_state"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_city"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_phone"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_address"), "ID")
+            );
+
+            if (!isMandatoryValid) {
+                sap.m.MessageToast.show("Please fill all mandatory fields.");
+                return;
+            }
+            const payload = {
+                data: {
+                    UserName: oModel.getProperty("/name"),
+                    Salutation: oModel.getProperty("/Salutation"),
+                    MobileNo: oModel.getProperty("/phone"),
+                    EmailID: oModel.getProperty("/email"),
+                    DateOfBirth: oModel.getProperty("/dob"),
+                    Gender: oModel.getProperty("/gender"),
+                    Address: oModel.getProperty("/address"),
+                    City: oModel.getProperty("/city"),
+                    State: oModel.getProperty("/state"),
+                    Country: oModel.getProperty("/country"),
+                    STDCode: oModel.getProperty("/stdCode")
+                },
+                filters: { UserID: oModel.getProperty("/UserID") }
+            };
+
+            try {
+                sap.ui.core.BusyIndicator.show(0);
+
+                await this.ajaxUpdateWithJQuery("HM_Login", payload);
+
+                // update global user object
+                Object.assign(this._oLoggedInUser, payload.data);
+
+                sap.m.MessageToast.show("Profile Updated Successfully!");
+
+            } catch (err) {
+                console.error(err);
+                sap.m.MessageToast.show("Error updating profile");
+            } finally {
+                sap.ui.core.BusyIndicator.hide();
+                oModel.setProperty("/isEditMode", false);
+            }
+        },
 
      onPressBookingRow: function (oEvent) {
 

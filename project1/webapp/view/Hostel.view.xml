@@ -60,10 +60,10 @@
                             key="idRooms"
                             text="Rooms"
                         />
-                        <IconTabFilter
+                        <!-- <IconTabFilter
                             key="idFacilities"
                             text="Facilities"
-                        />
+                        /> -->
                         <IconTabFilter
                             key="idContact"
                             text="Contact"
@@ -303,7 +303,7 @@
                             description="Please select another Branch or City."
                         />
                     </Page>
-                    <ScrollContainer
+                    <!-- <ScrollContainer
                         id="idFacilities"
                         horizontal="false"
                         vertical="true"
@@ -314,7 +314,7 @@
                             fragmentName="sap.ui.com.project1.fragment.HomePage"
                             type="XML"
                         />
-                    </ScrollContainer>
+                    </ScrollContainer> -->
                     <ScrollContainer
                         id="idContact"
                         horizontal="false"
