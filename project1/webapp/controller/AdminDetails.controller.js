@@ -395,10 +395,11 @@ sap.ui.define([
             sap.ui.getCore().byId("editStartTime").setVisible(false)
             sap.ui.getCore().byId("editEndTime").setVisible(false)
             sap.ui.getCore().byId("editHours").setVisible(false)
-            sap.ui.getCore().byId("idMonthYearSelect").setSelectedKey("1")
+             sap.ui.getCore().byId("idMonthYearSelectFragment").setSelectedKey("1")
         },
 
         onEditDialogClose: function() {
+                 this.byId("Ad_id_idFacilityRoomTableDetails").removeSelections()
             this.HM_Dialog.close();
         },
 
@@ -416,7 +417,8 @@ sap.ui.define([
             utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
             var editdata = this.getView().getModel("edit")
             var data = this.getView().getModel("Facilities").getData()
-            var Sfacilityname = sap.ui.getCore().byId("editFacilityName").getSelectedKey()
+            var Sfacilityname = sap.ui.getCore().byId("editFacilityName").getSelectedKey() || editdata.getProperty("/FacilityName")
+
             var Duration = sap.ui.getCore().byId("idUnitType").getSelectedKey();
 
             var FPrice = data.find((item) => {
@@ -567,7 +569,7 @@ sap.ui.define([
                 utils._LCstrictValidationComboBox(sap.ui.getCore().byId("editFacilityName"), "ID") &&
                 // utils._LCstrictValidationComboBox(oView.byId("idBedType"), "ID") &&
                 (utils._LCstrictValidationComboBox(sap.ui.getCore().byId("idUnitType"), "ID")) &&
-                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("Ad_id_editStartDate"), "ID") &&
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("editStartDate"), "ID") &&
                 // utils._LCvalidateMandatoryField(oView.byId("idRoomNumber13"), "ID") &&
                 utils._LCvalidateMandatoryField(sap.ui.getCore().byId("editEndDate"), "ID")
 

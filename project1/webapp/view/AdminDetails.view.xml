@@ -185,7 +185,7 @@
                             />
 							<Text text="{CustomerData>/Person}" />
 							<!-- Dates -->
-							<core:Title text="Dates" />
+							<core:Title text="" />
 							<!-- Start Date -->
 							<Label
                                 text="Start Date"
@@ -566,7 +566,7 @@
 								<Text text="Facility Name" />
 							</Column>
 							<Column>
-								<Text text="Facility Price (₹)" />
+								<Text text="Facility Price" />
 							</Column>
 							<Column>
 								<Text text="Start Date" />
@@ -581,7 +581,7 @@
 								<Text text="Days" />
 							</Column>
 							<Column>
-								<Text text="Total (₹)" />
+								<Text text="Total Price" />
 							</Column>
 						</columns>
 						<items>
