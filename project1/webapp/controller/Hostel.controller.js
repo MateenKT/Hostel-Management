@@ -298,9 +298,9 @@ sap.ui.define([
             //  Update global model
             oGlobalModel.setData(oMergedData, true);
 
-            sap.m.MessageToast.show(
-                `Booking prepared for ${oData.BedType || "Room"} (${oData.SelectedPriceType} plan)`
-            );
+            // sap.m.MessageToast.show(
+            //     `Booking prepared for ${oData.BedType || "Room"} (${oData.SelectedPriceType} plan)`
+            // );
 
             // Close dialog
             if (this._oRoomDetailFragment) {
@@ -725,9 +725,7 @@ sap.ui.define([
             if (this._oSignDialog) this._oSignDialog.close();
         },
 
-        _onFieldclear: function () {
-            var ofield
-        },
+
 
         onSwitchToSignIn: function () {
             const vm = this.getView().getModel("LoginViewModel");
@@ -892,7 +890,7 @@ sap.ui.define([
                 sap.m.MessageToast.show("Passwords do not match");
                 return;
             }
-            $C("signUpConfirmPassword").setValueState("Success");
+            $C("signUpConfirmPassword").setValueState("None");
 
             const now = new Date();
             const TimeDate =
@@ -1089,39 +1087,12 @@ sap.ui.define([
             this.getView().getModel("LoginMode").setProperty("/City", value);
         },
 
+
         _LCvalidateName: function (oEvent) {
             utils._LCvalidateName(oEvent);
         },
 
-        FSM_onConfirm: function (oEvent) {
-            const oModel = this.getView().getModel("LoginMode");
 
-            // Get confirm directly from the control (live accurate value)
-            const confirm = oEvent?.getSource()?.getValue()?.trim() || "";
-
-            // Get main password directly from its input (not from model)
-            const pass = sap.ui.getCore().byId("signUpPassword").getValue().trim();
-
-            const oInput = sap.ui.getCore().byId("signUpConfirmPassword");
-
-            // Required
-            if (!confirm) {
-                oInput.setValueState("Error");
-                oInput.setValueStateText("Confirm Password is required");
-                return;
-            }
-
-            // Compare
-            if (pass !== confirm) {
-                oInput.setValueState("Error");
-                oInput.setValueStateText("Passwords do not match");
-                return;
-            }
-
-            // If matched → Green
-            oInput.setValueState("Success");
-            oInput.setValueStateText("Passwords matched");
-        },
 
         // onSignIn: async function() {
         //     var oModel = this.getView().getModel("LoginMode");
@@ -2201,12 +2172,72 @@ sap.ui.define([
         OnpressBookingDetails: function () {
 
         },
+        //.,.,.,.,.,.
+        FSM_onConfirm: function (oEvent) {
+            const oModel = this.getView().getModel("LoginMode");
 
+            // Get confirm directly from the control (live accurate value)
+            const confirm = oEvent?.getSource()?.getValue()?.trim() || "";
 
-        onOtpLive: function (e) {
-            const v = e.getParameter("value").trim();
-            sap.ui.getCore().byId("btnOtpVerify").setEnabled(v !== "");
+            // Get main password directly from its input (not from model)
+            const pass = sap.ui.getCore().byId("signUpPassword").getValue().trim();
+
+            const oInput = sap.ui.getCore().byId("signUpConfirmPassword");
+
+            // Required
+            if (!confirm) {
+                oInput.setValueState("Error");
+                oInput.setValueStateText("Confirm Password is required");
+                return;
+            }
+
+            // Compare
+            if (pass !== confirm) {
+                oInput.setValueState("Error");
+                oInput.setValueStateText("Passwords do not match");
+                return;
+            }
+
+            // If matched → Green
+            oInput.setValueState("None");
+            // oInput.setValueStateText("Passwords matched");
         },
+        Forget_onConfirm: function (oEvent) {
+            const confirm = oEvent.getSource().getValue().trim();
+            const pass = sap.ui.getCore().byId("newPass").getValue().trim();
+            const oInput = sap.ui.getCore().byId("confPass");
+
+            if (!confirm) {
+                oInput.setValueState("Error");
+                oInput.setValueStateText("Confirm Password is required");
+                return;
+            }
+
+            if (pass !== confirm) {
+                oInput.setValueState("Error");
+                oInput.setValueStateText("Passwords do not match");
+                return;
+            }
+
+            oInput.setValueState("None");
+            oInput.setValueStateText("Passwords matched");
+        },
+
+        onOtpLive: function (oEvent) {
+            const sInput = oEvent.getSource();
+            const sVal = oEvent.getParameter("value").replace(/\D/g, ""); // allow digits only
+
+            sInput.setValue(sVal);
+
+            // Keep it in error state until full 6 digits
+            if (sVal.length === 6) {
+                sInput.setValueState(sap.ui.core.ValueState.None);
+            } else {
+                sInput.setValueState(sap.ui.core.ValueState.Error);
+                sInput.setValueStateText("Enter a valid 6-digit OTP");
+            }
+        },
+
 
 
         onBackToForgot: function () {
@@ -2219,32 +2250,68 @@ sap.ui.define([
 
 
 
+        // onForgotPassword: function () {
+        //     const vm = this.getView().getModel("LoginViewModel");
+        //     vm.setProperty("/authFlow", "forgot");
+
+        //     this._clearAllAuthFields();
+
+        //     // 🔥 Change Title to “Recover Password”
+        //     sap.ui.getCore().byId("authDialog")
+        //         .getCustomHeader()
+        //         .getContentMiddle()[0]
+        //         .setText("Reset Password");
+
+        //     this._showPanel("forgotFlowPanel");
+        //     this._showForgotSection("secForgotUser");
+        //     sap.ui.getCore().byId("btnFPNext").setEnabled(true);
+        //     sap.ui.getCore().byId("btnOtpVerify").setEnabled(true);
+        //     sap.ui.getCore().byId("btnUpdatePass").setEnabled(true);
+
+
+
+        // },
+
         onForgotPassword: function () {
             const vm = this.getView().getModel("LoginViewModel");
             vm.setProperty("/authFlow", "forgot");
 
             this._clearAllAuthFields();
 
-            // 🔥 Change Title to “Recover Password”
+            // Change Title to “Reset Password”
             sap.ui.getCore().byId("authDialog")
                 .getCustomHeader()
                 .getContentMiddle()[0]
-                .setText("Recover Password");
+                .setText("Reset Password");
 
+            // Show forgot panel
             this._showPanel("forgotFlowPanel");
-            this._showForgotSection("secForgotUser");
+
+            // Show only step-1 here 👇👇 (THIS WAS MISSING)
+            sap.ui.getCore().byId("fpStepOtp").setVisible(false);
+            sap.ui.getCore().byId("fpStepReset").setVisible(false);
+
+            // Keep your button enabling (as YOU want)
+            sap.ui.getCore().byId("btnFPNext").setEnabled(true);
+            sap.ui.getCore().byId("btnOtpVerify").setEnabled(true);
+            sap.ui.getCore().byId("btnUpdatePass").setEnabled(true);
+
+            // Also enable Step-1 input fields again
+            sap.ui.getCore().byId("fpUserId").setEnabled(true);
+            sap.ui.getCore().byId("fpUserName").setEnabled(true);
         },
 
 
 
 
-        _validateFPFields: function () {
-            let id = sap.ui.getCore().byId("fpUserId").getValue();
-            let name = sap.ui.getCore().byId("fpUserName").getValue();
-            let btn = this._oForgotDialog.getBeginButton();
 
-            btn.setEnabled(id !== "" && name !== "");
-        },
+        // _validateFPFields: function () {
+        //     let id = sap.ui.getCore().byId("fpUserId").getValue();
+        //     let name = sap.ui.getCore().byId("fpUserName").getValue();
+        //     let btn = this._oForgotDialog.getBeginButton();
+
+        //     btn.setEnabled(id !== "" && name !== "");
+        // },
 
         onSelectLoginMode: function (e) {
             const selected = e.getSource().getText(); // Password or OTP
@@ -2280,78 +2347,75 @@ sap.ui.define([
         },
 
 
-        onFPValidate: function () {
-            const id = sap.ui.getCore().byId("fpUserId").getValue().trim();
-            const name = sap.ui.getCore().byId("fpUserName").getValue().trim();
-            sap.ui.getCore().byId("btnFPNext").setEnabled(id !== "" && name !== "");
-        },
 
 
 
-        _sendOTPToBackend: function (id, name) {
-            let url = "https://rest.kalpavrikshatechnologies.com/HostelSendOTP";
 
-            let payload = {
-                UserID: id,
-                UserName: name,
-                Type: "OTP"
-            };
+        // _sendOTPToBackend: function (id, name) {
+        //     let url = "https://rest.kalpavrikshatechnologies.com/HostelSendOTP";
 
-            $.ajax({
-                url: url,
-                method: "POST",
-                contentType: "application/json",
-                headers: { // as provided
-                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-                },
-                data: JSON.stringify(payload),
-                success: function () {
-                    sap.m.MessageToast.show("OTP sent to email");
-                    this._oForgotDialog.close();
-                    this._openOTPDialog(id, name);
-                }.bind(this),
-                error: function () {
-                    sap.m.MessageToast.show("Failed to send OTP");
-                }
-            });
-        },
+        //     let payload = {
+        //         UserID: id,
+        //         UserName: name,
+        //         Type: "OTP"
+        //     };
 
-        _openOTPDialog: function () {
-            this._oOTPDialog = new sap.m.Dialog({
-                title: "Enter OTP",
-                type: "Message",
-                content: [
-                    new sap.m.Label({
-                        text: "OTP",
-                        required: true
-                    }),
-                    new sap.m.Input("fpOTP", {
-                        placeholder: "Enter OTP"
-                    })
-                ],
-                beginButton: new sap.m.Button({
-                    text: "Verify",
-                    type: "Accept",
-                    press: this._onVerifyOTP.bind(this)
-                }),
-                endButton: new sap.m.Button({
-                    text: "Cancel",
-                    press: function () {
-                        this._oOTPDialog.close();
-                    }.bind(this)
-                })
-            });
-            let btn = this._oOTPDialog.getBeginButton();
-            btn.setEnabled(false);
+        //     $.ajax({
+        //         url: url,
+        //         method: "POST",
+        //         contentType: "application/json",
+        //         headers: { // as provided
+        //             name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+        //             password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+        //         },
+        //         data: JSON.stringify(payload),
+        //         success: function () {
+        //             sap.m.MessageToast.show("OTP sent to email");
+        //             this._oForgotDialog.close();
+        //             this._openOTPDialog(id, name);
+        //         }.bind(this),
+        //         error: function () {
+        //             sap.m.MessageToast.show("Failed to send OTP");
+        //         }
+        //     });
+        // },
 
-            sap.ui.getCore().byId("fpOTP").attachLiveChange(function (oEvt) {
-                btn.setEnabled(oEvt.getParameter("value").trim() !== "");
-            });
+        // _openOTPDialog: function () {
+        //     this._oOTPDialog = new sap.m.Dialog({
+        //         title: "Enter OTP",
+        //         type: "Message",
+        //         content: [
+        //             new sap.m.Label({
+        //                 text: "OTP",
+        //                 required: true
+        //             }),
+        //             new sap.m.Input("fpOTP", {
+        //                 placeholder: "Enter OTP"
+        //             })
+        //         ],
+        //         beginButton: new sap.m.Button({
+        //             text: "Verify",
+        //             type: "Accept",
+        //             press: this._onVerifyOTP.bind(this)
+        //         }),
+        //         endButton: new sap.m.Button({
+        //             text: "Cancel",
+        //             press: function () {
+        //                 this._oOTPDialog.close();
+        //             }.bind(this)
+        //         })
+        //     });
+        //     let btn = this._oOTPDialog.getBeginButton();
+        //     btn.setEnabled(false);
+
+        //     sap.ui.getCore().byId("fpOTP").attachLiveChange(function (oEvt) {
+        //         btn.setEnabled(oEvt.getParameter("value").trim() !== "");
+        //     });
 
 
-            this._oOTPDialog.open();
-        },
+
+        //     this._oOTPDialog.open();
+        // },
 
 
         _resetAuthDialog: function () {
@@ -2483,16 +2547,81 @@ sap.ui.define([
         //     this._oResetDialog.open();
         // },
 
-        _clearForgotFlow: function () {
-            ["fpUserId", "fpUserName", "fpOTP", "newPass", "confPass"].forEach(id => {
-                const c = sap.ui.getCore().byId(id);
-                if (c) {
-                    c.setValue("");
-                    c.setValueState("None");
-                }
-            });
-            this._oResetUser = null;
-        },
+        // _clearForgotFlow: function () {
+        //     ["fpUserId", "fpUserName", "fpOTP", "newPass", "confPass"].forEach(id => {
+        //         const c = sap.ui.getCore().byId(id);
+        //         if (c) {
+        //             c.setValue("");
+        //             c.setValueState("None");
+        //         }
+        //     });
+        //     this._oResetUser = null;
+        // },
+
+
+
+
+        // onSubmitNewPassword: async function () {
+        //     const oNew = sap.ui.getCore().byId("newPass");
+        //     const oConf = sap.ui.getCore().byId("confPass");
+
+        //     const pass = oNew.getValue().trim();
+        //     const confirm = oConf.getValue().trim();
+
+        //     // Reset old states
+        //     oNew.setValueState("None");
+        //     oConf.setValueState("None");
+
+        //     // 1) Validate using CORRECT rule
+        //     if (!utils._LCvalidatePassword(oNew)) {
+        //         return;
+        //     }
+
+
+        //     // 2) Confirm required
+        //     if (!confirm) {
+        //         oConf.setValueState("Error");
+        //         oConf.setValueStateText("Confirm Password is required");
+        //         sap.m.MessageToast.show("Confirm Password is required");
+        //         return;
+        //     }
+
+        //     // 3) Must match
+        //     if (pass !== confirm) {
+        //         oConf.setValueState("Error");
+        //         oConf.setValueStateText("Passwords do not match");
+        //         sap.m.MessageToast.show("Passwords do not match");
+        //         return;
+        //     }
+
+        //     // PASSED VALIDATION 🎉
+        //     oConf.setValueState("Success");
+        //     oConf.setValueStateText("Passwords matched");
+
+        //     try {
+        //         await this.ajaxUpdateWithJQuery("HM_Login", {
+        //             data: { Password: btoa(pass) },
+        //             filters: { UserID: this._oResetUser?.UserID }
+        //         });
+
+        //         sap.m.MessageToast.show("Password updated successfully");
+
+        //         this._clearAllAuthFields?.();
+
+        //         sap.ui.getCore().byId("fpOTP").setEnabled(false);
+        //         sap.ui.getCore().byId("btnOtpVerify").setEnabled(false);
+        //         sap.ui.getCore().byId("newPass").setEnabled(false);
+        //         sap.ui.getCore().byId("confPass").setEnabled(false);
+        //         sap.ui.getCore().byId("btnUpdatePass").setEnabled(false);
+
+        //         const vm = this.getView().getModel("LoginViewModel");
+        //         vm.setProperty("/authFlow", "signin");
+        //         this._showPanel("signInPanel");
+
+        //     } catch (err) {
+        //         sap.m.MessageToast.show("Password reset failed");
+        //     }
+        // },
 
         onSubmitNewPassword: async function () {
             const oNew = sap.ui.getCore().byId("newPass");
@@ -2501,17 +2630,26 @@ sap.ui.define([
             const pass = oNew.getValue().trim();
             const confirm = oConf.getValue().trim();
 
-            // Reset old states
+            // RESET state before validation
             oNew.setValueState("None");
             oConf.setValueState("None");
 
-            // 1) Validate using CORRECT rule
-            if (!utils._LCvalidatePassword(oNew)) {
+            // 1) Required check for New Password
+            if (!pass) {
+                oNew.setValueState("Error");
+                oNew.setValueStateText("Password is required");
+                sap.m.MessageToast.show("Password is required");
                 return;
             }
 
+            // 2) Format rule check
+            if (!utils._LCvalidatePassword(oNew)) {
+                oNew.setValueState("Error");
+                oNew.setValueStateText("Must contain 1 uppercase, 1 lowercase, 1 number & 1 special character");
+                return;
+            }
 
-            // 2) Confirm required
+            // 3) Required check for Confirm Password
             if (!confirm) {
                 oConf.setValueState("Error");
                 oConf.setValueStateText("Confirm Password is required");
@@ -2519,7 +2657,7 @@ sap.ui.define([
                 return;
             }
 
-            // 3) Must match
+            // 4) Match both
             if (pass !== confirm) {
                 oConf.setValueState("Error");
                 oConf.setValueStateText("Passwords do not match");
@@ -2527,9 +2665,9 @@ sap.ui.define([
                 return;
             }
 
-            // PASSED VALIDATION 🎉
-            oConf.setValueState("Success");
-            oConf.setValueStateText("Passwords matched");
+            // 🔥 PASSED ALL VALIDATIONS → SUCCESS STATE
+            oConf.setValueState("None");
+            // oConf.setValueStateText("Passwords matched");
 
             try {
                 await this.ajaxUpdateWithJQuery("HM_Login", {
@@ -2537,25 +2675,42 @@ sap.ui.define([
                     filters: { UserID: this._oResetUser?.UserID }
                 });
 
-                sap.m.MessageToast.show("Password updated successfully");
 
-                this._clearAllAuthFields?.();
+                sap.m.MessageBox.success("Password updated successfully", {
+                    title: "Success",
+                    onClose: () => {
 
-                sap.ui.getCore().byId("fpOTP").setEnabled(false);
-                sap.ui.getCore().byId("btnOtpVerify").setEnabled(false);
-                sap.ui.getCore().byId("newPass").setEnabled(false);
-                sap.ui.getCore().byId("confPass").setEnabled(false);
-                sap.ui.getCore().byId("btnUpdatePass").setEnabled(false);
+                        // fully clean values
+                        this._clearAllAuthFields?.();
+                        this._clearForgotFlow?.();
 
-                const vm = this.getView().getModel("LoginViewModel");
-                vm.setProperty("/authFlow", "signin");
-                this._showPanel("signInPanel");
+                        // hide Step 2 & Step 3
+                        sap.ui.getCore().byId("fpStepOtp").setVisible(false);
+                        sap.ui.getCore().byId("fpStepReset").setVisible(false);
+
+                        // enable Step 1 inputs again
+                        sap.ui.getCore().byId("fpUserId").setEnabled(true);
+                        sap.ui.getCore().byId("fpUserName").setEnabled(true);
+
+                        // reset dialog title
+                        sap.ui.getCore().byId("authDialog")
+                            .getCustomHeader()
+                            .getContentMiddle()[0]
+                            .setText("Hostel Access Portal");
+
+                        // switch flow back to signin
+                        const vm = this.getView().getModel("LoginViewModel");
+                        vm.setProperty("/authFlow", "signin");
+
+                        // show login panel
+                        this._showPanel("signInPanel");
+                    }
+                });
 
             } catch (err) {
                 sap.m.MessageToast.show("Password reset failed");
             }
         },
-
 
         _resetAllAuthFields: function () {
             ["signInuserid", "signInusername", "signinPassword",
@@ -2572,26 +2727,17 @@ sap.ui.define([
 
         _verifyOTPWithBackend: async function (otp) {
             sap.ui.core.BusyIndicator.show(0);
-            console.log("OTP SENT FOR VERIFICATION:", otp.trim());
 
             try {
-                const oResp = await $.ajax({
-                    url: "https://rest.kalpavrikshatechnologies.com/HM_Login",
-                    method: "GET",
-                    contentType: "application/json",
-                    headers: {
-                        name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                        password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-                    },
-                    data: {
-                        UserID: this._oResetUser.UserID,
-                        UserName: this._oResetUser.UserName,
-                        OTP: otp.trim()
-                    }
-                });
-                console.log("OTP SENT FOR VERIFICATION:", otp.trim());
+                const oPayload = {
+                    UserID: this._oResetUser.UserID,
+                    UserName: this._oResetUser.UserName,
+                    OTP: otp.trim()
+                };
 
-                console.log("Verify OTP Response:", oResp);
+                // Call the BaseController Generic Read method
+                const oResp = await this.ajaxReadWithJQuery("HM_Login", oPayload);
+
                 return oResp?.success === true;
 
             } catch (err) {
@@ -2602,6 +2748,82 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide();
             }
         },
+
+
+        // onValidateUser: async function () {
+        //     const oIdCtrl = sap.ui.getCore().byId("fpUserId");
+        //     const oNameCtrl = sap.ui.getCore().byId("fpUserName");
+
+        //     // Frontend mandatory validation
+        //     const okId = utils._LCvalidateMandatoryField(oIdCtrl, "ID");
+        //     const okName = utils._LCvalidateMandatoryField(oNameCtrl, "ID");
+
+        //     if (!okId || !okName) {
+        //         sap.m.MessageToast.show("Enter valid User ID and User Name");
+        //         return;
+        //     }
+
+        //     const sUserId = oIdCtrl.getValue().trim();
+        //     const sUserName = oNameCtrl.getValue().trim();
+
+        //     const payload = {
+        //         UserID: sUserId,
+        //         UserName: sUserName,
+        //         Type: "OTP"
+        //     };
+        //     sap.ui.core.BusyIndicator.show(0);
+        //     try {
+        //         const oResp = await $.ajax({
+        //             url: "https://rest.kalpavrikshatechnologies.com/HostelSendOTP",
+        //             method: "POST",
+        //             contentType: "application/json",
+        //             headers: {
+        //                 name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+        //                 password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+        //             },
+        //             data: JSON.stringify(payload)
+        //         });
+        //         alert(oResp.OTP);
+        //         if (oResp?.success) {
+        //             sap.m.MessageToast.show("OTP sent! Check your email.");
+
+        //             // store user for reset flow
+        //             this._oResetUser = {
+        //                 UserID: sUserId,
+        //                 UserName: sUserName
+        //             };
+
+        //             // change flow section
+        //             const vm = this.getView().getModel("LoginViewModel");
+        //             vm.setProperty("/authFlow", "forgot");
+        //             this._showForgotSection("secForgotOTP");
+
+        //             // ====== UI STATE CONTROL ======
+
+        //             // Step-1 locked
+        //             sap.ui.getCore().byId("fpUserId").setEnabled(false);
+        //             sap.ui.getCore().byId("fpUserName").setEnabled(false);
+        //             // sap.ui.getCore().byId("btnFPNext").setEnabled(false);
+
+        //             // Step-2 visible but verify disabled until typing
+        //             sap.ui.getCore().byId("fpStepOtp").setVisible(true);
+        //             sap.ui.getCore().byId("fpOTP").setEnabled(true);
+        //             // sap.ui.getCore().byId("btnOtpVerify").setEnabled(false);
+
+        //             // If you have a Back-to-login button, show it only now
+        //             sap.ui.getCore().byId("forgotFlowPanel").$()
+        //                 .find("button[text='Back to Login']").show();
+        //         }
+        //         else {
+        //             sap.m.MessageToast.show("No user found with given ID / Name");
+        //         }
+        //     } catch (err) {
+        //         sap.m.MessageToast.show("Invalid User ID / User Name");
+        //     } finally {
+        //         sap.ui.core.BusyIndicator.hide();
+        //     }
+        // },
+
 
 
         onValidateUser: async function () {
@@ -2625,65 +2847,50 @@ sap.ui.define([
                 UserName: sUserName,
                 Type: "OTP"
             };
+
             sap.ui.core.BusyIndicator.show(0);
+
             try {
-                const oResp = await $.ajax({
-                    url: "https://rest.kalpavrikshatechnologies.com/HostelSendOTP",
-                    method: "POST",
-                    contentType: "application/json",
-                    headers: {
-                        name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                        password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-                    },
-                    data: JSON.stringify(payload)
-                });
+                // 🔥 reuse BaseController POST method
+                const oResp = await this.ajaxCreateWithJQuery("HostelSendOTP", payload);
 
                 if (oResp?.success) {
                     sap.m.MessageToast.show("OTP sent! Check your email.");
+                    alert(oResp.OTP);  // remove this in production
 
-                    // store who we are resetting
+                    // Store user for OTP verification phase
                     this._oResetUser = {
                         UserID: sUserId,
                         UserName: sUserName
                     };
 
+                    // Switch UI flow state
                     const vm = this.getView().getModel("LoginViewModel");
                     vm.setProperty("/authFlow", "forgot");
-
-                    // Updated line:
                     this._showForgotSection("secForgotOTP");
 
-                    // Enable only OTP input, disable verify until typing starts
-                    sap.ui.getCore().byId("fpOTP").setEnabled(true);
-                    sap.ui.getCore().byId("btnOtpVerify").setEnabled(false);
+                    // ====== UI STATE CONTROL ======
+                    oIdCtrl.setEnabled(false);
+                    oNameCtrl.setEnabled(false);
+
                     sap.ui.getCore().byId("fpStepOtp").setVisible(true);
-
-                    /////
-                    sap.ui.getCore().byId("fpStepOtp").setVisible(true);
-
-                    // disable Step 1 inputs & button
-                    sap.ui.getCore().byId("fpUserId").setEnabled(false);
-                    sap.ui.getCore().byId("fpUserName").setEnabled(false);
-                    sap.ui.getCore().byId("btnFPNext").setEnabled(false);
-
-                    // enable Step 2
                     sap.ui.getCore().byId("fpOTP").setEnabled(true);
-                    sap.ui.getCore().byId("btnOtpVerify").setEnabled(true);
 
-                    // show Back to Login (only here & step-1)
-                    sap.ui.getCore().byId("forgotFlowPanel").$().find("button[text='Back to Login']").show();
-                    //////
-
-
+                    // Show Back button if it exists
+                    sap.ui.getCore().byId("forgotFlowPanel").$()
+                        .find("button[text='Back to Login']").show();
                 } else {
                     sap.m.MessageToast.show("No user found with given ID / Name");
                 }
             } catch (err) {
-                sap.m.MessageToast.show("Unable to send OTP, try again later.");
+                sap.m.MessageToast.show("Invalid User ID / User Name");
+                console.error("Send OTP Error:", err);
             } finally {
                 sap.ui.core.BusyIndicator.hide();
             }
         },
+
+
 
         _showForgotSection: function (section) {
             ["secForgotUser", "secForgotOTP", "secForgotReset"].forEach(id => {
@@ -2788,9 +2995,25 @@ sap.ui.define([
             const otp = (flow === "forgot")
                 ? sap.ui.getCore().byId("fpOTP").getValue().trim()
                 : sap.ui.getCore().byId("signInOTP").getValue().trim();
+            // use same validation rule from onOtpLive
+            if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
+                const oInput = (flow === "forgot")
+                    ? sap.ui.getCore().byId("fpOTP")
+                    : sap.ui.getCore().byId("signInOTP");
+
+                oInput.setValueState(sap.ui.core.ValueState.Error);
+                oInput.setValueStateText("Enter a valid 6-digit OTP");
+                sap.m.MessageToast.show("Invalid OTP");
+                return;
+            }
+
 
             if (!otp) {
                 sap.m.MessageToast.show("Enter OTP");
+                //fpOTP need to set on error state
+                sap.ui.getCore().byId("fpOTP").setValueState(sap.ui.core.ValueState.Error);
+                sap.ui.getCore().byId("fpOTP").setValueStateText("Please enter OTP");
+
                 return;
             }
 
@@ -2810,8 +3033,7 @@ sap.ui.define([
                 sap.ui.getCore().byId("confPass").setEnabled(true).setValueState("None");
                 sap.ui.getCore().byId("btnUpdatePass").setEnabled(true);
                 sap.ui.getCore().byId("fpStepReset").setVisible(true);
-                // 👉 Place it ONLY here, AFTER UI enabled and visible
-                ////// this._enableForgotStep("fpStepReset");
+
 
                 // show Step 3
                 sap.ui.getCore().byId("fpStepReset").setVisible(true);
@@ -2890,7 +3112,6 @@ sap.ui.define([
             // re-enable Step 1
             sap.ui.getCore().byId("fpUserId").setEnabled(true);
             sap.ui.getCore().byId("fpUserName").setEnabled(true);
-            sap.ui.getCore().byId("btnFPNext").setEnabled(false); // disabled until valid
             sap.ui.getCore().byId("authDialog")
                 .getCustomHeader()
                 .getContentMiddle()[0]
@@ -2909,77 +3130,77 @@ sap.ui.define([
 
 
 
-        _openOTPLoginDialog: function (id, name) {
-            this._oLoginOTPDialog = new sap.m.Dialog({
-                title: "Enter OTP to Login",
-                content: [
-                    new sap.m.Label({
-                        text: "OTP"
-                    }),
-                    new sap.m.Input("loginOTP", {
-                        placeholder: "Enter OTP"
-                    })
-                ],
-                beginButton: new sap.m.Button({
-                    text: "Login",
-                    type: "Accept",
-                    press: this._verifyLoginOTP.bind(this)
-                }),
-                endButton: new sap.m.Button({
-                    text: "Cancel",
-                    press: () => this._oLoginOTPDialog.close()
-                })
-            });
+        // _openOTPLoginDialog: function (id, name) {
+        //     this._oLoginOTPDialog = new sap.m.Dialog({
+        //         title: "Enter OTP to Login",
+        //         content: [
+        //             new sap.m.Label({
+        //                 text: "OTP"
+        //             }),
+        //             new sap.m.Input("loginOTP", {
+        //                 placeholder: "Enter OTP"
+        //             })
+        //         ],
+        //         beginButton: new sap.m.Button({
+        //             text: "Login",
+        //             type: "Accept",
+        //             press: this._verifyLoginOTP.bind(this)
+        //         }),
+        //         endButton: new sap.m.Button({
+        //             text: "Cancel",
+        //             press: () => this._oLoginOTPDialog.close()
+        //         })
+        //     });
 
-            this._storedLoginCreds = {
-                UserID: id,
-                UserName: name
-            };
-            sap.ui.getCore().byId("loginOTP").attachLiveChange((oEvt) => {
-                this._oLoginOTPDialog.getBeginButton().setEnabled(oEvt.getParameter("value").trim() !== "");
-            });
+        //     this._storedLoginCreds = {
+        //         UserID: id,
+        //         UserName: name
+        //     };
+        //     sap.ui.getCore().byId("loginOTP").attachLiveChange((oEvt) => {
+        //         this._oLoginOTPDialog.getBeginButton().setEnabled(oEvt.getParameter("value").trim() !== "");
+        //     });
 
-            this._oLoginOTPDialog.open();
-        },
+        //     this._oLoginOTPDialog.open();
+        // },
 
 
 
-        _verifyLoginOTP: async function () {
-            const otp = sap.ui.getCore().byId("loginOTP").getValue().trim();
+        // _verifyLoginOTP: async function () {
+        //     const otp = sap.ui.getCore().byId("loginOTP").getValue().trim();
 
-            sap.ui.core.BusyIndicator.show(0);
+        //     sap.ui.core.BusyIndicator.show(0);
 
-            try {
-                const oResp = await $.ajax({
-                    url: "https://rest.kalpavrikshatechnologies.com/HM_Login",
-                    method: "GET",
-                    contentType: "application/json",
-                    headers: {
-                        name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                        password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-                    },
-                    data: {
-                        UserID: this._storedLoginCreds.UserID,
-                        UserName: this._storedLoginCreds.UserName,
-                        OTP: otp
-                    }
-                });
+        //     try {
+        //         const oResp = await $.ajax({
+        //             url: "https://rest.kalpavrikshatechnologies.com/HM_Login",
+        //             method: "GET",
+        //             contentType: "application/json",
+        //             headers: {
+        //                 name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
+        //                 password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
+        //             },
+        //             data: {
+        //                 UserID: this._storedLoginCreds.UserID,
+        //                 UserName: this._storedLoginCreds.UserName,
+        //                 OTP: otp
+        //             }
+        //         });
 
-                if (oResp?.success) {
-                    sap.m.MessageToast.show("Login Successful!");
-                    this._setLoggedInUser(oResp.data[0]);
-                    this._oLoginOTPDialog.close();
-                    this._oSignDialog.close();
-                } else {
-                    sap.m.MessageToast.show("Incorrect OTP");
-                }
+        //         if (oResp?.success) {
+        //             sap.m.MessageToast.show("Login Successful!");
+        //             this._setLoggedInUser(oResp.data[0]);
+        //             this._oLoginOTPDialog.close();
+        //             this._oSignDialog.close();
+        //         } else {
+        //             sap.m.MessageToast.show("Incorrect OTP");
+        //         }
 
-            } catch (err) {
-                sap.m.MessageToast.show("Login failed");
-            } finally {
-                sap.ui.core.BusyIndicator.hide();
-            }
-        },
+        //     } catch (err) {
+        //         sap.m.MessageToast.show("Login failed");
+        //     } finally {
+        //         sap.ui.core.BusyIndicator.hide();
+        //     }
+        // },
 
 
 

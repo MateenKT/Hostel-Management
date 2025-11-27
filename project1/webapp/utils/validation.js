@@ -639,7 +639,7 @@ sap.ui.define([], function() {
                     oField.setValueStateText("Enter 10-digit valid mobile number");
                     return false;
                 }
-                oField.setValueState("Success");
+                oField.setValueState("None");
                 return true;
             }
 
@@ -651,7 +651,7 @@ sap.ui.define([], function() {
                 return false;
             }
 
-            oField.setValueState("Success");
+            oField.setValueState("None");
             return true;
         },
 
