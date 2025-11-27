@@ -58,6 +58,44 @@ sap.ui.define([
       
 
         },
+        applyCountryStateCityFilters: async function () {
+    const oModel     = this.getView().getModel("CustomerData");
+    const oCountryCB = this.byId("CC_id_Country");
+    const oStateCB   = this.byId("CC_id_State");
+    const oSourceCB  = this.byId("CC_id_City");
+ 
+   const sCountry   = oModel.getProperty("/Country");
+    const sState     = oModel.getProperty("/State");
+    const sSource    = oModel.getProperty("/City");
+ 
+    oStateCB.getBinding("items")?.filter([]);
+    oSourceCB.getBinding("items")?.filter([]);
+ 
+    if (sCountry) {
+        const aCountryData = this.getView().getModel("CountryModel").getData();
+        const oCountryObj = aCountryData.find(c => c.countryName === sCountry);
+ 
+        if (oCountryObj) {
+            const sCountryCode = oCountryObj.code;
+ 
+            oStateCB.getBinding("items")?.filter([
+                new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+            ]);
+ 
+            if (sState) {
+                const aFilters = [
+                    new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, sState),
+                    new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+                ];
+                oSourceCB.getBinding("items")?.filter(aFilters);
+            }
+        }
+    }
+ 
+    oCountryCB.setValue(sCountry || "");
+    oStateCB.setValue(sState || "");
+    oSourceCB.setValue(sSource || "");
+},
 
         Facilitysearch: function() {
             var data = this.getView().getModel("CustomerData").getData()
@@ -729,6 +767,7 @@ const totals = this.calculateTotals(aPersons, oCustomerData.RentPrice);
         },
 
         onEditBooking: function() {
+            this.applyCountryStateCityFilters()
             this.getView().getModel("VisibleModel").setProperty("/visible", true)
             var data = this.getView().getModel("CustomerData").getData()
             var model = this.getView().getModel("Bookingmodel")
@@ -1184,8 +1223,31 @@ const totals = this.calculateTotals(aPersons, oCustomerData.RentPrice);
                 if (sUnit === "daily" || sUnit === "Per Day") {
                     fPrice = parseFloat(oSelectedBed.Price || 0);
                     // Calculate number of days
-                    var sStart = oBookingModel.getProperty("/StartDate");
-                    var sEnd = oBookingModel.getProperty("/EndDate");
+                     var sStartDate = oBookingModel.getProperty("/StartDate");
+    var sEndDate = oBookingModel.getProperty("/EndDate");
+
+    // Declare normalized variables
+    var sStart = "";
+    var sEnd = "";
+
+    // Normalize Start Date
+    if (sStartDate) {
+        if (sStartDate.includes("/")) {
+            // Convert dd/MM/yyyy → yyyy-MM-dd
+            sStart = sStartDate.split("/").reverse().join("-");
+        } else {
+            sStart = sStartDate;
+        }
+    }
+
+    // Normalize End Date
+    if (sEndDate) {
+        if (sEndDate.includes("/")) {
+            sEnd = sEndDate.split("/").reverse().join("-");
+        } else {
+            sEnd = sEndDate;
+        }
+    }
                     if (sStart && sEnd) {
                         var dStart = new Date(sStart);
                         var dEnd = new Date(sEnd);
