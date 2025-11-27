@@ -1380,18 +1380,19 @@ sap.ui.define([
 
             if (!isEditMode) {
                 oModel.setProperty("/isEditMode", true);
+                oModel.refresh(true); 
                 return;
             }
             const isMandatoryValid = (
-                utils._LCvalidateMandatoryField(this.byId("id_Name"), "ID") &&
-                utils._LCvalidateDate(this.byId("id_dob"), "ID") &&
-                utils._LCvalidateMandatoryField(this.byId("id_gender"), "ID") &&
-                utils._LCvalidateMandatoryField(this.byId("id_mail"), "ID") &&
-                utils._LCvalidateMandatoryField(this.byId("id_country"), "ID") &&
-                utils._LCvalidateMandatoryField(this.byId("id_state"), "ID") &&
-                utils._LCvalidateMandatoryField(this.byId("id_city"), "ID") &&
-                utils._LCvalidateMandatoryField(this.byId("id_phone"), "ID") &&
-                utils._LCvalidateMandatoryField(this.byId("id_address"), "ID")
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("id_Name"), "ID") &&
+                utils._LCvalidateDate(sap.ui.getCore().byId("id_dob"), "ID") &&
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("id_gender"), "ID") &&
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("id_mail"), "ID") &&
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("id_country"), "ID") &&
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("id_state"), "ID") &&
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("id_city"), "ID") &&
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("id_phone"), "ID") &&
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("id_address"), "ID")
             );
 
             if (!isMandatoryValid) {
@@ -1431,6 +1432,7 @@ sap.ui.define([
             } finally {
                 sap.ui.core.BusyIndicator.hide();
                 oModel.setProperty("/isEditMode", false);
+                oModel.refresh(true);
             }
         },
 
