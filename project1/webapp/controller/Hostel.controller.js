@@ -768,7 +768,7 @@ sap.ui.define([
             utils._LCvalidateEmail(oEvent);
         },
 
-        
+
         SM_onTogglePasswordVisibility: function (oEvent) {
             const oInput = oEvent.getSource();
             const isPassword = oInput.getType() === "Password";
@@ -1263,12 +1263,19 @@ sap.ui.define([
 
                 //  Load fragment if not already loaded
                 if (!this._oProfileDialog) {
+                    if (this._isProfileDialogLoading) {
+                        console.log("Profile dialog load already in process, skipping duplicate call.");
+                        return;
+                    }
+                    this._isProfileDialogLoading = true;
+
                     const oDialog = await sap.ui.core.Fragment.load({
                         name: "sap.ui.com.project1.fragment.ManageProfile",
                         controller: this
                     });
                     this._oProfileDialog = oDialog;
                     this.getView().addDependent(oDialog);
+                    this._isProfileDialogLoading = false;
                 }
 
                 //  Create and bind the Profile Model
@@ -1305,12 +1312,18 @@ sap.ui.define([
 
                 // Always open fragment even when error (like no customer found)
                 if (!this._oProfileDialog) {
+                     if (this._isProfileDialogLoading) {
+                        console.log("Profile dialog load already in process, skipping duplicate call.");
+                        return;
+                    }
+                    this._isProfileDialogLoading = true;
                     const oDialog = await sap.ui.core.Fragment.load({
                         name: "sap.ui.com.project1.fragment.ManageProfile",
                         controller: this
                     });
                     this._oProfileDialog = oDialog;
                     this.getView().addDependent(oDialog);
+                    this._isProfileDialogLoading = false;
                 }
 
                 const oProfileModel = new sap.ui.model.json.JSONModel({
@@ -1340,7 +1353,7 @@ sap.ui.define([
 
             if (!isEditMode) {
                 oModel.setProperty("/isEditMode", true);
-                oModel.refresh(true); 
+                oModel.refresh(true);
                 return;
             }
             const isMandatoryValid = (
@@ -1365,7 +1378,7 @@ sap.ui.define([
                     Salutation: oModel.getProperty("/Salutation"),
                     MobileNo: oModel.getProperty("/phone"),
                     EmailID: oModel.getProperty("/email"),
-                    DateOfBirth:  oModel.getData().DateOfBirth ? oModel.getData().DateOfBirth.split("/").reverse().join("-") : "",
+                    DateOfBirth: oModel.getData().DateOfBirth ? oModel.getData().DateOfBirth.split("/").reverse().join("-") : "",
                     Gender: oModel.getProperty("/gender"),
                     Address: oModel.getProperty("/address"),
                     City: oModel.getProperty("/city"),
@@ -1376,7 +1389,7 @@ sap.ui.define([
                 filters: { UserID: oModel.getProperty("/UserID") }
             };
 
-           
+
 
             try {
                 sap.ui.core.BusyIndicator.show(0);
@@ -2275,7 +2288,7 @@ sap.ui.define([
 
 
 
-   
+
 
         onSelectLoginMode: function (e) {
             const selected = e.getSource().getText(); // Password or OTP
@@ -2414,7 +2427,7 @@ sap.ui.define([
             });
         },
 
-   
+
 
 
 
@@ -3068,8 +3081,10 @@ sap.ui.define([
                     },
                     filters: { UserID: sUserID }
                 };
-                console.log("📤 Sent to Backend:", payload);
                 await this.ajaxUpdateWithJQuery("HM_Login", payload);
+                this._oLoggedInUser.FileContent = fileContent;
+                this._oLoggedInUser.Photo = "data:image/png;base64," + fileContent;
+
                 sap.m.MessageToast.show("Profile photo updated!");
 
             } catch (err) {
@@ -3307,19 +3322,19 @@ sap.ui.define([
         },
 
 
-         onChange: function(oEvent) {
+        onChange: function (oEvent) {
             const oInput = oEvent.getSource();
             utils._LCvalidateMandatoryField(oEvent);
             if (oInput.getValue() === "") oInput.setValueState("None");
         },
 
-         onDateChange: function(oEvent) {
+        onDateChange: function (oEvent) {
             const oInput = oEvent.getSource();
             utils._LCvalidateDate(oEvent);
             if (oInput.getValue() === "") oInput.setValueState("None");
         },
 
-        onCountrySelectionChange: function(oEvent) {
+        onCountrySelectionChange: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
             const oView = this.getView();
             const oModel = oView.getModel("profileData");
@@ -3360,7 +3375,7 @@ sap.ui.define([
             ]);
         },
 
-         CC_onChangeState: function(oEvent) {
+        CC_onChangeState: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
             const oView = this.getView();
             const oModel = oView.getModel("profileData");

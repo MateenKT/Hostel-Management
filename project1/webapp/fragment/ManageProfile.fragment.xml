@@ -32,7 +32,6 @@
             </Bar>
         </customHeader>
 
-        <!-- EDIT / SAVE BUTTON -->
         <Bar
             design="Header"
             class="sapUiSmallMarginBottom"
