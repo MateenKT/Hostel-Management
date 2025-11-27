@@ -1,65 +1,53 @@
 <mvc:View
     controllerName="sap.ui.com.project1.controller.AdminDetails"
-    xmlns:mvc="sap.ui.core.mvc"
-    xmlns="sap.m"
-    xmlns:layout="sap.ui.layout"
-    xmlns:f="sap.ui.layout.form"
-    xmlns:core="sap.ui.core"
->
-    <Page
-        showHeader="false"
+	xmlns:mvc="sap.ui.core.mvc"
+	xmlns="sap.m"
+	xmlns:layout="sap.ui.layout"
+	xmlns:f="sap.ui.layout.form"
+	xmlns:core="sap.ui.core">
+	<Page showHeader="false"
         class="sapUiResponsivePadding--footer sapUiResponsivePadding--floatingFooter"
-        enableScrolling="true"
-    >
-        <ScrollContainer>
-            <core:Fragment
-                fragmentName="sap.ui.com.project1.fragment.Header"
-                type="XML"
-            />
-            <content>
-                <VBox class="sapUiSmallMargin">
-                    <Title
-                        text="Hostel Booking"
-                        class="boldBlackText"
-                    />
-
-                    <!-- Booking Status and Price with Edit button -->
-                    <HBox
+        enableScrolling="true">
+		<ScrollContainer>
+			<core:Fragment fragmentName="sap.ui.com.project1.fragment.Header" type="XML"/>
+			<content>
+				<VBox class="sapUiSmallMargin">
+					<Title  text="Hostel Booking" class="boldBlackText"/>
+					<!-- Booking Status and Price with Edit button -->
+					<HBox
                         class="sapUiSmallMarginTop"
                         justifyContent="SpaceBetween"
                         alignItems="Center"
                     >
-                        <!-- Left side -->
-                        <HBox>
-                            <VBox>
-                                <Text
+						<!-- Left side -->
+						<HBox>
+							<VBox>
+								<Text
                                     text="Room Price"
                                     class="sapUiSmallMarginBottom"
                                 />
-                                <Text
+								<Text
                                     text="{CustomerData>/OrginalRentPrice}"
                                     class="largeTextBold"
                                 />
-                            </VBox>
-
-                            <VBox class="sapUiMediumMarginBegin">
-                                <Text
+							</VBox>
+							<VBox class="sapUiMediumMarginBegin">
+								<Text
                                     text="Bed Type"
                                     class="sapUiSmallMarginBottom"
                                 />
-                                <Text
+								<Text
                                     text="{CustomerData>/BedType}"
                                     class="largeTextBold"
                                 />
-                            </VBox>
-                            <VBox class="sapUiMediumMarginBegin">
-                                <Text
+							</VBox>
+							<VBox class="sapUiMediumMarginBegin">
+								<Text
                                     text="Status"
                                     class="sapUiSmallMarginBottom"
                                 />
-                                <!-- <Text text="{CustomerData>/Status}" class="largeTextBold"/> -->
-
-                                <ObjectStatus
+								<!-- <Text text="{CustomerData>/Status}" class="largeTextBold"/> -->
+								<ObjectStatus
                                     inverted="false"
                                     text="{CustomerData>/Status}"
                                     state="{
@@ -67,54 +55,47 @@
                               formatter: '.Formatter.formatObjectStatus'
                                    }"
                                 />
-                            </VBox>
-                        </HBox>
-
-                        <!-- Right side buttons -->
-                        <HBox
+							</VBox>
+						</HBox>
+						<!-- Right side buttons -->
+						<HBox
                             alignItems="Center"
                             justifyContent="End"
                             width="30%"
                         >
-                            <Button
+							<Button
                                 text="Edit" id="idedit"
-                                type="Transparent"
-                                icon="sap-icon://edit"
+                                class="sapUiSmallMarginBegin myUnifiedBtn"
                                 press="onEditBooking"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-
-                               <Button id="idcancel" text="Cancel" press="onPressCancelBooking" visible="{= !${VisibleModel>/visible} }"
-                                class="myUnifiedBtn"  />
-
-                            <Button
+							<Button id="idcancel" text="Cancel Booking" press="onPressCancelBooking" visible="{= !${VisibleModel>/visible} }"
+                                class="sapUiSmallMarginBegin myUnifiedBtn"  />
+							<Button
                                 text="Save"
-                                type="Accept"
-                                icon="sap-icon://save"
+                                
                                 press="onSaveBooking"
                                 visible="{VisibleModel>/visible}"
-                                class="sapUiSmallMarginBegin"
+                                class="sapUiSmallMarginBegin myUnifiedBtn"
                             />
-
-                            <Button
+							<Button
                                 text="Cancel"
-                                type="Reject"
-                                icon="sap-icon://cancel"
+                               
                                 press="onCancelBooking"
                                 visible="{VisibleModel>/visible}"
-                                class="sapUiSmallMarginBegin"
+                                class="sapUiSmallMarginBegin myUnifiedBtn"
                             />
-                        </HBox>
-                    </HBox>
-                </VBox>
-            </content>
-            <VBox class="sapUiMediumMarginBottom">
-                <Panel
+						</HBox>
+					</HBox>
+				</VBox>
+			</content>
+			<VBox class="sapUiMediumMarginBottom">
+				<Panel
                     headerText="{= 'Booking Information - ' + ${CustomerData>/CustomerID} }"
                     expandable="false"
                     class="customPanelHeader"
                 >
-                    <f:SimpleForm
+					<f:SimpleForm
                         id="idsimpleCompanyDetails"
                         busyIndicatorDelay="0"
                         editable="true"
@@ -133,22 +114,19 @@
                         columnsM="2"
                         singleContainerFullSize="false"
                     >
-                        <f:content>
-                            <!-- Booking Details -->
-
-                            <!-- Room Type -->
-
-                            <Label
+						<f:content>
+							<!-- Booking Details -->
+							<!-- Room Type -->
+							<Label
                                 text="Desired Room Type"
                                 required="true"
                             />
-                            <Text
+							<Text
                                 id="Ad_id_RoomType3"
                                 text="{CustomerData>/BedType}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-
-                            <ComboBox
+							<ComboBox
                                 id="Ad_id_RoomType"
                                 items="{Availablebeds>/}"
                                 showClearIcon="true"
@@ -156,33 +134,30 @@
                                 selectedKey="{Bookingmodel>/BedTypeName}"
                                 selectionChange="onRoomBedChange" valueStateText="Select Room Type"
                             >
-                                <core:ListItem
+								<core:ListItem
                                     key="{Availablebeds>BedTypeName}"
                                     text="{Availablebeds>BedTypeName}"
                                 />
-                            </ComboBox>
-
-                            <!-- Price -->
-                            <Label
+							</ComboBox>
+							<!-- Price -->
+							<Label
                                 text="Price"
                                 required="true"
                             />
-                            <Text
+							<Text
                                 id="Ad_id_idPrice4"
                                 text="{CustomerData>/OrginalRentPrice}"
                             />
-
-                            <!-- Payment -->
-                            <Label
+							<!-- Payment -->
+							<Label
                                 text="Payment Method"
                                 required="true"
                             />
-                            <Text
+							<Text
                                 text="{CustomerData>/PaymentType}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-
-                            <ComboBox
+							<ComboBox
                                 id="idPaymentMethod1"
                                 placeholder="Select Payment Method"
                                 selectedKey="{Bookingmodel>/UnitText}"
@@ -190,41 +165,37 @@
                                 selectionChange="onRoomDurationChange"
                                 visible="{VisibleModel>/visible}" valueStateText="Select Payment Type" change="onChange"
                             >
-                                <core:ListItem
+								<core:ListItem
                                     key="daily"
                                     text="Per Day"
                                 />
-                                <core:ListItem
+								<core:ListItem
                                     key="monthly"
                                     text="Per Month"
                                 />
-                                <core:ListItem
+								<core:ListItem
                                     key="yearly"
                                     text="Per Year"
                                 />
-                            </ComboBox>
-
-                            <!-- Persons -->
-                            <Label
+							</ComboBox>
+							<!-- Persons -->
+							<Label
                                 text="No of Persons"
                                 required="true"
                             />
-                            <Text text="{CustomerData>/Person}" />
-
-                            <!-- Dates -->
-                            <core:Title text="Dates" />
-
-                            <!-- Start Date -->
-                            <Label
+							<Text text="{CustomerData>/Person}" />
+							<!-- Dates -->
+							<core:Title text="Dates" />
+							<!-- Start Date -->
+							<Label
                                 text="Start Date"
                                 required="true"
                             />
-                            <Text
+							<Text
                                 text="{CustomerData>/StartDate}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-
-                            <DatePicker
+							<DatePicker
                                 id="Ad_id_editStartDate"
                                 visible="{VisibleModel>/visible}"
                                 value="{Bookingmodel>/StartDate}"
@@ -232,77 +203,73 @@
                                 valueFormat="dd/MM/yyyy"
                                 change="onBookingEditDateChange" valueStateText="Select Star Date" 
                             />
-
-                            <!-- Month/Year Select -->
-                            <Label
+							<!-- Month/Year Select -->
+							<Label
                                 text="How many Month/Year"
                                 visible="{= ${Bookingmodel>/UnitText} !== 'daily' }"
                             />
-
-                            <Select
+							<Select
                                 id="idMonthYearSelect"
                                 width="40%"
                                 visible="{= ${Bookingmodel>/UnitText} !== 'daily'}"
                                 selectedKey="{Bookingmodel>/DurationUnit}"
                                 change=".onBookMonthYearChange"
                             >
-                                <core:Item
+								<core:Item
                                     key="1"
                                     text="1"
                                 />
-                                <core:Item
+								<core:Item
                                     key="2"
                                     text="2"
                                 />
-                                <core:Item
+								<core:Item
                                     key="3"
                                     text="3"
                                 />
-                                <core:Item
+								<core:Item
                                     key="4"
                                     text="4"
                                 />
-                                <core:Item
+								<core:Item
                                     key="5"
                                     text="5"
                                 />
-                                <core:Item
+								<core:Item
                                     key="6"
                                     text="6"
                                 />
-                                <core:Item
+								<core:Item
                                     key="7"
                                     text="7"
                                 />
-                                <core:Item
+								<core:Item
                                     key="8"
                                     text="8"
                                 />
-                                <core:Item
+								<core:Item
                                     key="9"
                                     text="9"
                                 />
-                                <core:Item
+								<core:Item
                                     key="10"
                                     text="10"
                                 />
-                                <core:Item
+								<core:Item
                                     key="11"
                                     text="11"
                                 />
-                            </Select>
-
-                            <!-- End Date -->
-                            <Label
+							</Select>
+							<!-- End Date -->
+							<Label
                                 text="End Date"
                                 required="true"
                             />
-                            <Text
+							<Text
                                 text="{CustomerData>/EndDate}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-
-                            <DatePicker
+							<DatePicker
                                 id="editEndDate"
                                 visible="{VisibleModel>/visible}"
                                 editable="{= ${Bookingmodel>/UnitText} === 'daily' }"
@@ -311,25 +278,25 @@
                                 valueFormat="dd/MM/yyyy"
                                 change="onBookingEditDateChange"
                             />
-                            <Label
+							<Label
                                 text="Duration"
                                 required="true"
                             />
-                            <Text
+							<Text
                                 text="{= ${CustomerData>/Duration} + ' ' + ${CustomerData>/DurationUnit} }"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                        </f:content>
-                    </f:SimpleForm>
-                </Panel>
-            </VBox>
-            <VBox>
-                <Panel
+						</f:content>
+					</f:SimpleForm>
+				</Panel>
+			</VBox>
+			<VBox>
+				<Panel
                     headerText="{= 'Personal Information - ' + ${CustomerData>/CustomerName} }"
                     expandable="false"
                     class="customPanelHeader"
                 >
-                    <f:SimpleForm
+					<f:SimpleForm
                         id="idsimplePersonalDetails"
                         busyIndicatorDelay="0"
                         editable="true"
@@ -348,89 +315,87 @@
                         columnsM="2"
                         singleContainerFullSize="false"
                     >
-                        <!-- Personal Information -->
-                        <f:content>
-                            <core:Title text="" />
-                            <Label text="Full Name" />
-                             <Text
+						<!-- Personal Information -->
+						<f:content>
+							<core:Title text="" />
+							<Label text="Full Name" />
+							<Text
                                 text="{CustomerData>/Salutation}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                            <Text
+							<Text
                                 text="{CustomerData>/CustomerName}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                               <Select
+							<Select
                                 selectedKey="{Bookingmodel>/Salutation}"
                                 visible="{VisibleModel>/visible}"
                             >
-                                <core:Item
+								<core:Item
                                     key="Mr."
                                     text="Mr."
                                 />
-                                <core:Item
+								<core:Item
                                     key="Mrs."
                                     text="Mrs."
                                 />
-                              
-                            </Select>
-                            <Input
+							</Select>
+							<Input
                                 value="{Bookingmodel>/CustomerName}"
                                 maxLength="50"
                                 visible="{VisibleModel>/visible}" id="AD_id_CustomerName" valueStateText="Enter Customer Name"
                                 change="onChange"
                             />
-                            <Label text="Date of Birth" />
-                            <Text
+							<Label text="Date of Birth" />
+							<Text
                                 text="{CustomerData>/DateOfBirth}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                            <DatePicker
+							<DatePicker
                                 value="{Bookingmodel>/DateOfBirth}"
                                 displayFormat="dd/MM/yyyy"
                                 valueFormat="dd/MM/yyyy"
                                 visible="{VisibleModel>/visible}" id="AD_id_Date" valueStateText="Enter Date of Birth" change="onDateChange"
                             />
-                            <Label text="Gender" />
-                            <Text
+							<Label text="Gender" />
+							<Text
                                 text="{CustomerData>/Gender}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                            <ComboBox
+							<ComboBox
                                 selectedKey="{Bookingmodel>/Gender}"
                                 visible="{VisibleModel>/visible}" id="Ad_id_gender" valueStateText="Select Gender" change="onChange"
                             >
-                                <core:Item
+								<core:Item
                                     key="Male"
                                     text="Male"
                                 />
-                                <core:Item
+								<core:Item
                                     key="Female"
                                     text="Female"
                                 />
-                                <core:Item
+								<core:Item
                                     key="Other"
                                     text="Other"
                                 />
-                            </ComboBox>
-
-                            <Label text="Email" />
-                            <Text
+							</ComboBox>
+							<Label text="Email" />
+							<Text
                                 text="{CustomerData>/CustomerEmail}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                            <Input
+							<Input
                                 value="{Bookingmodel>/CustomerEmail}"
                                 type="Email"
                                 maxLength="50"
                                 visible="{VisibleModel>/visible}" id="Ad_id_CustomerEmail" valueStateText="Enter Email Id" change="onChange"
                             />
-                            <Label text="Country" />
-                            <Text
+							<Label text="Country" />
+							<Text
                                 text="{CustomerData>/Country}"
                                 visible="{= !${VisibleModel>/visible} }" 
                             />
-                            <ComboBox
+							<ComboBox
                                 id="CC_id_Country"
                                 change="MC_onChangeCountry"
                                 placeholder="Enter Country"
@@ -441,19 +406,18 @@
                                 visible="{VisibleModel>/visible}"
                                 selectionChange="onCountrySelectionChange" 
                             >
-                                <core:ListItem
+								<core:ListItem
                                     key="{CountryModel>countryName}"
                                     text="{CountryModel>countryName}"
                                     additionalText="{CountryModel>code}"
                                 />
-                            </ComboBox>
-
-                            <Label text="State" />
-                            <Text
+							</ComboBox>
+							<Label text="State" />
+							<Text
                                 text="{CustomerData>/State}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                            <ComboBox
+							<ComboBox
                                 id="CC_id_State"
                                 change="CC_onChangeState"
                                 placeholder="Enter State"
@@ -463,17 +427,17 @@
                                 showSecondaryValues="true"
                                 visible="{VisibleModel>/visible}"
                             >
-                                <core:ListItem
+								<core:ListItem
                                     key="{StateModel>stateName}"
                                     text="{StateModel>stateName}"
                                 />
-                            </ComboBox>
-                            <Label text="City" />
-                            <Text
+							</ComboBox>
+							<Label text="City" />
+							<Text
                                 text="{CustomerData>/City}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                            <ComboBox
+							<ComboBox
                                 id="CC_id_City"
                                 change="onChange"
                                 valueStateText="Select City"
@@ -483,31 +447,30 @@
                                 showSecondaryValues="true"
                                 visible="{VisibleModel>/visible}"
                             >
-                                <core:ListItem
+								<core:ListItem
                                     key="{CityModel>cityName}"
                                     text="{CityModel>cityName}"
                                     additionalText="{CityModel>branchCode}"
                                 />
-                            </ComboBox>
-                            <Label text="Mobile Number" />
-                              <Text
+							</ComboBox>
+							<Label text="Mobile Number" />
+							<Text
                                 text="{CustomerData>/STDCode}"
                                 visible="{= !${VisibleModel>/visible} }"
                                 width="30px"
                             />
-                            <Text
+							<Text
                                 text="{CustomerData>/MobileNo}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                            <Input
+							<Input
                                 id="CC_id_STDCode"
                                 value="{Bookingmodel>/STDCode}"
                                 editable="false"
                                 visible="{VisibleModel>/visible}"
-                            />  
-
-                            <!-- Phone Number -->
-                            <Input
+                            />
+							<!-- Phone Number -->
+							<Input
                                 id="CD_ID_idPhone"
                                 value="{Bookingmodel>/MobileNo}"
                                 placeholder="Enter Contact Number"
@@ -517,27 +480,27 @@
                                 type="Number"
                                 visible="{VisibleModel>/visible}"
                             />
-                        </f:content>
-                    </f:SimpleForm>
-                    <FlexBox
+						</f:content>
+					</f:SimpleForm>
+					<FlexBox
                         alignItems="Start"
                         justifyContent="Start"
                         class="sapUiSmallMarginTop"
                         items="{ path: 'CustomerData>/Persons' }"
                     >
-                        <VBox
+						<VBox
                             width="260px"
                             class="sapUiSmallMargin"
                         >
-                            <Title
+							<Title
                                 text="{= 'Facilities for ' + (${CustomerData>CustomerName} || 'Person') }"
                                 level="H6"
                             />
-                            <FlexBox
+							<FlexBox
                                 justifyContent="Start"
                                 items="{ path: 'CustomerData>PersonFacilitiesSummary' }"
                             >
-                                <VBox
+								<VBox
                                     width="200px"
                                     height="200px"
                                     class="sapUiSmallMargin serviceCard"
@@ -545,21 +508,21 @@
                                     justifyContent="Center"
                                     visible="{= !!${CustomerData>FacilityName} }"
                                 >
-                                    <Image
+									<Image
                                         src="{CustomerData>Image}"
                                         width="180px"
                                         height="140px"
                                         densityAware="false"
                                     />
-                                    <Text text="{CustomerData>FacilityName}" />
-                                    <Text
+									<Text text="{CustomerData>FacilityName}" />
+									<Text
                                         text="{= '₹ ' + ${CustomerData>Price}}"
                                     />
-                                </VBox>
-                            </FlexBox>
-                        </VBox>
-                    </FlexBox>
-                    <Table
+								</VBox>
+							</FlexBox>
+						</VBox>
+					</FlexBox>
+					<Table
                         id="Ad_id_idFacilityRoomTableDetails"
                         class="sapUiSmallMarginTop"
                         items="{path: 'CustomerData>/AllSelectedFacilities'}"
@@ -568,160 +531,146 @@
                         inset="false"
                         selectionChange="onTableSelection"
                     >
-                        <headerToolbar>
-                            <Toolbar>
-                                <Title
+						<headerToolbar>
+							<Toolbar>
+								<Title
                                     text="Booking Details"
                                     level="H5"
                                 />
-                                <ToolbarSpacer />
-                                <Button
-                                    icon="sap-icon://add"
+								<ToolbarSpacer />
+								<Button
+                                   
                                     text="Add"
                                     press="onAddFacilityDetails"
-                                    type="Accept"
+                                    class="myUnifiedBtn"
                                     visible="{VisibleModel>/visible}"
                                 />
-                                <Button
-                                    icon="sap-icon://edit"
+								<Button
+                                   
                                     text="Edit"
                                     press="onEditFacilityDetails"
-                                    type="Emphasized"
+                                     class="myUnifiedBtn"
                                     visible="{VisibleModel>/visible}"
                                 />
-                                <Button
-                                    icon="sap-icon://delete"
+								<Button
+                                   
                                     text="Delete"
                                     press="onDeleteFacilityDetails"
-                                    type="Reject"
+                                    class="myUnifiedBtn"
                                     visible="{VisibleModel>/visible}"
                                 />
-                            </Toolbar>
-                        </headerToolbar>
-                        <columns>
-                            <Column>
-                                <Text text="Facility Name" />
-                            </Column>
-                            <Column>
-                                <Text text="Facility Price (₹)" />
-                            </Column>
-                            <Column>
-                                <Text text="Start Date" />
-                            </Column>
-                            <Column>
-                                <Text text="End Date" />
-                            </Column>
-                            <Column>
-                                <Text text="Unit" />
-                            </Column>
-                            <Column>
-                                <Text text="Days" />
-                            </Column>
-                            <Column>
-                                <Text text="Total (₹)" />
-                            </Column>
-                        </columns>
-                        <items>
-                            <ColumnListItem>
-                                <cells>
-                                    <Text text="{CustomerData>FacilityName}" />
-                                    <Text text="{CustomerData>Price}" />
-                                    <Text
+							</Toolbar>
+						</headerToolbar>
+						<columns>
+							<Column>
+								<Text text="Facility Name" />
+							</Column>
+							<Column>
+								<Text text="Facility Price (₹)" />
+							</Column>
+							<Column>
+								<Text text="Start Date" />
+							</Column>
+							<Column>
+								<Text text="End Date" />
+							</Column>
+							<Column>
+								<Text text="Unit" />
+							</Column>
+							<Column>
+								<Text text="Days" />
+							</Column>
+							<Column>
+								<Text text="Total (₹)" />
+							</Column>
+						</columns>
+						<items>
+							<ColumnListItem>
+								<cells>
+									<Text text="{CustomerData>FacilityName}" />
+									<Text text="{CustomerData>Price}" />
+									<Text
                                         text="{path:'CustomerData>StartDate'}"
                                     />
-                                    <Text
+									<Text
                                         text="{path:'CustomerData>EndDate'}"
                                     />
-                                    <!-- <Text text="{CustomerData>UnitText}" /> -->
-                                    <Text
+									<!-- <Text text="{CustomerData>UnitText}" /> -->
+									<Text
                                         text="{= ${CustomerData>UnitText} === 'Per Hour'  ? ${CustomerData>UnitText} + ' (' + ${CustomerData>TotalHour} + ')' : ${CustomerData>UnitText}
                                             }"
                                     />
-
-                                    <Text text="{CustomerData>TotalDays}" />
-                                    <Text text="{CustomerData>TotalAmount}" />
-                                </cells>
-                            </ColumnListItem>
-                        </items>
-                    </Table>
-                    <VBox class="sapUiSmallMarginTop">
-                        <HBox
+									<Text text="{CustomerData>TotalDays}" />
+									<Text text="{CustomerData>TotalAmount}" />
+								</cells>
+							</ColumnListItem>
+						</items>
+					</Table>
+					<VBox class="sapUiSmallMarginTop">
+						<HBox
                             justifyContent="End"
                             class="sapUiSmallMarginTop"
                         >
-                            <Label
+							<Label
                                 text="Total Facility Cost:"
                                 design="Bold"
                                 class="sapUiSmallMarginEnd"
                             />
-                            <!-- <Text
+							<!-- <Text
                                 text="{path: 'CustomerData>/TotalFacilityPrice', formatter: '.Formatter.formatCurrency'}"
                                 class="sapUiSmallMarginEnd"
                             /> -->
-
-                            <Text
-    text="{
-        parts: [
-            { path: 'CustomerData>/TotalFacilityPrice' },
-            { path: 'CustomerData>/AllSelectedFacilities/0/Currency' }
-        ],
-        formatter: '.Formatter.formatCurrency'
-    }"
-    class="sapUiSmallMarginEnd totalColumnBold1"
-/>
-                        </HBox>
-                        <HBox
+							<Text text="{
+                                            parts: [
+                                                { path: 'CustomerData>/TotalFacilityPrice' },
+                                                { path: 'CustomerData>/AllSelectedFacilities/0/Currency' }
+                                            ],
+                                            formatter: '.Formatter.formatCurrency'
+                                        }"
+                                        class="sapUiSmallMarginEnd totalColumnBold1"
+                                    />
+						</HBox>
+						<HBox
                             justifyContent="End"
                             class="sapUiSmallMarginTop"
                         >
-                            <Label
+							<Label
                                 text="Room Rent:"
                                 design="Bold"
                                 class="sapUiSmallMarginEnd"
                             />
-                            <!-- <Text
+							<!-- <Text
                                 text="{CustomerData>/RentPrice}"
                                 class="sapUiSmallMarginEnd"
                             /> -->
-
-                                 <Text
-    text="{
-        parts: [
-            { path: 'CustomerData>/RentPrice' },
-            { path: 'CustomerData>/AllSelectedFacilities/0/Currency' }
-        ],
-        formatter: '.Formatter.formatCurrency'
-    }"
-    class="sapUiSmallMarginEnd totalColumnBold1"
-/>
-                        </HBox>
-                        <HBox
+							<Text text="{
+                                        parts: [
+                                            { path: 'CustomerData>/RentPrice' },
+                                            { path: 'CustomerData>/AllSelectedFacilities/0/Currency' }
+                                        ],
+                                        formatter: '.Formatter.formatCurrency'
+                                    }"
+                                    class="sapUiSmallMarginEnd totalColumnBold1"
+                                />
+						</HBox>
+						<HBox
                             justifyContent="End"
                             class="sapUiSmallMarginTop"
                         >
-                            <Label
+							<Label
                                 text="Grand Total:"
                                 design="Bold"
                                 class="sapUiSmallMarginEnd"
                             />
-                            <!-- <Text
+							<!-- <Text
                                 text="{path: 'CustomerData>/GrandTotal', formatter: '.Formatter.formatCurrency'}"
                                 class="sapUiSmallMarginEnd"
                             /> -->
-                            <Text
-    text="{
-        parts: [
-            { path: 'CustomerData>/GrandTotal' },
-            { path: 'CustomerData>/AllSelectedFacilities/0/Currency' }
-        ],
-        formatter: '.Formatter.formatCurrency'
-    }"
-    class="sapUiSmallMarginEnd totalColumnBold1"
-/> 
-                        </HBox>
-                    </VBox>
-                </Panel>
-            </VBox>
-        </ScrollContainer>
-    </Page>
+							<Text text="{ parts: [{ path: 'CustomerData>/GrandTotal' }, { path: 'CustomerData>/AllSelectedFacilities/0/Currency' }],formatter: '.Formatter.formatCurrency'}" class="sapUiSmallMarginEnd totalColumnBold1"/>
+						</HBox>
+					</VBox>
+				</Panel>
+			</VBox>
+		</ScrollContainer>
+	</Page>
 </mvc:View>

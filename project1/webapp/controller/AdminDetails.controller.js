@@ -4,26 +4,15 @@ sap.ui.define([
     "sap/ui/model/json/JSONModel",
     "sap/m/MessageBox",
     "../utils/validation"
-], function (BaseController, Formatter, JSONModel, MessageBox, utils) {
+], function(BaseController, Formatter, JSONModel, MessageBox, utils) {
     "use strict";
     return BaseController.extend("sap.ui.com.project1.controller.AdminDetails", {
         Formatter: Formatter,
-        onInit: function () {
+        onInit: function() {
             this.getOwnerComponent().getRouter().getRoute("RouteAdminDetails").attachMatched(this._onRouteMatched, this);
         },
-        _onRouteMatched: async function (oEvent) {
-            // const omodel = new sap.ui.model.json.JSONModel({
-            //     // for Database connection
-            //     url: "https://rest.kalpavrikshatechnologies.com/",
-            //     headers: {
-            //         name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-            //         password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
-            //         "Content-Type": "application/json",
-            //     },
-            //     isRadioVisible: false,
-            // });
-            // this.getOwnerComponent().setModel(omodel, "LoginModel");
-
+        
+        _onRouteMatched: async function(oEvent) {
             var model = new JSONModel({
                 FacilityName: "",
                 UnitText: "",
@@ -39,13 +28,12 @@ sap.ui.define([
             var model = new JSONModel({
                 StartDate: "",
                 EndDate: "",
-                UnitText: "daily",   // daily | monthly | yearly
+                UnitText: "daily", // daily | monthly | yearly
                 TotalMonths: 1,
                 TotalYears: 1,
                 BedTypeName: ""
             });
             this.getView().setModel(model, "Bookingmodel");
-
 
             var model = new JSONModel({
                 visible: false
@@ -63,18 +51,21 @@ sap.ui.define([
             this.decodedPath = decodeURIComponent(decodeURIComponent(sPath));
             await this.AD_onSearch()
             this.Facilitysearch()
-
         },
-        Facilitysearch: function () {
+
+        Facilitysearch: function() {
             var data = this.getView().getModel("CustomerData").getData()
             var sBranchCode = data.BranchCode
-            this.ajaxReadWithJQuery("HM_Facilities", { BranchCode: sBranchCode }).then((oData) => {
+            this.ajaxReadWithJQuery("HM_Facilities", {
+                BranchCode: sBranchCode
+            }).then((oData) => {
                 var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
                 var model = new sap.ui.model.json.JSONModel(oFCIAerData);
                 this.getView().setModel(model, "Facilities")
             })
         },
-        onNavBack: function () {
+
+        onNavBack: function() {
             const oLoginModel = this.getView().getModel("LoginModel");
             const sRole = oLoginModel?.getProperty("/Role") || "";
             const sEmpID = oLoginModel?.getProperty("/EmployeeID") || "";
@@ -87,7 +78,13 @@ sap.ui.define([
                 this.getOwnerComponent().getRouter().navTo("RouteAdmin");
             }
         },
-        AD_onSearch: async function () {
+
+        onHome: function() {
+            var oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("RouteHostel");
+        },
+
+        AD_onSearch: async function() {
             try {
                 sap.ui.core.BusyIndicator.show(0);
                 const filter = {
@@ -95,8 +92,6 @@ sap.ui.define([
                 };
                 const response = await this.ajaxReadWithJQuery("HM_Customer", filter);
                 const oCustomer = response?.Customers || response?.value?.[0] || {};
-
-
 
                 const oCustomerData = {
                     CustomerName: oCustomer.CustomerName,
@@ -135,7 +130,6 @@ sap.ui.define([
                 this.byId("Ad_id_editStartDate").setMinDate(oCustomer.BookingDate)
                 this.byId("editEndDate").setMinDate(oCustomer.BookingDate)
 
-
                 // Prepare for calculation
                 const aPersons = [{
                     FullName: oCustomer.CustomerName,
@@ -143,8 +137,6 @@ sap.ui.define([
                         SelectedFacilities: oCustomer.FaciltyItems || []
                     }
                 }];
-
-
 
                 const roomRentPrice = oCustomer.Bookings?.[0]?.RentPrice || 0;
 
@@ -194,8 +186,6 @@ sap.ui.define([
                 const oCustomerModel = new sap.ui.model.json.JSONModel(oCustomerData);
                 this.getView().setModel(oCustomerModel, "CustomerData");
                 // Set model
-
-
             } catch (err) {
                 sap.m.MessageToast.show(err.message || err.responseText);
             } finally {
@@ -203,7 +193,7 @@ sap.ui.define([
             }
         },
 
-        calculateTotals: function (aPersons, roomRentPrice) {
+        calculateTotals: function(aPersons, roomRentPrice) {
 
             let totalFacilityPricePerDay = 0;
             let otherFacilitiesTotal = 0;
@@ -325,16 +315,12 @@ sap.ui.define([
             };
         },
 
-
-
-
-        _parseDate: function (sDate) {
+        _parseDate: function(sDate) {
             const aParts = sDate.split("/");
             return new Date(aParts[2], aParts[1] - 1, aParts[0]);
         },
 
-
-        Ad_onPressEdit: async function () {
+        Ad_onPressEdit: async function() {
             const oView = this.getView();
             const oVisibilityModel = oView.getModel("visiablityPlay");
             const bEditMode = oVisibilityModel.getProperty("/editable");
@@ -358,16 +344,14 @@ sap.ui.define([
                         Country: oCustomerData.Country,
                         State: oCustomerData.State,
                         City: oCustomerData.City,
-                        Bookings: [
-                            {
-                                BedType: oCustomerData.BedType,
-                                RentPrice: oCustomerData.RentPrice,
-                                PaymentType: oCustomerData.PaymentType,
-                                NoOfPersons: oCustomerData.Person,
-                                StartDate: this._formatDateForAPI(oCustomerData.StartDate),
-                                EndDate: this._formatDateForAPI(oCustomerData.EndDate)
-                            }
-                        ]
+                        Bookings: [{
+                            BedType: oCustomerData.BedType,
+                            RentPrice: oCustomerData.RentPrice,
+                            PaymentType: oCustomerData.PaymentType,
+                            NoOfPersons: oCustomerData.Person,
+                            StartDate: this._formatDateForAPI(oCustomerData.StartDate),
+                            EndDate: this._formatDateForAPI(oCustomerData.EndDate)
+                        }]
                     };
 
                     // Use your common AJAX update helper
@@ -384,8 +368,9 @@ sap.ui.define([
                 }
             }
         },
-        onAddFacilityDetails: function () {
-             this._editIndex = undefined;
+
+        onAddFacilityDetails: function() {
+            this._editIndex = undefined;
             this.byId("Ad_id_idFacilityRoomTableDetails").removeSelections()
             if (!this.HM_Dialog) {
                 var oView = this.getView();
@@ -411,15 +396,13 @@ sap.ui.define([
             sap.ui.getCore().byId("editEndTime").setVisible(false)
             sap.ui.getCore().byId("editHours").setVisible(false)
             sap.ui.getCore().byId("idMonthYearSelect").setSelectedKey("1")
-
-           
-
-
         },
-        onEditDialogClose: function () {
+
+        onEditDialogClose: function() {
             this.HM_Dialog.close();
         },
-        onFacilityChange: function (oEvent) {
+
+        onFacilityChange: function(oEvent) {
             utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
             var oUnitType = sap.ui.getCore().byId("idUnitType");
             sap.ui.getCore().byId("editPrice").setValue("");
@@ -428,14 +411,13 @@ sap.ui.define([
 
             oUnitType.setSelectedKey("").setVisible(true);
         },
-        onUnitTextChange: function (oEvent) {
+
+        onUnitTextChange: function(oEvent) {
             utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
             var editdata = this.getView().getModel("edit")
             var data = this.getView().getModel("Facilities").getData()
             var Sfacilityname = sap.ui.getCore().byId("editFacilityName").getSelectedKey()
             var Duration = sap.ui.getCore().byId("idUnitType").getSelectedKey();
-
-
 
             var FPrice = data.find((item) => {
                 return item.FacilityName === Sfacilityname
@@ -464,70 +446,68 @@ sap.ui.define([
 
             editdata.setProperty("/TotalDays", "")
             sap.ui.getCore().byId("idMonthYearSelectFragment").setSelectedKey("1")
-
         },
-       onEditDateChange: function (oEvent) {
-    utils._LCvalidateMandatoryField(oEvent);
-    const oModel = this.getView().getModel("edit");
-    const sUnit = oModel.getProperty("/UnitText");
-    let sStartDate = oModel.getProperty("/StartDate"); // use let to allow reassignment
-    let sEndDate = oModel.getProperty("/EndDate");     // use let
 
-    if (!sUnit || !sStartDate) return;
+        onEditDateChange: function(oEvent) {
+            utils._LCvalidateMandatoryField(oEvent);
+            const oModel = this.getView().getModel("edit");
+            const sUnit = oModel.getProperty("/UnitText");
+            let sStartDate = oModel.getProperty("/StartDate"); // use let to allow reassignment
+            let sEndDate = oModel.getProperty("/EndDate"); // use let
 
-    const oSelect =
-        this.byId("idMonthYearSelectFragment") ||
-        sap.ui.getCore().byId(this.getView().createId("idMonthYearSelectFragment"));
+            if (!sUnit || !sStartDate) return;
 
-    let iCount = 1;
-    if (oSelect) {
-        const sKey = oSelect.getSelectedKey();
-        iCount = sKey ? Number(sKey) : 1;
-    } else {
-        iCount = this.iCount || 1;
-    }
+            const oSelect =
+                this.byId("idMonthYearSelectFragment") ||
+                sap.ui.getCore().byId(this.getView().createId("idMonthYearSelectFragment"));
 
-    if (!iCount || iCount <= 0) return;
+            let iCount = 1;
+            if (oSelect) {
+                const sKey = oSelect.getSelectedKey();
+                iCount = sKey ? Number(sKey) : 1;
+            } else {
+                iCount = this.iCount || 1;
+            }
 
-    // ✅ Correct date conversion
-    if (sStartDate.includes("/")) {
-        sStartDate = sStartDate.split("/").reverse().join("-");
-        if (sEndDate) {
-            sEndDate = sEndDate.split("/").reverse().join("-");
-        }
-    }
+            if (!iCount || iCount <= 0) return;
 
-    let oStart = new Date(sStartDate);
-    let oEnd = sEndDate ? new Date(sEndDate) : null;
-    let iDays = 0;
+            // ✅ Correct date conversion
+            if (sStartDate.includes("/")) {
+                sStartDate = sStartDate.split("/").reverse().join("-");
+                if (sEndDate) {
+                    sEndDate = sEndDate.split("/").reverse().join("-");
+                }
+            }
 
-    if (sUnit === "Per Month" || sUnit === "monthly") {
-        oEnd = new Date(oStart);
-        oEnd.setMonth(oEnd.getMonth() + iCount);
-        iDays = iCount * 30;
-    } else if (sUnit === "Per Year" || sUnit === "yearly") {
-        oEnd = new Date(oStart);
-        oEnd.setFullYear(oEnd.getFullYear() + iCount);
-        iDays = iCount * 365;
-    } else if (sUnit === "Per Day" || sUnit === "daily" || sUnit === "Per Hour") {
-        if (!oEnd) {
-            iDays = 1;
-        } else if (oStart <= oEnd) {
-            iDays = Math.ceil((oEnd - oStart) / (1000 * 60 * 60 * 24)) + 1;
-        } else {
-            oEnd = null;
-            iDays = 0;
-        }
-    }
+            let oStart = new Date(sStartDate);
+            let oEnd = sEndDate ? new Date(sEndDate) : null;
+            let iDays = 0;
 
-    // Update model
-    oModel.setProperty("/EndDate", oEnd ? oEnd.toISOString().split("T")[0] : "");
-    oModel.setProperty("/TotalDays", iDays);
-}
+            if (sUnit === "Per Month" || sUnit === "monthly") {
+                oEnd = new Date(oStart);
+                oEnd.setMonth(oEnd.getMonth() + iCount);
+                iDays = iCount * 30;
+            } else if (sUnit === "Per Year" || sUnit === "yearly") {
+                oEnd = new Date(oStart);
+                oEnd.setFullYear(oEnd.getFullYear() + iCount);
+                iDays = iCount * 365;
+            } else if (sUnit === "Per Day" || sUnit === "daily" || sUnit === "Per Hour") {
+                if (!oEnd) {
+                    iDays = 1;
+                } else if (oStart <= oEnd) {
+                    iDays = Math.ceil((oEnd - oStart) / (1000 * 60 * 60 * 24)) + 1;
+                } else {
+                    oEnd = null;
+                    iDays = 0;
+                }
+            }
 
-        ,
+            // Update model
+            oModel.setProperty("/EndDate", oEnd ? oEnd.toISOString().split("T")[0] : "");
+            oModel.setProperty("/TotalDays", iDays);
+        },
 
-        onMonthYearChange: function (oEvent) {
+        onMonthYearChange: function(oEvent) {
             const oModel = this.getView().getModel("edit");
             const iCount = Number(oEvent.getSource().getSelectedKey());
 
@@ -558,7 +538,7 @@ sap.ui.define([
                 iDays = iCount * 30; // Add Months as 30 days
             } else if (sUnit === "Per Year") {
                 oEnd.setDate(oEnd.getDate() + iCount * 365);
-                iDays = iCount * 365;// Add Years as 365 days
+                iDays = iCount * 365; // Add Years as 365 days
             }
 
             // Format yyyy-MM-dd for DatePicker
@@ -566,9 +546,9 @@ sap.ui.define([
 
             oModel.setProperty("/EndDate", sFormatted);
             oModel.setProperty("/TotalDays", iDays);
-
         },
-        onEditFacilitySave: function () {
+
+        onEditFacilitySave: function() {
 
             var oCustomerModel = this.getView().getModel("CustomerData");
             var oCustomerData = oCustomerModel.getData();
@@ -619,21 +599,18 @@ sap.ui.define([
                 // BASE PRICE
                 var basePrice = Number(oPayload.Price) || 0;
                 var iDays = Number(oPayload.TotalDays) || 0;
-                var iHours = Number(oPayload.TotalHour) || 0;   // ← NEW for Per Hour
+                var iHours = Number(oPayload.TotalHour) || 0; // ← NEW for Per Hour
                 var finalPrice = 0;
                 const iCount = oPayload.TotalHour || 1;
 
                 // CALCULATE PRICE BASED ON UNIT
                 if (oPayload.UnitText === "Per Day") {
                     finalPrice = basePrice * iDays;
-                }
-                else if (oPayload.UnitText === "Per Month") {
+                } else if (oPayload.UnitText === "Per Month") {
                     finalPrice = basePrice * iCount;
-                }
-                else if (oPayload.UnitText === "Per Year") {
+                } else if (oPayload.UnitText === "Per Year") {
                     finalPrice = basePrice * iCount;
-                }
-                else if (oPayload.UnitText === "Per Hour") {
+                } else if (oPayload.UnitText === "Per Hour") {
                     // ✅ Newly Added Hour Calculation
                     finalPrice = basePrice * iHours * iDays;
                 }
@@ -659,7 +636,7 @@ sap.ui.define([
 
                 // Recalculate totals
                 var total = 0;
-                oCustomerData.AllSelectedFacilities.forEach(function (fac) {
+                oCustomerData.AllSelectedFacilities.forEach(function(fac) {
                     total += Number(fac.TotalAmount) || 0;
                 });
 
@@ -679,7 +656,8 @@ sap.ui.define([
                 sap.m.MessageToast.show("Make sure all the mandatory fields are filled and validate the entered value")
             }
         },
-        onEditBooking: function () {
+
+        onEditBooking: function() {
             this.getView().getModel("VisibleModel").setProperty("/visible", true)
             var data = this.getView().getModel("CustomerData").getData()
             var model = this.getView().getModel("Bookingmodel")
@@ -703,11 +681,6 @@ sap.ui.define([
             model.setProperty("/MobileNo", data.MobileNo)
             model.setProperty("/Salutation", data.Salutation)
 
-
-
-
-
-
             if (data.PaymentType === "Per Month") {
                 model.setProperty("/UnitText", "monthly")
             } else if (data.PaymentType === "Per Day") {
@@ -715,8 +688,6 @@ sap.ui.define([
             } else if (data.PaymentType === "Per Year") {
                 model.setProperty("/UnitText", "yearly")
             }
-
-
 
             if (data.PaymentType !== "daily" || data.PaymentType !== "Per Day") {
                 this.byId("idMonthYearSelect").setVisible(false)
@@ -737,7 +708,7 @@ sap.ui.define([
             this.ajaxReadWithJQuery("HM_Rooms", "").then((oData) => {
                 var aRooms = Array.isArray(oData.commentData) ? oData.commentData : [oData.commentData];
 
-                var aFilteredRooms = aRooms.filter(function (room) {
+                var aFilteredRooms = aRooms.filter(function(room) {
                     return room.BranchCode === sBranchCode;
                 });
 
@@ -747,159 +718,160 @@ sap.ui.define([
 
             })
         },
-    onBookingEditDateChange: function(oEvent) {
+
+        onBookingEditDateChange: function(oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
-    var oBookingModel = this.getView().getModel("Bookingmodel");
-    var oCustomerModel = this.getView().getModel("CustomerData");
-    var oData = oBookingModel.getData();
+            var oBookingModel = this.getView().getModel("Bookingmodel");
+            var oCustomerModel = this.getView().getModel("CustomerData");
+            var oData = oBookingModel.getData();
 
-    var sStart = oData.StartDate;
-    var sEnd = oData.EndDate;
-    var sUnit = oData.UnitText; // daily / monthly / yearly
+            var sStart = oData.StartDate;
+            var sEnd = oData.EndDate;
+            var sUnit = oData.UnitText; // daily / monthly / yearly
 
-    // Get selected duration from <Select>
-    var duration = oData.DurationUnit ? parseInt(oData.DurationUnit) : 1;
+            // Get selected duration from <Select>
+            var duration = oData.DurationUnit ? parseInt(oData.DurationUnit) : 1;
 
-    // Rent handling
-    let originalRent = oCustomerModel.getProperty("/OrginalRentPrice");
-    if (!originalRent) {
-        originalRent = oCustomerModel.getProperty("/RentPrice") || 0;
-        oCustomerModel.setProperty("/OriginalRentPrice", originalRent);
-    }
+            // Rent handling
+            let originalRent = oCustomerModel.getProperty("/OrginalRentPrice");
+            if (!originalRent) {
+                originalRent = oCustomerModel.getProperty("/RentPrice") || 0;
+                oCustomerModel.setProperty("/OriginalRentPrice", originalRent);
+            }
 
-    if (!sStart || !sUnit) {
-        return;
-    }
+            if (!sStart || !sUnit) {
+                return;
+            }
 
-    // Convert dates if dd/mm/yyyy
-    if (sStart.includes("/")) {
-        sStart = sStart.split("/").reverse().join("-");
-    }
-    if (sEnd && sEnd.includes("/")) {
-        sEnd = sEnd.split("/").reverse().join("-");
-    }
+            // Convert dates if dd/mm/yyyy
+            if (sStart.includes("/")) {
+                sStart = sStart.split("/").reverse().join("-");
+            }
+            if (sEnd && sEnd.includes("/")) {
+                sEnd = sEnd.split("/").reverse().join("-");
+            }
 
-    var oStart = new Date(sStart);
-    var oEnd = sEnd ? new Date(sEnd) : null;
+            var oStart = new Date(sStart);
+            var oEnd = sEnd ? new Date(sEnd) : null;
 
-    // Set MinDate on EndDate picker
-    var oEndDatePicker = this.byId("editEndDate");
-    if (oEndDatePicker) {
-        oEndDatePicker.setMinDate(oStart);
-    }
+            // Set MinDate on EndDate picker
+            var oEndDatePicker = this.byId("editEndDate");
+            if (oEndDatePicker) {
+                oEndDatePicker.setMinDate(oStart);
+            }
 
-    // DAILY CALCULATION
-    if (sUnit === "daily" || sUnit === "Per Day") {
+            // DAILY CALCULATION
+            if (sUnit === "daily" || sUnit === "Per Day") {
 
-        if (!oEnd) {
-            sap.m.MessageToast.show("Please select End Date for daily calculation.");
-            return;
-        }
+                if (!oEnd) {
+                    sap.m.MessageToast.show("Please select End Date for daily calculation.");
+                    return;
+                }
 
-        // Validate EndDate >= StartDate
-        if (oEnd < oStart) {
-            // Clear EndDate
-            oBookingModel.setProperty("/EndDate", "");
-            if (oEndDatePicker) oEndDatePicker.setValue("");
+                // Validate EndDate >= StartDate
+                if (oEnd < oStart) {
+                    // Clear EndDate
+                    oBookingModel.setProperty("/EndDate", "");
+                    if (oEndDatePicker) oEndDatePicker.setValue("");
 
-            sap.m.MessageToast.show("End Date cannot be earlier than Start Date.");
-            return;
-        }
+                    sap.m.MessageToast.show("End Date cannot be earlier than Start Date.");
+                    return;
+                }
 
-        // Calculate day difference
-        var diffTime = oEnd - oStart;
-        var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1 || 1;
+                // Calculate day difference
+                var diffTime = oEnd - oStart;
+                var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1 || 1;
 
-        oCustomerModel.setProperty("/RentPrice", diffDays * originalRent);
-        oCustomerModel.setProperty("/Duration", diffDays);
+                oCustomerModel.setProperty("/RentPrice", diffDays * originalRent);
+                oCustomerModel.setProperty("/Duration", diffDays);
 
-        oData.EndDate = this._formatDate(oEnd);
-        oBookingModel.refresh();
-        return;
-    }
+                oData.EndDate = this._formatDate(oEnd);
+                oBookingModel.refresh();
+                return;
+            }
 
-    // MONTHLY CALCULATION
-    if (sUnit === "monthly" || sUnit === "Per Month") {
+            // MONTHLY CALCULATION
+            if (sUnit === "monthly" || sUnit === "Per Month") {
 
-        // Reset EndDate to StartDate always
-        oEnd = new Date(oStart);
+                // Reset EndDate to StartDate always
+                oEnd = new Date(oStart);
 
-        // Add selected duration months
-        oEnd.setMonth(oEnd.getMonth() + duration);
-    }
+                // Add selected duration months
+                oEnd.setMonth(oEnd.getMonth() + duration);
+            }
 
-    // YEARLY CALCULATION
-    if (sUnit === "yearly" || sUnit === "Per Year") {
+            // YEARLY CALCULATION
+            if (sUnit === "yearly" || sUnit === "Per Year") {
 
-        // Reset EndDate to StartDate always
-        oEnd = new Date(oStart);
+                // Reset EndDate to StartDate always
+                oEnd = new Date(oStart);
 
-        // Add selected duration years
-        oEnd.setFullYear(oEnd.getFullYear() + duration);
-    }
+                // Add selected duration years
+                oEnd.setFullYear(oEnd.getFullYear() + duration);
+            }
 
-    // Save final EndDate in yyyy-MM-dd
-    oData.EndDate = this._formatDate(oEnd);
+            // Save final EndDate in yyyy-MM-dd
+            oData.EndDate = this._formatDate(oEnd);
 
-    oBookingModel.refresh();
-}
-,
+            oBookingModel.refresh();
+        },
 
-        _formatDate: function (oDate) {
+        _formatDate: function(oDate) {
             var yyyy = oDate.getFullYear();
             var mm = String(oDate.getMonth() + 1).padStart(2, '0');
             var dd = String(oDate.getDate()).padStart(2, '0');
             return `${yyyy}-${mm}-${dd}`;
         },
-        onBookMonthYearChange: function (oEvent) {
-            const oModel = this.getView().getModel("Bookingmodel");
-            const oCustomerData = this.getView().getModel("CustomerData");
 
-            // Store original RentPrice once if not already stored
-            let originalRent = oCustomerData.getProperty("/OriginalRentPrice");
-            if (!originalRent) {
-                originalRent = oCustomerData.getProperty("/OrginalRentPrice") || 0;
-                oCustomerData.setProperty("/OriginalRentPrice1", originalRent);
-            }
+        onBookMonthYearChange: function(oEvent) {
+                const oModel = this.getView().getModel("Bookingmodel");
+                const oCustomerData = this.getView().getModel("CustomerData");
 
-            const iCount = Number(oEvent.getSource().getSelectedKey()) || 1;
-            const sUnit = oModel.getProperty("/UnitText");
-            let sStartDate = oModel.getProperty("/StartDate"); // e.g., "24/11/2025"
+                // Store original RentPrice once if not already stored
+                let originalRent = oCustomerData.getProperty("/OriginalRentPrice");
+                if (!originalRent) {
+                    originalRent = oCustomerData.getProperty("/OrginalRentPrice") || 0;
+                    oCustomerData.setProperty("/OriginalRentPrice1", originalRent);
+                }
 
-            if (!sStartDate) {
-                sap.m.MessageToast.show("Please select Start Date first.");
-                return;
-            }
+                const iCount = Number(oEvent.getSource().getSelectedKey()) || 1;
+                const sUnit = oModel.getProperty("/UnitText");
+                let sStartDate = oModel.getProperty("/StartDate"); // e.g., "24/11/2025"
 
-            if (sStartDate.includes("/")) {
-                sStartDate = sStartDate
-                    .split("/")
-                    .reverse()
-                    .join("-");
-            }
+                if (!sStartDate) {
+                    sap.m.MessageToast.show("Please select Start Date first.");
+                    return;
+                }
 
-            const oStart = new Date(sStartDate);
-            let oEnd = new Date(oStart);
+                if (sStartDate.includes("/")) {
+                    sStartDate = sStartDate
+                        .split("/")
+                        .reverse()
+                        .join("-");
+                }
 
-            if (sUnit === "monthly" || sUnit === "Per Month") {
-                oEnd.setDate(oEnd.getDate() + iCount * 30);
-                oCustomerData.setProperty("/RentPrice", iCount * originalRent); // use originalRent
-            } else if (sUnit === "yearly" || sUnit === "Per Year") {
-                oEnd.setDate(oEnd.getDate() + iCount * 365);
-                oCustomerData.setProperty("/RentPrice", iCount * originalRent); // use originalRent
-            }
+                const oStart = new Date(sStartDate);
+                let oEnd = new Date(oStart);
 
-            // Format yyyy-MM-dd for DatePicker
-            const sFormatted = oEnd.toISOString().split("T")[0];
-            oModel.setProperty("/EndDate", sFormatted);
-        }
+                if (sUnit === "monthly" || sUnit === "Per Month") {
+                    oEnd.setDate(oEnd.getDate() + iCount * 30);
+                    oCustomerData.setProperty("/RentPrice", iCount * originalRent); // use originalRent
+                } else if (sUnit === "yearly" || sUnit === "Per Year") {
+                    oEnd.setDate(oEnd.getDate() + iCount * 365);
+                    oCustomerData.setProperty("/RentPrice", iCount * originalRent); // use originalRent
+                }
 
-        ,
-        onCancelBooking: function () {
+                // Format yyyy-MM-dd for DatePicker
+                const sFormatted = oEnd.toISOString().split("T")[0];
+                oModel.setProperty("/EndDate", sFormatted);
+            },
+
+        onCancelBooking: function() {
             this.getView().getModel("VisibleModel").setProperty("/visible", false)
             this.byId("idMonthYearSelect").setVisible(false)
         },
-        onEditFacilityDetails: function () {
+
+        onEditFacilityDetails: function() {
             var oTable = this.byId("Ad_id_idFacilityRoomTableDetails");
             var oSelectedItem = oTable.getSelectedItem();
 
@@ -924,12 +896,10 @@ sap.ui.define([
                 oView.addDependent(this.HM_Dialog);
             }
             sap.ui.getCore().byId("idUnitType").setVisible(true)
-
-
             this.HM_Dialog.open();
-
         },
-        onDeleteFacilityDetails: function () {
+
+        onDeleteFacilityDetails: function() {
             var oTable = this.byId("Ad_id_idFacilityRoomTableDetails");
             var oSelectedItem = oTable.getSelectedItem();
 
@@ -963,18 +933,19 @@ sap.ui.define([
 
             if (sFacilityID) {
                 sap.m.MessageBox.confirm(
-                    "Are you sure you want to delete this Facility?",
-                    {
+                    "Are you sure you want to delete this Facility?", {
                         title: "Confirm Delete",
                         actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
-                        onClose: function (oAction) {
+                        onClose: function(oAction) {
                             if (oAction === sap.m.MessageBox.Action.OK) {
 
                                 // Backend call
                                 that.ajaxDeleteWithJQuery("HM_BookingFacilityItems", {
-                                    filters: { FacilityID: sFacilityID }
-                                })
-                                    .then(function () {
+                                        filters: {
+                                            FacilityID: sFacilityID
+                                        }
+                                    })
+                                    .then(function() {
                                         // Remove from model
                                         if (deleteIndex > -1) {
                                             aFacilities.splice(deleteIndex, 1);
@@ -988,7 +959,7 @@ sap.ui.define([
 
                                         sap.m.MessageToast.show("Facility deleted successfully!");
                                     })
-                                    .catch(function () {
+                                    .catch(function() {
                                         sap.m.MessageToast.show("Failed to delete facility from server.");
                                     });
 
@@ -1013,22 +984,19 @@ sap.ui.define([
             sap.m.MessageToast.show("Facility removed successfully!");
         },
 
-
         // Helper: Total Calculation
-        _recalculateFacilityTotals: function (oCustomerData) {
+        _recalculateFacilityTotals: function(oCustomerData) {
             var total = 0;
 
-            (oCustomerData.AllSelectedFacilities || []).forEach(function (fac) {
+            (oCustomerData.AllSelectedFacilities || []).forEach(function(fac) {
                 total += Number(fac.TotalAmount) || 0;
             });
 
             oCustomerData.TotalFacilityPrice = total;
             oCustomerData.GrandTotal = total + (oCustomerData.RentPrice || 0);
-        }
-        ,
+        },
 
-
-         onRoomDurationChange: function (oEvent) {
+        onRoomDurationChange: function(oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
             var oSelectedItem = oEvent.getParameter("selectedItem");
 
@@ -1070,14 +1038,12 @@ sap.ui.define([
                     oBookingModel.setProperty("/StartDate", "")
                     oBookingModel.setProperty("/EndDate", "")
 
-                }
-                else if (sUnit === "monthly" || sUnit === "Per Month") {
+                } else if (sUnit === "monthly" || sUnit === "Per Month") {
                     fPrice = parseFloat(oSelectedBed.MonthPrice || 0)
                     oBookingModel.setProperty("/StartDate", "")
                     oBookingModel.setProperty("/EndDate", "")
                     oBookingModel.setProperty("/DurationUnit", "1")
-                }
-                else if (sUnit === "yearly" || sUnit === "Per Year") {
+                } else if (sUnit === "yearly" || sUnit === "Per Year") {
                     fPrice = parseFloat(oSelectedBed.YearPrice || 0)
                     oBookingModel.setProperty("/StartDate", "")
                     oBookingModel.setProperty("/EndDate", "")
@@ -1094,8 +1060,9 @@ sap.ui.define([
                 oCustomerModel.setProperty("/GrandTotal", fPrice + fFacilityPrice);
             }
         },
-      onRoomBedChange: function (oEvent) {
-          utils._LCvalidateMandatoryField(oEvent);
+
+        onRoomBedChange: function(oEvent) {
+            utils._LCvalidateMandatoryField(oEvent);
             var oSelectedItem = oEvent.getParameter("selectedItem");
 
             if (!oSelectedItem) {
@@ -1106,57 +1073,56 @@ sap.ui.define([
                 return;
             }
 
-    var sBedType = oEvent.getParameter("selectedItem").getKey(); // Selected bed type
-    var oBookingModel = this.getView().getModel("Bookingmodel");
-    var oCustomerModel = this.getView().getModel("CustomerData");
+            var sBedType = oEvent.getParameter("selectedItem").getKey(); // Selected bed type
+            var oBookingModel = this.getView().getModel("Bookingmodel");
+            var oCustomerModel = this.getView().getModel("CustomerData");
 
-    // Update selected bed in Bookingmodel
-    oBookingModel.setProperty("/BedTypeName", sBedType);
+            // Update selected bed in Bookingmodel
+            oBookingModel.setProperty("/BedTypeName", sBedType);
 
-    var aAvailableBeds = this.getView().getModel("Availablebeds").getData(); // all available beds
-    var sUnit = oCustomerModel.getProperty("/PaymentType"); // daily / monthly / yearly
+            var aAvailableBeds = this.getView().getModel("Availablebeds").getData(); // all available beds
+            var sUnit = oCustomerModel.getProperty("/PaymentType"); // daily / monthly / yearly
 
-    // Find the bed object
-    var oSelectedBed = aAvailableBeds.find(bed => bed.BedTypeName === sBedType);
+            // Find the bed object
+            var oSelectedBed = aAvailableBeds.find(bed => bed.BedTypeName === sBedType);
 
-    if (oSelectedBed) {
-        var fPrice = 0;
-        var iDuration = 1; // default duration
+            if (oSelectedBed) {
+                var fPrice = 0;
+                var iDuration = 1; // default duration
 
-        if (sUnit === "daily" || sUnit === "Per Day") {
-            fPrice = parseFloat(oSelectedBed.Price || 0);
-            // Calculate number of days
-            var sStart = oBookingModel.getProperty("/StartDate");
-            var sEnd = oBookingModel.getProperty("/EndDate");
-            if (sStart && sEnd) {
-                var dStart = new Date(sStart);
-                var dEnd = new Date(sEnd);
-                // +1 to include start and end day
-                iDuration = Math.ceil((dEnd - dStart) / (1000 * 60 * 60 * 24)) + 1;
+                if (sUnit === "daily" || sUnit === "Per Day") {
+                    fPrice = parseFloat(oSelectedBed.Price || 0);
+                    // Calculate number of days
+                    var sStart = oBookingModel.getProperty("/StartDate");
+                    var sEnd = oBookingModel.getProperty("/EndDate");
+                    if (sStart && sEnd) {
+                        var dStart = new Date(sStart);
+                        var dEnd = new Date(sEnd);
+                        // +1 to include start and end day
+                        iDuration = Math.ceil((dEnd - dStart) / (1000 * 60 * 60 * 24)) + 1;
+                    }
+                } else if (sUnit === "monthly" || sUnit === "Per Month") {
+                    fPrice = parseFloat(oSelectedBed.MonthPrice || 0);
+                    // Get selected months
+                    iDuration = parseInt(oBookingModel.getProperty("/DurationUnit")) || 1;
+                } else if (sUnit === "yearly" || sUnit === "Per Year") {
+                    fPrice = parseFloat(oSelectedBed.YearPrice || 0);
+                    // Get selected years
+                    iDuration = parseInt(oBookingModel.getProperty("/DurationUnit")) || 1;
+                }
+
+                // Multiply by duration
+                var fOriginalRentPrice = fPrice * iDuration;
+
+                // Update model
+                oCustomerModel.setProperty("/RentPrice", fOriginalRentPrice);
+                oCustomerModel.setProperty("/OrginalRentPrice", fPrice);
+
+                // Recalculate GrandTotal
+                var fFacilityPrice = parseFloat(oCustomerModel.getProperty("/TotalFacilityPrice") || 0);
+                oCustomerModel.setProperty("/GrandTotal", fOriginalRentPrice + fFacilityPrice);
             }
-        } else if (sUnit === "monthly" || sUnit === "Per Month") {
-            fPrice = parseFloat(oSelectedBed.MonthPrice || 0);
-            // Get selected months
-            iDuration = parseInt(oBookingModel.getProperty("/DurationUnit")) || 1;
-        } else if (sUnit === "yearly" || sUnit === "Per Year") {
-            fPrice = parseFloat(oSelectedBed.YearPrice || 0);
-            // Get selected years
-            iDuration = parseInt(oBookingModel.getProperty("/DurationUnit")) || 1;
-        }
-
-        // Multiply by duration
-        var fOriginalRentPrice = fPrice * iDuration;
-
-        // Update model
-        oCustomerModel.setProperty("/RentPrice", fOriginalRentPrice);
-        oCustomerModel.setProperty("/OrginalRentPrice", fPrice);
-
-        // Recalculate GrandTotal
-        var fFacilityPrice = parseFloat(oCustomerModel.getProperty("/TotalFacilityPrice") || 0);
-        oCustomerModel.setProperty("/GrandTotal", fOriginalRentPrice + fFacilityPrice);
-    }
-}
-,
+        },
 
         onEditTimeChange: function(oEvent) {
             utils._LCvalidateMandatoryField(oEvent)
@@ -1206,6 +1172,7 @@ sap.ui.define([
 
             oModel.setProperty("/TotalHour", formatted);
         },
+
         onCountrySelectionChange: function(oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
             const oView = this.getView();
@@ -1246,6 +1213,7 @@ sap.ui.define([
                 new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
             ]);
         },
+
         CC_onChangeState: function(oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
             const oView = this.getView();
@@ -1277,7 +1245,6 @@ sap.ui.define([
                 new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
             ]);
         },
-
 
         onChange: function(oEvent) {
             const oInput = oEvent.getSource();
@@ -1337,9 +1304,8 @@ sap.ui.define([
                 "City": Bookingdata.City,
                 "STDCode": Bookingdata.STDCode,
                 "Salutation": CustomerData.Salutation || "Mr.",
-               "Booking": [    
-                    {
-                        "BookingDate": new Date().toISOString().split('T')[0], // current date
+                "Booking": [{
+                    "BookingDate": new Date().toISOString().split('T')[0], // current date
                     "RentPrice": CustomerData.RentPrice,
                     "NoOfPersons": CustomerData.NoOfPersons,
                     "StartDate": Bookingdata.StartDate.split('/').reverse().join('-'),
