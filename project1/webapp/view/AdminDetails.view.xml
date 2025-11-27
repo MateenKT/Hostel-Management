@@ -400,22 +400,26 @@
                                 text="{CustomerData>/City}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-							<ComboBox
-                                id="CC_id_City"
-                                change="onChange"
-                                valueStateText="Select City"
-                                placeholder="Enter City"
-                                items="{path:'CityModel>/',length:1000}"
-                                selectedKey="{Bookingmodel>/City}"
-                                showSecondaryValues="true"
-                                visible="{VisibleModel>/visible}"
-                            >
-								<core:ListItem
-                                    key="{CityModel>cityName}"
-                                    text="{CityModel>cityName}"
-                                    additionalText="{CityModel>branchCode}"
-                                />
-							</ComboBox>
+						<ComboBox
+    id="CC_id_City"
+    change="onChange"
+    valueStateText="Select City"
+    placeholder="Enter City"
+    items="{
+        path:'CityModel>/',
+        length:1000
+    }"
+    selectedKey="{Bookingmodel>/City}"
+    showSecondaryValues="true"
+    visible="{VisibleModel>/visible}"
+>
+    <core:ListItem
+        key="{CityModel>cityName}"
+        text="{CityModel>cityName}"
+        additionalText="{CityModel>branchCode}"
+    />
+</ComboBox>
+
 							<Label text="Mobile Number" />
 							<Text
                                 text="{= ${CustomerData>/STDCode} + ' ' + ${CustomerData>/MobileNo} }"
@@ -438,7 +442,7 @@
                                 value="{Bookingmodel>/MobileNo}"
                                 placeholder="Enter Contact Number"
                                 maxLength="10"
-                                liveChange="onChange"
+                                liveChange="onmobileChange"
                                 valueStateText="Enter Contact Number"
                                 visible="{VisibleModel>/visible}"
                             />

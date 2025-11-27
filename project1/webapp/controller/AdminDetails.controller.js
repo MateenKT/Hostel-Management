@@ -875,6 +875,11 @@ const totals = this.calculateTotals(aPersons, oCustomerData.RentPrice);
 
                 // Add selected duration months
                 oEnd.setMonth(oEnd.getMonth() + duration);
+                var diffDays=oBookingModel.getProperty("/DurationUnit");
+                oCustomerModel.setProperty("/RentPrice", diffDays * originalRent);
+                oCustomerModel.setProperty("/GrandTotal", diffDays * originalRent + (oCustomerModel.getProperty("/TotalFacilityPrice") || 0));
+
+
             }
 
             // YEARLY CALCULATION
@@ -885,6 +890,9 @@ const totals = this.calculateTotals(aPersons, oCustomerData.RentPrice);
 
                 // Add selected duration years
                 oEnd.setFullYear(oEnd.getFullYear() + duration);
+                   var diffDays=oBookingModel.getProperty("/DurationUnit");
+                oCustomerModel.setProperty("/RentPrice", diffDays * originalRent);
+                oCustomerModel.setProperty("/GrandTotal", diffDays * originalRent + (oCustomerModel.getProperty("/TotalFacilityPrice") || 0));
             }
 
             // Save final EndDate in yyyy-MM-dd
@@ -1330,6 +1338,11 @@ const totals = this.calculateTotals(aPersons, oCustomerData.RentPrice);
         },
 
         onChange: function(oEvent) {
+            const oInput = oEvent.getSource();
+            utils._LCvalidateMandatoryField(oEvent);
+            if (oInput.getValue() === "") oInput.setValueState("None");
+        },
+           onmobileChange: function(oEvent) {
             const oInput = oEvent.getSource();
             utils._LCvalidateMobileNumber(oEvent);
             if (oInput.getValue() === "") oInput.setValueState("None");
