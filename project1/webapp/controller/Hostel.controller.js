@@ -1365,7 +1365,7 @@ sap.ui.define([
                     Salutation: oModel.getProperty("/Salutation"),
                     MobileNo: oModel.getProperty("/phone"),
                     EmailID: oModel.getProperty("/email"),
-                    DateOfBirth: oModel.getProperty("/dob"),
+                    DateOfBirth:  oModel.getData().DateOfBirth ? oModel.getData().DateOfBirth.split("/").reverse().join("-") : "",
                     Gender: oModel.getProperty("/gender"),
                     Address: oModel.getProperty("/address"),
                     City: oModel.getProperty("/city"),
@@ -1375,6 +1375,8 @@ sap.ui.define([
                 },
                 filters: { UserID: oModel.getProperty("/UserID") }
             };
+
+           
 
             try {
                 sap.ui.core.BusyIndicator.show(0);
