@@ -175,11 +175,11 @@
             <Button
                 text="Save"
                 press=".onEditFacilitySave"
-                type="Emphasized"
+                 class="myUnifiedBtn"
             />
             <Button
                 text="Cancel"
-                press="onEditDialogClose"
+                press="onEditDialogClose"  class="myUnifiedBtn"
             />
         </buttons>
     </Dialog>
