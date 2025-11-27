@@ -1603,3 +1603,16 @@ span.sapMBtnInner.sapMBtnEmphasized {
   border-radius: 5px;
   object-fit: cover;
 }
+
+.custom-flexbox {
+  margin: 10px 0;
+  margin-right: 10px;
+}
+ 
+.totalColumnBold1 {
+  font-weight: bold;     /* Same as boldBlackText */
+  color: #000;           /* Same black color */
+  text-align: right;     /* Align text to the right */
+  margin-right: 5px;     /* Matches rightAlignLabel spacing */
+  font-size: 1.05rem;    /* Slightly larger to highlight totals */
+}
