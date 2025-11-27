@@ -12,82 +12,44 @@
 			<core:Fragment fragmentName="sap.ui.com.project1.fragment.Header" type="XML"/>
 			<content>
 				<VBox class="sapUiSmallMargin">
-					<Title  text="Hostel Booking" class="boldBlackText"/>
-					<!-- Booking Status and Price with Edit button -->
-					<HBox
-                        class="sapUiSmallMarginTop"
-                        justifyContent="SpaceBetween"
-                        alignItems="Center"
-                    >
-						<!-- Left side -->
-						<HBox>
-							<VBox>
-								<Text
-                                    text="Room Price"
-                                    class="sapUiSmallMarginBottom"
-                                />
-								<Text
-                                    text="{CustomerData>/OrginalRentPrice}"
-                                    class="largeTextBold"
-                                />
-							</VBox>
-							<VBox class="sapUiMediumMarginBegin">
-								<Text
-                                    text="Bed Type"
-                                    class="sapUiSmallMarginBottom"
-                                />
-								<Text
-                                    text="{CustomerData>/BedType}"
-                                    class="largeTextBold"
-                                />
-							</VBox>
-							<VBox class="sapUiMediumMarginBegin">
-								<Text
-                                    text="Status"
-                                    class="sapUiSmallMarginBottom"
-                                />
-								<!-- <Text text="{CustomerData>/Status}" class="largeTextBold"/> -->
-								<ObjectStatus
-                                    inverted="false"
-                                    text="{CustomerData>/Status}"
-                                    state="{
-                               path: 'CustomerData>/Status',
-                              formatter: '.Formatter.formatObjectStatus'
-                                   }"
-                                />
-							</VBox>
-						</HBox>
-						<!-- Right side buttons -->
-						<HBox
-                            alignItems="Center"
-                            justifyContent="End"
-                            width="30%"
-                        >
-							<Button
-                                text="Edit" id="idedit"
-                                class="sapUiSmallMarginBegin myUnifiedBtn"
-                                press="onEditBooking"
-                                visible="{= !${VisibleModel>/visible} }"
-                            />
-							<Button id="idcancel" text="Cancel Booking" press="onPressCancelBooking" visible="{= !${VisibleModel>/visible} }"
-                                class="sapUiSmallMarginBegin myUnifiedBtn"  />
-							<Button
-                                text="Save"
-                                
-                                press="onSaveBooking"
-                                visible="{VisibleModel>/visible}"
-                                class="sapUiSmallMarginBegin myUnifiedBtn"
-                            />
-							<Button
-                                text="Cancel"
-                               
-                                press="onCancelBooking"
-                                visible="{VisibleModel>/visible}"
-                                class="sapUiSmallMarginBegin myUnifiedBtn"
-                            />
-						</HBox>
-					</HBox>
-				</VBox>
+    <Title text="Hostel Booking" class="boldBlackText sapUiSmallMarginBottom"/>
+    
+    <!-- Responsive Booking Status and Buttons -->
+        
+        <!-- Left Side Info -->
+        <FlexBox wrap="Wrap" justifyContent="Start" alignItems="Start" class="sapUiSmallMarginEnd">
+            <VBox class="sapUiSmallMarginEnd">
+                <!-- <layoutData>
+                    <FlexItemData growFactor="1"/>
+                </layoutData> -->
+                <Text text="Room Price" class="sapUiSmallMarginBottom"/>
+                <Text text="{CustomerData>/OrginalRentPrice}" class="largeTextBold"/>
+            </VBox>
+            <VBox class="sapUiSmallMarginEnd">
+                <!-- <layoutData>
+                    <FlexItemData growFactor="1"/>
+                </layoutData> -->
+                <Text text="Bed Type" class="sapUiSmallMarginBottom"/>
+                <Text text="{CustomerData>/BedType}" class="largeTextBold"/>
+            </VBox>
+            <VBox>
+                <!-- <layoutData>
+                    <FlexItemData growFactor="1"/>
+                </layoutData> -->
+                <Text text="Status" class="sapUiSmallMarginBottom"/>
+                <ObjectStatus text="{CustomerData>/Status}" state="{path:'CustomerData>/Status', formatter:'.Formatter.formatObjectStatus'}"/>
+            </VBox>
+        </FlexBox>
+
+        <!-- Right Side Buttons -->
+        <FlexBox wrap="NoWrap" justifyContent="End" alignItems="Center"  class="sapUiSmallMarginTop">
+            <Button text="Edit" id="idedit" class="sapUiSmallMarginBegin myUnifiedBtn" press="onEditBooking" visible="{= !${VisibleModel>/visible} }"/>
+            <Button id="idcancel" text="Cancel Booking" press="onPressCancelBooking" visible="{= !${VisibleModel>/visible} }" class="sapUiSmallMarginBegin myUnifiedBtn"/>
+            <Button text="Save" press="onSaveBooking" visible="{VisibleModel>/visible}" class="sapUiSmallMarginBegin myUnifiedBtn"/>
+            <Button text="Cancel" press="onCancelBooking" visible="{VisibleModel>/visible}" class="sapUiSmallMarginBegin myUnifiedBtn"/>
+        </FlexBox>
+</VBox>
+
 			</content>
 			<VBox class="sapUiMediumMarginBottom">
 				<Panel
@@ -164,7 +126,7 @@
                                 width="100%"
                                 selectionChange="onRoomDurationChange"
                                 visible="{VisibleModel>/visible}" valueStateText="Select Payment Type" change="onChange"
-                            >
+                            >   
 								<core:ListItem
                                     key="daily"
                                     text="Per Day"
@@ -320,13 +282,14 @@
 							<core:Title text="" />
 							<Label text="Full Name" />
 							<Text
-                                text="{CustomerData>/Salutation}"
+                              text="{= ${CustomerData>/Salutation} + ' ' + ${CustomerData>/CustomerName} }"
+
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-							<Text
+							<!-- <Text
                                 text="{CustomerData>/CustomerName}"
                                 visible="{= !${VisibleModel>/visible} }"
-                            />
+                            /> -->
 							<Select
                                 selectedKey="{Bookingmodel>/Salutation}"
                                 visible="{VisibleModel>/visible}"
@@ -388,7 +351,7 @@
                                 value="{Bookingmodel>/CustomerEmail}"
                                 type="Email"
                                 maxLength="50"
-                                visible="{VisibleModel>/visible}" id="Ad_id_CustomerEmail" valueStateText="Enter Email Id" change="onChange"
+                                visible="{VisibleModel>/visible}" id="Ad_id_CustomerEmail" valueStateText="Enter Email Id" change="onChangemail"
                             />
 							<Label text="Country" />
 							<Text
@@ -455,14 +418,14 @@
 							</ComboBox>
 							<Label text="Mobile Number" />
 							<Text
-                                text="{CustomerData>/STDCode}"
+                                text="{= ${CustomerData>/STDCode} + ' ' + ${CustomerData>/MobileNo} }"
+
                                 visible="{= !${VisibleModel>/visible} }"
-                                width="30px"
                             />
-							<Text
+							<!-- <Text
                                 text="{CustomerData>/MobileNo}"
                                 visible="{= !${VisibleModel>/visible} }"
-                            />
+                            /> -->
 							<Input
                                 id="CC_id_STDCode"
                                 value="{Bookingmodel>/STDCode}"
@@ -477,7 +440,6 @@
                                 maxLength="10"
                                 liveChange="onChange"
                                 valueStateText="Enter Contact Number"
-                                type="Number"
                                 visible="{VisibleModel>/visible}"
                             />
 						</f:content>
@@ -562,25 +524,34 @@
 							</Toolbar>
 						</headerToolbar>
 						<columns>
-							<Column>
+							<Column   
+                           
+                        demandPopin="true">
 								<Text text="Facility Name" />
 							</Column>
-							<Column>
+							<Column   
+                         
+                        demandPopin="true">
 								<Text text="Facility Price" />
 							</Column>
-							<Column>
+							<Column     minScreenWidth="Tablet"
+                        demandPopin="true">
 								<Text text="Start Date" />
 							</Column>
-							<Column>
+							<Column     minScreenWidth="Tablet"
+                        demandPopin="true">
 								<Text text="End Date" />
 							</Column>
-							<Column>
+							<Column     minScreenWidth="Tablet"
+                        demandPopin="true">
 								<Text text="Unit" />
 							</Column>
-							<Column>
+							<Column  minScreenWidth="Tablet"
+                        demandPopin="true">
 								<Text text="Days" />
 							</Column>
-							<Column>
+							<Column     minScreenWidth="Tablet"
+                        demandPopin="true">
 								<Text text="Total Price" />
 							</Column>
 						</columns>

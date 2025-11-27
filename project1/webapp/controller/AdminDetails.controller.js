@@ -49,8 +49,14 @@ sap.ui.define([
 
             var sPath = oEvent.getParameter("arguments").sPath;
             this.decodedPath = decodeURIComponent(decodeURIComponent(sPath));
+
+            
             await this.AD_onSearch()
-            this.Facilitysearch()
+            await  this.Facilitysearch()
+
+          
+      
+
         },
 
         Facilitysearch: function() {
@@ -106,8 +112,8 @@ sap.ui.define([
                     City: oCustomer.City,
                     STDCode: oCustomer.STDCode || "",
                     Salutation: oCustomer.Salutation || "Mr.",
-                    RentPrice: oCustomer.Bookings?.[0]?.RentPrice || 0,
-                    OrginalRentPrice: oCustomer.Bookings?.[0]?.RentPrice || 0,
+                    // RentPrice: oCustomer.Bookings?.[0]?.RentPrice || 0,
+                    // OrginalRentPrice: oCustomer.Bookings?.[0]?.RoomPrice || 0,
                     BedType: oCustomer.Bookings?.[0]?.BedType || "",
                     BookingID: oCustomer.Bookings?.[0]?.BookingID || "",
                     BranchCode: oCustomer.Bookings?.[0]?.BranchCode || "",
@@ -129,7 +135,6 @@ sap.ui.define([
                 }
                 this.byId("Ad_id_editStartDate").setMinDate(oCustomer.BookingDate)
                 this.byId("editEndDate").setMinDate(oCustomer.BookingDate)
-
                 // Prepare for calculation
                 const aPersons = [{
                     FullName: oCustomer.CustomerName,
@@ -138,7 +143,53 @@ sap.ui.define([
                     }
                 }];
 
-                const roomRentPrice = oCustomer.Bookings?.[0]?.RentPrice || 0;
+
+
+                // Calculate totals
+          var sBranchCode=oCustomer.Bookings?.[0]?.BranchCode 
+            var BedType= oCustomer.Bookings?.[0]?.BedType
+             var PaymentType=oCustomer.Bookings?.[0]?.PaymentType
+
+            
+            await  this.ajaxReadWithJQuery("HM_Rooms", "").then((oData) => {
+                var aRooms = Array.isArray(oData.commentData) ? oData.commentData : [oData.commentData];
+
+                var aFilteredRooms = aRooms.filter(function(room) {
+                    return room.BranchCode === sBranchCode;
+                });
+
+
+                // set only filtered data to the model
+                var model = new sap.ui.model.json.JSONModel(aFilteredRooms);
+                this.getView().setModel(model, "Availablebeds");
+
+                  var RoomBedprice =aFilteredRooms.filter(function(item){
+                            return   item.BedTypeName === BedType
+                          });
+
+var oModel = new sap.ui.model.json.JSONModel(RoomBedprice);
+this.getView().setModel(oModel, "Availablebedprice");
+        
+  })
+      var Availablebedprice=this.getView().getModel("Availablebedprice").getData()
+
+          let roomRentPrice = 0;  
+
+if (PaymentType === "Per Month") {
+    roomRentPrice = Availablebedprice[0].MonthPrice;
+    oCustomerData.OrginalRentPrice= Availablebedprice[0].MonthPrice;
+
+} else if (PaymentType === "Per Day") {
+    roomRentPrice = Availablebedprice[0].Price;
+    oCustomerData.OrginalRentPrice= Availablebedprice[0].Price;
+
+
+} else if (PaymentType === "Per Year") {
+    roomRentPrice = Availablebedprice[0].YearPrice;
+    oCustomerData.OrginalRentPrice= Availablebedprice[0].YearPrice;
+
+}
+
 
                 let Duration = 0;
                 let DurationUnit = "";
@@ -157,8 +208,9 @@ sap.ui.define([
                     const diffMs = end - start;
 
                     if (paymentType === "per day") {
-                        Duration = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                        Duration = Math.ceil(diffMs / (1000 * 60 * 60 * 24)) + 1;
                         DurationUnit = "days";
+
 
                     } else if (paymentType === "per month") {
                         const years = end.getFullYear() - start.getFullYear();
@@ -166,25 +218,34 @@ sap.ui.define([
                         Duration = years * 12 + months;
                         DurationUnit = "months";
 
+
                     } else if (paymentType === "per year") {
                         Duration = end.getFullYear() - start.getFullYear();
                         DurationUnit = "years";
+
                     }
                 }
+                 oCustomerData.RentPrice= Duration * roomRentPrice;
 
                 // Add duration to model
                 oCustomerData.Duration = Duration;
                 oCustomerData.DurationUnit = DurationUnit;
+             
+const totals = this.calculateTotals(aPersons, oCustomerData.RentPrice);
 
-                // Calculate totals
-                const totals = this.calculateTotals(aPersons, roomRentPrice);
 
-                if (totals) {
+                   if (totals) {
                     Object.assign(oCustomerData, totals);
                 }
-
                 const oCustomerModel = new sap.ui.model.json.JSONModel(oCustomerData);
                 this.getView().setModel(oCustomerModel, "CustomerData");
+
+               
+// Now it is available here:
+
+
+
+          
                 // Set model
             } catch (err) {
                 sap.m.MessageToast.show(err.message || err.responseText);
@@ -370,6 +431,7 @@ sap.ui.define([
         },
 
         onAddFacilityDetails: function() {
+
             this._editIndex = undefined;
             this.byId("Ad_id_idFacilityRoomTableDetails").removeSelections()
             if (!this.HM_Dialog) {
@@ -395,6 +457,7 @@ sap.ui.define([
             sap.ui.getCore().byId("editStartTime").setVisible(false)
             sap.ui.getCore().byId("editEndTime").setVisible(false)
             sap.ui.getCore().byId("editHours").setVisible(false)
+
              sap.ui.getCore().byId("idMonthYearSelectFragment").setSelectedKey("1")
         },
 
@@ -589,11 +652,17 @@ sap.ui.define([
                     }
                 }
                 // Format Dates
-                if (oPayload.StartDate.includes("-") || oPayload.EndDate.includes("-")) {
+                if (oPayload.StartDate.includes("-") ) {
                     oPayload.StartDate = this.Formatter.DateFormat(oPayload.StartDate);
-                    oPayload.EndDate = this.Formatter.DateFormat(oPayload.EndDate);
                 } else {
                     oPayload.StartDate = oPayload.StartDate;
+                }
+
+                if(oPayload.EndDate.includes("-")){
+                    oPayload.EndDate = this.Formatter.DateFormat(oPayload.EndDate);
+
+                }else{
+
                     oPayload.EndDate = oPayload.EndDate;
                 }
 
@@ -663,7 +732,10 @@ sap.ui.define([
             this.getView().getModel("VisibleModel").setProperty("/visible", true)
             var data = this.getView().getModel("CustomerData").getData()
             var model = this.getView().getModel("Bookingmodel")
-            model.setProperty("/BedTypeName", data.BedType)
+
+            
+           
+            model.setProperty("/BedTypeName", data.BedType) 
 
             model.setProperty("/StartDate", data.StartDate)
             model.setProperty("/EndDate", data.EndDate)
@@ -737,7 +809,7 @@ sap.ui.define([
             // Rent handling
             let originalRent = oCustomerModel.getProperty("/OrginalRentPrice");
             if (!originalRent) {
-                originalRent = oCustomerModel.getProperty("/RentPrice") || 0;
+                originalRent = oCustomerModel.getProperty("/OrginalRentPrice") || 0;
                 oCustomerModel.setProperty("/OriginalRentPrice", originalRent);
             }
 
@@ -786,6 +858,9 @@ sap.ui.define([
 
                 oCustomerModel.setProperty("/RentPrice", diffDays * originalRent);
                 oCustomerModel.setProperty("/Duration", diffDays);
+                oCustomerModel.setProperty("/GrandTotal", diffDays * originalRent + (oCustomerModel.getProperty("/TotalFacilityPrice") || 0));
+
+
 
                 oData.EndDate = this._formatDate(oEnd);
                 oBookingModel.refresh();
@@ -866,6 +941,9 @@ sap.ui.define([
                 // Format yyyy-MM-dd for DatePicker
                 const sFormatted = oEnd.toISOString().split("T")[0];
                 oModel.setProperty("/EndDate", sFormatted);
+                var fPrice=oCustomerData.getProperty("/RentPrice")
+                var fFacilityPrice = parseFloat(oCustomerData.getProperty("/TotalFacilityPrice") || 0);
+                oCustomerData.setProperty("/GrandTotal", fPrice + fFacilityPrice);
             },
 
         onCancelBooking: function() {
@@ -890,6 +968,7 @@ sap.ui.define([
 
             // Load data into edit model
             this.getView().getModel("edit").setData(Object.assign({}, oSelectedData));
+
 
             // Open dialog
             if (!this.HM_Dialog) {
@@ -1029,6 +1108,8 @@ sap.ui.define([
 
 
             oCustomerModel.setProperty("/PaymentType", sUnit);
+            this.byId("idPaymentMethod1").setSelectedKey(sUnit);
+
             // Find the bed object
             var oSelectedBed = aAvailableBeds.find(bed => bed.BedTypeName === sBedType);
 
@@ -1250,8 +1331,11 @@ sap.ui.define([
 
         onChange: function(oEvent) {
             const oInput = oEvent.getSource();
-            utils._LCvalidateMandatoryField(oEvent);
+            utils._LCvalidateMobileNumber(oEvent);
             if (oInput.getValue() === "") oInput.setValueState("None");
+        },
+        onChangemail:function(oEvent){
+                utils._LCvalidateEmail(oEvent);
         },
 
         onDateChange: function(oEvent) {
@@ -1272,11 +1356,11 @@ sap.ui.define([
                 utils._LCvalidateMandatoryField(this.byId("AD_id_CustomerName"), "ID") &&
                 utils._LCvalidateDate(this.byId("AD_id_Date"), "ID") &&
                 utils._LCvalidateMandatoryField(this.byId("Ad_id_gender"), "ID") &&
-                utils._LCvalidateMandatoryField(this.byId("Ad_id_CustomerEmail"), "ID") &&
+                utils._LCvalidateEmail(this.byId("Ad_id_CustomerEmail"), "ID") &&
                 utils._LCvalidateMandatoryField(this.byId("CC_id_Country"), "ID") &&
                 utils._LCvalidateMandatoryField(this.byId("CC_id_State"), "ID") &&
                 utils._LCvalidateMandatoryField(this.byId("CC_id_City"), "ID") &&
-                utils._LCvalidateMandatoryField(this.byId("CD_ID_idPhone"), "ID")
+                utils._LCvalidateMobileNumber(this.byId("CD_ID_idPhone"), "ID")
             );
 
             if (!isMandatoryValid) {
@@ -1308,12 +1392,13 @@ sap.ui.define([
                 "Salutation": CustomerData.Salutation || "Mr.",
                 "Booking": [{
                     "BookingDate": new Date().toISOString().split('T')[0], // current date
-                    "RentPrice": CustomerData.RentPrice,
+                    "RentPrice": CustomerData.GrandTotal,
                     "NoOfPersons": CustomerData.NoOfPersons,
                     "StartDate": Bookingdata.StartDate.split('/').reverse().join('-'),
                     "EndDate": Bookingdata.EndDate.split('/').reverse().join('-'),
                     "PaymentType": paymentMap[unit] || Bookingdata.UnitText, // fallback
-                    "BedType": Bookingdata.BedTypeName
+                    "BedType": Bookingdata.BedTypeName,
+                    "RoomPrice": CustomerData.RentPrice
                 }],
                 "FacilityItems": CustomerData.AllSelectedFacilities.map(item => {
                     // Normalize UnitText for facility as well
