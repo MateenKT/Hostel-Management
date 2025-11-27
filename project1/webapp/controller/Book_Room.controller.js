@@ -163,7 +163,8 @@ oHostelModel.setProperty("/SelectedPerson", "1");
        this.getView().setModel(new JSONModel({
                 isOtpSelected: false,
                 isPasswordSelected: true,
-                authFlow: "signin"   // [signin, forgot, otp, reset]
+                authFlow: "signin" ,  // [signin, forgot, otp, reset]
+                isOtpBoxVisible: false
             }), "LoginViewModel");
     },
     Roomdetails: async function () {
@@ -303,8 +304,6 @@ onNoOfPersonSelect: function (oEvent) {
 
     // Store only the number of persons
     oModel.setProperty("/SelectedPerson", iPersons);
-
-    // DO NOT create UI here
 },
 
 _createDynamicPersonsUI: function () {
@@ -975,15 +974,15 @@ _applyFacilitySelectionUI: function () {
         if (this._iSelectedStepIndex === 0) {
         this._createDynamicPersonsUI();
     }
-//         if (this._iSelectedStepIndex === 1) {
-//     const aMissing = this._checkMandatoryFields();
-//     if (aMissing.length > 0) {
-//         sap.m.MessageBox.error(
-//             "Please fill the following mandatory fields:\n\n" + aMissing.join("\n")
-//         );
-//         return; // STOP navigation
-//     }
-// }
+        if (this._iSelectedStepIndex === 1) {
+    const aMissing = this._checkMandatoryFields();
+    if (aMissing.length > 0) {
+        sap.m.MessageBox.error(
+            "Please fill the following mandatory fields:\n\n" + aMissing.join("\n")
+        );
+        return; // STOP navigation
+    }
+}
 
       this._iSelectedStepIndex = this._oWizard.getSteps().indexOf(this._oSelectedStep);
       this.oNextStep = this._oWizard.getSteps()[this._iSelectedStepIndex + 1];
@@ -1243,10 +1242,10 @@ switch (sType) {
     }
 ,
 
-    TC_onDialogBackButton: function () {
-      const oWizard = this.getView().byId("TC_id_wizard");
-      oWizard.previousStep();
-    },
+    // TC_onDialogBackButton: function () {
+    //   const oWizard = this.getView().byId("TC_id_wizard");
+    //   oWizard.previousStep();
+    // },
 
     onFieldValidation: function (oEvent) {
       const oView = this.getView();
