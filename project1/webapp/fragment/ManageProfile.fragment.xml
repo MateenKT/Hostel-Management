@@ -371,20 +371,26 @@
                     </OverflowToolbar>
                 </headerToolbar>
 
-                <columns>
-                    <Column>
+                 <columns>
+                    <Column demandPopin="true">
                         <Text text="Customer Name" />
                     </Column>
-                    <Column>
+                    <Column demandPopin="true">
                         <Text text="Start Date" />
                     </Column>
-                    <Column>
+                    <Column demandPopin="true">
                         <Text text="Room" />
                     </Column>
-                    <Column>
+                    <Column
+                        demandPopin="true"
+                        minScreenWidth="Tablet"
+                    >
                         <Text text="Amount" />
                     </Column>
-                    <Column>
+                    <Column
+                        demandPopin="true"
+                        minScreenWidth="Tablet"
+                    >
                         <Text text="Status" />
                     </Column>
                 </columns>
