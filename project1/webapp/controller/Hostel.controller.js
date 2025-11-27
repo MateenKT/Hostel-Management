@@ -10,6 +10,7 @@ sap.ui.define([
     const $C = (id) => sap.ui.getCore().byId(id);
     const $V = (id) => $C(id)?.getValue()?.trim() || "";
     return BaseController.extend("sap.ui.com.project1.controller.Hostel", {
+        _isProfileRequested: false,
         Formatter: Formatter,
         onInit: function () {
             this.getOwnerComponent().getRouter().getRoute("RouteHostel").attachMatched(this._onRouteMatched, this);
@@ -1192,10 +1193,9 @@ sap.ui.define([
             this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", false);
         },
 
-       onPressAvatar: async function () {
+        onPressAvatar: async function (oEvent) {
             const oUser = this._oLoggedInUser || {};
             const sPhoto = "./image.jpg";
-
             try {
                 const sUserID = oUser.UserID || "";
                 if (!sUserID) {
@@ -1206,9 +1206,15 @@ sap.ui.define([
                     UserID: sUserID
                 };
                 // Use already available login data
-                    // const fullUserData = this._oLoggedInUser || {};
-                    // console.log("🔥 FULL HM_Login DATA:", fullUserData);
-
+                const fullUserData = this._oLoggedInUser || {};
+                console.log("🔥 FULL HM_Login DATA:", fullUserData);
+                //  let fullUserData = {};
+                if (!this._isProfileRequested) {
+                    this.createAvatarActionSheet();
+                    this._oProfileActionSheet.openBy(oEvent.getSource());
+                    return;   // ❗ Stop execution, do NOT run rest of code yet
+                }
+                this._isProfileRequested = false;
                 //  Fetch only the logged-in user's data
                 sap.ui.core.BusyIndicator.show(0);
                 const response = await this.ajaxReadWithJQuery("HM_Customer", filter);
@@ -1313,8 +1319,8 @@ sap.ui.define([
 
                 //  Create and bind the Profile Model
                 const oProfileModel = new JSONModel({
-                    //   ...fullUserData, 
-                    photo: finalImage || "",  
+                    ...fullUserData,
+                    photo: finalImage || "",
                     initials: oUser.UserName ? oUser.UserName.charAt(0).toUpperCase() : "",
                     name: oUser.UserName || "",
                     email: oUser.EmailID || "",
@@ -1343,11 +1349,11 @@ sap.ui.define([
                     this._oProfileDialog = oDialog;
                     this.getView().addDependent(oDialog);
                 }
-                  const base64Image = this.arrayBufferToBase64(oUser.FileContent.data);
+                const base64Image = this.arrayBufferToBase64(oUser.FileContent.data);
                 const finalImage = "data:image/png;base64," + base64Image;
                 const oProfileModel = new sap.ui.model.json.JSONModel({
-                    //  ...fullUserData, 
-                    photo: finalImage || "", 
+                    ...fullUserData,
+                    photo: finalImage || "",
                     initials: oUser.UserName ? oUser.UserName.charAt(0).toUpperCase() : "",
                     name: oUser.UserName || "",
                     email: oUser.EmailID || "",
@@ -1359,9 +1365,7 @@ sap.ui.define([
                     facility: [],
                     aCustomers: []
                 });
-
                 this._oProfileDialog.setModel(oProfileModel, "profileData");
-
                 this._oProfileDialog.open();
             } finally {
                 sap.ui.core.BusyIndicator.hide();
@@ -1415,6 +1419,50 @@ sap.ui.define([
             }
 
             this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", false);
+        },
+
+        _onEnterProfile: async function () {
+            this._oProfileActionSheet.close();
+            this._isProfileRequested = true;
+            await this.onPressAvatar();
+        },
+
+        _onLogout: function () {
+            this._oProfileActionSheet.close();
+            sap.m.MessageToast.show("Logging out...");
+            this._oLoggedInUser = null;
+            if (this._oProfileDialog) {
+                this._oProfileDialog.destroy();
+                this._oProfileDialog = null;
+            }
+            if (this._oProfileActionSheet) {
+                this._oProfileActionSheet.destroy();
+                this._oProfileActionSheet = null;
+            }
+            this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", false);
+            this.getOwnerComponent().getRouter().navTo("RouteHostel");
+        },
+
+        createAvatarActionSheet: function () {
+            if (!this._oProfileActionSheet) {
+                this._oProfileActionSheet = new sap.m.ActionSheet({
+                    placement: sap.m.PlacementType.Bottom,
+                    buttons: [
+                        new sap.m.Button({
+                            text: "Enter into Profile",
+                            icon: "sap-icon://customer",
+                            press: this._onEnterProfile.bind(this)
+                        }),
+                        new sap.m.Button({
+                            text: "Logout",
+                            icon: "sap-icon://log",
+                            press: this._onLogout.bind(this)
+                        })
+                    ]
+                });
+
+                this.getView().addDependent(this._oProfileActionSheet);
+            }
         },
 
         Bookfragment: function () {
@@ -2308,7 +2356,7 @@ sap.ui.define([
             oVM.setProperty("/isPasswordSelected", true);
             oVM.setProperty("/isOtpSelected", false);
 
-            oVM.setProperty("/isOtpBoxVisible", false);  
+            oVM.setProperty("/isOtpBoxVisible", false);
 
 
 
@@ -2633,7 +2681,7 @@ sap.ui.define([
 
                 //     this._oResetUser = { UserID: sUserId, UserName: sUserName };
 
-                    
+
 
                 //     // ❗Stay in Sign-In Flow (do NOT set to 'otp')
                 //     this.getView().getModel("LoginViewModel").setProperty("/authFlow", "signin");
