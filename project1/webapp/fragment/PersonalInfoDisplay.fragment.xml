@@ -39,9 +39,7 @@
                 <Text text="{HostelModel>City}" />
             </f:content>
         </f:SimpleForm>
-          <!-- ========================= -->
-<!-- DOCUMENT SUMMARY PER PERSON -->
-<!-- ========================= -->
+        
 
 
 
@@ -83,11 +81,13 @@
 
 </VBox>
 
+<VBox visible="{= ${HostelModel>AllSelectedFacilities}.length > 0 }">
         <!-- Selected Facilities for THIS person -->
         <Toolbar >
             <Title text="Selected Facilities" level="H4" />
         </Toolbar>
         <FlexBox
+       
              wrap= "Wrap"   
             alignItems="Start"
             justifyContent="Start"
@@ -108,7 +108,7 @@
         <!-- Booking Details for THIS person -->
         <Table id="idFacilitySummaryTable"
             class="sapUiSmallMarginTop"
-         
+          
             items="{
                 path: 'HostelModel>AllSelectedFacilities'
             }"
@@ -119,7 +119,7 @@
                 <Toolbar>
                     <Title text="Booking Details" level="H5" />
                     <ToolbarSpacer />
-                    <Button icon="sap-icon://edit" text="Edit" press="onEditFacilityDetails" class="myUnifiedBtn" />
+                    <Button  text="Edit" press="onEditFacilityDetails" class="myUnifiedBtn" />
                 </Toolbar>
             </headerToolbar>
 
@@ -141,14 +141,24 @@
                         <Text text="{HostelModel>StartDate}" />
                         <Text text="{HostelModel>EndDate}" />
                         <Text text="{HostelModel>TotalDays}" />
-                        <Text class="totalColumnBold" text="{= ${HostelModel>TotalAmount}.toFixed(2) + ' ' + ${HostelModel>/Currency} }" />
+                       <Text 
+    class="totalColumnBold"
+    text="{
+        parts: [
+            'HostelModel>TotalAmount',
+            'HostelModel>Currency'
+        ],
+        formatter: '.Formatter.formatCurrency'
+    }"
+/>
+
                     </cells>
                 </ColumnListItem>
             </items>
         </Table>
-
+   
         <!-- Totals for THIS person (NOTE: all RELATIVE, no leading "/") -->
-        <VBox class="sapUiSmallMarginTop" visible="{HostelModel>/HasFacilities}">
+       
             <HBox justifyContent="End" class="sapUiSmallMarginTop">
                 <Label text="Total Facility Cost:" class="totalColumnBold1 sapUiSmallMarginEnd"/>
                 <Text text="{
@@ -159,35 +169,7 @@
                 }" class="totalColumnBold1 sapUiSmallMarginEnd"/>
               
             </HBox>
-            <!-- <HBox justifyContent="End" class="sapUiSmallMarginTop">
-                <Label text="Room Rent:" design="Bold" class="sapUiSmallMarginEnd"/>
-                <Text text="{path:'HostelModel>/FinalPrice',formatter: '.Formatter.formatCurrency'}" class="sapUiSmallMarginEnd"/>
-            </HBox>
-
-            <HBox justifyContent="End" class="sapUiSmallMarginTop">
-                <Label text="Grand Total:" design="Bold" class="sapUiSmallMarginEnd"/>
-                <Text text="{
-                    path: 'HostelModel>GrandTotal',
-                    formatter: '.Formatter.formatCurrency'
-                }" class="sapUiSmallMarginEnd"/>
-            </HBox> -->
-        </VBox>
-
-        
-         <!-- <VBox visible="{= !!${HostelModel>FileName}}">
-        <HBox>
-            <Label text="ID Proof Uploaded:" design="Bold" />
-            <Link text="{HostelModel>FileName}"
-                  target="_blank"
-                  href="{= 'data:' + ${HostelModel>FileType} + ';base64,' + ${HostelModel>Document} }"
-                  tooltip="Open/Download Attachment" />
-        </HBox>
-       
-        <Image src="{= ${HostelModel>FileType}.startsWith('image/') ? 'data:' + ${HostelModel>FileType} + ';base64,' + ${HostelModel>Document} : '' }"
-               width="180px"
-               height="auto"
-               visible="{= !!${HostelModel>Document}  ${HostelModel>FileType}.startsWith('image/') }"/>
-    </VBox> -->
+              </VBox>
 
     </Panel>
     <!-- Grand Total section -->

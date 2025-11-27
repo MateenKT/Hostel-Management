@@ -43,6 +43,7 @@ sap.ui.define([
           FinalPrice: "",
           SelectedPriceType: "",
           Capacity: "",
+           SelectedPrice:"",
           StopPriceRecalculateByPerson:false,
         });
         sap.ui.getCore().setModel(oHostelModel, "HostelModel");
@@ -860,46 +861,54 @@ _createDynamicPersonsUI: function () {
                           height: "178px",
                           class: "serviceImage",
                           densityAware: false,
-                        press: function (oEvent) {
+                       press: function (oEvent) {
     const oCtx = oEvent.getSource().getBindingContext("FacilityModel");
-    const oFacility = oCtx.getObject();
-    const aPersons = oModel.getProperty("/Persons");
-    const aSelected = aPersons[i].Facilities.SelectedFacilities;
-
+    const facility = oCtx.getObject();
     const oCard = oEvent.getSource().getParent().getParent();
-    const idx = aSelected.findIndex(f => f.FacilityName === oFacility.FacilityName);
+    const iPersonIndex = i;
 
-    // toggle
-    if (idx > -1) {
-        aSelected.splice(idx, 1);
+    const oModel = that.getView().getModel("HostelModel");
+    const aPersons = oModel.getProperty("/Persons") || [];
+    const aSelected = aPersons[iPersonIndex].Facilities.SelectedFacilities;
+
+    // Check if facility already selected
+    const existsIndex = aSelected.findIndex(
+        f => f.FacilityName === facility.FacilityName
+    );
+  
+
+
+    // If selected → REMOVE it
+    if (existsIndex > -1) {
+
+        aSelected.splice(existsIndex, 1); // remove
         oCard.removeStyleClass("serviceCardSelected");
-    } else {
-        aSelected.push({
-            FacilityName: oFacility.FacilityName,
-            BranchCode: oFacility.BranchCode,
-            PricePerDay: oFacility.PricePerDay,
-            PricePerMonth: oFacility.PricePerMonth,
-            PricePerYear: oFacility.PricePerYear,
-            Currency: oFacility.Currency,
-            UnitText: oModel.getProperty("/SelectedPriceType"),
-            Image: oFacility.Image
-        });
-        oCard.addStyleClass("serviceCardSelected");
-    }
 
-    if (oData.ForBothSelected && i === 0) {
-        // sync to all
-        for (let p = 1; p < iPersons; p++) {
-            oData.Persons[p].Facilities.SelectedFacilities = aPersons[0].Facilities.SelectedFacilities.map(f => ({ ...f }));
+        // If select-for-all ON and first person
+        if (oModel.getProperty("/ForBothSelected") && iPersonIndex === 0) {
+            for (let p = 1; p < aPersons.length; p++) {
+                
+                let other = aPersons[p].Facilities.SelectedFacilities;
+                let removeIdx = other.findIndex(
+                    f => f.FacilityName === facility.FacilityName
+                );
+                if (removeIdx > -1) other.splice(removeIdx, 1);
+            }
         }
+        oModel.setProperty("/HasFacilitySelection",
+    aPersons.some(p => p.Facilities.SelectedFacilities.length > 0)
+);
 
+        oModel.refresh(true);
+        return;
     }
 
+    // If NOT selected → open popover to choose price
+   const oActionSheet = that._createFacilityActionSheet(facility, iPersonIndex, oCard);
+oActionSheet.openBy(oEvent.getSource());
 
-    oModel.refresh(true);
-      that._currentPersonIndex = i;
-    that._applyFacilitySelectionUI();
 }
+
 
                         }),
 
@@ -918,14 +927,25 @@ _createDynamicPersonsUI: function () {
                     }),
 
                     // Facility Price (below the image)
-                  new sap.m.Text({
-    text: "{= " +
-          "   ${HostelModel>/SelectedPriceType} === 'Per Day' ? '₹ ' + ${FacilityModel>PricePerDay} + ' ' + ${FacilityModel>Currency} +' '+ ${HostelModel>/SelectedPriceType}:" +
-          "   ${HostelModel>/SelectedPriceType} === 'Per Month' ? '₹ ' + ${FacilityModel>PricePerMonth} + ' ' + ${FacilityModel>Currency} +' '+ ${HostelModel>/SelectedPriceType}:" +
-          "   ${HostelModel>/SelectedPriceType} === 'Per Year' ? '₹ ' + ${FacilityModel>PricePerYear} + ' ' + ${FacilityModel>Currency} +' '+ ${HostelModel>/SelectedPriceType}:" +
-          "   '₹ ' + ${FacilityModel>PricePerDay} + ' ' + ${FacilityModel>Currency}" +
-          "}"
+               new sap.m.Text({
+    text: {
+        parts: [
+            { path: "FacilityModel>FacilityName" },
+            { path: "HostelModel>/Persons/" + i + "/Facilities/SelectedFacilities" }
+        ],
+        formatter: function (facilityName, aSelectedFacilities) {
+
+            if (!aSelectedFacilities || !facilityName) return "";
+
+            const found = aSelectedFacilities.find(f => f.FacilityName === facilityName);
+            if (!found) return "";
+
+            return found.SelectedPriceType + " " + found.SelectedPrice;
+        }
+    }
 }).addStyleClass("sapUiTinyMarginTop facilityPriceText")
+
+
 
                   ]
                 })
@@ -949,26 +969,90 @@ _createDynamicPersonsUI: function () {
 oFacilityModel.refresh(true);
       oModel.refresh(true);
 },
-_applyFacilitySelectionUI: function () {
-    setTimeout(() => {
-        const oHostelModel = this.getView().getModel("HostelModel");
-        const aPersons = oHostelModel.getProperty("/Persons");
-        const person = aPersons[this._currentPersonIndex];
+_createFacilityActionSheet: function (facility, iPersonIndex, oCard) {
+    const that = this;
+    const oModel = this.getView().getModel("HostelModel");
 
-        if (!person) return;
+    if (this._oFacilityActionSheet) {
+        this._oFacilityActionSheet.destroy();
+    }
 
-        // remove all selection UI
-        $(".serviceCard").removeClass("serviceCardSelected");
+    this._oFacilityActionSheet = new sap.m.ActionSheet({
+        placement: sap.m.PlacementType.Left,
+        buttons: [
+            new sap.m.Button({
+                text: "Per Hour – " + facility.PricePerHour + " " + facility.Currency,
+                press: function () {
+                    that._setFacilitySelectedPrice(facility, "Per Hour", facility.PricePerHour, iPersonIndex, oCard);
+                }
+            }),
+            new sap.m.Button({
+                text: "Per Day – " + facility.PricePerDay + " " + facility.Currency,
+                press: function () {
+                    that._setFacilitySelectedPrice(facility, "Per Day", facility.PricePerDay, iPersonIndex, oCard);
+                }
+            }),
+            new sap.m.Button({
+                text: "Per Month – " + facility.PricePerMonth + " " + facility.Currency,
+                press: function () {
+                    that._setFacilitySelectedPrice(facility, "Per Month", facility.PricePerMonth, iPersonIndex, oCard);
+                }
+            }),
+            new sap.m.Button({
+                text: "Per Year – " + facility.PricePerYear + " " + facility.Currency,
+                press: function () {
+                    that._setFacilitySelectedPrice(facility, "Per Year", facility.PricePerYear, iPersonIndex, oCard);
+                }
+            })
+        ]
+    });
 
-        // reapply correct selection
-        person.Facilities.SelectedFacilities.forEach(f => {
-            $(`img[src='${f.Image}']`)
-                .closest(".serviceCard")
-                .addClass("serviceCardSelected");
-        });
-    }, 50);
-}
-,
+    this.getView().addDependent(this._oFacilityActionSheet);
+    return this._oFacilityActionSheet;
+},
+
+_setFacilitySelectedPrice: function (facility, selectedType, selectedPrice, iPersonIndex, oCard) {
+    const oModel = this.getView().getModel("HostelModel");
+    const aPersons = oModel.getProperty("/Persons");
+
+    let selectedFacilities = aPersons[iPersonIndex].Facilities.SelectedFacilities;
+    let index = selectedFacilities.findIndex(f => f.FacilityName === facility.FacilityName);
+
+    const oNewFacilityData = {
+        FacilityName: facility.FacilityName,
+        BranchCode: facility.BranchCode,
+        PricePerHour: facility.PricePerHour,
+        PricePerDay: facility.PricePerDay,
+        PricePerMonth: facility.PricePerMonth,
+        PricePerYear: facility.PricePerYear,
+        Currency: facility.Currency,
+        SelectedPrice: selectedPrice,
+        SelectedPriceType: selectedType,
+        Image: facility.Image
+    };
+
+    if (index > -1) {
+        selectedFacilities[index] = oNewFacilityData;
+    } else {
+        selectedFacilities.push(oNewFacilityData);
+    }
+
+    oCard.addStyleClass("serviceCardSelected");
+
+    if (oModel.getProperty("/ForBothSelected") && iPersonIndex === 0) {
+        for (let p = 1; p < aPersons.length; p++) {
+            aPersons[p].Facilities.SelectedFacilities =
+                aPersons[0].Facilities.SelectedFacilities.map(f => ({ ...f }));
+        }
+    }
+      oModel.setProperty(
+        "/HasFacilitySelection",
+        aPersons.some(p => p.Facilities.SelectedFacilities.length > 0)
+    );
+
+    oModel.refresh(true);
+},
+
     onDialogNextButton: async function () {
 
         if (this._iSelectedStepIndex === 0) {
@@ -1183,20 +1267,17 @@ calculateTotals: function (aPersons, sStartDate, sEndDate, roomRentPrice) {
       if(faciliti?.length>0){
         aAllFacilities.push(faciliti[0])
       }else{
-      let fPrice = 0;
-const sType = this.getView().getModel("HostelModel").getProperty("/SelectedPriceType");
+    const sType = f.SelectedPriceType;
+const fPrice = f.SelectedPrice;
+let fTotal = 0;
 
-if (sType === "Per Day") fPrice = f.PricePerDay;
-if (sType === "Per Month") fPrice = f.PricePerMonth;
-if (sType === "Per Year") fPrice = f.PricePerYear;
-
-
-     let fTotal = 0;
 switch (sType) {
-  case "Per Day":   fTotal = fPrice * iDays;     break;
-  case "Per Month": fTotal = fPrice * iMonths;   break;
-  case "Per Year":  fTotal = fPrice * iYears;    break;
+    case "Per Hour":  fTotal = fPrice * diffHours; break;
+    case "Per Day":   fTotal = fPrice * iDays; break;
+    case "Per Month": fTotal = fPrice * iMonths; break;
+    case "Per Year":  fTotal = fPrice * iYears; break;
 }
+
 
 
       totalFacilityPrice += fTotal;
@@ -1216,7 +1297,7 @@ switch (sType) {
         Image: f.Image,
         Currency: f.Currency,
         Branch:f.BranchCode,
-        UnitText: f.UnitText
+        UnitText: sType
       });
     }
     });
