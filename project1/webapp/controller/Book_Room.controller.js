@@ -354,7 +354,8 @@ _createDynamicPersonsUI: function () {
           Facilities: {
             SelectedFacilities: []
           },
-          Documents: []
+          Documents: [],
+          DocumentType:""
         });
 
         /** ---- PERSON FORM ---- **/
@@ -768,7 +769,13 @@ _createDynamicPersonsUI: function () {
           editable: true,
           title: "Document Upload",
           layout: "ColumnLayout",
-         
+          adjustLabelSpan: false,
+          labelSpanXL: 4,
+          labelSpanL: 3,
+          labelSpanM: 4,
+          columnsXL: 2,
+          columnsL: 2,
+          columnsM: 1,
           content: [
             new sap.m.Label({
               text: "Upload ID Proof"
@@ -815,6 +822,31 @@ _createDynamicPersonsUI: function () {
     }
 }
 
+            }),
+            new sap.m.Label({
+              text: "Document Type"
+            }),
+              new sap.m.ComboBox({
+              width: "100%",
+              selectedKey: "{HostelModel>/Persons/" + i + "/DocumentType}",
+              items: [
+                 new sap.ui.core.ListItem({
+                  key: "Aadhar Card",
+                  text: "Aadhar Card"
+                }),
+                new sap.ui.core.ListItem({
+                  key: "Pan Card",
+                  text: "Pan Card"
+                }),
+                new sap.ui.core.ListItem({
+                  key: "Driving License",
+                  text: "Driving License"
+                }),
+                new sap.ui.core.ListItem({
+                  key: "Passport",
+                  text: "Passport"
+                })
+              ]
             }),
 
           ]
@@ -2082,7 +2114,7 @@ if (Array.isArray(oResponse.data)) {
     // Set default values
     oPaymentModel.setProperty("/PaymentDate", this.Formatter.formatDate(new Date()));
     oPaymentModel.setProperty("/PaymentType", "UPI");
-    oPaymentModel.setProperty("/Amount", oHostelModel.getProperty("/FinalTotalCost")
+    oPaymentModel.setProperty("/Amount", oHostelModel.getProperty("/OverallTotalCost")
     );
 
     this._oPaymentDialog.open();
@@ -2299,12 +2331,13 @@ aSelectedFacilities.forEach(fac => {
                  PermanentAddress: p.Address,
                  Documents: (p.Documents && p.Documents.length > 0)
                   ? p.Documents.map(doc => ({
-                      DocumentType: "ID Proof",
+                      DocumentType:p.DocumentType || "",
                       File: doc.Document,
                       FileName: doc.FileName,
                       FileType: doc.FileType
                   }))
                   : [],
+                
 
                  Booking: bookingData,
                  FacilityItems: facilityData,
