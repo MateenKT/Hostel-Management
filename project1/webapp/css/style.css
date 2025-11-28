@@ -407,8 +407,8 @@
   padding: 4px;
   width: 420px;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: left;
+  align-items: left;
   margin: 0 auto 18px auto;
 }
 
@@ -981,6 +981,12 @@
 .barheader .sapMBarRight .sapMBtn:hover .sapMBtnInner {
   background: #007785 !important;
 }
+.barheader .sapMBarMiddle .sapMTitle {
+    color: white !important; 
+}
+
+
+
 .roomCarouselImage {
   width: 100%;
   height: 500px !important;
@@ -1513,19 +1519,31 @@ span.sapMBtnInner.sapMBtnEmphasized {
   }
 }
 
+/* Base */
 .myUnifiedBtn .sapMBtnInner {
     background: linear-gradient(135deg, #00b7c7, #008b96) !important;
     color: white !important;
-}
-.myUnifiedBtn:hover .sapMBtnInner,
-.myUnifiedBtn.sapMBtnHover .sapMBtnInner {
-  background: #28c2d0 !important;
-  color: white !important;
+
+    transform: scale(1.1);
+    transform-origin: center;
+    transition: background 0.15s ease, transform 0.1s ease;
 }
 
+/* Hover — now gradient instead of flat color */
+.myUnifiedBtn:hover .sapMBtnInner,
+.myUnifiedBtn.sapMBtnHover .sapMBtnInner {
+    background: linear-gradient(135deg, #28c2d0, #14aab7) !important;
+    color: white !important;
+
+    transform: scale(1.1);
+}
+
+/* Active */
 .myUnifiedBtn.sapMBtnActive .sapMBtnInner {
-  background: #28c2d0 !important;
-  color: white !important;
+    background: linear-gradient(135deg, #1fb7c5, #0f99a6) !important;
+    color: white !important;
+
+    transform: scale(1.1);
 }
 
 .customBoldTitle {
@@ -1645,3 +1663,19 @@ span.sapMBtnInner.sapMBtnEmphasized {
   margin: 10px 0;
   margin-right: 10px;
 }
+
+
+
+/* .authMargin > * {
+    margin-top: 0.3rem;
+    margin-bottom: 0.3rem;
+    
+} */
+
+.aleftMargin > *{
+    margin-right: 2.9dvw;
+}
+
+
+
+

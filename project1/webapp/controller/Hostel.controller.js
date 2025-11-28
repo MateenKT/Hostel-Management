@@ -680,6 +680,7 @@ sap.ui.define([
                     this
                 );
                 this.getView().addDependent(this._oSignDialog);
+                this._oSignDialog.addStyleClass("authDialog"); // Add our custom style class
                 this._oSignDialog.attachAfterClose(this._resetAuthDialog, this);
             }
 
@@ -1872,11 +1873,11 @@ sap.ui.define([
             var oBookingData = oContext.getObject();
 
             // Status check (optional)
-            // var sStatus = (oBookingData.status || "").trim().toLowerCase();
-            // if (sStatus !== "new") {
-            //     sap.m.MessageToast.show("Only bookings with status 'New' can be edited.");
-            //     return;
-            // }
+            var sStatus = (oBookingData.status || "").trim().toLowerCase();
+            if (sStatus !== "new") {
+                sap.m.MessageToast.show("Only bookings with status 'New' can be edited.");
+                return;
+            }
 
             // Now reuse your logic exactly as in onEditBooking
             var oProfileModel = this._oProfileDialog.getModel("profileData");
@@ -3475,7 +3476,6 @@ sap.ui.define([
                     const oUserModel = new sap.ui.model.json.JSONModel(user);
                     sap.ui.getCore().setModel(oUserModel, "LoginModel");
                     this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", true);
-                    await this.onPressAvatar();
                 } else if (user.Role === "Admin" || user.Role === "Employee") {
                     this.getOwnerComponent().getRouter().navTo("TilePage");
                 } else {
@@ -3585,6 +3585,51 @@ sap.ui.define([
                 new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, sStateName),
                 new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
             ]);
+        },
+        onValidateUser: async function () {
+
+            const isValid =
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("fpUserId"), "ID") &&
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("fpUserName"), "ID");
+
+            if (!isValid) {
+                sap.m.MessageToast.show("Please fill all mandatory fields.");
+                return;
+            }
+
+            const oIdCtrl = sap.ui.getCore().byId("fpUserId");
+            const oNameCtrl = sap.ui.getCore().byId("fpUserName");
+
+            const sUserId = oIdCtrl.getValue().trim();
+            const sUserName = oNameCtrl.getValue().trim();
+
+            const payload = {
+                UserID: sUserId,
+                UserName: sUserName,
+                Type: "OTP"
+            };
+
+            sap.ui.core.BusyIndicator.show(0);
+
+            try {
+                const oResp = await this.ajaxCreateWithJQuery("HostelSendOTP", payload);
+
+                if (oResp?.success) {
+                    sap.m.MessageToast.show("OTP sent! Check your email.");
+                    alert(oResp.OTP);
+
+                    this._oResetUser = { UserID: sUserId, UserName: sUserName };
+
+                    this.getView().getModel("LoginViewModel").setProperty("/forgotStep", 2);
+                } else {
+                    sap.m.MessageToast.show("No user found with given ID / Name");
+                }
+
+            } catch (err) {
+                sap.m.MessageToast.show("Invalid User ID / User Name");
+            } finally {
+                sap.ui.core.BusyIndicator.hide();
+            }
         },
     });
 });

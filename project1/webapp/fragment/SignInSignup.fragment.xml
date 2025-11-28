@@ -5,7 +5,7 @@
 	xmlns:l="sap.ui.layout">
 	<Dialog id="authDialog" draggable="true" resizable="true" class="authDialog" contentWidth="auto" contentHeight="auto">
 		<customHeader>
-			<Bar>
+			<Bar class="barheader">
 				<contentMiddle>
 					<Title text="{LoginViewModel>/dialogTitle}" />
 				</contentMiddle>
@@ -16,36 +16,45 @@
 		</customHeader>
 		<VBox>
 			<!-- Switch Button -->
-			<HBox justifyContent="Center" class="switch-toggle-container" visible="{= ${LoginViewModel>/authFlow} === 'signin' || ${LoginViewModel>/authFlow} === 'signup' }">
-				<Button text="SIGN IN" type="Transparent" class="switch-toggle-btn {= ${LoginViewModel>/selectedAccountType} === 'personal' ? 'active' : 'inactive'}" press="onSwitchToSignIn" />
-				<Button id="signupvisible" text="SIGN UP" type="Transparent" class="switch-toggle-btn {= ${LoginViewModel>/selectedAccountType} === 'biz' ? 'active' : 'inactive'}" press="onSwitchToSignUp" />
-			</HBox>
+
+
+			<HBox justifyContent="Start" class="switch-toggle-container" visible="{= ${LoginViewModel>/authFlow} === 'signin' || ${LoginViewModel>/authFlow} === 'signup' }">
+	<Button text="SIGN IN"  type="Transparent" class="switch-toggle-btn {= ${LoginViewModel>/authFlow} === 'signin' ? 'active' : 'inactive'} myBtn" press="onSwitchToSignIn" visible="{= ${LoginViewModel>/authFlow} !== 'signin' }" />
+	<Button id="signupvisible"  text="SIGN UP" type="Transparent" class="switch-toggle-btn {= ${LoginViewModel>/authFlow} === 'signup' ? 'active' : 'inactive'} myBtn" press="onSwitchToSignUp" visible="{= ${LoginViewModel>/authFlow} !== 'signup' }" />	
+
+
+
+
+<!-- 	
+				<HBox justifyContent="Center" class="switch-toggle-container" visible="{= ${LoginViewModel>/authFlow} === 'signin' || ${LoginViewModel>/authFlow} === 'signup' }">
+	<Button text="SIGN IN" type="Transparent" class="switch-toggle-btn {= ${LoginViewModel>/selectedAccountType} === 'personal' ? 'active' : 'inactive'}" press="onSwitchToSignIn" />
+	<Button id="signupvisible" text="SIGN UP" type="Transparent" class="switch-toggle-btn {= ${LoginViewModel>/selectedAccountType} === 'biz' ? 'active' : 'inactive'}" press="onSwitchToSignUp" /> -->
+	</HBox>	
 			<!-- Sign In Panel -->
 			<Panel id="signInPanel" expandable="false" visible="{= ${LoginViewModel>/authFlow} === 'signin' }">
-				<VBox>
+				<VBox >
 					<Label text="User ID" required="true" />
 					<Input id="signInuserid" placeholder="User ID" valueLiveUpdate="true" liveChange="onUserlivechange" valueStateText="Please enter a valid User ID" />
-					<Label text="User Name" required="true" />
+					<Label class="sapUiSmallMarginTop" text="User Name" required="true" />
 					<Input id="signInusername" placeholder="User Name" valueLiveUpdate="true" liveChange="onUserlivechange" valueStateText="Please enter a valid User Name"/>
-					<Label text="Login with" />
-					<HBox alignItems="End" justifyContent="Start">
+					<Label text="Login with" class="sapUiSmallMarginTop"/>
+					<HBox class="aleftMargin" alignItems="End" justifyContent="Start">
 						<RadioButton text="Password" groupName="loginType" selected="{= ${LoginViewModel>/loginMode} === 'password' }" select="onSelectLoginMode"/>
 						<RadioButton text="OTP" groupName="loginType" selected="{= ${LoginViewModel>/loginMode} === 'otp' }" select="onSelectLoginMode"/>
 						<Button id="btnSignInSendOTP" text="Send OTP" visible="{= ${LoginViewModel>/loginMode} === 'otp' }" press="onPressOTP"/>
 					</HBox>
 					<!-- PASSWORD SECTION -->
-					<Label text="Password" required="true" visible="{= ${LoginViewModel>/loginMode} === 'password' }"/>
+					<Label class="sapUiSmallMarginTop" text="Password" required="true" visible="{= ${LoginViewModel>/loginMode} === 'password' }"/>
 					<Input id="signinPassword" placeholder="Enter Password" visible="{= ${LoginViewModel>/loginMode} === 'password' }" submit="onSignIn" type="Password" showValueHelp="true" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility" liveChange="onSigninPasswordLive" />
 					<!-- REUSED OTP FIELD FOR LOGIN -->
 					<!-- <VBox id="signInOTPBox" visible="{= ${LoginViewModel>/loginMode} === 'otp' }"> -->
-					<VBox id="signInOTPBox" visible="{LoginViewModel>/showOTPField}">
-						<Label text="Enter OTP" required="true" />
+					<VBox class="sapUiSmallMarginTop" id="signInOTPBox" visible="{LoginViewModel>/showOTPField}">
+						<Label  text="Enter OTP" required="true" />
 						<Input id="signInOTP" placeholder="Enter OTP" liveChange="onLoginOtpLive" maxLength="6" type="Text" />
 					</VBox>
-					<HBox justifyContent="SpaceBetween" class="sapUiTinyMarginTop">
-						<Button text="Forgot Password?" type="Transparent" press="onForgotPassword"/>
-						<!-- <Button text="Sign In" type="Accept" width="100px" press="onSignIn"/> -->
-						<Button text="Sign In" width="100px" enabled="true" press="onSignIn"/>
+					<HBox  justifyContent="SpaceBetween" class="sapUiTinyMarginTop">
+						<Button text="Forgot Password?" class="sapUiSmallMarginTop" type="Transparent" press="onForgotPassword"/>
+						<Button class="sapUiSmallMarginTop myUnifiedBtn" text="Sign In" width="100px" enabled="true" press="onSignIn"/>
 					</HBox>
 				</VBox>
 			</Panel>
@@ -57,75 +66,45 @@
 
 
 
-<!-- FORGOT FLOW IN ONE PANEL -->
-<Panel id="forgotFlowPanel" expandable="false" visible="{= ${LoginViewModel>/authFlow} === 'forgot' }">
-<HBox justifyContent="Center" class="switch-toggle-container" />
-	<VBox id="forgotVBox">
 
-		<!-- STEP 1: SEND OTP -->
-		<VBox id="fpStepUser" visible="{= ${LoginViewModel>/forgotStep} >= 1 }">
-			<Label text="Enter User ID" required="true"/>
-			<Input id="fpUserId" placeholder="Your User ID" 
-				   liveChange="onUserlivechange" 
-				   valueStateText="Please enter a valid User ID"
-				   enabled="{= ${LoginViewModel>/forgotStep} === 1 }"/>
-			
-			<Label text="Enter User Name" required="true"/>
-			<Input id="fpUserName" placeholder="Registered Name"
-				   liveChange="onUserlivechange"
-				   valueStateText="Please enter a valid User Name"
-				   enabled="{= ${LoginViewModel>/forgotStep} === 1 }"/>
-			
-			<HBox justifyContent="End">
-				<Button id="btnFPNext" text="Send OTP" type="Emphasized" 
-						press="onValidateUser"
-						enabled="{= ${LoginViewModel>/forgotStep} &lt;= 2 }"/>
-			</HBox>
-		</VBox>
 
-		<!-- STEP 2: OTP -->
-		<VBox id="fpStepOtp" class="sapUiSmallMarginTop" visible="{= ${LoginViewModel>/forgotStep} >= 2 }">
-			<Label text="Enter OTP" required="true"/>
-			<Input id="fpOTP" placeholder="Enter OTP" 
-				   liveChange="onOtpLive" maxLength="6" type="Text" 
-				   valueStateText="Please enter a valid OTP"
-				   enabled="{= ${LoginViewModel>/forgotStep} === 2 }"/>
-			
-			<HBox justifyContent="End">
-				<Button id="btnOtpVerify" text="Verify OTP" type="Accept" 
-						press="_onVerifyOTP"
-						enabled="{= ${LoginViewModel>/forgotStep} === 2 }"/>
-			</HBox>
-		</VBox>
 
-		<!-- STEP 3: RESET PASSWORD -->
-		<VBox id="fpStepReset" class="sapUiSmallMarginTop" visible="{= ${LoginViewModel>/forgotStep} >= 3 }">
-			<Label text="New Password" required="true"/>
-			<Input id="newPass" type="Password"
-				   showValueHelp="true" valueHelpIconSrc="sap-icon://show"
-				   liveChange="SM_onChnageSetAndConfirm"
-				   valueStateText="Password must contain 1 uppercase, 1 lowercase, 1 number &amp; 1 special character" 
-				   maxLength="50" valueHelpRequest=".SM_onTogglePasswordVisibility"
-				   enabled="{= ${LoginViewModel>/forgotStep} === 3 }"/>
-			
-			<Label text="Confirm Password" required="true" />
-			<Input id="confPass" type="Password"
-				   change="Forget_onConfirm" liveChange="Forget_onConfirm"
-				   showValueHelp="true" valueHelpIconSrc="sap-icon://show"
-				   valueHelpRequest="SM_onTogglePasswordVisibility"
-				   valueStateText="Enter Confirm Password" maxLength="50"
-				   enabled="{= ${LoginViewModel>/forgotStep} === 3 }"/>
-			
-			<HBox justifyContent="End">
-				<Button id="btnUpdatePass" text="Update Password" type="Accept"
-						press="onSubmitNewPassword"
-						enabled="{= ${LoginViewModel>/forgotStep} === 3 }"/>
-			</HBox>
-		</VBox>
+			<!-- FORGOT FLOW IN ONE PANEL -->
+			<Panel id="forgotFlowPanel" expandable="false" visible="{= ${LoginViewModel>/authFlow} === 'forgot' }">
+				<HBox justifyContent="Center" class="switch-toggle-container" />
+				<VBox id="forgotVBox" >
+					<!-- STEP 1: SEND OTP -->
+					<VBox id="fpStepUser" visible="{= ${LoginViewModel>/forgotStep} >= 1 }"  >
+						<Label text="Enter User ID" required="true" class="sapUiSmallMarginTop" />
+						<Input id="fpUserId" placeholder="Your User ID" liveChange="onUserlivechange" valueStateText="Please enter a valid User ID" enabled="{= ${LoginViewModel>/forgotStep} === 1 }"/>
+						<Label text="Enter User Name" required="true" class="sapUiSmallMarginTop"/>
+						<Input id="fpUserName" placeholder="Registered Name" liveChange="onUserlivechange" valueStateText="Please enter a valid User Name" enabled="{= ${LoginViewModel>/forgotStep} === 1 }"/>
+						<HBox justifyContent="End">
+							<Button id="btnFPNext" text="Send OTP" press="onValidateUser" enabled="{= ${LoginViewModel>/forgotStep} &lt;= 2 }" class="myUnifiedBtn sapUiSmallMarginTop"/>
+						</HBox>
+					</VBox>
+					<!-- STEP 2: OTP -->
+					<VBox id="fpStepOtp" visible="{= ${LoginViewModel>/forgotStep} >= 2 }" >
+						<Label text="Enter OTP" required="true" class="sapUiSmallMarginTop"/>
+						<Input id="fpOTP" placeholder="Enter OTP" liveChange="onOtpLive" maxLength="6" type="Text" valueStateText="Please enter a valid OTP" enabled="{= ${LoginViewModel>/forgotStep} === 2 }"/>
+						<HBox justifyContent="End">
+							<Button id="btnOtpVerify" text="Verify OTP"  press="_onVerifyOTP" enabled="{= ${LoginViewModel>/forgotStep} === 2 }" class="myUnifiedBtn sapUiSmallMarginTop"/>
+						</HBox>
+					</VBox>
+					<!-- STEP 3: RESET PASSWORD -->
+					<VBox id="fpStepReset"  visible="{= ${LoginViewModel>/forgotStep} >= 3 }">
+						<Label text="New Password" required="true" class="sapUiSmallMarginTop"/>
+						<Input id="newPass" type="Password" showValueHelp="true" valueHelpIconSrc="sap-icon://show" liveChange="SM_onChnageSetAndConfirm" valueStateText="Password must contain 1 uppercase, 1 lowercase, 1 number &amp; 1 special character" maxLength="50" valueHelpRequest=".SM_onTogglePasswordVisibility" enabled="{= ${LoginViewModel>/forgotStep} === 3 }"/>
+						<Label text="Confirm Password" required="true" class="sapUiSmallMarginTop"/>
+						<Input id="confPass" type="Password" change="Forget_onConfirm" liveChange="Forget_onConfirm" showValueHelp="true" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility" valueStateText="Enter Confirm Password" maxLength="50" enabled="{= ${LoginViewModel>/forgotStep} === 3 }"/>
+						<HBox justifyContent="End">
+							<Button id="btnUpdatePass" text="Update Password"  press="onSubmitNewPassword" enabled="{= ${LoginViewModel>/forgotStep} === 3 }" class="myUnifiedBtn sapUiSmallMarginTop"/>
+						</HBox>
+					</VBox>
+					<Button text="Back to Login" type="Transparent" press="onBackToLogin"/>
+				</VBox>
+			</Panel>
 
-		<Button text="Back to Login" type="Transparent" class="sapUiTinyMarginTop" press="onBackToLogin"/>
-	</VBox>
-</Panel>
 
 
 
@@ -153,7 +132,7 @@
 								<Input id="signUpName" value="{LoginMode>/fullname}" placeholder="Full Name" required="true" liveChange="_LCvalidateName" valueStateText="Enter valid name"/>
 							</VBox>
 						</HBox>
-						<Label text="Date Of Birth" required="true"/>
+						<Label text="Date Of Birth" required="true"  />
 						<DatePicker id="signUpDOB" displayFormat="dd-MM-yyyy" valueFormat="yyyy-MM-dd" change="onChangeDOB" />
 						<Label text="Gender" required="true"/>
 						<Select id="signUpGender" selectedKey="" change="onChangeGender">
@@ -163,7 +142,7 @@
 							<core:Item key="Other" text="Other"/>
 						</Select>
 						<!-- ================== 2) CONTACT DETAILS ================== -->
-						<Label text="Email" required="true"/>
+						<Label text="Email" required="true" class="sapUiTinyMarginTop" />
 						<Input id="signUpEmail" value="{LoginMode>/Email}" placeholder="Email" type="Email" required="true" liveChange="onEmailliveChange" valueStateText="Enter valid email" />
 						<Label text="Country" required="true"/>
 						<ComboBox id="signUpCountry" change="onChangeCountry" selectionChange="onChangeCountry" placeholder="Select Country" valueStateText="Select a valid Country" items="{path:'CountryModel>/', length:1000}" showSecondaryValues="true">
@@ -202,7 +181,7 @@
 						<Input id="signUpConfirmPassword" placeholder="Enter Confirm Password" value="{LoginMode>/comfirmpass}" type="Password" change="FSM_onConfirm" liveChange="FSM_onConfirm" showValueHelp="true" valueStateText="Enter Confirm Password" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility" maxLength="50"/>
 					</f:SimpleForm>
 					<HBox justifyContent="End" class="sapUiSmallMarginTop">
-						<Button text="Sign Up" type="Emphasized" width="120px" press="onSignUp"/>
+						<Button text="Sign Up" class="myUnifiedBtn" width="120px" press="onSignUp"/>
 					</HBox>
 				</content>
 			</Panel>
