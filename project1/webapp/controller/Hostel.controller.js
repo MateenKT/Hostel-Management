@@ -279,7 +279,8 @@ sap.ui.define([
                 FinalPrice: oData.SelectedPriceValue,
                 Currency: oData.Currency || "INR",
                 Source: "UI5_HostelApp",
-                Status: "Pending"
+                Status: "Pending",
+                Country:oData.Country
             };
 
             //  Merge and clean
@@ -441,7 +442,8 @@ sap.ui.define([
                     Capacity: oSelected.NoOfPerson || "",
                     ImageList: (oSelected.Images || []).map(img => img.src),
                     SelectedPriceType: "",
-                    SelectedPriceValue: ""
+                    SelectedPriceValue: "",
+                    Country:oSelected.Country
                 };
 
                 const oHostelModel = new sap.ui.model.json.JSONModel(oFullDetails);

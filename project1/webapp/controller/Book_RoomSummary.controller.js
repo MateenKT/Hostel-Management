@@ -423,6 +423,11 @@ if (oUpdatedData.UnitText === "Per Hour") {
                 //oHostelModel.setProperty("/TotalDays", totals.TotalDays);
                 oHostelModel.setProperty("/TotalFacilityPrice", totals.TotalFacilityPrice);
                 oHostelModel.setProperty("/GrandTotal", totals.GrandTotal);
+                // GST based on HostelModel Country (NOT person country)
+oHostelModel.setProperty("/CGST", totals.CGST || 0);
+oHostelModel.setProperty("/SGST", totals.SGST || 0);
+oHostelModel.setProperty("/FinalTotalCost", totals.FinalTotal || totals.GrandTotal);
+
             }
 
             var overAllTotal = 0;
@@ -664,11 +669,33 @@ if (oUpdatedData.UnitText === "Per Hour") {
 
             const grandTotal = totalFacilityPrice + Number(roomRentPrice || 0);
 
-            return {
-                TotalFacilityPrice: +totalFacilityPrice.toFixed(2),
-                GrandTotal: +grandTotal.toFixed(2),
-                AllSelectedFacilities: aAllFacilities
-            };
+            //-------------------------------------------------------------
+// GST Based Only on HostelModel Country
+//-------------------------------------------------------------
+const sCountry = this.getView().getModel("HostelModel").getProperty("/Country") || "";
+let cgst = 0, sgst = 0, finalTotal = grandTotal;
+
+if (sCountry === "India") {
+    cgst = grandTotal * 0.09;
+    sgst = grandTotal * 0.09;
+    finalTotal = grandTotal + cgst + sgst;
+}
+
+return {
+    TotalFacilityPrice: +totalFacilityPrice.toFixed(2),
+    GrandTotal: +grandTotal.toFixed(2),
+    CGST: +cgst.toFixed(2),
+    SGST: +sgst.toFixed(2),
+    FinalTotal: +finalTotal.toFixed(2),
+    AllSelectedFacilities: aAllFacilities
+};
+
+
+            // return {
+            //     TotalFacilityPrice: +totalFacilityPrice.toFixed(2),
+            //     GrandTotal: +grandTotal.toFixed(2),
+            //     AllSelectedFacilities: aAllFacilities
+            // };
         },
 
         _parseDate: function (sDate) {

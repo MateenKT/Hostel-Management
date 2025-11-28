@@ -1637,3 +1637,11 @@ span.sapMBtnInner.sapMBtnEmphasized {
         width: 100% !important;
     }
 }
+.custom-vbox {
+  align-items: flex-end;
+  width: 100%;
+}
+.custom-flexbox {
+  margin: 10px 0;
+  margin-right: 10px;
+}

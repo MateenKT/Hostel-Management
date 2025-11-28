@@ -45,6 +45,7 @@ sap.ui.define([
           Capacity: "",
            SelectedPrice:"",
           StopPriceRecalculateByPerson:false,
+          Country:""
         });
         sap.ui.getCore().setModel(oHostelModel, "HostelModel");
       }
@@ -129,14 +130,14 @@ oHostelModel.setProperty("/SelectedPerson", "1");
       setTimeout(() => {
         this.Roomdetails();
       }, 100);
-      const oLoginModeModel = new JSONModel({
-        fullname: "",
-        Email: "",
-        Mobileno: "",
-        password: "",
-        comfirmpass: ""
-      });
-      this.getView().setModel(oLoginModeModel, "LoginMode")
+      // const oLoginModeModel = new JSONModel({
+      //   fullname: "",
+      //   Email: "",
+      //   Mobileno: "",
+      //   password: "",
+      //   comfirmpass: ""
+      // });
+      // this.getView().setModel(oLoginModeModel, "LoginMode")
 
 			this._fetchCommonData("Country", "CountryModel","");
 			this._fetchCommonData("State", "StateModel");
@@ -167,6 +168,13 @@ oHostelModel.setProperty("/SelectedPerson", "1");
                 authFlow: "signin" ,  // [signin, forgot, otp, reset]
                 isOtpBoxVisible: false
             }), "LoginViewModel");
+
+             const vm = this.getView().getModel("LoginViewModel");
+
+            // Add only your required properties (safe, isolated)
+            vm.setProperty("/loginMode", "password");   // "password" or "otp"
+            vm.setProperty("/showOTPField", false);     // show OTP input box only after Send OTP success
+            vm.setProperty("/isOtpEntered", false); 
              oView.setModel(new JSONModel({
                 CustomerName: "",
                 MobileNo: "",
@@ -1253,6 +1261,37 @@ let roomRentPerPerson = baseRoomRent * monthsOrYears;
   oHostelModel.setProperty("/TotalFacilityPrice", totalFacilitySum);
   oHostelModel.setProperty("/GrandTotal", grandTotalSum);
   oHostelModel.setProperty("/OverallTotalCost", grandTotalSum);
+  oHostelModel.setProperty("/CGST", 0);
+oHostelModel.setProperty("/SGST", 0);
+oHostelModel.setProperty("/FinalTotalCost", 0);
+oHostelModel.setProperty("/IsIndia", false);
+
+
+  // Get country from first person (all filled same after sign in)
+const sCountry = oHostelModel.getProperty("/Country") || "";
+
+
+// If India → calculate 9% CGST + 9% SGST
+if (sCountry === "India") {
+    const subTotal = grandTotalSum;
+
+    const cgst = subTotal * 0.09;
+    const sgst = subTotal * 0.09;
+    const finalTotal = subTotal + cgst + sgst;
+
+    oHostelModel.setProperty("/IsIndia", true);
+    oHostelModel.setProperty("/CGST", cgst);
+    oHostelModel.setProperty("/SGST", sgst);
+    oHostelModel.setProperty("/FinalTotalCost", finalTotal);
+} 
+// Other countries → no tax
+else {
+    oHostelModel.setProperty("/IsIndia", false);
+    oHostelModel.setProperty("/CGST", 0);
+    oHostelModel.setProperty("/SGST", 0);
+    oHostelModel.setProperty("/FinalTotalCost", grandTotalSum);
+}
+
   oHostelModel.updateBindings(true);
   oHostelModel.refresh(true);
 },

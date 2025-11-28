@@ -73,22 +73,50 @@
     </items>
 
 </Table>
-
+      
+      <FlexBox class="custom-flexbox"
+                                        direction="Column">
         <!-- Totals for THIS person (NOTE: all RELATIVE, no leading "/") -->
-        <VBox class="sapUiSmallMarginTop">
-            <HBox justifyContent="End" class="sapUiSmallMarginTop">
-                <Label text="Total Cost:" class="totalColumnBold1 sapUiSmallMarginEnd"/>
-                <Text text="{
-                  parts: [
+        <VBox class="sapUiSmallMarginTop custom-vbox">
+        
+           <HBox justifyContent="End" class="sapUiSmallMarginTop"
+      visible="{= !${HostelModel>/IsIndia} }">
+    <Label text="Sub-Total (Non-Taxable):" class="totalColumnBold1 sapUiSmallMarginEnd"/>
+    <Text text="{   parts: [
         'HostelModel>/OverallTotalCost',
         'HostelModel>/Currency'
-    ],
-                    formatter: '.Formatter.formatCurrency'
-                }" class="totalColumnBold1 sapUiSmallMarginEnd"/>
-              
-            </HBox>
+    ], formatter: '.Formatter.formatCurrency'}"  class="totalColumnBold1"/>
+</HBox>
+
+            <HBox justifyContent="End" class="sapUiSmallMarginTop" 
+      visible="{HostelModel>/IsIndia}">
+    <Label text="Sub-Total (Taxable):" class="totalColumnBold1 sapUiSmallMarginEnd"/>
+    <Text text="{ parts: [
+        'HostelModel>/OverallTotalCost',
+        'HostelModel>/Currency'
+    ], formatter: '.Formatter.formatCurrency'}"  class="totalColumnBold1"/>
+</HBox>
+
+            <HBox justifyContent="End" class="sapUiSmallMarginTop"
+      visible="{HostelModel>/IsIndia}">
+    <Label text="CGST (9%):" class="totalColumnBold1 sapUiSmallMarginEnd"/>
+    <Text text="{parts:['HostelModel>/CGST','HostelModel>/Currency'], formatter: '.Formatter.formatCurrency'}"  class="totalColumnBold1"/>
+</HBox>
+
+            <HBox justifyContent="End" class="sapUiSmallMarginTop"
+      visible="{HostelModel>/IsIndia}">
+    <Label text="SGST (9%):" class="totalColumnBold1 sapUiSmallMarginEnd"/>
+    <Text text="{parts:['HostelModel>/SGST','HostelModel>/Currency'], formatter: '.Formatter.formatCurrency'}"  class="totalColumnBold1" />
+</HBox>
+
+            <HBox justifyContent="End" class="sapUiSmallMarginTop">
+    <Label text="Total Cost:" class="totalColumnBold1 sapUiSmallMarginEnd"/>
+    <Text text="{parts:['HostelModel>/FinalTotalCost','HostelModel>/Currency'], formatter: '.Formatter.formatCurrency'}" class="totalColumnBold1" />
+</HBox>
+
            
         </VBox>
+        </FlexBox>
      <!--<VBox class="sapUiMediumMarginBottom">
         <VBox
             visible="{= ${oTCModel>/Visiblity/Services/TrafficManagement} || ${oTCModel>/Visiblity/Services/TrafficManagementVehicles} }"
