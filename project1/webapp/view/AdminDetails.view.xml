@@ -1,4 +1,5 @@
-<mvc:View xmlns:unified="sap.ui.unified"
+<mvc:View
+    xmlns:unified="sap.ui.unified"
     controllerName="sap.ui.com.project1.controller.AdminDetails"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
@@ -59,7 +60,7 @@
                                 class="largeTextBold"
                             />
                         </VBox>
-                        <VBox>
+                        <VBox class="sapUiSmallMarginEnd">
                             <!-- <layoutData>
                     <FlexItemData growFactor="1"/>
                 </layoutData> -->
@@ -70,6 +71,17 @@
                             <ObjectStatus
                                 text="{CustomerData>/Status}"
                                 state="{path:'CustomerData>/Status', formatter:'.Formatter.formatObjectStatus'}"
+                            />
+                        </VBox>
+                        <VBox
+                            visible="{= ${CustomerData>/RoomNo} ? true : false }"
+                        >
+                            <Text
+                                text="Room No"
+                                class="sapUiSmallMarginBottom"
+                            />
+                            <Text
+                                text="{CustomerData>/RoomNo}"
                             />
                         </VBox>
                     </FlexBox>
@@ -92,7 +104,7 @@
                             id="idcancel"
                             text="Cancel Booking"
                             press="onPressCancelBooking"
-                           visible="{= ${CustomerData>/Status} !== 'Cancelled' &amp;&amp; !${VisibleModel>/visible} }"
+                            visible="{= ${CustomerData>/Status} !== 'Cancelled' &amp;&amp; !${VisibleModel>/visible} }"
                             class="sapUiSmallMarginBegin myUnifiedBtn"
                         />
                         <Button
@@ -203,13 +215,10 @@
                                 />
                             </ComboBox>
                             <!-- Persons -->
-                            <Label
-                                text="No of Persons"
-                                required="true"
-                            />
-                            <Text text="{CustomerData>/Person}" />
+                            <!-- <Label text="No of Persons" required="true" />
+                            <Text text="{CustomerData>/Person}" /> -->
                             <!-- Dates -->
-                            <core:Title text="" />
+                            <!-- <core:Title text="" /> -->
                             <!-- Start Date -->
                             <Label
                                 text="Start Date"
@@ -348,10 +357,7 @@
                                 text="{= ${CustomerData>/Salutation} + ' ' + ${CustomerData>/CustomerName} }"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                            <!-- <Text
-                                text="{CustomerData>/CustomerName}"
-                                visible="{= !${VisibleModel>/visible} }"
-                            /> -->
+                            <!-- <Text text="{CustomerData>/CustomerName}" visible="{= !${VisibleModel>/visible} }" /> -->
                             <Select
                                 selectedKey="{Bookingmodel>/Salutation}"
                                 visible="{VisibleModel>/visible}"
@@ -498,10 +504,7 @@
                                 text="{= ${CustomerData>/STDCode} + ' ' + ${CustomerData>/MobileNo} }"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                            <!-- <Text
-                                text="{CustomerData>/MobileNo}"
-                                visible="{= !${VisibleModel>/visible} }"
-                            /> -->
+                            <!-- <Text text="{CustomerData>/MobileNo}" visible="{= !${VisibleModel>/visible} }" /> -->
                             <Input
                                 id="CC_id_STDCode"
                                 value="{Bookingmodel>/STDCode}"
@@ -560,63 +563,99 @@
                             </FlexBox>
                         </VBox>
                     </FlexBox>
-                       <VBox class="sapUiMediumMarginBottom">
-                <Panel
-                    headerText="{= 'Customer Document - ' + ${CustomerData>/CustomerName} }"
-                    expandable="false"
-                    class="customPanelHeader"
-                >
-                  <Table
-                        id="Ad_id_idFacilityRoomTableDetails1"
-                        class="sapUiSmallMarginTop"
-                        items="{path: 'CustomerData>/Documents'}"
-                        mode="{= ${VisibleModel>/visible} === true ? 'Delete' : 'None' }"
-                        delete="onDocumentDelete"
-                        busyIndicatorDelay="0"
-                        inset="false"
-                        selectionChange="onTableSelection"
-                    >
-                        <headerToolbar>
-                            <Toolbar>
-                               <Title text="Document Details ({=${CustomerData>/Documents}.length})"/>
-                                <ToolbarSpacer />
-                              	<u:FileUploader
-                            id="BT_id_FileUploader"
-                            fileType="jpg,jpeg,png"
-                            multiple="true"
-                            maximumFileSize="5MB"
-                            sameFilenameAllowed="false"
-                            buttonOnly="true"
-                            buttonText="Upload Images"
-                            change="onFacilityFileChange"
-                            visible="{VisibleModel>/visible}"
-                                      />
-                            </Toolbar>
-                        </headerToolbar>
-                        <columns>
-                            <Column demandPopin="true">
-                                <Text text="File Name" />
-                            </Column>
-                            <Column demandPopin="true">
-                                <Text text="File Type" />
-                            </Column>
-                           
-                        </columns>
-                        <items>
-                            <ColumnListItem>
-                                <cells>
-                                    <Link 
-                                    text="{CustomerData>FileName}" 
-                                    press="onFileNameLinkPress"/>
-                                    <Text text="{CustomerData>FileType}" />
-                                   
-                                </cells>
-                            </ColumnListItem>
-                        </items>
-                    </Table>
-                  
-                </Panel>
-            </VBox>
+                    <VBox class="sapUiMediumMarginBottom">
+                        <Panel
+                            headerText="{= 'Customer Document - ' + ${CustomerData>/CustomerName} }"
+                            expandable="false"
+                            class="customPanelHeader"
+                        >
+                            <Table
+                                id="Ad_id_idFacilityRoomTableDetails1"
+                                class="sapUiSmallMarginTop"
+                                items="{path: 'CustomerData>/Documents'}"
+                                mode="{= ${VisibleModel>/visible} === true ? 'Delete' : 'None' }"
+                                delete="onDocumentDelete"
+                                busyIndicatorDelay="0"
+                                inset="false"
+                                selectionChange="onTableSelection"
+                            >
+                                <headerToolbar>
+                                    <Toolbar>
+                                        <Title
+                                            text="Document Details ({=${CustomerData>/Documents}.length})"
+                                        />
+                                        <ToolbarSpacer />
+                              <ComboBox
+                                id="idProofType"
+                                placeholder="Select ID Proof"
+                                selectedKey="{Bookingmodel>/DocumentType}"
+                                selectionChange="onRoomDurationChange"
+                                visible="{VisibleModel>/visible}"
+                                valueStateText="Select ID Proof"
+                                change="onidproofchange"
+                            >
+                                <core:ListItem
+                                    key="Aadhar Card"
+                                    text="Aadhar Card"
+                                />
+                                <core:ListItem
+                                    key="Pan Card"
+                                    text="Pan Card"
+                                />
+                                
+                                 <core:ListItem
+                                    key="Driving License"
+                                    text="Driving License"
+                                 />
+                                    <core:ListItem
+                                        key="Passport"
+                                        text="Passport"
+                                    />
+                            </ComboBox>
+                                        <u:FileUploader
+                                            id="BT_id_FileUploader"
+                                            fileType="jpg,jpeg,png"
+                                            maximumFileSize="5MB"
+                                            sameFilenameAllowed="false"
+                                            buttonOnly="true"
+                                            buttonText="Upload Images"
+                                            change="onFacilityFileChange"
+                                            visible="{VisibleModel>/visible}"
+                                             class="myUnifiedBtn"
+
+                                        />
+                                    </Toolbar>
+                                </headerToolbar>
+                                <columns>
+                                    <Column demandPopin="true">
+                                        <Text text="File Name" />
+                                    </Column>
+                                     <Column demandPopin="true">
+                                        <Text text="Document Type" />
+                                    </Column>
+                                    <Column demandPopin="true">
+                                        <Text text="File Type" />
+                                    </Column>
+                                </columns>
+                                <items>
+                                    <ColumnListItem>
+                                        <cells>
+                                            <Link
+                                                text="{CustomerData>FileName}"
+                                                press="onFileNameLinkPress"
+                                            />
+                                             <Text
+                                                text="{CustomerData>DocumentType}"
+                                            />
+                                            <Text
+                                                text="{CustomerData>FileType}"
+                                            />
+                                        </cells>
+                                    </ColumnListItem>
+                                </items>
+                            </Table>
+                        </Panel>
+                    </VBox>
                     <Table
                         id="Ad_id_idFacilityRoomTableDetails"
                         class="sapUiSmallMarginTop"
@@ -628,7 +667,9 @@
                     >
                         <headerToolbar>
                             <Toolbar>
-                               <Title text="Facility Details ({=${CustomerData>/AllSelectedFacilities}.length})"/>
+                                <Title
+                                    text="Facility Details ({=${CustomerData>/AllSelectedFacilities}.length})"
+                                />
                                 <ToolbarSpacer />
                                 <Button
                                     text="Add"
@@ -720,10 +761,7 @@
                                 design="Bold"
                                 class="sapUiSmallMarginEnd"
                             />
-                            <!-- <Text
-                                text="{path: 'CustomerData>/TotalFacilityPrice', formatter: '.Formatter.formatCurrency'}"
-                                class="sapUiSmallMarginEnd"
-                            /> -->
+                            <!-- <Text text="{path: 'CustomerData>/TotalFacilityPrice', formatter: '.Formatter.formatCurrency'}" class="sapUiSmallMarginEnd" /> -->
                             <Text
                                 text="{
                                             parts: [
@@ -744,15 +782,52 @@
                                 design="Bold"
                                 class="sapUiSmallMarginEnd"
                             />
-                            <!-- <Text
-                                text="{CustomerData>/RentPrice}"
-                                class="sapUiSmallMarginEnd"
-                            /> -->
+                            <!-- <Text text="{CustomerData>/RentPrice}" class="sapUiSmallMarginEnd" /> -->
                             <Text
                                 text="{
                                         parts: [
                                             { path: 'CustomerData>/RentPrice' },
                                             { path: 'CustomerData>/AllSelectedFacilities/0/Currency' }
+                                        ],
+                                        formatter: '.Formatter.formatCurrency'
+                                    }"
+                                class="sapUiSmallMarginEnd totalColumnBold1"
+                            />
+                        </HBox>
+                         <HBox
+                            justifyContent="End"
+                            class="sapUiSmallMarginTop"
+                        >
+                            <Label
+                                text="CGST:"
+                                design="Bold"
+                                class="sapUiSmallMarginEnd"
+                            />
+                            <!-- <Text text="{CustomerData>/RentPrice}" class="sapUiSmallMarginEnd" /> -->
+                            <Text
+                                text="{
+                                        parts: [
+                                            { path: 'CustomerData>/CGST' }
+                                        ],
+                                        formatter: '.Formatter.formatCurrency'
+                                    }"
+                                class="sapUiSmallMarginEnd totalColumnBold1"
+                            />
+                        </HBox>
+                         <HBox
+                            justifyContent="End"
+                            class="sapUiSmallMarginTop"
+                        >
+                            <Label
+                                text="SGST:"
+                                design="Bold"
+                                class="sapUiSmallMarginEnd"
+                            />
+                            <!-- <Text text="{CustomerData>/RentPrice}" class="sapUiSmallMarginEnd" /> -->
+                            <Text
+                                text="{
+                                        parts: [
+                                            { path: 'CustomerData>/SGST' }
                                         ],
                                         formatter: '.Formatter.formatCurrency'
                                     }"
@@ -768,10 +843,7 @@
                                 design="Bold"
                                 class="sapUiSmallMarginEnd"
                             />
-                            <!-- <Text
-                                text="{path: 'CustomerData>/GrandTotal', formatter: '.Formatter.formatCurrency'}"
-                                class="sapUiSmallMarginEnd"
-                            /> -->
+                            <!-- <Text text="{path: 'CustomerData>/GrandTotal', formatter: '.Formatter.formatCurrency'}" class="sapUiSmallMarginEnd" /> -->
                             <Text
                                 text="{ parts: [{ path: 'CustomerData>/GrandTotal' }, { path: 'CustomerData>/AllSelectedFacilities/0/Currency' }],formatter: '.Formatter.formatCurrency'}"
                                 class="sapUiSmallMarginEnd totalColumnBold1"
