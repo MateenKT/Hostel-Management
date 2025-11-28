@@ -795,6 +795,28 @@
                                 class="sapUiSmallMarginEnd totalColumnBold1"
                             />
                         </HBox>
+
+                         <HBox
+                            justifyContent="End"
+                            class="sapUiSmallMarginTop"
+                        >
+                            <Label
+                                text="Sub Total:"
+                                design="Bold"
+                                class="sapUiSmallMarginEnd"
+                            />
+                            <!-- <Text text="{CustomerData>/RentPrice}" class="sapUiSmallMarginEnd" /> -->
+                            <Text
+                                text="{
+                                        parts: [
+                                            { path: 'CustomerData>/SubTotal' },
+                                            { path: 'CustomerData>/AllSelectedFacilities/0/Currency' }
+                                        ],
+                                        formatter: '.Formatter.formatCurrency'
+                                    }"
+                                class="sapUiSmallMarginEnd totalColumnBold1"
+                            />
+                        </HBox>
                          <HBox
                             justifyContent="End"
                             class="sapUiSmallMarginTop"
@@ -810,7 +832,9 @@
                             <Text
                                 text="{
                                         parts: [
-                                            { path: 'CustomerData>/CGST' }
+                                            { path: 'CustomerData>/CGST' },
+                                            { path: 'CustomerData>/AllSelectedFacilities/0/Currency' }
+
                                         ],
                                         formatter: '.Formatter.formatCurrency'
                                     }"
@@ -831,7 +855,9 @@
                             <Text
                                 text="{
                                         parts: [
-                                            { path: 'CustomerData>/SGST' }
+                                            { path: 'CustomerData>/SGST' },
+                                            { path: 'CustomerData>/AllSelectedFacilities/0/Currency' }
+
                                         ],
                                         formatter: '.Formatter.formatCurrency'
                                     }"

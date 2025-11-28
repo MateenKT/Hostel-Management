@@ -397,6 +397,8 @@ sap.ui.define([
             // Final Price Calculation
             // -------------------------------
             const FacilityPrice = totalFacilityPricePerDay + otherFacilitiesTotal;
+            const SubTotal = FacilityPrice + roomRentPrice;
+
             const SGST = (FacilityPrice + roomRentPrice) * 0.09;
             const CGST = (FacilityPrice + roomRentPrice) * 0.09;
             const grandTotal =FacilityPrice + SGST + CGST + Number(roomRentPrice || 0);
@@ -413,6 +415,7 @@ sap.ui.define([
                 GrandTotal: grandTotal,
                 SGST: SGST,
                 CGST: CGST,
+                SubTotal:SubTotal,
                 AllSelectedFacilities: aAllFacilities
             };
         },
@@ -640,8 +643,8 @@ sap.ui.define([
             let iDays = 0;
 
             if (sUnit === "Per Month") {
-                oEnd.setDate(oEnd.getDate() + iCount * 30);
-                iDays = iCount * 30; // Add Months as 30 days
+                oEnd.setDate(oEnd.getDate() + iCount * 31);
+                iDays = iCount * 31; // Add Months as 31 days
             } else if (sUnit === "Per Year") {
                 oEnd.setDate(oEnd.getDate() + iCount * 365);
                 iDays = iCount * 365; // Add Years as 365 days
@@ -756,6 +759,8 @@ sap.ui.define([
                 oCustomerData.SGST = (total + (oCustomerData.RentPrice || 0)) * 0.09;
 
                 oCustomerData.CGST = (total + (oCustomerData.RentPrice || 0)) * 0.09;
+                oCustomerData.SubTotal = (total + (oCustomerData.RentPrice || 0));
+
 
                 oCustomerData.GrandTotal = total + (oCustomerData.RentPrice || 0) + oCustomerData.SGST + oCustomerData.CGST;
 
@@ -905,8 +910,12 @@ sap.ui.define([
                 oCustomerModel.setProperty("/RentPrice", diffDays * originalRent);
                 oCustomerModel.setProperty("/Duration", diffDays);
                  var SGST=( diffDays * originalRent + (oCustomerModel.getProperty("/TotalFacilityPrice"))) * 0.09
+                 var SubTotal=( diffDays * originalRent + (oCustomerModel.getProperty("/TotalFacilityPrice")))
+
                 oCustomerModel.setProperty("/SGST", SGST);
                 oCustomerModel.setProperty("/CGST", SGST);
+                oCustomerModel.setProperty("/SubTotal", SubTotal);
+
                 oCustomerModel.setProperty("/GrandTotal", diffDays * originalRent + (oCustomerModel.getProperty("/TotalFacilityPrice") || 0) + SGST + SGST);
 
 
@@ -927,8 +936,12 @@ sap.ui.define([
                 var diffDays = oBookingModel.getProperty("/DurationUnit");
                 oCustomerModel.setProperty("/RentPrice", diffDays * originalRent);
                      var SGST=( diffDays * originalRent + (oCustomerModel.getProperty("/TotalFacilityPrice"))) * 0.09
+                     var SubTotal=( diffDays * originalRent + (oCustomerModel.getProperty("/TotalFacilityPrice"))) 
+
                 oCustomerModel.setProperty("/SGST", SGST);
                 oCustomerModel.setProperty("/CGST", SGST);
+                oCustomerModel.setProperty("/SubTotal", SubTotal);
+
                 oCustomerModel.setProperty("/GrandTotal", diffDays * originalRent + (oCustomerModel.getProperty("/TotalFacilityPrice") || 0) + SGST + SGST);
 
 
@@ -945,8 +958,12 @@ sap.ui.define([
                 var diffDays = oBookingModel.getProperty("/DurationUnit");
                 oCustomerModel.setProperty("/RentPrice", diffDays * originalRent);
                  var SGST=( diffDays * originalRent + (oCustomerModel.getProperty("/TotalFacilityPrice"))) * 0.09
+                 var SubTotal=( diffDays * originalRent + (oCustomerModel.getProperty("/TotalFacilityPrice"))) 
+
                 oCustomerModel.setProperty("/SGST", SGST);
                 oCustomerModel.setProperty("/CGST", SGST);
+                oCustomerModel.setProperty("/SubTotal", SubTotal);
+
 
                
                 oCustomerModel.setProperty("/GrandTotal", diffDays * originalRent + (oCustomerModel.getProperty("/TotalFacilityPrice") || 0) + SGST + SGST);
@@ -996,7 +1013,7 @@ sap.ui.define([
             let oEnd = new Date(oStart);
 
             if (sUnit === "monthly" || sUnit === "Per Month") {
-                oEnd.setDate(oEnd.getDate() + iCount * 30);
+                oEnd.setDate(oEnd.getDate() + iCount * 31);
                 oCustomerData.setProperty("/RentPrice", iCount * originalRent); // use originalRent
             } else if (sUnit === "yearly" || sUnit === "Per Year") {
                 oEnd.setDate(oEnd.getDate() + iCount * 365);
@@ -1010,8 +1027,12 @@ sap.ui.define([
                 
             var fFacilityPrice = parseFloat(oCustomerData.getProperty("/TotalFacilityPrice") || 0);
                 var CGST=(fPrice + fFacilityPrice) * 0.09
+                var SubTotal=fPrice + fFacilityPrice
+
                 oCustomerData.setProperty("/SGST", CGST);
                 oCustomerData.setProperty("/CGST", CGST);
+                oCustomerData.setProperty("/SubTotal", SubTotal);
+
 
 
 
@@ -1148,6 +1169,8 @@ sap.ui.define([
             });
 
             oCustomerData.TotalFacilityPrice = total;
+            oCustomerData.SubTotal = (total + (oCustomerData.RentPrice || 0)) ;
+
             oCustomerData.SGST = (total + (oCustomerData.RentPrice || 0)) * 0.09;
             oCustomerData.CGST = (total + (oCustomerData.RentPrice || 0)) * 0.09;
             oCustomerData.GrandTotal = (total + (oCustomerData.RentPrice || 0)) + oCustomerData.SGST + oCustomerData.CGST;
@@ -1217,10 +1240,14 @@ sap.ui.define([
 
                 // Update GrandTotal
                 var fFacilityPrice = parseFloat(oCustomerModel.getProperty("/TotalFacilityPrice") || 0);
+                    var SubTotal=fPrice + fFacilityPrice
+
                     var CGST=(fPrice + fFacilityPrice) * 0.09
 
                 oCustomerModel.setProperty("/SGST",CGST)
                 oCustomerModel.setProperty("/CGST",CGST)
+                oCustomerModel.setProperty("/SubTotal",SubTotal)
+
                  oCustomerModel.setProperty("/GrandTotal", fPrice + fFacilityPrice + CGST * 2);
 
             }
@@ -1308,10 +1335,14 @@ sap.ui.define([
 
                 // Recalculate GrandTotal
                 var fFacilityPrice = parseFloat(oCustomerModel.getProperty("/TotalFacilityPrice") || 0);
+                var SubTotal=fOriginalRentPrice + fFacilityPrice
+
                 var CGST=(fOriginalRentPrice + fFacilityPrice) * 0.09
 
                 oCustomerModel.setProperty("/SGST",CGST)
                 oCustomerModel.setProperty("/CGST",CGST)
+                oCustomerModel.setProperty("/SubTotal",SubTotal)
+
 
                 oCustomerModel.setProperty("/GrandTotal", fOriginalRentPrice + fFacilityPrice + CGST * 2);
             }
