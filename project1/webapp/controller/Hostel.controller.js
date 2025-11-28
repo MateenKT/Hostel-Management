@@ -798,6 +798,24 @@ sap.ui.define([
 
             /* ========= CONTROL GETTER ========= */
             const $C = (id) => sap.ui.getCore().byId(id);
+            // ========= Mandatory fields check (toast once) =========
+            const mandatoryValid =
+                utils._LCvalidateMandatoryField($C("signUpSalutation"), "ID") &&
+                utils._LCvalidateMandatoryField($C("signUpName"), "ID") &&
+                utils._LCvalidateMandatoryField($C("signUpGender"), "ID") &&
+                utils._LCvalidateMandatoryField($C("signUpEmail"), "ID") &&
+                utils._LCvalidateMandatoryField($C("signUpCountry"), "ID") &&
+                utils._LCvalidateMandatoryField($C("signUpState"), "ID") &&
+                utils._LCvalidateMandatoryField($C("signUpCity"), "ID") &&
+                utils._LCvalidateMandatoryField($C("signUpSTD"), "ID") &&
+                utils._LCvalidateMandatoryField($C("signUpPhone"), "ID") &&
+                utils._LCvalidateMandatoryField($C("signUpAddress"), "ID");
+
+            if (!mandatoryValid) {
+                sap.m.MessageToast.show("Please fill all mandatory fields.");
+                return;
+            }
+
 
             // 1) Salutation
             if (!utils._LCstrictValidationComboBox($C("signUpSalutation"), "ID")) return;
@@ -855,14 +873,49 @@ sap.ui.define([
             if (!utils._LCvalidateEmail($C("signUpEmail"), "ID")) return;
 
             // 6) Country → State → City
-            if (!utils._LCstrictValidationComboBox($C("signUpCountry"), "ID")) return;
-            if (!utils._LCstrictValidationComboBox($C("signUpState"), "ID")) return;
-            if (!utils._LCstrictValidationComboBox($C("signUpCity"), "ID")) return;
+            if (!utils._LCvalidateMandatoryField($C("signUpCountry"), "ID")) return;
+            if (!utils._LCvalidateMandatoryField($C("signUpState"), "ID")) return;
+            if (!utils._LCvalidateMandatoryField($C("signUpCity"), "ID")) return;
 
             // 7) Mobile Number
-            if (!utils._LCstrictValidationComboBox($C("signUpSTD"), "ID")) return;
+            if (!utils._LCvalidateMandatoryField($C("signUpSTD"), "ID")) return;
             const sSTD = $C("signUpSTD").getSelectedKey();
-            if (!utils._LCvalidateInternationalMobileNumberWithSTD($C("signUpPhone"), sSTD)) return;
+            // ========= FINAL MOBILE VALIDATION (same as liveChange rules) =========
+            const phoneInput = $C("signUpPhone");
+            let mobile = phoneInput.getValue().replace(/\D/g, ""); // keep only digits
+
+            // Mandatory
+            if (!mobile) {
+                phoneInput.setValueState("Error");
+                phoneInput.setValueStateText("Mobile number is required");
+                return;
+            }
+
+            // India rules
+            if (sSTD === "+91") {
+                if (mobile.length !== 10) {
+                    phoneInput.setValueState("Error");
+                    phoneInput.setValueStateText("Mobile Number must be exactly 10 digits");
+                    return;
+                }
+                if (mobile.startsWith("0")) {
+                    phoneInput.setValueState("Error");
+                    phoneInput.setValueStateText("Mobile number must not start with 0");
+                    return;
+                }
+            }
+            // International rules
+            else {
+                if (mobile.length < 4 || mobile.length > 18) {
+                    phoneInput.setValueState("Error");
+                    phoneInput.setValueStateText("Mobile number must be 4–18 digits");
+                    return;
+                }
+            }
+
+            phoneInput.setValueState("None");
+
+            // 7) Address
 
             const addrInput = $C("signUpAddress");
             const addr = addrInput.getValue().trim();
@@ -1059,7 +1112,7 @@ sap.ui.define([
             const oPhone = $C("signUpPhone");
 
             // 🚫 Validate only if invalid entry typed
-            if (!utils._LCstrictValidationComboBox(oCountryCB, "ID")) return;
+            if (!utils._LCvalidateMandatoryField(oCountryCB, "ID")) return;
             oCountryCB.setValueState("None"); // Clear previous error
 
             /** ✔ SET SELECTED COUNTRY INTO MODEL */
@@ -1090,7 +1143,7 @@ sap.ui.define([
             if (obj?.stdCode) {
                 oModel.setProperty("/STDCode", obj.stdCode);
                 oStdCB.setSelectedKey(obj.stdCode);
-                oStdCB.setEnabled(false); // 🔐 Lock STD
+                // oStdCB.setEnabled(false); // 🔐 Lock STD
             }
 
             /** FILTER STATES BY COUNTRY */
@@ -1100,9 +1153,17 @@ sap.ui.define([
         },
 
         onMobileLivechnage: function (oEvent) {
-            const sSTD = sap.ui.getCore().byId("signUpSTD").getSelectedKey() || "";
-            utils._LCvalidateInternationalMobileNumberWithSTD(oEvent, sSTD);
-        },
+
+                const sSTD = $C("signUpSTD").getSelectedKey() || "";
+                const oInput = oEvent.getSource();
+
+                // Force-only digits
+                let sValue = oInput.getValue().replace(/\D/g, "");
+                oInput.setValue(sValue);
+
+                // Validate using your utility function
+                utils._LCvalidateInternationalMobileNumberWithSTD(oEvent, sSTD);
+            }, 
 
         onAddressChange: function (oEvent) {
             const oInput = oEvent.getSource();
@@ -1122,7 +1183,25 @@ sap.ui.define([
 
             oInput.setValueState("None");
             oInput.setValueStateText("");
+        }, 
+        onSTDChange: function (oEvent) {
+            const sSTD = oEvent.getSource().getSelectedKey();
+            const oInput = $C("signUpPhone");
+
+            // Reset mobile number when STD changes
+            oInput.setValue("");
+            oInput.setValueState("None");
+
+            // Update maxLength based on STD
+            if (sSTD === "+91") {
+                oInput.setMaxLength(10);
+            } else {
+                oInput.setMaxLength(18);
+            }
+
         },
+
+
 
         onChangeState: function (oEvent) {
             const $C = (id) => sap.ui.getCore().byId(id);
@@ -1131,7 +1210,7 @@ sap.ui.define([
             const oStateCB = oEvent.getSource();
             const oCityCB = $C("signUpCity");
 
-            if (!utils._LCstrictValidationComboBox(oStateCB, "ID")) return;
+            if (!utils._LCvalidateMandatoryField(oStateCB, "ID")) return;
             oStateCB.setValueState("None");
 
             const state = oStateCB.getSelectedKey();
@@ -1147,7 +1226,7 @@ sap.ui.define([
 
         onChangeCity: function (oEvent) {
             const oCityCB = oEvent.getSource();
-            if (!utils._LCstrictValidationComboBox(oCityCB, "ID")) return;
+            if (!utils._LCvalidateMandatoryField(oCityCB, "ID")) return;
             oCityCB.setValueState("None");
 
             const value = oCityCB.getSelectedKey();
@@ -2676,55 +2755,7 @@ sap.ui.define([
         //     }
         // },
 
-        onValidateUser: async function () {
-            const oIdCtrl = sap.ui.getCore().byId("fpUserId");
-            const oNameCtrl = sap.ui.getCore().byId("fpUserName");
 
-            const sUserId = oIdCtrl.getValue().trim();
-            const sUserName = oNameCtrl.getValue().trim();
-
-            // 🔥 Step 1: Validate User ID first
-            if (!utils._LCvalidateMandatoryField(oIdCtrl, "User ID")) {
-                // ❗ Do NOT modify the other field
-                sap.m.MessageToast.show("Enter valid User ID");
-                return;
-            }
-
-            // 🔥 Step 2: User ID correct → validate User Name
-            if (!utils._LCvalidateMandatoryField(oNameCtrl, "User Name")) {
-                sap.m.MessageToast.show("Enter valid User Name");
-                return;
-            }
-
-            // 🔥 Step 3: Both fields valid → Send OTP
-            const payload = {
-                UserID: sUserId,
-                UserName: sUserName,
-                Type: "OTP"
-            };
-
-            sap.ui.core.BusyIndicator.show(0);
-
-            try {
-                const oResp = await this.ajaxCreateWithJQuery("HostelSendOTP", payload);
-
-                if (oResp?.success) {
-                    sap.m.MessageToast.show("OTP sent! Check your email.");
-                    alert(oResp.OTP);
-
-                    this._oResetUser = { UserID: sUserId, UserName: sUserName };
-
-                    this.getView().getModel("LoginViewModel").setProperty("/forgotStep", 2);
-                } else {
-                    sap.m.MessageToast.show("No user found with given ID / Name");
-                }
-
-            } catch (err) {
-                sap.m.MessageToast.show("Invalid User ID / User Name");
-            } finally {
-                sap.ui.core.BusyIndicator.hide();
-            }
-        },
 
 
 
@@ -3416,7 +3447,7 @@ sap.ui.define([
                     return;
                 }
 
-                sap.m.MessageToast.show("Login Successful!");
+                // sap.m.MessageToast.show("Login Successful!");
 
                 // Global access + Model update
                 this._oLoggedInUser = user;
@@ -3542,5 +3573,51 @@ sap.ui.define([
                 new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
             ]);
         },
+        onValidateUser: async function () {
+
+            const isValid =
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("fpUserId"), "ID") &&
+                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("fpUserName"), "ID");
+
+            if (!isValid) {
+                sap.m.MessageToast.show("Please fill all mandatory fields.");
+                return;
+            }
+
+            const oIdCtrl = sap.ui.getCore().byId("fpUserId");
+            const oNameCtrl = sap.ui.getCore().byId("fpUserName");
+
+            const sUserId = oIdCtrl.getValue().trim();
+            const sUserName = oNameCtrl.getValue().trim();
+
+            const payload = {
+                UserID: sUserId,
+                UserName: sUserName,
+                Type: "OTP"
+            };
+
+            sap.ui.core.BusyIndicator.show(0);
+
+            try {
+                const oResp = await this.ajaxCreateWithJQuery("HostelSendOTP", payload);
+
+                if (oResp?.success) {
+                    sap.m.MessageToast.show("OTP sent! Check your email.");
+                    alert(oResp.OTP);
+
+                    this._oResetUser = { UserID: sUserId, UserName: sUserName };
+
+                    this.getView().getModel("LoginViewModel").setProperty("/forgotStep", 2);
+                } else {
+                    sap.m.MessageToast.show("No user found with given ID / Name");
+                }
+
+            } catch (err) {
+                sap.m.MessageToast.show("Invalid User ID / User Name");
+            } finally {
+                sap.ui.core.BusyIndicator.hide();
+            }
+        },
+
     });
 });

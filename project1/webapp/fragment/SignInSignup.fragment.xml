@@ -181,13 +181,13 @@
 						<HBox width="100%" alignItems="Center" justifyContent="Start">
 							<VBox width="26%">
 								<Label text="ISD Code" required="true"/>
-								<ComboBox id="signUpSTD" placeholder="Code" valueStateText="Select Code" showSecondaryValues="true" items="{path:'CountryModel>/', length:1000}">
+								<ComboBox change="onSTDChange" id="signUpSTD" placeholder="Code" valueStateText="Select Code" showSecondaryValues="true" items="{path:'CountryModel>/', length:1000}">
 									<core:ListItem key="{CountryModel>stdCode}" text="{CountryModel>stdCode}" additionalText="{CountryModel>code}" />
 								</ComboBox>
 							</VBox>
 							<VBox width="74%" class="sapUiTinyMarginBegin">
 								<Label text="Mobile Number" required="true"/>
-								<Input id="signUpPhone" value="{LoginMode>/Mobileno}" placeholder="Enter Contact Number" maxLength="18" liveChange="onMobileLivechnage" valueStateText="Enter a valid mobile number" />
+								<Input id="signUpPhone" type="Tel" value="{LoginMode>/Mobileno}" placeholder="Enter Contact Number" maxLength="18" liveChange="onMobileLivechnage" valueStateText="Enter a valid mobile number" />
 							</VBox>
 						</HBox>
 						<Label text="Address" required="true"/>
