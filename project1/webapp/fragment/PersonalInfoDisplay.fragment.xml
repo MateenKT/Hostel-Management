@@ -24,7 +24,7 @@
                 <Label text="Full Name" />
                 <Text text="{HostelModel>FullName}" />
                 <Label text="Date of Birth" />
-                <Text text="{path:'HostelModel>DateOfBirth', formatter: '.Formatter.DateFormat'}" />
+                <Text text="{path:'HostelModel>DateOfBirth'}" />
                 <Label text="Gender" />
                 <Text text="{HostelModel>Gender}" />
                 <Label text="Mobile Number" />

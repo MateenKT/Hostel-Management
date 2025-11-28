@@ -401,32 +401,35 @@ _createDynamicPersonsUI: function () {
         }
          const DOB =that.Formatter.DateFormat(oUser.DateOfBirth)
         // Already logged in → auto-fill
-        aPersons[0].Salutation = oUser.Salutation || "";
-        aPersons[0].FullName = oUser.UserName || "";
-        aPersons[0].CustomerEmail = oUser.EmailID || "";
-        aPersons[0].MobileNo = oUser.MobileNo || "";
-        aPersons[0].UserID = oUser.UserID || "";
-        aPersons[0].DateOfBirth = DOB|| "";
-        aPersons[0].Gender = oUser.Gender || "";
-        aPersons[0].Country = oUser.Country || "";
-        aPersons[0].State = oUser.State || "";
-        aPersons[0].City = oUser.City || "";
-        aPersons[0].Address = oUser.Address || "";
-        aPersons[0].STDCode = oUser.STDCode || "";
+        aPersons.forEach(p => {
+            p.Salutation    = oUser.Salutation || "";
+            p.FullName      = oUser.UserName || "";
+            p.CustomerEmail = oUser.EmailID || "";
+            p.MobileNo      = oUser.MobileNo || "";
+            p.UserID        = oUser.UserID || "";
+            p.DateOfBirth   = DOB;
+            p.Gender        = oUser.Gender || "";
+            p.Country       = oUser.Country || "";
+            p.State         = oUser.State || "";
+            p.City          = oUser.City || "";
+            p.Address       = oUser.Address || "";
+            p.STDCode       = oUser.STDCode || "";
+        });
     } else {
-        // Only clear if user unchecks manually
-        aPersons[0].FullName = "";
-        aPersons[0].CustomerEmail = "";
-        aPersons[0].MobileNo = "";
-        aPersons[0].UserID = "";
-        aPersons[0].Salutation = "";
-        aPersons[0].DateOfBirth ="";
-        aPersons[0].Gender="";
-        aPersons[0].State = "";
-        aPersons[0].Country  = "";
-        aPersons[0].City = "";
-        aPersons[0].Address = "";
-        aPersons[0].STDCode ="";
+      aPersons.forEach(p => {
+            p.Salutation =  "";
+            p.FullName      = "";
+            p.CustomerEmail =  "";
+            p.MobileNo      = "";
+            p.UserID        = "";
+            p.DateOfBirth   = "";
+            p.Gender      = "";
+            p.Country       =  "";
+            p.State         =  "";
+            p.City          = "";
+            p.Address       = "";
+            p.STDCode       =  "";
+        });
     }
 
     oModel.refresh(true);
@@ -451,10 +454,19 @@ _createDynamicPersonsUI: function () {
                 new sap.ui.core.ListItem({
                   key: "Mr.",
                   text: "Mr"
-                }), new sap.ui.core.ListItem({
+                }),
+                 new sap.ui.core.ListItem({
                   key: "Mrs.",
                   text: "Mrs"
-                })
+                }),
+                 new sap.ui.core.ListItem({
+                  key: "Ms.",
+                  text: "Ms"
+                }),
+                  new sap.ui.core.ListItem({
+                  key: "Dr.",
+                  text: "Dr"
+                }),
                 
               ]
             }),
@@ -1280,7 +1292,7 @@ const fPrice = f.SelectedPrice;
 let fTotal = 0;
 
 switch (sType) {
-    case "Per Hour":  fTotal = fPrice * diffHours; break;
+    case "Per Hour":  fTotal = fPrice * diffHours * iDays; break;
     case "Per Day":   fTotal = fPrice * iDays; break;
     case "Per Month": fTotal = fPrice * iMonths; break;
     case "Per Year":  fTotal = fPrice * iYears; break;
@@ -1741,41 +1753,35 @@ if (Array.isArray(oResponse.data)) {
 
         // Handle UI visibility based on role
         const oView = this.getView();
-       if (oMatchedUser.Role === "Customer") {
+   
 
     const oHostelModel = this.getView().getModel("HostelModel");
     const aPersons = oHostelModel.getProperty("/Persons");
 
-    // Ensure Persons array exists
-    if (aPersons && aPersons.length > 0) {
-        const DOB =this.Formatter.DateFormat(oMatchedUser.DateOfBirth)
-        // Fill Person 1 details
-        aPersons[0].Salutation      = oMatchedUser.Salutation || "";
-        aPersons[0].FullName        = oMatchedUser.UserName || "";
-        aPersons[0].DateOfBirth     = DOB;
-        aPersons[0].Gender          = oMatchedUser.Gender || "";
-        aPersons[0].MobileNo        = oMatchedUser.MobileNo || "";
-        aPersons[0].CustomerEmail   = oMatchedUser.EmailID || "";
-        aPersons[0].Country         = oMatchedUser.Country || "";
-        aPersons[0].State           = oMatchedUser.State || "";
-        aPersons[0].City            = oMatchedUser.City || "";
-        aPersons[0].Address         = oMatchedUser.Address || "";
-        aPersons[0].STDCode         = oMatchedUser.STDCode || "";
+   const DOB = this.Formatter.DateFormat(oMatchedUser.DateOfBirth);
 
-       aPersons.forEach(p => {
-    p.UserID = oMatchedUser.UserID;
-        });
-
-
-        oHostelModel.refresh(true);
+      aPersons.forEach((p) => {
+        p.Salutation     = oMatchedUser.Salutation || "";
+        p.FullName       = oMatchedUser.UserName || "";
+        p.CustomerEmail  = oMatchedUser.EmailID || "";
+        p.MobileNo       = oMatchedUser.MobileNo || "";
+        p.UserID         = oMatchedUser.UserID || "";
+        p.DateOfBirth    = DOB || "";
+        p.Gender         = oMatchedUser.Gender || "";
+        p.Country        = oMatchedUser.Country || "";
+        p.State          = oMatchedUser.State || "";
+        p.City           = oMatchedUser.City || "";
+        p.Address        = oMatchedUser.Address || "";
+        p.STDCode        = oMatchedUser.STDCode || "";
+    });
 
         // Auto-check the "Fill Yourself" checkbox
         const oCheck = sap.ui.getCore().byId(this.createId("IDSelfCheck_0"));
         if (oCheck) {
             oCheck.setSelected(true);
         }
-    }
-       }
+      oHostelModel.refresh(true);
+       
       } catch (err) {
         console.error("Login Error:", err);
         sap.m.MessageToast.show("Failed to fetch login data: " + err);
@@ -2215,14 +2221,11 @@ if (Array.isArray(oResponse.data)) {
 
 aSelectedFacilities.forEach(fac => {
     let facilityPrice = 0;
+    let facilityHour = 0;
 
-    if (fac.UnitText === "Per Day") facilityPrice = fac.Price
- || 0;
-    else if (fac.UnitText === "Per Month") facilityPrice = fac.Price
- || 0;
-    else if (fac.UnitText === "Per Year") facilityPrice = fac.Price
- || 0;
-    else if (fac.UnitText === "Per Hour") facilityPrice = fac.Price || 0;
+       facilityPrice = fac.TotalAmount || 0;
+       facilityHour= fac.TotalTime || 1
+  
 
     facilityData.push({
         PaymentID: "",
@@ -2234,7 +2237,7 @@ aSelectedFacilities.forEach(fac => {
         UnitText: fac.UnitText,
         StartTime: fac.StartTime || "",
         EndTime: fac.EndTime || "",
-        TotalHour: fac.TotalTime || "",
+        TotalHour: facilityHour,
         Currency: fac.Currency
     });
 });
