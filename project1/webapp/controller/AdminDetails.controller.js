@@ -54,9 +54,6 @@ sap.ui.define([
             await this.AD_onSearch()
             await this.Facilitysearch()
 
-
-
-
         },
         applyCountryStateCityFilters: async function () {
             const oModel = this.getView().getModel("CustomerData");
@@ -1648,7 +1645,7 @@ sap.ui.define([
                                 CustomerID: custid
                             }
                         });
-
+                          
                         that.AD_onSearch();
                         that.getView().getModel("VisibleModel").setProperty("/visible", false);
                         that.byId("idMonthYearSelect").setVisible(false);
@@ -1662,7 +1659,6 @@ sap.ui.define([
                         sap.ui.core.BusyIndicator.hide();
                         sap.m.MessageToast.show(err.message || err.responseText);
                     } finally {
-                        sap.ui.core.BusyIndicator.hide();
                     }
                 }
             }
@@ -1760,27 +1756,26 @@ sap.ui.define([
                 sap.m.MessageToast.show("Document removed");
             }
         },
-        onFileNameLinkPress: function (oEvent) {
+       onFileNameLinkPress: function (oEvent) {
 
-            // Get document object from CustomerData model
-            var oContext = oEvent.getSource().getBindingContext("CustomerData");
-            var oDoc = oContext.getObject();
+    // Get document object from CustomerData model
+    var oContext = oEvent.getSource().getBindingContext("CustomerData");
+    var oDoc = oContext.getObject();
 
-            if (!oDoc) {
-                sap.m.MessageBox.error("No document found!");
-                return;
-            }
+    if (!oDoc) {
+        sap.m.MessageBox.error("No document found!");
+        return;
+    }
 
-            // Base64 image from model (FileContent or File)
-            var sBase64 = oDoc.FileContent || oDoc.File;
+    // Base64 image from model (FileContent or File)
+    var sBase64 = oDoc.FileContent || oDoc.File;
 
-            if (!sBase64) {
-                sap.m.MessageBox.error("No image found for this document!");
-                return;
-            }
+    if (!sBase64) {
+        sap.m.MessageBox.error("No image found for this document!");
+        return;
+    }
 
-            // Remove whitespace/newlines
-            sBase64 = sBase64.replace(/\s/g, ""); // remove whitespace
+      sBase64 = sBase64.replace(/\s/g, ""); // remove whitespace
 
             var imagePart = sBase64; // initialize
 
@@ -1804,38 +1799,60 @@ sap.ui.define([
             }
 
 
-            // Create image
-            var oImage = new sap.m.Image({
-                src: sBase64,
-                width: "100%",         // Fit width of dialog
-                height: "100%",        // Fit height
-                layoutData: new sap.ui.layout.form.GridElementData({
-                    hCells: "12"
-                }),
-                densityAware: false,
-                tooltip: "Click to view full size"
-            });
+    // --- Create Dialog like onImagePress ---
+    if (!this._oDocPreviewDialog) {
 
-            // Create Dialog without scroll
-            var oDialog = new sap.m.Dialog({
-                title: oDoc.FileName || "Document Image",
-                contentWidth: "80%",   // Dialog size
-                contentHeight: "80%",
-                stretch: sap.ui.Device.system.phone,
-                content: [oImage],
-                endButton: new sap.m.Button({
-                    text: "Close",
-                    press: function () {
-                        oDialog.close();
-                    }
-                }),
-                afterClose: function () {
-                    oDialog.destroy();
-                }
-            });
+        var oFlex = new sap.m.FlexBox({
+            width: "100%",
+            height: "100%",
+            renderType: "Div",
+            justifyContent: "Center",
+            alignItems: "Center",
+            items: [
+                new sap.m.Image({
+                    id: this.createId("docPreviewImage"),
+                    densityAware: false,
+                    width: "100%",
+                    height: "100%",
+                    style: "object-fit: contain; display:block; margin:0; padding:0;"
+                })
+            ]
+        });
 
-            oDialog.open();
-        }
+        this._oDocPreviewDialog = new sap.m.Dialog({
+            title: oDoc.FileName || "Document Image",
+            contentWidth: "50%",
+            contentHeight: "60%",
+            draggable: true,
+            resizable: true,
+            horizontalScrolling: false,
+            verticalScrolling: false,
+            contentPadding: "0rem",
+            content: [oFlex],
+
+            beginButton: new sap.m.Button({
+                text: "Close",
+                press: function () {
+                    this._oDocPreviewDialog.close();
+                }.bind(this)
+            }),
+
+            afterClose: function () {
+                this._oDocPreviewDialog.destroy();
+                this._oDocPreviewDialog = null;
+            }.bind(this)
+        });
+
+        this.getView().addDependent(this._oDocPreviewDialog);
+    } else {
+        this._oDocPreviewDialog.setTitle(oDoc.FileName || "Document Image");
+    }
+
+    // Set image
+    this.byId("docPreviewImage").setSrc(sBase64);
+
+    this._oDocPreviewDialog.open();
+}
 
 
 

@@ -98,13 +98,15 @@
                             id="idedit"
                             class="sapUiSmallMarginBegin myUnifiedBtn"
                             press="onEditBooking"
-                            visible="{= ${CustomerData>/Status} !== 'Cancelled' &amp;&amp; !${VisibleModel>/visible} }"
+                             visible="{= (${CustomerData>/Status} === 'Assigned' || ${CustomerData>/Status} === 'New') 
+               &amp;&amp; !${VisibleModel>/visible} }"
                         />
                         <Button
                             id="idcancel"
                             text="Cancel Booking"
                             press="onPressCancelBooking"
-                            visible="{= ${CustomerData>/Status} !== 'Cancelled' &amp;&amp; !${VisibleModel>/visible} }"
+                          visible="{= ${CustomerData>/Status} === 'New' 
+                                       &amp;&amp; !${VisibleModel>/visible} }"
                             class="sapUiSmallMarginBegin myUnifiedBtn"
                         />
                         <Button
@@ -589,7 +591,6 @@
                                 id="idProofType"
                                 placeholder="Select ID Proof"
                                 selectedKey="{Bookingmodel>/DocumentType}"
-                                selectionChange="onRoomDurationChange"
                                 visible="{VisibleModel>/visible}"
                                 valueStateText="Select ID Proof"
                                 change="onidproofchange"
@@ -797,9 +798,11 @@
                          <HBox
                             justifyContent="End"
                             class="sapUiSmallMarginTop"
+                          visible="{= ${CustomerData>/Country} === 'India' }"
+
                         >
                             <Label
-                                text="CGST:"
+                                text="CGST(9%):"
                                 design="Bold"
                                 class="sapUiSmallMarginEnd"
                             />
@@ -817,9 +820,10 @@
                          <HBox
                             justifyContent="End"
                             class="sapUiSmallMarginTop"
+                          visible="{= ${CustomerData>/Country} === 'India' }"
                         >
                             <Label
-                                text="SGST:"
+                                text="SGST(9%):"
                                 design="Bold"
                                 class="sapUiSmallMarginEnd"
                             />

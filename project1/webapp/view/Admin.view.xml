@@ -98,7 +98,7 @@
                 busyIndicatorDelay="0"
                 class="sapUiResponsiveMargin"
                 items="{path: 'HostelModel>/',  sorter: [{
-                    path: 'RoomType',
+                    path: 'HostelModel>Bookings/0/BranchCode',
                     group: true
                 }]}"
             >
@@ -175,12 +175,12 @@
                     >
 						<Text text="Status" />
 					</Column>
-					<Column
+					<!-- <Column
                         minScreenWidth="Tablet"
                         demandPopin="true"
                     >
 						<Text text="ID Proof" />
-					</Column>
+					</Column> -->
 				</columns>
 				<items>
 					<ColumnListItem type="Navigation" press="AD_onPressEditDetails">
@@ -219,11 +219,11 @@
                                    }"
                                 class="sapUiTinyMarginBottom"
                             />
-							<Button
+							<!-- <Button
                                 text="View"
                                 press="HM_viewroom"
                                 class="myUnifiedBtn"
-                            />
+                            /> -->
 						</cells>
 					</ColumnListItem>
 				</items>
