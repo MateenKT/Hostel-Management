@@ -2155,6 +2155,7 @@ sap.ui.define([
                     );
 
                     const sArea = oBranchInfo?.Address || "";
+                    const sCountry= oBranchInfo?.Country|| "";
 
                     const aImages = [];
                     for (let i = 1; i <= 5; i++) {
@@ -2177,7 +2178,8 @@ sap.ui.define([
                         YearPrice: YearPrice,
                         Currency: Currency,
                         BranchCode: room.BranchCode,
-                        Images: aImages
+                        Images: aImages,
+                        Country:sCountry
                         // Visible: isVisible
                     };
                 });

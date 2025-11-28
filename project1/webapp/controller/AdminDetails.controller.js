@@ -351,21 +351,21 @@ const totals = this.calculateTotals(aPersons, oCustomerData.RentPrice);
                     // Apply Billing Logic
                     // -------------------------------
                     if (unit === "Per Day") {
-                        fTotal = fPrice * days;
+                        fTotal = fPrice ;
                         totalFacilityPricePerDay += fPrice;
 
                     } else if (unit === "Per Month") {
                         f.TotalMonths = totalMonths;
-                        fTotal = fPrice * totalMonths;
+                        fTotal = fPrice;
                         otherFacilitiesTotal += fTotal;
 
                     } else if (unit === "Per Year") {
                         f.TotalYears = totalYears;
-                        fTotal = fPrice * totalYears;
+                        fTotal = fPrice;
                         otherFacilitiesTotal += fTotal;
                     } else if (unit === "Per Hour") {
                         const totalHours = f.TotalHour || 0;
-                        fTotal = fPrice * parseFloat(totalHours) * days;
+                        fTotal = fPrice ;
                         otherFacilitiesTotal += fTotal;
                     }
 
@@ -589,7 +589,7 @@ const totals = this.calculateTotals(aPersons, oCustomerData.RentPrice);
             if (sUnit === "Per Month" || sUnit === "monthly") {
                 oEnd = new Date(oStart);
                 oEnd.setMonth(oEnd.getMonth() + iCount);
-                iDays = iCount * 30;
+                iDays = iCount * 31;
             } else if (sUnit === "Per Year" || sUnit === "yearly") {
                 oEnd = new Date(oStart);
                 oEnd.setFullYear(oEnd.getFullYear() + iCount);
@@ -1481,7 +1481,7 @@ const totals = this.calculateTotals(aPersons, oCustomerData.RentPrice);
                     return {
                         FacilityID: item.FacilityID,
                         FacilityName: item.FacilityName,
-                        FacilitiPrice: item.Price,
+                        FacilitiPrice: item.TotalAmount,
                         StartDate: item.StartDate.split('/').reverse().join('-'),
                         EndDate: item.EndDate.split('/').reverse().join('-'),
                         UnitText: paymentMap[itemUnit] || item.UnitText, // convert to Per Month/Day/Year
@@ -1492,6 +1492,16 @@ const totals = this.calculateTotals(aPersons, oCustomerData.RentPrice);
                         StartTime: item.StartTime,
                         EndTime: item.EndTime
 
+                    };
+                }),
+                 "Documents": CustomerData.Documents.map(item => {
+                    // Normalize UnitText for facility as well
+                    return {
+                        CustomerID : CustomerData.CustomerID,
+                        DocumentID: item.DocumentID,
+                        FileName: item.FileName,
+                        FileType: item.FileType,
+                        File: item.File
                     };
                 })
             };
@@ -1613,6 +1623,168 @@ const totals = this.calculateTotals(aPersons, oCustomerData.RentPrice);
                     }
                 }
             );
+        },
+        onFacilityFileChange: function (oEvent) {
+    var oFileUploader = oEvent.getSource();
+    var aFiles = oEvent.getParameter("files");  // selected files
+    var oCustomerModel = this.getView().getModel("CustomerData");
+    var aDocs = oCustomerModel.getProperty("/Documents") || [];
+
+    if (!aFiles || aFiles.length === 0) {
+        return;
+    }
+        aFiles = Array.from(aFiles);    
+
+    aFiles.forEach(file => {
+        var reader = new FileReader();
+
+        reader.onload = (e) => {
+            var sBase64 = e.target.result.split(",")[1]; // file base64 string
+
+            // Push new document into table array
+            aDocs.push({
+                FileName: file.name,
+                FileType: file.type,
+                File: sBase64      // store file content if needed
+            });
+
+            oCustomerModel.setProperty("/Documents", aDocs);
+        };
+
+        // Read file as Base64
+        reader.readAsDataURL(file);
+    });
+},
+onDocumentDelete: function (oEvent) {
+    var oCustomerModel = this.getView().getModel("CustomerData");
+    var aDocs = oCustomerModel.getProperty("/Documents") || [];
+
+    var oItem = oEvent.getParameter("listItem");
+    var oCtx = oItem.getBindingContext("CustomerData");
+    var iIndex = oCtx.getPath().split("/").pop();
+    var oDoc = aDocs[iIndex];
+
+    var that = this;
+
+    // If saved document → ask confirmation + AJAX delete
+    if (oDoc.DocumentID) {
+
+        MessageBox.confirm(
+            "This document is already saved. Do you want to delete it?",
+            {
+                actions: [MessageBox.Action.YES, MessageBox.Action.NO],
+                onClose: function (sAction) {
+
+                    if (sAction === MessageBox.Action.YES) {
+
+
+                          that.ajaxDeleteWithJQuery("HM_CustomerDocument", {
+                                        filters: {
+                                            DocumentID : oDoc.DocumentID
+                                        }
+                                    })
+                                    .then(function() {
+                                        // Remove from model
+                                         aDocs.splice(iIndex, 1);
+                                oCustomerModel.setProperty("/Documents", aDocs);
+
+                                sap.m.MessageToast.show("Document deleted successfully");
+
+                                    })
+                                    .catch(function() {
+                                        sap.m.MessageToast.show("Failed to delete Document from server.");
+                                    });
+
+                    }
+                }
+            }
+        );
+
+    } else {
+        // No DocumentID → only local delete
+        aDocs.splice(iIndex, 1);
+        oCustomerModel.setProperty("/Documents", aDocs);
+        sap.m.MessageToast.show("Document removed");
+    }
+},
+onFileNameLinkPress: function (oEvent) {
+
+    // Get document object from CustomerData model
+    var oContext = oEvent.getSource().getBindingContext("CustomerData");
+    var oDoc = oContext.getObject();
+
+    if (!oDoc) {
+        sap.m.MessageBox.error("No document found!");
+        return;
+    }
+
+    // Base64 image from model (FileContent or File)
+    var sBase64 = oDoc.FileContent || oDoc.File;
+
+    if (!sBase64) {
+        sap.m.MessageBox.error("No image found for this document!");
+        return;
+    }
+
+    // Remove whitespace/newlines
+    sBase64 = sBase64.replace(/\s/g, "");
+
+    var decoded = "";
+
+    try {
+        decoded = atob(sBase64);
+    } catch (e) {
+        decoded = sBase64;
+    }
+
+    var imagePart = decoded.includes("base64,")
+        ? decoded.split("base64,")[1]
+        : decoded;
+
+    if (imagePart.startsWith("iVB")) {
+        sBase64 = "data:image/png;base64," + imagePart;
+    } else if (imagePart.startsWith("/9j")) {
+        sBase64 = "data:image/jpeg;base64," + imagePart;
+    } else {
+        sBase64 = "data:image/jpeg;base64," + imagePart;
+    }
+
+    // Create image
+    var oImage = new sap.m.Image({
+        src: sBase64,
+        width: "100%",         // Fit width of dialog
+        height: "100%",        // Fit height
+        layoutData: new sap.ui.layout.form.GridElementData({
+            hCells: "12"
+        }),
+        densityAware: false,
+        tooltip: "Click to view full size"
+    });
+
+    // Create Dialog without scroll
+    var oDialog = new sap.m.Dialog({
+        title: oDoc.FileName,
+        contentWidth: "80%",   // Dialog size
+        contentHeight: "80%",
+        stretch: sap.ui.Device.system.phone,
+        content: [oImage],
+        endButton: new sap.m.Button({
+            text: "Close",
+            press: function () {
+                oDialog.close();
+            }
+        }),
+        afterClose: function () {
+            oDialog.destroy();
         }
+    });
+
+    oDialog.open();
+}
+
+
+
+
+
     });
 });

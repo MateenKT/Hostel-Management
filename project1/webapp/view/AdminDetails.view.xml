@@ -1,10 +1,11 @@
-<mvc:View
+<mvc:View xmlns:unified="sap.ui.unified"
     controllerName="sap.ui.com.project1.controller.AdminDetails"
     xmlns:mvc="sap.ui.core.mvc"
     xmlns="sap.m"
     xmlns:layout="sap.ui.layout"
     xmlns:f="sap.ui.layout.form"
     xmlns:core="sap.ui.core"
+    xmlns:u="sap.ui.unified"
 >
     <Page
         showHeader="false"
@@ -559,6 +560,63 @@
                             </FlexBox>
                         </VBox>
                     </FlexBox>
+                       <VBox class="sapUiMediumMarginBottom">
+                <Panel
+                    headerText="{= 'Customer Document - ' + ${CustomerData>/CustomerName} }"
+                    expandable="false"
+                    class="customPanelHeader"
+                >
+                  <Table
+                        id="Ad_id_idFacilityRoomTableDetails1"
+                        class="sapUiSmallMarginTop"
+                        items="{path: 'CustomerData>/Documents'}"
+                        mode="{= ${VisibleModel>/visible} === true ? 'Delete' : 'None' }"
+                        delete="onDocumentDelete"
+                        busyIndicatorDelay="0"
+                        inset="false"
+                        selectionChange="onTableSelection"
+                    >
+                        <headerToolbar>
+                            <Toolbar>
+                               <Title text="Document Details ({=${CustomerData>/Documents}.length})"/>
+                                <ToolbarSpacer />
+                              	<u:FileUploader
+                            id="BT_id_FileUploader"
+                            fileType="jpg,jpeg,png"
+                            multiple="true"
+                            maximumFileSize="5MB"
+                            sameFilenameAllowed="false"
+                            buttonOnly="true"
+                            buttonText="Upload Images"
+                            change="onFacilityFileChange"
+                            visible="{VisibleModel>/visible}"
+                                      />
+                            </Toolbar>
+                        </headerToolbar>
+                        <columns>
+                            <Column demandPopin="true">
+                                <Text text="File Name" />
+                            </Column>
+                            <Column demandPopin="true">
+                                <Text text="File Type" />
+                            </Column>
+                           
+                        </columns>
+                        <items>
+                            <ColumnListItem>
+                                <cells>
+                                    <Link 
+                                    text="{CustomerData>FileName}" 
+                                    press="onFileNameLinkPress"/>
+                                    <Text text="{CustomerData>FileType}" />
+                                   
+                                </cells>
+                            </ColumnListItem>
+                        </items>
+                    </Table>
+                  
+                </Panel>
+            </VBox>
                     <Table
                         id="Ad_id_idFacilityRoomTableDetails"
                         class="sapUiSmallMarginTop"

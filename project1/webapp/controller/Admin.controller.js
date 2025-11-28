@@ -214,8 +214,8 @@ sap.ui.define([
     var Model = selected.getBindingContext("HostelModel");
     this.data = Model.getObject(); // Customer data
 
-    if (this.data.Bookings[0].Status === "Closed" || this.data.Bookings[0].Status === "Assigned") {
-        sap.m.MessageToast.show("This customer can't be assigned");
+    if (this.data.Bookings[0].Status === "Cancelled" || this.data.Bookings[0].Status === "Assigned" || this.data.Bookings[0].Status === "Completed") {
+        sap.m.MessageToast.show("This customer can't be assign");
         return;
     }
 
