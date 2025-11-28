@@ -1504,13 +1504,24 @@ sap.ui.define([
             }
         },
 
-        onEditSaveProfile: async function () {
+         onEditSaveProfile: async function () {
             const oModel = this._oProfileDialog.getModel("profileData");
             const isEditMode = oModel.getProperty("/isEditMode");
 
             if (!isEditMode) {
                 oModel.setProperty("/isEditMode", true);
-                oModel.refresh(true);
+                // this._oProfileDialog.close();
+                sap.ui.core.BusyIndicator.show(0);
+                if (!this._oProfileEditDialog) {
+                    this._oProfileEditDialog = await sap.ui.core.Fragment.load({
+                        name: "sap.ui.com.project1.fragment.ManageProfileEdit",
+                        controller: this
+                    });
+                    this.getView().addDependent(this._oProfileEditDialog);
+                    this._oProfileEditDialog.setModel(oModel, "profileData");
+                }
+                sap.ui.core.BusyIndicator.hide();
+                this._oProfileEditDialog.open();
                 return;
             }
             const isMandatoryValid = (
@@ -1546,16 +1557,10 @@ sap.ui.define([
                 filters: { UserID: oModel.getProperty("/UserID") }
             };
 
-
-
             try {
                 sap.ui.core.BusyIndicator.show(0);
-
                 await this.ajaxUpdateWithJQuery("HM_Login", payload);
-
-                // update global user object
                 Object.assign(this._oLoggedInUser, payload.data);
-
                 sap.m.MessageToast.show("Profile Updated Successfully!");
 
             } catch (err) {
@@ -1564,7 +1569,8 @@ sap.ui.define([
             } finally {
                 sap.ui.core.BusyIndicator.hide();
                 oModel.setProperty("/isEditMode", false);
-                oModel.refresh(true);
+                this._oProfileEditDialog.close();
+                this._oProfileDialog.open();
             }
         },
 
@@ -1577,7 +1583,10 @@ sap.ui.define([
             sap.m.MessageToast.show("Profile picture edit not implemented yet.");
         },
 
-        onProfileDialogClose: function () {
+       onProfileDialogClose: function () {
+            if (this._oProfileEditDialog) {
+                this._oProfileEditDialog.close();
+            }
             if (this._oProfileDialog) {
                 this._oProfileDialog.close();
             }
@@ -3501,19 +3510,19 @@ sap.ui.define([
             if (oInput.getValue() === "") oInput.setValueState("None");
         },
 
-        onCountrySelectionChange: function (oEvent) {
+         onCountrySelectionChange: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
-            const oView = this.getView();
-            const oModel = oView.getModel("profileData");
+            const oModel =
+                this._oProfileEditDialog?.getModel("profileData") ||
+                this._oProfileDialog.getModel("profileData");
 
-            const oStateCB = oView.byId("id_state");
-            const oCityCB = oView.byId("id_city");
-            const oSTD = oView.byId("id_std");
+            const oStateCB = sap.ui.getCore().byId("id_state");
+            const oCityCB = sap.ui.getCore().byId("id_city");
+            const oSTD = sap.ui.getCore().byId("id_std");
 
             const oItem = oEvent.getSource().getSelectedItem();
             if (!oItem) return;
 
-            // Clear state + city
             oModel.setProperty("/State", "");
             oModel.setProperty("/City", "");
 
@@ -3527,7 +3536,6 @@ sap.ui.define([
 
             const sCountryName = oItem.getText();
             const sCountryCode = oItem.getAdditionalText();
-
             oModel.setProperty("/country", sCountryName);
 
             // Fetch country STD code
@@ -3544,11 +3552,13 @@ sap.ui.define([
 
         CC_onChangeState: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
-            const oView = this.getView();
-            const oModel = oView.getModel("profileData");
+            const oModel =
+                this._oProfileEditDialog?.getModel("profileData") ||
+                this._oProfileDialog?.getModel("profileData");
+
+            const oCityCB = sap.ui.getCore().byId("id_city");
+            const oCountryCB = sap.ui.getCore().byId("id_country");
             const oItem = oEvent.getSource().getSelectedItem();
-            const oCityCB = oView.byId("id_city");
-            const oCountryCB = oView.byId("id_country");
 
             // Reset
             oModel.setProperty("/City", "");
@@ -3573,51 +3583,5 @@ sap.ui.define([
                 new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
             ]);
         },
-        onValidateUser: async function () {
-
-            const isValid =
-                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("fpUserId"), "ID") &&
-                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("fpUserName"), "ID");
-
-            if (!isValid) {
-                sap.m.MessageToast.show("Please fill all mandatory fields.");
-                return;
-            }
-
-            const oIdCtrl = sap.ui.getCore().byId("fpUserId");
-            const oNameCtrl = sap.ui.getCore().byId("fpUserName");
-
-            const sUserId = oIdCtrl.getValue().trim();
-            const sUserName = oNameCtrl.getValue().trim();
-
-            const payload = {
-                UserID: sUserId,
-                UserName: sUserName,
-                Type: "OTP"
-            };
-
-            sap.ui.core.BusyIndicator.show(0);
-
-            try {
-                const oResp = await this.ajaxCreateWithJQuery("HostelSendOTP", payload);
-
-                if (oResp?.success) {
-                    sap.m.MessageToast.show("OTP sent! Check your email.");
-                    alert(oResp.OTP);
-
-                    this._oResetUser = { UserID: sUserId, UserName: sUserName };
-
-                    this.getView().getModel("LoginViewModel").setProperty("/forgotStep", 2);
-                } else {
-                    sap.m.MessageToast.show("No user found with given ID / Name");
-                }
-
-            } catch (err) {
-                sap.m.MessageToast.show("Invalid User ID / User Name");
-            } finally {
-                sap.ui.core.BusyIndicator.hide();
-            }
-        },
-
     });
 });

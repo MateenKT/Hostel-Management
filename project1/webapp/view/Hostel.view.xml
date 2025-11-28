@@ -27,7 +27,6 @@
                     text="SIGN IN / UP"
                     id="loginButton"
                     class=" sapUiSmallMarginTop loginButton"
-                    tooltip="{i18n>tooltipLogin}"
                     press="onpressLogin"  visible="{= !${UIModel>/isLoggedIn} }"
                 >
                     <layoutData>

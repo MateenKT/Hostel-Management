@@ -1543,7 +1543,7 @@ span.sapMBtnInner.sapMBtnEmphasized {
 
 .avatarEditIcon {
     position: absolute;
-    bottom: 10px;
+    bottom: 1px;
     right: 10px;
     background: white;
     border-radius: 50%;
@@ -1615,4 +1615,25 @@ span.sapMBtnInner.sapMBtnEmphasized {
   text-align: right;     /* Align text to the right */
   margin-right: 5px;     /* Matches rightAlignLabel spacing */
   font-size: 1.05rem;    /* Slightly larger to highlight totals */
+}
+/* Mobile view (phone) */
+@media only screen and (max-width: 768px) {
+
+    .responsiveProfileBox {
+        flex-direction: column !important;     /* Stack vertically */
+        align-items: center !important;        /* Center avatar block */
+    }
+
+    .responsiveProfileBox > .sapMFlexItem {
+        width: 100% !important;                /* Full width form */
+    }
+
+    .responsiveProfileBox .sapUiMediumMarginEnd {
+        margin-right: 0 !important;
+        margin-bottom: 1rem !important;        /* Space below avatar */
+    }
+
+    .responsiveProfileBox .sapUiForm {
+        width: 100% !important;
+    }
 }
