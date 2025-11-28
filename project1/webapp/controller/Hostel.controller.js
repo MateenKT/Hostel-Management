@@ -1870,11 +1870,11 @@ sap.ui.define([
             var oBookingData = oContext.getObject();
 
             // Status check (optional)
-            var sStatus = (oBookingData.status || "").trim().toLowerCase();
-            if (sStatus !== "new") {
-                sap.m.MessageToast.show("Only bookings with status 'New' can be edited.");
-                return;
-            }
+            // var sStatus = (oBookingData.status || "").trim().toLowerCase();
+            // if (sStatus !== "new") {
+            //     sap.m.MessageToast.show("Only bookings with status 'New' can be edited.");
+            //     return;
+            // }
 
             // Now reuse your logic exactly as in onEditBooking
             var oProfileModel = this._oProfileDialog.getModel("profileData");
@@ -3473,6 +3473,7 @@ sap.ui.define([
                     const oUserModel = new sap.ui.model.json.JSONModel(user);
                     sap.ui.getCore().setModel(oUserModel, "LoginModel");
                     this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", true);
+                    await this.onPressAvatar();
                 } else if (user.Role === "Admin" || user.Role === "Employee") {
                     this.getOwnerComponent().getRouter().navTo("TilePage");
                 } else {
