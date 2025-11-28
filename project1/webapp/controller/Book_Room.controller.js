@@ -2082,7 +2082,7 @@ if (Array.isArray(oResponse.data)) {
     // Set default values
     oPaymentModel.setProperty("/PaymentDate", this.Formatter.formatDate(new Date()));
     oPaymentModel.setProperty("/PaymentType", "UPI");
-    oPaymentModel.setProperty("/Amount", oHostelModel.getProperty("/OverallTotalCost")
+    oPaymentModel.setProperty("/Amount", oHostelModel.getProperty("/FinalTotalCost")
     );
 
     this._oPaymentDialog.open();
@@ -2098,7 +2098,7 @@ if (Array.isArray(oResponse.data)) {
 
     oPaymentModel.setProperty("/PaymentType", isUPI ? "UPI" : "CARD");
     oPaymentModel.setProperty("/PaymentDate", this.Formatter.formatDate(new Date()));
-    oPaymentModel.setProperty("/Amount", oHostelModel.getProperty("/OverallTotalCost"));
+    oPaymentModel.setProperty("/Amount", oHostelModel.getProperty("/FinalTotalCost"));
 },
 
     _togglePaymentSections: function(isUPI) {
@@ -2240,7 +2240,8 @@ if (Array.isArray(oResponse.data)) {
                      Status: "New",
                      PaymentType: oData.SelectedPriceType || "",
                      BedType: `${oData.BedType} - ${oData.ACType}`,
-                     BranchCode:oData.BranchCode
+                     BranchCode:oData.BranchCode,
+                     Currency:oData.Currency
                  });
              }
              const paymentDetails = {
