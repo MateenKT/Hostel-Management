@@ -55,6 +55,7 @@ sap.ui.define([
                 }
             });
         },
+
         _onRouteMatched: async function () {
             const oView = this.getView();
 
@@ -139,9 +140,13 @@ sap.ui.define([
                     new sap.ui.model.Filter("cityName", "EQ", "__NONE__")
                 ]);
             }
+            vm.setProperty("/canResendOTP", true);
+            vm.setProperty("/otpTimer", 0);
+            vm.setProperty("/otpButtonText", "Send OTP");
 
 
         },
+
 
         CustomerDetails: async function () {
             try {
@@ -739,7 +744,7 @@ sap.ui.define([
             // Reset dialog title
             vm.setProperty("/dialogTitle", "Hostel Access Portal");
 
-            this.getView().addStyleClass("blur-background");    
+            this.getView().addStyleClass("blur-background");
 
             this._oSignDialog.open();
         },
@@ -747,8 +752,11 @@ sap.ui.define([
 
 
 
+
         onDialogClose: function () {
             // The afterClose event will handle removing the blur class
+            this._resetOtpState();
+
             if (this._oSignDialog) this._oSignDialog.close();
             if (this._oSignDialog) {
                 this.getView().removeStyleClass("blur-background");
@@ -758,34 +766,78 @@ sap.ui.define([
 
 
 
+
         onSwitchToSignIn: function () {
+
             const vm = this.getView().getModel("LoginViewModel");
 
-            // Show / Hide panels
-            sap.ui.getCore().byId("signInPanel").setVisible(true);
-            sap.ui.getCore().byId("signUpPanel").setVisible(false);
-
-            // Reset Login mode to PASSWORD
+            // -------------------------
+            // FLOW RESET
+            // -------------------------
             vm.setProperty("/authFlow", "signin");
-            vm.setProperty("/isPasswordSelected", true);
-            vm.setProperty("/isOtpSelected", false);
-            vm.setProperty("/isOtpBoxVisible", false);
+            vm.setProperty("/loginMode", "password");
+            vm.setProperty("/forgotStep", 0);
+            vm.setProperty("/dialogTitle", "Hostel Access Portal");
 
-            // Reset Sign-In UI states
-            sap.ui.getCore().byId("signinPassword").setEnabled(true).setValue("");
-            sap.ui.getCore().byId("signInOTP").setEnabled(false).setValue("");
-            sap.ui.getCore().byId("btnSignInSendOTP").setVisible(false);
+            // -------------------------
+            // RESET OTP + TIMER
+            // -------------------------
+            this._resetOtpState();
 
-            // Clear Sign-In fields (NOT Sign-Up fields)
-            sap.ui.getCore().byId("signInuserid").setValue("");
-            sap.ui.getCore().byId("signInusername").setValue("");
+            // -------------------------
+            // RESET SIGN-IN FIELDS
+            // -------------------------
+            ["signInuserid", "signInusername", "signinPassword", "signInOTP"]
+                .forEach(id => {
+                    const c = sap.ui.getCore().byId(id);
+                    if (c) {
+                        c.setValue("");
+                        c.setValueState("None");
+                        c.setValueStateText("");
+                    }
+                });
 
-            // Restore dialog header title
+            sap.ui.getCore().byId("signinPassword")?.setEnabled(true);
+            sap.ui.getCore().byId("signInOTP")?.setEnabled(false);
+            sap.ui.getCore().byId("btnSignInSendOTP")?.setVisible(false);
+
+            // -------------------------
+            // RESET FORGOT FIELDS
+            // -------------------------
+            ["fpUserId", "fpUserName", "fpOTP", "newPass", "confPass"]
+                .forEach(id => {
+                    const c = sap.ui.getCore().byId(id);
+                    if (c) {
+                        c.setValue("");
+                        c.setValueState("None");
+                        c.setValueStateText("");
+                    }
+                });
+
+            // -------------------------
+            // 🚫 DISABLE FORGOT FORM
+            // -------------------------
+            ["fpUserId", "fpUserName", "fpOTP", "newPass", "confPass"]
+                .forEach(id => {
+                    const c = sap.ui.getCore().byId(id);
+                    if (c) c.setEnabled(false);
+                });
+
+            // -------------------------
+            // PANELS
+            // -------------------------
+            sap.ui.getCore().byId("signInPanel")?.setVisible(true);
+            sap.ui.getCore().byId("signUpPanel")?.setVisible(false);
+
+            // -------------------------
+            // HEADER
+            // -------------------------
             sap.ui.getCore().byId("authDialog")
-                .getCustomHeader()
-                .getContentMiddle()[0]
-                .setText("Hostel Access Portal");
+                ?.getCustomHeader()
+                ?.getContentMiddle()[0]
+                ?.setText("Hostel Access Portal");
         },
+
 
 
         onSwitchToSignUp: function () {
@@ -812,6 +864,7 @@ sap.ui.define([
                 const oMinDate = new Date(oToday.getFullYear() - 100, oToday.getMonth(), oToday.getDate());
                 oDOBpicker.setMinDate(oMinDate);
             }
+            this._resetOtpState();
         },
 
         onEmailliveChange: function (oEvent) {
@@ -832,6 +885,8 @@ sap.ui.define([
         SM_onChnageSetAndConfirm: function (oEvent) {
             utils._LCvalidatePassword(oEvent);
         },
+
+
 
 
         // onSignUp: async function () {
@@ -1018,6 +1073,7 @@ sap.ui.define([
 
         // },
 
+
         onSignUp: async function () {
 
             const C = sap.ui.getCore().byId.bind(sap.ui.getCore());
@@ -1068,12 +1124,12 @@ sap.ui.define([
 
                     Status: "Active",
                     TimeDate,
-                    DateOfBirth: data.DateOfBirth || "", 
+                    DateOfBirth: data.DateOfBirth || "",
                     Gender: C("signUpGender").getSelectedKey(),
 
                     Country: data.Country,
                     State: data.State,
-                    City: data.City,                      
+                    City: data.City,
                     Address: data.Address.trim()
                 }
             };
@@ -1172,6 +1228,7 @@ sap.ui.define([
             }
 
         },
+
         onChangeState: function (oEvent) {
 
             const oState = oEvent.getSource();
@@ -1767,7 +1824,7 @@ sap.ui.define([
                     aCustomers: aCustomerDetails
                 });
                 this._oProfileDialog.setModel(oProfileModel, "profileData");
-                 oProfileModel.setProperty("/isEditMode", false);
+                oProfileModel.setProperty("/isEditMode", false);
                 //  Open the dialog
                 this._oProfileDialog.open();
 
@@ -1805,14 +1862,14 @@ sap.ui.define([
                     aCustomers: []
                 });
                 this._oProfileDialog.setModel(oProfileModel, "profileData");
-                 oProfileModel.setProperty("/isEditMode", false);
+                oProfileModel.setProperty("/isEditMode", false);
                 this._oProfileDialog.open();
             } finally {
                 sap.ui.core.BusyIndicator.hide();
             }
         },
 
-         onEditSaveProfile: async function () {
+        onEditSaveProfile: async function () {
             const oModel = this._oProfileDialog.getModel("profileData");
             const isEditMode = oModel.getProperty("/isEditMode");
             if (!isEditMode) {
@@ -1931,7 +1988,7 @@ sap.ui.define([
         _onLogout: function () {
             this._oProfileActionSheet.close();
             // sap.m.MessageToast.show("Logging out...");
-             this._oLoggedInUser = {};
+            this._oLoggedInUser = {};
             if (this._oProfileDialog) {
                 this._oProfileDialog.destroy();
                 this._oProfileDialog = null;
@@ -2771,6 +2828,8 @@ sap.ui.define([
 
 
 
+
+
         _clearAllAuthFields: function () {
             const ids = [
                 "signInuserid", "signInusername", "signinPassword",
@@ -2786,9 +2845,8 @@ sap.ui.define([
             });
             this._storedLoginCreds = null;
             this._oResetUser = null;
+            this._resetOtpState();
         },
-
-
 
 
 
@@ -2852,12 +2910,7 @@ sap.ui.define([
             const oVM = this.getView().getModel("LoginViewModel");
             oVM.setProperty("/selectedAccountType", "personal");
             oVM.setProperty("/authFlow", "signin");
-
-
-
-
-
-
+            this._resetOtpState();
 
 
 
@@ -2886,7 +2939,6 @@ sap.ui.define([
                 }
             });
         },
-
 
 
 
@@ -2936,7 +2988,7 @@ sap.ui.define([
             // 🔥 PASSED ALL VALIDATIONS → SUCCESS STATE
             oConf.setValueState("None");
             // oConf.setValueStateText("Passwords matched");
-            sap.ui.core.BusyIndicator.show(0);  
+            sap.ui.core.BusyIndicator.show(0);
             try {
                 await this.ajaxUpdateWithJQuery("HM_Login", {
                     data: { Password: btoa(pass) },
@@ -2980,8 +3032,11 @@ sap.ui.define([
             }
             finally {
                 sap.ui.core.BusyIndicator.hide();  // ALWAYS stop
+                this._resetOtpState();
             }
         },
+
+
 
         _resetAllAuthFields: function () {
             ["signInuserid", "signInusername", "signinPassword",
@@ -3111,6 +3166,10 @@ sap.ui.define([
 
 
 
+
+
+
+
         onPressOTP: async function () {
             const oUserIdCtrl = sap.ui.getCore().byId("signInuserid");
             const oUserNameCtrl = sap.ui.getCore().byId("signInusername");
@@ -3134,7 +3193,6 @@ sap.ui.define([
             sap.ui.core.BusyIndicator.show(0);
 
             try {
-                // 🚀 Reuse BaseController POST
                 const oResp = await this.ajaxCreateWithJQuery("HostelSendOTP", payload);
 
                 if (oResp?.success) {
@@ -3142,23 +3200,22 @@ sap.ui.define([
                     sap.m.MessageToast.show("OTP sent! Check your email.");
                     alert(oResp.OTP);
 
-                    // Save login user for OTP verification
                     this._oResetUser = { UserID: sUserId, UserName: sUserName };
 
                     const vm = this.getView().getModel("LoginViewModel");
 
-                    // ❗ Show OTP input field only now
+                    // Show OTP input
                     vm.setProperty("/showOTPField", true);
 
-                    // Clean & enable OTP input
                     const oOtpCtrl = sap.ui.getCore().byId("signInOTP");
-
-
                     oOtpCtrl.setEnabled(true);
                     oOtpCtrl.setValue("");
-                    oOtpCtrl.setValueState("None");     // <--- IMPORTANT
-                    oOtpCtrl.setValueStateText("");     // <--- no error by default
+                    oOtpCtrl.setValueState("None");
+                    oOtpCtrl.setValueStateText("");
                     oOtpCtrl.focus();
+
+                    // 🔥 THIS WAS MISSING
+                    this._startOtpTimer();     // ✅ start 20 sec resend cooldown
 
                 }
                 else {
@@ -3172,8 +3229,6 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide();
             }
         },
-
-
 
 
         _onVerifyOTP: async function () {
@@ -3251,12 +3306,16 @@ sap.ui.define([
 
 
 
+
+
+
         onBackToLogin: function () {
 
             // Clean auth data & any internal flags
             this._clearAllAuthFields();
 
             // Reset only values (not visibility/enabled state)
+
             sap.ui.getCore().byId("fpUserId").setValue("");
             sap.ui.getCore().byId("fpUserName").setValue("");
             sap.ui.getCore().byId("fpOTP").setValue("");
@@ -3265,16 +3324,16 @@ sap.ui.define([
 
             // Update flow using ViewModel
             const vm = this.getView().getModel("LoginViewModel");
+            vm.setProperty("/loginMode", "password");
             vm.setProperty("/authFlow", "signin");
             vm.setProperty("/forgotStep", 1);
 
             vm.setProperty("/authFlow", "signin");
             vm.setProperty("/forgotStep", 1);
             vm.setProperty("/dialogTitle", "Hostel Access Portal");
-
+            this._resetOtpState();
 
         },
-
 
 
 
@@ -3823,7 +3882,7 @@ sap.ui.define([
 
         onCountrySelectionChange: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
-           const oModel = this._oProfileDialog.getModel("profileData");
+            const oModel = this._oProfileDialog.getModel("profileData");
 
             const oStateCB = sap.ui.getCore().byId("id_state");
             const oCityCB = sap.ui.getCore().byId("id_city");
@@ -3861,7 +3920,7 @@ sap.ui.define([
 
         CC_onChangeState: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
-           const oModel = this._oProfileDialog.getModel("profileData");
+            const oModel = this._oProfileDialog.getModel("profileData");
 
             const oCityCB = sap.ui.getCore().byId("id_city");
             const oCountryCB = sap.ui.getCore().byId("id_country");
@@ -3936,7 +3995,7 @@ sap.ui.define([
             }
         },
 
-          _applyCountryStateCityFilters: function () {
+        _applyCountryStateCityFilters: function () {
             const oModel = this._oProfileDialog.getModel("profileData");
             const oCountryCB = sap.ui.getCore().byId("id_country");
             const oStateCB = sap.ui.getCore().byId("id_state");
@@ -3979,5 +4038,66 @@ sap.ui.define([
             oStateCB.setValue(sState || "");
             oSourceCB.setValue(sSource || "");
         },
+
+
+        _startOtpTimer: function () {
+
+            const vm = this.getView().getModel("LoginViewModel");
+
+            this._clearOtpTimer();
+
+            const START = 20;
+
+            vm.setProperty("/canResendOTP", false);
+            vm.setProperty("/otpTimer", START);
+
+            // 🔥 UPDATE TEXT IMMEDIATELY (important)
+            vm.setProperty("/otpButtonText", `Resend OTP (${START}s)`);
+
+            this._otpInterval = setInterval(() => {
+
+                let remaining = vm.getProperty("/otpTimer");
+
+                remaining--;
+
+                if (remaining <= 0) {
+                    this._clearOtpTimer();
+                    vm.setProperty("/otpTimer", 0);
+                    vm.setProperty("/otpButtonText", "Resend OTP");
+                    vm.setProperty("/canResendOTP", true);
+                    return;
+                }
+
+                vm.setProperty("/otpTimer", remaining);
+                vm.setProperty("/otpButtonText", `Resend OTP (${remaining}s)`);
+
+            }, 1000);
+        },
+
+
+
+        _clearOtpTimer: function () {
+            if (this._otpInterval) {
+                clearInterval(this._otpInterval);
+                this._otpInterval = null;
+            }
+        },
+        _resetOtpState: function () {
+            const vm = this.getView().getModel("LoginViewModel");
+
+            this._clearOtpTimer();
+
+            vm.setProperty("/otpTimer", 0);
+            vm.setProperty("/canResendOTP", true);
+            vm.setProperty("/otpButtonText", "Send OTP");
+            vm.setProperty("/showOTPField", false);
+            vm.setProperty("/isOtpEntered", false);
+
+            const otpCtrl = sap.ui.getCore().byId("signInOTP");
+            otpCtrl?.setValue("");
+            otpCtrl?.setEnabled(false);
+            otpCtrl?.setValueState("None");
+        },
+
     });
 });
