@@ -169,17 +169,19 @@ sap.ui.define([
             oSourceCB.setValue(sSource || "");
         },
 
-        Facilitysearch: function (sBranchCode) {
-            // var data = this.getView().getModel("CustomerData").getData()
-            // var sBranchCode = data.BranchCode
-            this.ajaxReadWithJQuery("HM_Facilities", {
-                BranchCode: sBranchCode
-            }).then((oData) => {
-                var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
-                var model = new sap.ui.model.json.JSONModel(oFCIAerData);
-                this.getView().setModel(model, "Facilities")
-            })
-        },
+       Facilitysearch: async function (sBranchCode) {
+    const oData = await this.ajaxReadWithJQuery("HM_Facilities", {
+        BranchCode: sBranchCode
+    });
+
+    const aFacilities = Array.isArray(oData.data) ? oData.data : [oData.data];
+
+    const oModel = new sap.ui.model.json.JSONModel(aFacilities);
+    this.getView().setModel(oModel, "Facilities");
+
+    // very important: return data so main function waits
+    return aFacilities;
+},
 
         onNavBack: function () {
             const oLoginModel = this.getView().getModel("LoginModel");
@@ -364,7 +366,7 @@ sap.ui.define([
                 oCustomerData.Duration = Duration;
                 oCustomerData.DurationUnit = DurationUnit;
                 var sBranchCode = oCustomer.Bookings?.[0]?.BranchCode
-                 this.Facilitysearch(sBranchCode)
+                await this.Facilitysearch(sBranchCode)
 
 
                 const totals = this.calculateTotals(aPersons, oCustomerData.RentPrice,sBranchCode);
