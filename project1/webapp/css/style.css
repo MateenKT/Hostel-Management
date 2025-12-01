@@ -1813,6 +1813,10 @@ span.sapMBtnInner.sapMBtnEmphasized {
         align-self: center !important;
     }
 
+        #id_address {
+        width: 100% !important;
+    }
+
     .sapMFlexBox {
         flex-wrap: wrap !important;
     }

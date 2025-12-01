@@ -1764,6 +1764,7 @@ sap.ui.define([
                             bookingGroup: bookingGroup,
                             cutomerid: booking.CustomerID,
                             branchCode: booking.BranchCode,
+                            currency: booking.Currency || "INR",
                             noofperson: booking.NoOfPersons,
                             grandTotal: booking.RentPrice,
                             paymenytype: booking.PaymentType,

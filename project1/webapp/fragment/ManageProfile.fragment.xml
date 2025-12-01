@@ -35,7 +35,12 @@
                 </contentRight>
             </Bar>
         </customHeader>
-        <FlexBox direction="Row" class="myclass" justifyContent="Center" alignItems="Center">
+        <FlexBox
+            direction="Row"
+            class="myclass"
+            justifyContent="Center"
+            alignItems="Center"
+        >
             <VBox>
                 <m:Avatar
                     src="{path: 'profileData>/photo'}"
@@ -98,7 +103,8 @@
                                 visible="{= !${profileData>/isEditMode}}"
                             > -->
                         <m:Text
-                            text="{= ${profileData>/stdCode} + ' ' + ${profileData>/phone}}" class="sapUiSmallMarginBegin"
+                            text="{= ${profileData>/stdCode} + ' ' + ${profileData>/phone}}"
+                            class="sapUiSmallMarginBegin"
                         />
 
                         <m:Label text="Gender" />
@@ -113,7 +119,10 @@
                     visible="{profileData>/isEditMode}"
                 >
                     <f:content>
-                        <m:Label text="Full Name" required="{profileData>/isEditMode}"/>
+                        <m:Label
+                            text="Full Name"
+                            required="{profileData>/isEditMode}"
+                        />
                         <Select
                             selectedKey="{profileData>/Salutation}"
                             width="90px"
@@ -138,7 +147,10 @@
                             change="onChange"
                         />
 
-                        <m:Label text="Email" required="{profileData>/isEditMode}"/>
+                        <m:Label
+                            text="Email"
+                            required="{profileData>/isEditMode}"
+                        />
                         <m:Input
                             id="id_mail"
                             value="{profileData>/email}"
@@ -147,7 +159,10 @@
                             change="onChange"
                         />
 
-                        <m:Label text="Date of Birth" required="{profileData>/isEditMode}" />
+                        <m:Label
+                            text="Date of Birth"
+                            required="{profileData>/isEditMode}"
+                        />
                         <DatePicker
                             id="id_dob"
                             value="{profileData>/dob}"
@@ -157,7 +172,10 @@
                             change="onDateChange"
                         />
 
-                        <m:Label text="Country" required="{profileData>/isEditMode}" />
+                        <m:Label
+                            text="Country"
+                            required="{profileData>/isEditMode}"
+                        />
                         <ComboBox
                             id="id_country"
                             items="{path:'CountryModel>/',length:1000}"
@@ -174,7 +192,10 @@
                             />
                         </ComboBox>
 
-                        <m:Label text="State" required="{profileData>/isEditMode}"/>
+                        <m:Label
+                            text="State"
+                            required="{profileData>/isEditMode}"
+                        />
                         <ComboBox
                             id="id_state"
                             change="CC_onChangeState"
@@ -190,7 +211,10 @@
                             />
                         </ComboBox>
 
-                        <m:Label text="City" required="{profileData>/isEditMode}"/>
+                        <m:Label
+                            text="City"
+                            required="{profileData>/isEditMode}"
+                        />
                         <ComboBox
                             id="id_city"
                             change="onChange"
@@ -206,13 +230,16 @@
                             />
                         </ComboBox>
 
-                        <m:Label text="Mobile Number" required="{profileData>/isEditMode}" />
+                        <m:Label
+                            text="Mobile Number"
+                            required="{profileData>/isEditMode}"
+                        />
                         <!-- <HBox
                                 renderType="Bare"
                                 visible="{= !${profileData>/isEditMode}}"
                             > -->
                         <!-- <m:Text text="{profileData>/phone}" class="sapUiSmallMarginBegin"
-                                /> -->  
+                                /> -->
                         <!-- </HBox> -->
                         <!-- <HBox
                                 renderType="Bare"
@@ -229,7 +256,7 @@
                             id="id_phone"
                             value="{profileData>/phone}"
                             editable="true"
-                            class="sapUiSmallMarginBegin"
+                            class="sapUiTinyMarginBegin"
                             placeholder="Enter Contact Number"
                             maxLength="10"
                             liveChange="onChange"
@@ -237,7 +264,10 @@
                             type="Number"
                         />
 
-                        <m:Label text="Gender" required="{profileData>/isEditMode}"/>
+                        <m:Label
+                            text="Gender"
+                            required="{profileData>/isEditMode}"
+                        />
                         <ComboBox
                             id="id_gender"
                             selectedKey="{profileData>/gender}"
@@ -259,14 +289,22 @@
                         </ComboBox>
                     </f:content>
                 </f:SimpleForm>
-                <HBox class="sapUiSmallMarginBegin" alignContent="Center" alignItems="Center" width="60px">
-                    <m:Label text="Address" required="{profileData>/isEditMode}"/>
+                <HBox
+                    class="sapUiSmallMarginBegin"
+                    alignContent="Center"
+                    alignItems="Center"
+                    width="100%"
+                >
+                    <m:Label
+                        text="Address"
+                        required="{profileData>/isEditMode}"
+                    />
                     <TextArea
                         id="id_address"
                         class="sapUiTinyMarginBegin"
                         value="{profileData>/address}"
                         visible="{profileData>/isEditMode}"
-                        width="60px"
+                        width="100%"
                         rows="2"
                         cols="7"
                     />
@@ -280,7 +318,6 @@
         </FlexBox>
         <Table
             id="Id_ProfileaTable"
-          
             noDataText="No booking history found"
             items="{
                     path: 'profileData>/bookings',
@@ -335,9 +372,7 @@
                         />
                         <Text text="{profileData>Startdate}" />
                         <Text text="{profileData>room}" />
-                        <Text
-                            text="{path:'profileData>amount', formatter: '.Formatter.formatCurrency'}"
-                        />
+                        <Text text="{ parts: [ 'profileData>amount', 'profileData>currency' ], formatter: '.Formatter.formatCurrency' }" />
                         <Text text="{profileData>status}" />
                     </cells>
                 </ColumnListItem>
