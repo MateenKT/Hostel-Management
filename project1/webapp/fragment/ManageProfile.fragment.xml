@@ -28,7 +28,7 @@
                         class="myUnifiedBtn"
                         press="onEditSaveProfile"
                     />
-                    <Button
+                    <m:Button
                         icon="sap-icon://decline"
                         type="Transparent"
                         press="onProfileDialogClose"
@@ -36,7 +36,7 @@
                 </contentRight>
             </Bar>
         </customHeader>
-        <FlexBox direction="Row" class="myclass" justifyContent="Center" alignItems="Center"
+        <FlexBox direction="Row" class="myclass" justifyContent="Center" alignItems="Center">
             <VBox>
                 <m:Avatar
                     src="{path: 'profileData>/photo'}"
@@ -68,51 +68,53 @@
                 <f:SimpleForm
                     layout="ColumnLayout"
                     columnsM="3"
+                    class="sapUiTinyMarginTop"
                     columnsL="4"
                     visible="{= !${profileData>/isEditMode}}"
                 >
                     <f:content>
-                        <m:Label text="Full Name:" />
+                        <m:Label text="Full Name" />
                         <m:Text
                             text="{= ${profileData>/Salutation} + ' ' + ${profileData>/name}}"
                         />
 
-                        <m:Label text="Email:" />
+                        <m:Label text="Email" />
                         <Text text="{profileData>/email}" />
 
-                        <m:Label text="Date of Birth:" />
+                        <m:Label text="Date of Birth" />
                         <Text text="{profileData>/dob}" />
 
-                        <m:Label text="Country:" />
+                        <m:Label text="Country" />
                         <Text text="{profileData>/country}" />
 
-                        <m:Label text="State:" />
+                        <m:Label text="State" />
                         <Text text="{profileData>/state}" />
 
-                        <m:Label text="City:" />
+                        <m:Label text="City" />
                         <Text text="{profileData>/city}" />
 
-                        <m:Label text="Mobile Number:" />
+                        <m:Label text="Mobile Number" />
                         <!-- <HBox
                                 renderType="Bare"
                                 visible="{= !${profileData>/isEditMode}}"
                             > -->
                         <m:Text
-                            text="{= ${profileData>/stdCode} + ' ' + ${profileData>/phone}}"
+                            text="{= ${profileData>/stdCode} + ' ' + ${profileData>/phone}}" class="sapUiSmallMarginBegin"
                         />
 
-                        <m:Label text="Gender:" />
+                        <m:Label text="Gender" />
                         <Text text="{profileData>/gender}" />
                     </f:content>
                 </f:SimpleForm>
                 <f:SimpleForm
                     layout="ColumnLayout"
                     columnsM="3"
+                    class="sapUiTinyMarginTop"
                     columnsL="4"
                     visible="{profileData>/isEditMode}"
                 >
                     <f:content>
-                        <m:Label text="Full Name:" />
+                        <m:Label text="Full Name" required="{profileData>/isEditMode}"/>
                         <Select
                             selectedKey="{profileData>/Salutation}"
                             width="90px"
@@ -137,7 +139,7 @@
                             change="onChange"
                         />
 
-                        <m:Label text="Email:" />
+                        <m:Label text="Email" required="{profileData>/isEditMode}"/>
                         <m:Input
                             id="id_mail"
                             value="{profileData>/email}"
@@ -146,7 +148,7 @@
                             change="onChange"
                         />
 
-                        <m:Label text="Date of Birth:" />
+                        <m:Label text="Date of Birth" required="{profileData>/isEditMode}" />
                         <DatePicker
                             id="id_dob"
                             value="{profileData>/dob}"
@@ -156,7 +158,7 @@
                             change="onDateChange"
                         />
 
-                        <m:Label text="Country:" />
+                        <m:Label text="Country" required="{profileData>/isEditMode}" />
                         <ComboBox
                             id="id_country"
                             items="{path:'CountryModel>/',length:1000}"
@@ -173,7 +175,7 @@
                             />
                         </ComboBox>
 
-                        <m:Label text="State:" />
+                        <m:Label text="State" required="{profileData>/isEditMode}"/>
                         <ComboBox
                             id="id_state"
                             change="CC_onChangeState"
@@ -189,7 +191,7 @@
                             />
                         </ComboBox>
 
-                        <m:Label text="City:" />
+                        <m:Label text="City" required="{profileData>/isEditMode}"/>
                         <ComboBox
                             id="id_city"
                             change="onChange"
@@ -205,13 +207,13 @@
                             />
                         </ComboBox>
 
-                        <m:Label text="Mobile Number:" />
+                        <m:Label text="Mobile Number" required="{profileData>/isEditMode}" />
                         <!-- <HBox
                                 renderType="Bare"
                                 visible="{= !${profileData>/isEditMode}}"
                             > -->
                         <!-- <m:Text text="{profileData>/phone}" class="sapUiSmallMarginBegin"
-                                /> -->
+                                /> -->  
                         <!-- </HBox> -->
                         <!-- <HBox
                                 renderType="Bare"
@@ -228,6 +230,7 @@
                             id="id_phone"
                             value="{profileData>/phone}"
                             editable="true"
+                            class="sapUiSmallMarginBegin"
                             placeholder="Enter Contact Number"
                             maxLength="10"
                             liveChange="onChange"
@@ -235,7 +238,7 @@
                             type="Number"
                         />
 
-                        <m:Label text="Gender:" />
+                        <m:Label text="Gender" required="{profileData>/isEditMode}"/>
                         <ComboBox
                             id="id_gender"
                             selectedKey="{profileData>/gender}"
@@ -257,16 +260,16 @@
                         </ComboBox>
                     </f:content>
                 </f:SimpleForm>
-                <HBox class="sapUiSmallMarginBegin" alignContent="Center" alignItems="Center">
-                    <m:Label text="Address:" />
+                <HBox class="sapUiSmallMarginBegin" alignContent="Center" alignItems="Center" width="60px">
+                    <m:Label text="Address" required="{profileData>/isEditMode}"/>
                     <TextArea
                         id="id_address"
                         class="sapUiTinyMarginBegin"
                         value="{profileData>/address}"
                         visible="{profileData>/isEditMode}"
-                        width="auto"
+                        width="60px"
                         rows="2"
-                        cols="5"
+                        cols="7"
                     />
                 </HBox>
                 <Text

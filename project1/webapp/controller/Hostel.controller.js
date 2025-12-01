@@ -1767,7 +1767,8 @@ sap.ui.define([
                             noofperson: booking.NoOfPersons,
                             grandTotal: booking.RentPrice,
                             paymenytype: booking.PaymentType,
-                            RoomPrice: booking.RoomPrice
+                            RoomPrice: booking.RoomPrice,
+                             BookingID:booking.BookingID
                         };
                     });
                 }
@@ -1988,7 +1989,7 @@ sap.ui.define([
         _onLogout: function () {
             this._oProfileActionSheet.close();
             // sap.m.MessageToast.show("Logging out...");
-            this._oLoggedInUser = {};
+            this._oLoggedInUser = null;
             if (this._oProfileDialog) {
                 this._oProfileDialog.destroy();
                 this._oProfileDialog = null;
@@ -3384,7 +3385,7 @@ sap.ui.define([
                 });
                 this.getView().addDependent(this._oAvatarActionSheet);
             }
-            this._oAvatarActionSheet.openBy(sap.ui.getCore().byId("avatarEditBtn"));
+            this._oAvatarActionSheet.openBy(sap.ui.getCore().byId("id_avatarEditBtn"));
         },
 
         _StartCamera: function () {

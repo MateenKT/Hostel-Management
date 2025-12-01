@@ -1778,3 +1778,25 @@ span.sapMBtnInner.sapMBtnEmphasized {
         align-self: center;
     }
 }
+
+/* Remove scroll bar inside ActionSheet */
+.sapMActionSheet .sapMActionSheetScroll {
+    overflow: hidden !important;
+    padding: 0 !important;
+}
+
+/* Add padding around ActionSheet container */
+.sapMActionSheetPopover .sapMPopoverCont {
+    padding: 6px 8px !important;
+}
+
+/* Add spacing between ActionSheet buttons */
+.sapMActionSheet button {
+    margin: 4px 0 !important;
+}
+
+/* Ensure full width nice-look buttons */
+.sapMActionSheet button .sapMBtnInner {
+    width: 100% !important;
+    border-radius: 6px !important;
+}
