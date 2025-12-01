@@ -693,10 +693,11 @@ sap.ui.define([
             let oEnd = sEndDate ? new Date(sEndDate) : null;
             let iDays = 0;
 
+
             if (sUnit === "Per Month" || sUnit === "monthly") {
                 oEnd = new Date(oStart);
                 oEnd.setMonth(oEnd.getMonth() + iCount);
-                iDays = iCount * 31;
+                iDays = iCount * 30;
             } else if (sUnit === "Per Year" || sUnit === "yearly") {
                 oEnd = new Date(oStart);
                 oEnd.setFullYear(oEnd.getFullYear() + iCount);
@@ -705,7 +706,7 @@ sap.ui.define([
                 if (!oEnd) {
                     iDays = 1;
                 } else if (oStart <= oEnd) {
-                    iDays = Math.ceil((oEnd - oStart) / (1000 * 60 * 60 * 24)) + 1;
+                    iDays = Math.ceil((oEnd - oStart) / (1000 * 60 * 60 * 24)) ;
                 } else {
                     oEnd = null;
                     iDays = 0;
@@ -744,8 +745,8 @@ sap.ui.define([
             let iDays = 0;
 
             if (sUnit === "Per Month") {
-                oEnd.setDate(oEnd.getDate() + iCount * 31);
-                iDays = iCount * 31; // Add Months as 31 days
+                oEnd.setDate(oEnd.getDate() + iCount * 30);
+                iDays = iCount * 30; // Add Months as 30 days
             } else if (sUnit === "Per Year") {
                 oEnd.setDate(oEnd.getDate() + iCount * 365);
                 iDays = iCount * 365; // Add Years as 365 days
@@ -994,7 +995,7 @@ sap.ui.define([
 
                 // Calculate day difference
                 var diffTime = oEnd - oStart;
-                var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1 || 1;
+                var diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))  || 1;
 
                 oCustomerModel.setProperty("/RentPrice", diffDays * originalRent);
                 oCustomerModel.setProperty("/Duration", diffDays);
@@ -1102,7 +1103,7 @@ sap.ui.define([
             let oEnd = new Date(oStart);
 
             if (sUnit === "monthly" || sUnit === "Per Month") {
-                oEnd.setDate(oEnd.getDate() + iCount * 31);
+                oEnd.setDate(oEnd.getDate() + iCount * 30);
                 oCustomerData.setProperty("/RentPrice", iCount * originalRent); // use originalRent
             } else if (sUnit === "yearly" || sUnit === "Per Year") {
                 oEnd.setDate(oEnd.getDate() + iCount * 365);
@@ -1403,7 +1404,7 @@ sap.ui.define([
                         var dStart = new Date(sStart);
                         var dEnd = new Date(sEnd);
                         // +1 to include start and end day
-                        iDuration = Math.ceil((dEnd - dStart) / (1000 * 60 * 60 * 24)) + 1;
+                        iDuration = Math.ceil((dEnd - dStart) / (1000 * 60 * 60 * 24)) ;
                     }
                 } else if (sUnit === "monthly" || sUnit === "Per Month") {
                     fPrice = parseFloat(oSelectedBed.MonthPrice || 0);
