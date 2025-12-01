@@ -210,7 +210,6 @@ sap.ui.define([
                 };
                 const response = await this.ajaxReadWithJQuery("HM_Customer", filter);
                 const oCustomer = response?.Customers || response?.value?.[0] || {};
-                sap.ui.core.BusyIndicator.hide();
 
 
                 const oCustomerData = {
