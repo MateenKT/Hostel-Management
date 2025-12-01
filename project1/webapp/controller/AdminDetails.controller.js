@@ -55,6 +55,59 @@ sap.ui.define([
             await this.Facilitysearch()
 
         },
+        onChekout:function(){
+              var data= this.getView().getModel("CustomerData").getData()
+         
+                     if (!this.CK_Dialog) {
+                var oView = this.getView();
+                this.CK_Dialog = sap.ui.xmlfragment("sap.ui.com.project1.fragment.Checkout", this);
+                oView.addDependent(this.CK_Dialog);
+            }
+            sap.ui.getCore().byId("Ck_id_editStartDate").setValue(data.StartDate)
+            sap.ui.getCore().byId("Ck_id_editEndDate").setValue(data.EndDate)
+
+            this.CK_Dialog.open();
+        },
+        Ck_onCancelButtonPress:function(){
+            this.CK_Dialog.close();
+
+        },
+      Ck_onsavebuttonpress: function () {
+
+    // Get edited data from Bookingmodel
+    var oBookingData = this.getView().getModel("Bookingmodel").getData();
+
+    // Update CustomerData model with edited dates
+    var oCustomerModel = this.getView().getModel("CustomerData").getData();
+
+
+    // Refresh model to update UI bindings
+
+       var Payload = {
+                "Booking": [{
+                    "StartDate": oBookingData.StartDate.split('/').reverse().join('-'),
+                    "EndDate": oBookingData.EndDate.split('/').reverse().join('-'),
+                    "Status": "Completed"
+                }]
+            };
+
+            // Send payload
+            this.ajaxUpdateWithJQuery("HM_Customer", {
+                data: [Payload],
+                filters: {
+                    CustomerID: oCustomerModel.CustomerID
+                }
+            })
+                .then(() => {
+                    sap.m.MessageToast.show("Customer Completed successfully!")});
+
+                    // Refresh models
+                    this.AD_onSearch();
+
+    // Close dialog
+    this.CK_Dialog.close();
+},
+
         applyCountryStateCityFilters: async function () {
             const oModel = this.getView().getModel("CustomerData");
             const oCountryCB = this.byId("CC_id_Country");
