@@ -607,101 +607,45 @@ sap.ui.define([], function() {
             oField.setValueState("None");
             return true;
         },
-        // _LCvalidateInternationalMobileNumberWithSTD: function (oEventOrControl, sStdCode) {
-        //     var oField = (typeof oEventOrControl.getSource === "function")
-        //         ? oEventOrControl.getSource() : oEventOrControl;
+        _LCvalidateISDmobile: function (oEventOrControl, sStdCode) {
 
-        //     if (!oField) return false;
+            var oField =
+                (typeof oEventOrControl.getSource === "function")
+                    ? oEventOrControl.getSource()
+                    : oEventOrControl;
 
-        //     // Set dynamic max length
-        //     if (sStdCode === "+91") {
-        //         oField.setMaxLength(10);
-        //     } else {
-        //         oField.setMaxLength(18);
-        //     }
+            var oValue = oField.getValue().replace(/\D/g, "");
+            oField.setValue(oValue);
 
-        //     // Clean non-numeric chars
-        //     var oValue = oField.getValue().replace(/[^0-9]/g, "");
-        //     oField.setValue(oValue);
+            var isValid = true;
 
-        //     // 🔥 FIX: Do not validate empty value
-        //     if (!oValue) {
-        //         oField.setValueState("None");
-        //         oField.setValueStateText("");
-        //         return false;
-        //     }
+            if (sStdCode === "+91") {
 
-        //     // 🇮🇳 Indian format validation
-        //     if (sStdCode === "+91") {
-        //         var indianRegex = /^[1-9][0-9]{9}$/;
-        //         if (!indianRegex.test(oValue)) {
-        //             oField.setValueState("Error");
-        //             oField.setValueStateText("Enter 10-digit valid mobile number");
-        //             return false;
-        //         }
-        //         oField.setValueState("None");
-        //         return true;
-        //     }
+                // 🇮🇳 India = exactly 10 digits
+                var regexIndia = /^[1-9]\d{9}$/;
+                if (!regexIndia.test(oValue)) {
+                    isValid = false;
+                }
 
-        //     // 🌍 International validation
-        //     var intlRegex = /^[0-9]{4,18}$/;
-        //     if (!intlRegex.test(oValue)) {
-        //         oField.setValueState("Error");
-        //         oField.setValueStateText("Enter valid mobile number");
-        //         return false;
-        //     }
-
-        //     oField.setValueState("None");
-        //     return true;
-        // },
-
-        _LCvalidateInternationalMobileNumberWithSTD: function (oEvent, sSTD) {
-            const oInput = oEvent.getSource();
-
-            // Dynamic max length based on ISD
-            if (sSTD === "+91") {
-                oInput.setMaxLength(10);
             } else {
-                oInput.setMaxLength(18);
-            }
 
-            const sValue = oInput.getValue().replace(/\D/g, "");
-
-            // Don't validate empty value
-            if (!sValue) {
-                oInput.setValueState("None");
-                return;
-            }
-
-            let bValid = true;
-            let sError = "";
-
-            // India (+91)
-            if (sSTD === "+91") {
-                if (sValue.length !== 10) {
-                    bValid = false;
-                    sError = "Mobile number must be 10 digits";
-                } else if (sValue.startsWith("0")) {
-                    bValid = false;
-                    sError = "Mobile number must not start with 0.";
+                // 🌍 International = 4–18 digits
+                var intlRegex = /^\d{4,18}$/;
+                if (!intlRegex.test(oValue)) {
+                    isValid = false;
                 }
             }
 
-            // Other countries
-            else {
-                if (sValue.length < 4 || sValue.length > 18) {
-                    bValid = false;
-                    sError = "Mobile number must be 4–18 digits.";
-                }
+            if (!isValid) {
+                oField.setValueState("Error");
+                oField.setValueStateText("Enter valid mobile number");
+            } else {
+                oField.setValueState("None");
             }
 
-            if (!bValid) {
-                oInput.setValueState("Error");
-                oInput.setValueStateText(sError);
-            } else {
-                oInput.setValueState("None");
-            }
+            return isValid;
         },
+
 
 
     };

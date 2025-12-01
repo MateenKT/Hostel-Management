@@ -400,7 +400,7 @@
   color: #333333 !important;
   font-family: "Franklin Gothic Medium", "Arial Narrow", Arial, sans-serif;
 }
-.switch-toggle-container {
+ .switch-toggle-container {
   background: #fff;
   border-radius: 32px;
   box-shadow: 0 4px 12px 0 rgba(60, 70, 90, 0.08);
@@ -432,7 +432,47 @@
 .switch-toggle-btn.inactive {
   background: transparent;
   color: #333 !important;
+} 
+
+
+
+.switch-toggle-container {
+  background: #fff;
+  border-radius: 32px;
+  box-shadow: 0 4px 12px rgba(60, 70, 90, 0.08);
+  padding: 4px;
+  width: 420px;
+  display: flex;
+  justify-content: left;   /* center children */
+  align-items: stretch;
+  gap: 4px;                  /* replace margin on buttons */
+  margin: 0 auto 18px auto;
 }
+
+.switch-toggle-btn {
+  flex: 1;                   /* make both buttons equal width */
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.2rem;  
+  border-radius: 32px !important;
+  transition: background 0.2s, color 0.2s;
+  padding: 0.8rem 0;         /* even padding */
+  min-width: 0;             /* remove size fighting */
+  border: none;
+}
+.switch-toggle-btn {
+  margin: 0;
+}
+.switch-toggle-btn.active {
+  background: linear-gradient(90deg, #2596ff 0%, #1669e6 100%);
+  color: #fff !important;
+}
+
+.switch-toggle-btn.inactive {
+  background: transparent;
+  color: #333 !important;
+}
+
 
 .customSearchBar.sapMInput {
   /* background: #1bb2bf  !important;           
@@ -1222,43 +1262,60 @@
 .sapUiCompFilterBar .sapMLabel {
     color: #ffffff !important;
 }
-/* .authDialog .sapMBtnInner {
+
+
+
+
+/* 
+ .authDialog .sapMBtnInner {
     background: linear-gradient(135deg, #00b7c7, #007984) !important;
-} */
-/* .authDialog button,
+} 
+ .authDialog button,
 .authDialog .sapMBtnInner,
 .authDialog .sapMBtnIcon {
     color: #fff !important;
-} */
-/* AUTH DIALOG - NORMAL STATE */
-/* .authDialog .sapMBtnInner {
+} 
+ .authDialog .sapMBtnInner {
   background-color: #1bb2bf !important;
     color: #ffffff !important;
-    border: 2px solid #0074d9 !important;  /* blue border */
-    /* border-radius: 10px !important;
+    border: 2px solid #007984 !important;  
+    border-radius: 10px !important;
+    font-size: medium;
     font-weight: bold;
-} */
-/* AUTH DIALOG - HOVER */
-/* .authDialog .sapMBtn:hover .sapMBtnInner,
+    padding:  0.2rem 0 0 0;
+    width: 100px;
+    height: 35px;
+} 
+ .authDialog .sapMBtn:hover .sapMBtnInner,
 .authDialog .sapMBtn.sapMBtnHover .sapMBtnInner {
     background: #ffffff !important;
-    color: #005bbf !important;      /* BLUE text */
-    /* border-color: #005bbf !important;
+    color: #005bbf !important;      
+     border-color: #005bbf !important;
 }
-/* AUTH DIALOG - ACTIVE */
-/* .authDialog .sapMBtn.sapMBtnActive .sapMBtnInner {
-    background: #e6f0ff !important; /* light blue */
-    /* color: #005bbf !important; */
-    /* border-color: #005bbf !important;
+ .authDialog .sapMBtn.sapMBtnActive .sapMBtnInner {
+    background: #e6f0ff !important; 
+    color: #005bbf !important;
+     border-color: #005bbf !important;
 }
 .authDialog .sapUiIcon {
-  background-color: #1bb2bf !important;
+  background-color: #007984 !important;
     color: #ffffff !important;
 }
 .authDialog .sapUiIcon :hover{
   background-color: #ffffff !important;
-    color: #1781cd !important;
-} */
+    color: #005bbf !important;
+}  */
+
+
+
+
+
+
+
+
+
+
+
 span.sapMBtnInner.sapMBtnEmphasized {
     background-color: #00ACC1 !important; /* light teal */
     color: #FFFFFF !important;
@@ -1545,6 +1602,16 @@ span.sapMBtnInner.sapMBtnEmphasized {
 
     transform: scale(1.1);
 }
+/* Space between siblings */
+.myUnifiedBtn {
+    margin-right: 0.5rem !important; ;
+}
+
+/* Remove trailing gap on last button */
+.myUnifiedBtn:last-child {
+    margin-right: 0 !important  ;
+}         
+
 
 .customBoldTitle {
     font-weight: bold;
