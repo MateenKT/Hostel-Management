@@ -50,11 +50,19 @@ sap.ui.define([
             var sPath = oEvent.getParameter("arguments").sPath;
             this.decodedPath = decodeURIComponent(decodeURIComponent(sPath));
 
+             await this.OnRoom();
 
-            await this.AD_onSearch()
-            await this.Facilitysearch()
+             this.AD_onSearch()
 
         },
+        OnRoom:function(){
+               this.ajaxReadWithJQuery("HM_Rooms", "").then((oData) => {
+                    var aRooms = Array.isArray(oData.commentData) ? oData.commentData : [oData.commentData];
+                    var model = new sap.ui.model.json.JSONModel(aRooms);
+                    this.getView().setModel(model, "Availablebeds")
+                  
+                });
+        },  
         onChekout:function(){
               var data= this.getView().getModel("CustomerData").getData()
          
@@ -147,9 +155,9 @@ sap.ui.define([
             oSourceCB.setValue(sSource || "");
         },
 
-        Facilitysearch: function () {
-            var data = this.getView().getModel("CustomerData").getData()
-            var sBranchCode = data.BranchCode
+        Facilitysearch: function (sBranchCode) {
+            // var data = this.getView().getModel("CustomerData").getData()
+            // var sBranchCode = data.BranchCode
             this.ajaxReadWithJQuery("HM_Facilities", {
                 BranchCode: sBranchCode
             }).then((oData) => {
@@ -186,6 +194,8 @@ sap.ui.define([
                 };
                 const response = await this.ajaxReadWithJQuery("HM_Customer", filter);
                 const oCustomer = response?.Customers || response?.value?.[0] || {};
+                sap.ui.core.BusyIndicator.hide();
+
 
                 const oCustomerData = {
                     CustomerName: oCustomer.CustomerName,
@@ -210,6 +220,7 @@ sap.ui.define([
                     Status: oCustomer.Bookings?.[0]?.Status || "",
                     Person: oCustomer.Bookings?.[0]?.NoOfPersons || "",
                     RoomNo: oCustomer.Bookings?.[0]?.RoomNo || "",
+                    Currency: oCustomer.Bookings?.[0]?.Currency || "",
 
                     StartDate: this.Formatter.DateFormat(oCustomer.Bookings?.[0]?.StartDate || ""),
                     EndDate: this.Formatter.DateFormat(oCustomer.Bookings?.[0]?.EndDate || ""),
@@ -240,27 +251,45 @@ sap.ui.define([
                 var BedType = oCustomer.Bookings?.[0]?.BedType
                 var PaymentType = oCustomer.Bookings?.[0]?.PaymentType
 
+                //  var Country=this.getView().getModel("sBRModel").getData().find((item)=>{
+                //      return item.BranchCode===sBranchCode
+                //  })
 
-                await this.ajaxReadWithJQuery("HM_Rooms", "").then((oData) => {
-                    var aRooms = Array.isArray(oData.commentData) ? oData.commentData : [oData.commentData];
+                //   var oModel = new sap.ui.model.json.JSONModel(Country);
 
-                    var aFilteredRooms = aRooms.filter(function (room) {
+                //     this.getView().setModel(oModel, "Country");
+
+                // await this.ajaxReadWithJQuery("HM_Rooms", "").then((oData) => {
+                //     var aRooms = Array.isArray(oData.commentData) ? oData.commentData : [oData.commentData];
+
+                //     var aFilteredRooms = aRooms.filter(function (room) {
+                //         return room.BranchCode === sBranchCode;
+                //     });
+
+
+                //     // set only filtered data to the model
+                //     var model = new sap.ui.model.json.JSONModel(aFilteredRooms);
+                //     this.getView().setModel(model, "Availablebeds");
+
+                //     var RoomBedprice = aFilteredRooms.filter(function (item) {
+                //         return item.BedTypeName === BedType
+                //     });
+
+               
+
+                // })
+                var aFilteredRooms=this.getView().getModel("Availablebeds").getData().filter(function (room) {
                         return room.BranchCode === sBranchCode;
                     });
+                    this.getView().getModel("Availablebeds").setData(aFilteredRooms)
 
-
-                    // set only filtered data to the model
-                    var model = new sap.ui.model.json.JSONModel(aFilteredRooms);
-                    this.getView().setModel(model, "Availablebeds");
-
-                    var RoomBedprice = aFilteredRooms.filter(function (item) {
+                       var RoomBedprice=this.getView().getModel("Availablebeds").getData().filter(function (item) {
                         return item.BedTypeName === BedType
                     });
+                     var oModel = new sap.ui.model.json.JSONModel(RoomBedprice);
 
-                    var oModel = new sap.ui.model.json.JSONModel(RoomBedprice);
                     this.getView().setModel(oModel, "Availablebedprice");
-
-                })
+                
                 var Availablebedprice = this.getView().getModel("Availablebedprice").getData()
 
                 let roomRentPrice = 0;
@@ -298,7 +327,7 @@ sap.ui.define([
                     const diffMs = end - start;
 
                     if (paymentType === "per day") {
-                        Duration = Math.ceil(diffMs / (1000 * 60 * 60 * 24)) + 1;
+                        Duration = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
                         DurationUnit = "days";
 
 
@@ -320,8 +349,11 @@ sap.ui.define([
                 // Add duration to model
                 oCustomerData.Duration = Duration;
                 oCustomerData.DurationUnit = DurationUnit;
+                var sBranchCode = oCustomer.Bookings?.[0]?.BranchCode
+                await  this.Facilitysearch(sBranchCode)
 
-                const totals = this.calculateTotals(aPersons, oCustomerData.RentPrice);
+
+                const totals = this.calculateTotals(aPersons, oCustomerData.RentPrice,sBranchCode);
 
 
                 if (totals) {
@@ -344,7 +376,8 @@ sap.ui.define([
             }
         },
 
-        calculateTotals: function (aPersons, roomRentPrice) {
+        calculateTotals: function (aPersons, roomRentPrice, sBranchCode) {
+            var Facilitiesdata=this.getView().getModel("Facilities").getData()
 
             let totalFacilityPricePerDay = 0;
             let otherFacilitiesTotal = 0;
@@ -356,7 +389,22 @@ sap.ui.define([
 
                 aFacilities.forEach((f) => {
 
+                   var FacilityBasicprice=  Facilitiesdata.find((item)=>{
+                         return item.FacilityName===f.FacilityName  && item.BranchCode===sBranchCode
+                     }
+                    )
+                    if(f.UnitText==="Per Day"){
+                        FacilityBasicprice=FacilityBasicprice.PerDayPrice
+                    }else if(f.UnitText==="Per Month"){
+                        FacilityBasicprice=FacilityBasicprice.PerMonthPrice
+                    }else if(f.UnitText==="Per Year"){
+                        FacilityBasicprice=FacilityBasicprice.PerYearPrice
+                    }else if(f.UnitText==="Per Hour"){
+                        FacilityBasicprice=FacilityBasicprice.PerHourPrice
+                    }
+                      
                     const fPrice = parseFloat(f.FacilitiPrice || 0);
+                    
                     const unit = f.UnitText;
 
                     let fTotal = 0;
@@ -376,7 +424,7 @@ sap.ui.define([
                     // Calculate Days
                     // -------------------------------
                     const dayDiff = facEnd - facStart;
-                    const days = Math.ceil(dayDiff / (1000 * 3600 * 24)) + 1;
+                    const days = Math.ceil(dayDiff / (1000 * 3600 * 24));
 
                     if (days <= 0) {
                         console.warn("Invalid facility date range:", f);
@@ -429,7 +477,7 @@ sap.ui.define([
                         FacilityName: f.FacilityName,
                         FacilityID: f.FacilityID,
                         UnitText: unit,
-                        Price: fPrice,
+                        Price: FacilityBasicprice,
                         StartDate: this.Formatter.DateFormat(f.StartDate),
                         EndDate: this.Formatter.DateFormat(f.EndDate),
                         TotalDays: days,
@@ -440,7 +488,7 @@ sap.ui.define([
                         Image: f.Image,
                         Currency: f.Currency,
                         EndTime: f.EndTime,
-                        StartTime: f.StartTime
+                        StartTime: f.StartTime,
                     });
 
                 });
@@ -833,6 +881,7 @@ sap.ui.define([
 
         onEditBooking: function () {
             this.applyCountryStateCityFilters()
+
             this.getView().getModel("VisibleModel").setProperty("/visible", true)
             var data = this.getView().getModel("CustomerData").getData()
             var model = this.getView().getModel("Bookingmodel")
@@ -881,20 +930,7 @@ sap.ui.define([
                 this.byId("idMonthYearSelect").setVisible(true)
 
             }
-            var sBranchCode = data.BranchCode
 
-            this.ajaxReadWithJQuery("HM_Rooms", "").then((oData) => {
-                var aRooms = Array.isArray(oData.commentData) ? oData.commentData : [oData.commentData];
-
-                var aFilteredRooms = aRooms.filter(function (room) {
-                    return room.BranchCode === sBranchCode;
-                });
-
-                // set only filtered data to the model
-                var model = new sap.ui.model.json.JSONModel(aFilteredRooms);
-                this.getView().setModel(model, "Availablebeds");
-
-            })
         },
 
         onBookingEditDateChange: function (oEvent) {
@@ -1632,6 +1668,8 @@ sap.ui.define([
             };
 
             // Send payload
+                 sap.ui.core.BusyIndicator.show(0);
+
             this.ajaxUpdateWithJQuery("HM_Customer", {
                 data: [Payload],
                 filters: {
@@ -1639,10 +1677,12 @@ sap.ui.define([
                 }
             })
                 .then(() => {
-                    sap.m.MessageToast.show("Booking saved successfully!");
 
                     // Refresh models
+
                     this.AD_onSearch();
+                    sap.m.MessageToast.show("Booking saved successfully!");
+
                     this.getView().getModel("VisibleModel").setProperty("/visible", false);
                     this.byId("idMonthYearSelect").setVisible(false);
                 })
@@ -1766,8 +1806,13 @@ sap.ui.define([
                 return;
             }
             aFiles = Array.from(aFiles);
+                const MAX_SIZE = 2 * 1024 * 1024; 
 
             aFiles.forEach(file => {
+                   if (file.size > MAX_SIZE) {
+            sap.m.MessageToast.show("File " + file.name + " exceeds 2 MB limit.");
+            return; // skip this file
+        }
                 var reader = new FileReader();
 
                 reader.onload = (e) => {
@@ -1787,6 +1832,7 @@ sap.ui.define([
                 // Read file as Base64
                 reader.readAsDataURL(file);
             });
+            this.byId("idProofType").setValue("");
         },
         onDocumentDelete: function (oEvent) {
             var oCustomerModel = this.getView().getModel("CustomerData");

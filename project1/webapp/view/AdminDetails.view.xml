@@ -76,9 +76,7 @@
                                 text="Room No"
                                 class="sapUiSmallMarginBottom"
                             />
-                            <Text
-                                text="{CustomerData>/RoomNo}"
-                            />
+                            <Text text="{CustomerData>/RoomNo}" />
                         </VBox>
                     </FlexBox>
 
@@ -94,25 +92,25 @@
                             id="idedit"
                             class="sapUiSmallMarginBegin myUnifiedBtn"
                             press="onEditBooking"
-                             visible="{= (${CustomerData>/Status} === 'Assigned' || ${CustomerData>/Status} === 'New') 
+                            visible="{= (${CustomerData>/Status} === 'Assigned' || ${CustomerData>/Status} === 'New') 
                            &amp;&amp; !${VisibleModel>/visible} }"
                         />
                         <Button
                             id="idcancel"
                             text="Cancel Booking"
                             press="onPressCancelBooking"
-                          visible="{= ${CustomerData>/Status} === 'New' 
+                            visible="{= ${CustomerData>/Status} === 'New' 
                                        &amp;&amp; !${VisibleModel>/visible} }"
                             class="sapUiSmallMarginBegin myUnifiedBtn"
                         />
-                           <Button
+                        <Button
                             text="CheckOut"
                             id="idCheckout"
                             class="sapUiSmallMarginBegin myUnifiedBtn"
                             press="onChekout"
-                                visible="{= ${CustomerData>/Status} === 'Assigned' 
+                            visible="{= ${CustomerData>/Status} === 'Assigned' 
                                         &amp;&amp; !${VisibleModel>/visible} }"
-                            />
+                        />
                         <Button
                             text="Save"
                             id="idsave"
@@ -121,7 +119,7 @@
                             class="sapUiSmallMarginBegin myUnifiedBtn"
                         />
                         <Button
-                        id="idcancelbtn"
+                            id="idcancelbtn"
                             text="Cancel"
                             press="onCancelBooking"
                             visible="{VisibleModel>/visible}"
@@ -160,9 +158,7 @@
                             <!-- Room Type -->
                             <Label
                                 text="Desired Room Type"
-                              required="{= ${VisibleModel>/visible} ? true : false }"
-
-
+                                required="{= ${VisibleModel>/visible} ? true : false }"
                             />
                             <Text
                                 id="Ad_id_RoomType3"
@@ -186,21 +182,16 @@
                             <!-- Price -->
                             <Label
                                 text="Price"
-                                                                                        required="{= ${VisibleModel>/visible} ? true : false }"
-
-
-
+                                required="{= ${VisibleModel>/visible} ? true : false }"
                             />
                             <Text
                                 id="Ad_id_idPrice4"
-                                text="{CustomerData>/OrginalRentPrice}"
+                                text="{=${CustomerData>/OrginalRentPrice} +' ' + ${CustomerData>/Currency}}"
                             />
                             <!-- Payment -->
                             <Label
                                 text="Payment Method"
-                                                                                                                        required="{= ${VisibleModel>/visible} ? true : false }"
-
-
+                                required="{= ${VisibleModel>/visible} ? true : false }"
                             />
                             <Text
                                 text="{CustomerData>/PaymentType}"
@@ -237,9 +228,7 @@
                             <!-- Start Date -->
                             <Label
                                 text="Start Date"
-                                                                                      required="{= ${VisibleModel>/visible} ? true : false }"
-
-
+                                required="{= ${VisibleModel>/visible} ? true : false }"
                             />
                             <Text
                                 text="{CustomerData>/StartDate}"
@@ -314,9 +303,7 @@
                             <!-- End Date -->
                             <Label
                                 text="End Date"
-                                                                          required="{= ${VisibleModel>/visible} ? true : false }"
-
-
+                                required="{= ${VisibleModel>/visible} ? true : false }"
                             />
                             <Text
                                 text="{CustomerData>/EndDate}"
@@ -333,9 +320,7 @@
                             />
                             <Label
                                 text="Duration"
-                                 required="{= ${VisibleModel>/visible} ? true : false }"
-
-
+                                required="{= ${VisibleModel>/visible} ? true : false }"
                             />
                             <Text
                                 text="{= ${CustomerData>/Duration} + ' ' + ${CustomerData>/DurationUnit} }"
@@ -374,10 +359,9 @@
                         <f:content>
                             <core:Title text="" />
                             <Label
-                                                                required="{= ${VisibleModel>/visible} ? true : false }"
-
-
-                             text="Full Name" />
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                                text="Full Name"
+                            />
                             <Text
                                 text="{= ${CustomerData>/Salutation} + ' ' + ${CustomerData>/CustomerName} }"
                                 visible="{= !${VisibleModel>/visible} }"
@@ -404,11 +388,10 @@
                                 valueStateText="Enter Customer Name"
                                 change="onChange"
                             />
-                            <Label 
-                                      required="{= ${VisibleModel>/visible} ? true : false }"
-
-                            
-                             text="Date of Birth" />
+                            <Label
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                                text="Date of Birth"
+                            />
                             <Text
                                 text="{CustomerData>/DateOfBirth}"
                                 visible="{= !${VisibleModel>/visible} }"
@@ -423,10 +406,9 @@
                                 change="onDateChange"
                             />
                             <Label
-                                          required="{= ${VisibleModel>/visible} ? true : false }"
-
-
-                             text="Gender" />
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                                text="Gender"
+                            />
                             <Text
                                 text="{CustomerData>/Gender}"
                                 visible="{= !${VisibleModel>/visible} }"
@@ -451,11 +433,10 @@
                                     text="Other"
                                 />
                             </ComboBox>
-                            <Label 
-                                                required="{= ${VisibleModel>/visible} ? true : false }"
-
-
-                            text="Email" />
+                            <Label
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                                text="Email"
+                            />
                             <Text
                                 text="{CustomerData>/CustomerEmail}"
                                 visible="{= !${VisibleModel>/visible} }"
@@ -470,10 +451,9 @@
                                 change="onChangemail"
                             />
                             <Label
-                                                         required="{= ${VisibleModel>/visible} ? true : false }"
-
-
-                            text="Country" />
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                                text="Country"
+                            />
                             <Text
                                 text="{CustomerData>/Country}"
                                 visible="{= !${VisibleModel>/visible} }"
@@ -495,11 +475,10 @@
                                     additionalText="{CountryModel>code}"
                                 />
                             </ComboBox>
-                            <Label 
-                                                 required="{= ${VisibleModel>/visible} ? true : false }"
-
-
-                            text="State" />
+                            <Label
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                                text="State"
+                            />
                             <Text
                                 text="{CustomerData>/State}"
                                 visible="{= !${VisibleModel>/visible} }"
@@ -519,11 +498,10 @@
                                     text="{StateModel>stateName}"
                                 />
                             </ComboBox>
-                            <Label 
-                                                  required="{= ${VisibleModel>/visible} ? true : false }"
-
-
-                            text="City" />
+                            <Label
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                                text="City"
+                            />
                             <Text
                                 text="{CustomerData>/City}"
                                 visible="{= !${VisibleModel>/visible} }"
@@ -548,11 +526,10 @@
                                 />
                             </ComboBox>
 
-                            <Label 
-                                    required="{= ${VisibleModel>/visible} ? true : false }"
-
-
-                            text="Mobile Number" />
+                            <Label
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                                text="Mobile Number"
+                            />
                             <Text
                                 text="{= ${CustomerData>/STDCode} + ' ' + ${CustomerData>/MobileNo} }"
                                 visible="{= !${VisibleModel>/visible} }"
@@ -638,43 +615,41 @@
                                             text="Document Details ({=${CustomerData>/Documents}.length})"
                                         />
                                         <ToolbarSpacer />
-                              <ComboBox
-                                id="idProofType"
-                                placeholder="Select ID Proof"
-                                selectedKey="{Bookingmodel>/DocumentType}"
-                                visible="{VisibleModel>/visible}"
-                                valueStateText="Select ID Proof"
-                                change="onidproofchange"
-                            >
-                                <core:ListItem
-                                    key="Aadhar Card"
-                                    text="Aadhar Card"
-                                />
-                                <core:ListItem
-                                    key="Pan Card"
-                                    text="Pan Card"
-                                />
-                                
-                                 <core:ListItem
-                                    key="Driving License"
-                                    text="Driving License"
-                                 />
-                                    <core:ListItem
-                                        key="Passport"
-                                        text="Passport"
-                                    />
-                            </ComboBox>
+                                        <ComboBox
+                                            id="idProofType"
+                                            placeholder="Select ID Proof"
+                                            value="{Bookingmodel>/DocumentType}"
+                                            visible="{VisibleModel>/visible}"
+                                            valueStateText="Select ID Proof"
+                                            change="onidproofchange"
+                                        >
+                                            <core:ListItem
+                                                key="Aadhar Card"
+                                                text="Aadhar Card"
+                                            />
+                                            <core:ListItem
+                                                key="Pan Card"
+                                                text="Pan Card"
+                                            />
+
+                                            <core:ListItem
+                                                key="Driving License"
+                                                text="Driving License"
+                                            />
+                                            <core:ListItem
+                                                key="Passport"
+                                                text="Passport"
+                                            />
+                                        </ComboBox>
                                         <u:FileUploader
                                             id="BT_id_FileUploader"
                                             fileType="jpg,jpeg,png"
-                                            maximumFileSize="5MB"
                                             sameFilenameAllowed="false"
                                             buttonOnly="true"
                                             buttonText="Upload Images"
                                             change="onFacilityFileChange"
                                             visible="{VisibleModel>/visible}"
-                                             class="myUnifiedBtn"
-
+                                            class="myUnifiedBtn"
                                         />
                                     </Toolbar>
                                 </headerToolbar>
@@ -682,7 +657,7 @@
                                     <Column demandPopin="true">
                                         <Text text="File Name" />
                                     </Column>
-                                     <Column demandPopin="true">
+                                    <Column demandPopin="true">
                                         <Text text="Document Type" />
                                     </Column>
                                     <Column demandPopin="true">
@@ -696,7 +671,7 @@
                                                 text="{CustomerData>FileName}"
                                                 press="onFileNameLinkPress"
                                             />
-                                             <Text
+                                            <Text
                                                 text="{CustomerData>DocumentType}"
                                             />
                                             <Text
@@ -785,7 +760,7 @@
                             <ColumnListItem>
                                 <cells>
                                     <Text text="{CustomerData>FacilityName}" />
-                                    <Text text="{CustomerData>Price}" />
+                                    <Text text="{= ${CustomerData>Price} +' ' +  ${CustomerData>Currency}}" />
                                     <Text
                                         text="{path:'CustomerData>StartDate'}"
                                     />
@@ -798,7 +773,8 @@
                                             }"
                                     />
                                     <Text text="{CustomerData>TotalDays}" />
-                                    <Text text="{CustomerData>TotalAmount}" />
+                                    <Text text="{= ${CustomerData>TotalAmount} +' ' +  ${CustomerData>Currency}}" />
+                                    
                                 </cells>
                             </ColumnListItem>
                         </items>
@@ -847,7 +823,7 @@
                             />
                         </HBox>
 
-                         <HBox
+                        <HBox
                             justifyContent="End"
                             class="sapUiSmallMarginTop"
                         >
@@ -868,10 +844,10 @@
                                 class="sapUiSmallMarginEnd totalColumnBold1"
                             />
                         </HBox>
-                         <HBox
+                        <HBox
                             justifyContent="End"
                             class="sapUiSmallMarginTop"
-                          visible="{= ${CustomerData>/Country} === 'India' }"
+                           
 
                         >
                             <Label
@@ -892,10 +868,12 @@
                                 class="sapUiSmallMarginEnd totalColumnBold1"
                             />
                         </HBox>
-                         <HBox
+                        <HBox
                             justifyContent="End"
                             class="sapUiSmallMarginTop"
-                          visible="{= ${CustomerData>/Country} === 'India' }"
+                
+
+
                         >
                             <Label
                                 text="SGST(9%):"

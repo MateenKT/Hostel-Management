@@ -20,47 +20,15 @@ sap.ui.define([
             this.getOwnerComponent().getRouter().getRoute("RouteAdmin").attachMatched(this._onRouteMatched, this);
         },
         _onRouteMatched: async function() {
-            // const omodel = new sap.ui.model.json.JSONModel({
-            //     // for Database connection
-            //     url: "https://rest.kalpavrikshatechnologies.com/",
-            //     headers: {
-            //         name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-            //         password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u",
-            //         "Content-Type": "application/json",
-            //     },
-            //     isRadioVisible: false,
-            // });
-            // this.getOwnerComponent().setModel(omodel, "LoginModel");
+        
             await this.Cust_read()
-            // $.ajax({
-            //     url: "https://rest.kalpavrikshatechnologies.com/HM_Rooms",
-            //     method: "GET",
-            //     contentType: "application/json",
-            //     headers: {
-            //         name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-            //         password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-            //     },
-            //     success: function (response) {
-            //         var model = new JSONModel(response.commentData);
-            //         this.getView().setModel(model, "RoomDetailsModel");
-            //         sap.ui.core.BusyIndicator.hide();
-
-
-            //     }.bind(this),
-            //     error: function (err) {
-            //         sap.m.MessageBox.error("Error uploading data or file.");
-            //     }
-            // });
-            await this.ajaxReadWithJQuery("HM_Rooms", "").then((oData) => {
+          
+             this.ajaxReadWithJQuery("HM_Rooms", "").then((oData) => {
                 var oFCIAerData = Array.isArray(oData.commentData) ? oData.commentData : [oData.commentData];
                 var model = new JSONModel(oFCIAerData);
                 this.getView().setModel(model, "RoomDetailsModel");
             })
-            // await this.ajaxReadWithJQuery("HM_ExtraFacilities", "").then((oData) => {
-            //     var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
-            //     var model = new JSONModel(oFCIAerData);
-            //     this.getView().setModel(model, "facilitymodel");
-            // })
+           
             var model = new JSONModel({
                 BranchCode: "",
                 BedType: "",
@@ -74,8 +42,8 @@ sap.ui.define([
                 Visible: false
             });
             this.getView().setModel(model, "Visiblemodel")
-            this.onClearAndSearch("PO_id_FilterbarEmployee");
-            this.BedTypedetails();
+            // this.onClearAndSearch("PO_id_FilterbarEmployee");
+            // this.BedTypedetails();
         },
         BedTypedetails: function() {
             this.ajaxReadWithJQuery("HM_BedType", "").then((oData) => {
