@@ -35,7 +35,8 @@
 					<HBox class="aleftMargin" alignItems="End" justifyContent="Start">
 						<RadioButton text="Password" groupName="loginType" selected="{= ${LoginViewModel>/loginMode} === 'password' }" select="onSelectLoginMode"/>
 						<RadioButton text="OTP" groupName="loginType" selected="{= ${LoginViewModel>/loginMode} === 'otp' }" select="onSelectLoginMode"/>
-						<Button id="btnSignInSendOTP" text="Send OTP" visible="{= ${LoginViewModel>/loginMode} === 'otp' }" press="onPressOTP"/>
+						<!-- <Button id="btnSignInSendOTP" text="Send OTP" visible="{= ${LoginViewModel>/loginMode} === 'otp' }" press="onPressOTP"/> -->
+						<Button id="btnSignInSendOTP" text="{LoginViewModel>/otpButtonText}" enabled="{LoginViewModel>/canResendOTP}" visible="{= ${LoginViewModel>/loginMode} === 'otp' }" press="onPressOTP"/>
 					</HBox>
 					<!-- PASSWORD SECTION -->
 					<Label text="Password" required="true" visible="{= ${LoginViewModel>/loginMode} === 'password' }"/>
@@ -49,6 +50,7 @@
 				<HBox justifyContent="SpaceBetween" class="sapUiSmallMargin">
 					<Button text="Forgot Password?" type="Transparent" press="onForgotPassword"/>
 					<Button class="myUnifiedBtn" text="Sign In" width="100px" enabled="true" press="onSignIn"/>
+					
 				</HBox>
 			</Panel>
 
