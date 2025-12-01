@@ -793,34 +793,49 @@ _createDynamicPersonsUI: function () {
     const index = parseInt(oEvent.getSource().data("index"));
     const oFile = oEvent.getParameter("files")[0];
 
-    if (oFile) {
-        const reader = new FileReader();
-        reader.onload = function (e) {
-            const sBase64 = e.target.result;
+    if (!oFile) return;
 
-            // Always overwrite old document
-            oData.Persons[index].Documents = [];
+    const MAX_SIZE = 2 * 1024 * 1024; // 2MB
 
-            // Auto-thumbnail logic
-            let sThumbnail = sBase64;
-            if (oFile.type === "application/pdf") {
-                sThumbnail = "sap-icon://pdf-attachment";
-            }
+    if (oFile.size > MAX_SIZE) {
+        sap.m.MessageBox.error(
+            "File size must be less than 2 MB.\nSelected file size: " +
+            (oFile.size / 1024 / 1024).toFixed(2) + " MB"
+        );
 
-            // Push new document
-            oData.Persons[index].Documents.push({
-                FileName: oFile.name,
-                FileType: oFile.type,
-                Document: sBase64,
-                Thumbnail: sThumbnail
-            });
-
-            oModel.refresh(true);
-        };
-
-        reader.readAsDataURL(oFile);
+        //  Reset the FileUploader input
+        oEvent.getSource().clear();
+        return;
     }
+
+    const reader = new FileReader();
+
+    reader.onload = function (e) {
+        const sBase64 = e.target.result;
+
+        // Clear previous document
+        oData.Persons[index].Documents = [];
+
+        // Thumbnail logic
+        let sThumbnail = sBase64;
+        if (oFile.type === "application/pdf") {
+            sThumbnail = "sap-icon://pdf-attachment";
+        }
+
+        // Push new document
+        oData.Persons[index].Documents.push({
+            FileName: oFile.name,
+            FileType: oFile.type,
+            Document: sBase64,
+            Thumbnail: sThumbnail
+        });
+
+        oModel.refresh(true);
+    };
+
+    reader.readAsDataURL(oFile);
 }
+
 
             }),
             new sap.m.Label({
@@ -1113,6 +1128,7 @@ _setFacilitySelectedPrice: function (facility, selectedType, selectedPrice, iPer
 
     oModel.refresh(true);
 },
+_bStep2UIBuilt: false,
 
     onDialogNextButton: async function () {
 
@@ -2114,7 +2130,7 @@ if (Array.isArray(oResponse.data)) {
     // Set default values
     oPaymentModel.setProperty("/PaymentDate", this.Formatter.formatDate(new Date()));
     oPaymentModel.setProperty("/PaymentType", "UPI");
-    oPaymentModel.setProperty("/Amount", oHostelModel.getProperty("/OverallTotalCost")
+    oPaymentModel.setProperty("/Amount", oHostelModel.getProperty("/FinalTotalCost")
     );
 
     this._oPaymentDialog.open();
@@ -2150,7 +2166,7 @@ if (Array.isArray(oResponse.data)) {
         if (oInput.getValue() === "") oInput.setValueState("None");
 
         const value = (oInput.getValue());
-        const total = (this.getView().getModel("HostelModel").getProperty("/OverallTotalCost"));
+        const total = (this.getView().getModel("HostelModel").getProperty("/FinalTotalCost"));
 
         if (value > total) {
             oInput.setValueState("Error");
@@ -2226,67 +2242,67 @@ if (Array.isArray(oResponse.data)) {
         }
     },
 
-    onSubmitPress: async function() {
-     const oModel = this.getView().getModel("HostelModel");
-     const oData = oModel.getData();
-     // Mandatory validation
-     const isMandatoryValid = (
-         utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idPaymentTypeField"), "ID") &&
-         utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idTransactionID"), "ID") &&
-         utils._LCvalidateDate(sap.ui.getCore().byId("idPaymentDate"), "ID")
-     );
+      onSubmitPress: async function() {
+      const oModel = this.getView().getModel("HostelModel");
+      const oData = oModel.getData();
+      // Mandatory validation
+      const isMandatoryValid = (
+          utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idPaymentTypeField"), "ID") &&
+          utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idTransactionID"), "ID") &&
+          utils._LCvalidateDate(sap.ui.getCore().byId("idPaymentDate"), "ID")
+      );
 
-     if (!isMandatoryValid) {
-         sap.m.MessageToast.show("Please fill all mandatory fields.");
-         return;
-     }
+      if (!isMandatoryValid) {
+          sap.m.MessageToast.show("Please fill all mandatory fields.");
+          return;
+      }
 
-     const oAmountInput = sap.ui.getCore().byId("idAmount");
-     const enteredAmount = Number(oAmountInput.getValue());
-     const grandTotal = Number(this.getView().getModel("HostelModel").getProperty("/OverallTotalCost"));
+      const oAmountInput = sap.ui.getCore().byId("idAmount");
+      const enteredAmount = Number(oAmountInput.getValue());
+      const grandTotal = Number(this.getView().getModel("HostelModel").getProperty("/FinalTotalCost"));
 
-     if (enteredAmount > grandTotal) {
-         oAmountInput.setValueState("Error");
-         oAmountInput.setValueStateText("Amount cannot be greater than Grand Total");
-         sap.m.MessageToast.show("Amount cannot be greater than Grand Total");
-         return; // STOP further processing
-     } else {
-         oAmountInput.setValueState("None");
-     }
+      if (enteredAmount > grandTotal) {
+          oAmountInput.setValueState("Error");
+          oAmountInput.setValueStateText("Amount cannot be greater than Grand Total");
+          sap.m.MessageToast.show("Amount cannot be greater than Grand Total");
+          return; // STOP further processing
+      } else {
+          oAmountInput.setValueState("None");
+      }
 
-     try {
-         // Format payload according to your new structure
-         const formattedPayload = oData.Persons.map((p) => {
-             const bookingData = [];
-             const facilityData = [];
+      try {
+          // Format payload according to your new structure
+          const formattedPayload = oData.Persons.map((p) => {
+              const bookingData = [];
+              const facilityData = [];
 
-             //  FIX: Use oData for booking fields, not individual person object
-             if (oData.StartDate) {
-                 bookingData.push({
-                     BookingDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
-                     RentPrice: oData.GrandTotal ? oData.GrandTotal.toString() : "0",
-                     RoomPrice: oData.FinalPrice,
-                     NoOfPersons: oData.Person || oData.Persons.length,
-                     StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
-                     EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
-                     Status: "New",
-                     PaymentType: oData.SelectedPriceType || "",
-                     BedType: `${oData.BedType} - ${oData.ACType}`,
-                     BranchCode:oData.BranchCode,
-                     Currency:oData.Currency
-                 });
-             }
-             const paymentDetails = {
-                //  BankName: sap.ui.getCore().byId("idBankName").getValue(),
-                 Amount: sap.ui.getCore().byId("idAmount").getValue(),
-                 PaymentType: sap.ui.getCore().byId("idPaymentTypeField").getValue(),
-                 BankTransactionID: sap.ui.getCore().byId("idTransactionID").getValue(),
-                 Date: sap.ui.getCore().byId("idPaymentDate").getValue() ? sap.ui.getCore().byId("idPaymentDate").getValue().split("/").reverse().join("-") : "",
-                //  Currency: sap.ui.getCore().byId("idCurrency").getValue()
-             };
+              //  FIX: Use oData for booking fields, not individual person object
+              if (oData.StartDate) {
+                  bookingData.push({
+                      BookingDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
+                      RentPrice: oData.GrandTotal ? oData.GrandTotal.toString() : "0",
+                      RoomPrice: oData.FinalPrice,
+                      NoOfPersons: oData.Person || oData.Persons.length,
+                      StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
+                      EndDate: oData.EndDate ? oData.EndDate.split("/").reverse().join("-") : "",
+                      Status: "New",
+                      PaymentType: oData.SelectedPriceType || "",
+                      BedType: `${oData.BedType} - ${oData.ACType}`,
+                      BranchCode:oData.BranchCode,
+                      Currency:oData.Currency
+                  });
+              }
+              const paymentDetails = {
+                  //  BankName: sap.ui.getCore().byId("idBankName").getValue(),
+                  Amount: sap.ui.getCore().byId("idAmount").getValue(),
+                  PaymentType: sap.ui.getCore().byId("idPaymentTypeField").getValue(),
+                  BankTransactionID: sap.ui.getCore().byId("idTransactionID").getValue(),
+                  Date: sap.ui.getCore().byId("idPaymentDate").getValue() ? sap.ui.getCore().byId("idPaymentDate").getValue().split("/").reverse().join("-") : "",
+                  //  Currency: sap.ui.getCore().byId("idCurrency").getValue()
+              };
 
-             // Store in model temporarily
-             oData.PaymentDetails = paymentDetails;
+              // Store in model temporarily
+               oData.PaymentDetails = paymentDetails;
 
              //  Handle both object and string facility formats
            const aSelectedFacilities = p.AllSelectedFacilities || [];
@@ -2296,7 +2312,7 @@ aSelectedFacilities.forEach(fac => {
     let facilityHour = 0;
 
        facilityPrice = fac.TotalAmount || 0;
-       facilityHour= fac.TotalTime || 1
+       facilityHour= fac.TotalTime || "";
   
 
     facilityData.push({
@@ -2315,79 +2331,78 @@ aSelectedFacilities.forEach(fac => {
 });
 
 
-             // Return formatted entry
-             return {
-                 Salutation: p.Salutation,
-                 CustomerName: p.FullName,
-                 UserID: p.UserID,
-                 STDCode: p.STDCode,
-                 MobileNo: p.MobileNo,
-                 Gender: p.Gender,
-                 DateOfBirth: p.DateOfBirth ? p.DateOfBirth.split("/").reverse().join("-") : "",
-                 CustomerEmail: p.CustomerEmail,
-                 Country: p.Country,
-                 State: p.State,
-                 City: p.City,
-                 PermanentAddress: p.Address,
-                 Documents: (p.Documents && p.Documents.length > 0)
-                  ? p.Documents.map(doc => ({
-                      DocumentType:p.DocumentType || "",
-                      File: doc.Document,
-                      FileName: doc.FileName,
-                      FileType: doc.FileType
-                  }))
-                  : [],
-                
+              // Return formatted entry
+              return {
+                  Salutation: p.Salutation,
+                  CustomerName: p.FullName,
+                  UserID: p.UserID,
+                  STDCode: p.STDCode,
+                  MobileNo: p.MobileNo,
+                  Gender: p.Gender,
+                  DateOfBirth: p.DateOfBirth ? p.DateOfBirth.split("/").reverse().join("-") : "",
+                  CustomerEmail: p.CustomerEmail,
+                  Country: p.Country,
+                  State: p.State,
+                  City: p.City,
+                  PermanentAddress: p.Address,
+                  Documents: (p.Documents && p.Documents.length > 0)
+                    ? p.Documents.map(doc => ({
+                        DocumentType:p.DocumentType || "",
+                        File: doc.Document,
+                        FileName: doc.FileName,
+                        FileType: doc.FileType
+                    }))
+                    : [],
+                  Booking: bookingData,
+                  FacilityItems: facilityData,
+                  PaymentDetails: [oData.PaymentDetails]
+              };
+          });
 
-                 Booking: bookingData,
-                 FacilityItems: facilityData,
-                 PaymentDetails: [oData.PaymentDetails]
-             };
-         });
+          // Final payload structure
+          const oPayload = {
+              data: formattedPayload
+          };
+              
+          BusyIndicator.show(0)
+          // AJAX call
+          const oResponse = await this.ajaxCreateWithJQuery("HM_Customer", oPayload);
 
-         // Final payload structure
-         const oPayload = {
-             data: formattedPayload
-         };
+          // Extract BookingDetails array
+          const aBookingDetails = oResponse.BookingDetails || [];
+            BusyIndicator.hide()
+          // Prepare message text
+          let sMessage = "Booking Successful!\n\n";
 
-         // AJAX call
-         const oResponse = await this.ajaxCreateWithJQuery("HM_Customer", oPayload);
+          aBookingDetails.forEach((item, index) => {
+              sMessage += "Booking ID: " + item.BookingID + "\n";
+          });
 
-         // Extract BookingDetails array
-         const aBookingDetails = oResponse.BookingDetails || [];
+          // Show success box
+          sap.m.MessageBox.success(sMessage, {
+              title: "Success",
+              actions: [sap.m.MessageBox.Action.OK],
+            onClose: function () {
 
-         // Prepare message text
-         let sMessage = "Booking Successful!\n\n";
+                  // Navigate to hostel page
+                  var oRoute = this.getOwnerComponent().getRouter();
+                  oRoute.navTo("RouteHostel");
 
-         aBookingDetails.forEach((item, index) => {
-             sMessage += "Booking ID: " + item.BookingID + "\n";
-         });
-
-         // Show success box
-         sap.m.MessageBox.success(sMessage, {
-             title: "Success",
-             actions: [sap.m.MessageBox.Action.OK],
-          onClose: function () {
-
-                // Navigate to hostel page
-                var oRoute = this.getOwnerComponent().getRouter();
-                oRoute.navTo("RouteHostel");
-
-                setTimeout(function () {
-                  this.resetAllBookingData()
-                    this.openProfileDialog();
-                }.bind(this), 500);
-                // --- SHOW AVATAR AUTOMATICALLY ---
-                const oAvatar = sap.ui.getCore().byId("ProfileAvatar");
-                if (oAvatar) {
-                    oAvatar.setVisible(true);   
-                }
-            }.bind(this)
-         });
-        } catch (err) {
-            sap.m.MessageBox.error("Error while booking: " + err);
-        }
-    },
+                  setTimeout(function () {
+                    this.resetAllBookingData()
+                      this.openProfileDialog();
+                  }.bind(this), 500);
+                  // --- SHOW AVATAR AUTOMATICALLY ---
+                  const oAvatar = sap.ui.getCore().byId("ProfileAvatar");
+                  if (oAvatar) {
+                      oAvatar.setVisible(true);   
+                  }
+              }.bind(this)
+          });
+          } catch (err) {
+              sap.m.MessageBox.error("Error while booking: " + err);
+          }
+      },
       openProfileDialog: function () {
       this.onPressAvatar()
       },
@@ -2517,22 +2532,6 @@ aSelectedFacilities.forEach(fac => {
                     aCustomers: aCustomerDetails
                 });
                 this._oProfileDialog.setModel(oProfileModel, "profileData");
-
-                //  Menu model (for tab switch)
-                const oMenuModel = new JSONModel({
-                    items: [
-                        { title: "My Profile", icon: "sap-icon://employee", key: "profile" },
-                        { title: "Booking History", icon: "sap-icon://history", key: "devices" }
-                    ]
-                });
-                this._oProfileDialog.setModel(oMenuModel, "profileMenuModel");
-
-                //  Section model (default = booking if available)
-                const oSectionModel = new JSONModel({
-                    selectedSection: aBookingData.length ? "profile" : "devices"
-                });
-                this._oProfileDialog.setModel(oSectionModel, "profileSectionModel");
-
                 //  Open the dialog
                 this._oProfileDialog.open();
 

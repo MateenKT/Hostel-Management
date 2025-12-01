@@ -31,6 +31,11 @@
                     <Label text="Grand Total :" class="sapUiTinyMargin" />
                     <Text text="{parts: ['HostelModel>/FinalTotalCost','HostelModel>/Currency'],formatter: '.Formatter.formatCurrency'}"/>
                 </HBox>
+                 <HBox>
+                    <Label text="Enter Coupon Code :" class="sapUiTinyMargin" />
+                    <Input type="Text" change="onChangeCouponCode"/>
+                </HBox>
+
 
                 <!-- ===== PAYMENT TYPE (Radio) ===== -->
                 <Label text="Payment Type" design="Bold"/>

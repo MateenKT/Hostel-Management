@@ -149,118 +149,113 @@ sap.ui.define([
             this._oEditDialog.close();
         },
 
-        onMonthSelectionChange: function (oEvent) {
-            const oView = this.getView();
-            const oHostelModel = oView.getModel("edit");
+      onMonthSelectionChange: function (oEvent) {
+    const oView = this.getView();
+    const oHostelModel = oView.getModel("edit");
 
-            const sUnit = oHostelModel.getProperty("/UnitText");
-            const sStartDate = oHostelModel.getProperty("/StartDate") || "";
+    const sUnit = oHostelModel.getProperty("/UnitText");
+    const sStartDate = oHostelModel.getProperty("/StartDate") || "";
 
-            const iSelectedNumber = parseInt(oEvent.getSource().getSelectedKey() || "1", 10);
+    const iSelectedNumber = parseInt(oEvent.getSource().getSelectedKey() || "1", 10);
 
-            if (!sStartDate) {
-                sap.m.MessageToast.show("Please select Start Date first.");
-                return;
-            }
+    if (!sStartDate) {
+        sap.m.MessageToast.show("Please select Start Date first.");
+        return;
+    }
 
-            const oStart = this._parseDate(sStartDate);
-            if (!(oStart instanceof Date) || isNaN(oStart)) {
-                sap.m.MessageToast.show("Invalid Start Date.");
-                return;
-            }
+    const oStart = this._parseDate(sStartDate);
+    if (!(oStart instanceof Date) || isNaN(oStart)) {
+        sap.m.MessageToast.show("Invalid Start Date.");
+        return;
+    }
 
-            let oEnd = new Date(oStart);
+    let iTotalDays = 0;
+    let oEnd = new Date(oStart);
 
-            //  USE FIXED DAYS (30 DAYS PER MONTH)
-            let iTotalDays = 0;
+    // Use fixed days: 30 days per month, 365 per year
+    if (sUnit === "Per Month") {
+        iTotalDays = iSelectedNumber * 30;
+        oEnd.setDate(oEnd.getDate() + iTotalDays);
+        oHostelModel.setProperty("/TotalMonths", iSelectedNumber);
+        oHostelModel.setProperty("/TotalYears", 0);
+    } else if (sUnit === "Per Year") {
+        iTotalDays = iSelectedNumber * 365;
+        oEnd.setDate(oEnd.getDate() + iTotalDays);
+        oHostelModel.setProperty("/TotalYears", iSelectedNumber);
+        oHostelModel.setProperty("/TotalMonths", 0);
+    } else {
+        return;
+    }
 
-            if (sUnit === "Per Month") {
-                iTotalDays = iSelectedNumber * 30; // FIXED
-                oEnd.setDate(oEnd.getDate() + iTotalDays);
+    const sEndDate = this._formatDateToDDMMYYYY(oEnd);
 
-                oHostelModel.setProperty("/TotalMonths", iSelectedNumber);
-                oHostelModel.setProperty("/TotalYears", 0);
-            } else if (sUnit === "Per Year") {
-                iTotalDays = iSelectedNumber * 365; // FIXED
-                oEnd.setDate(oEnd.getDate() + iTotalDays);
-
-                oHostelModel.setProperty("/TotalYears", iSelectedNumber);
-                oHostelModel.setProperty("/TotalMonths", 0);
-            } else {
-                return;
-            }
-
-            const sEndDate = this._formatDateToDDMMYYYY(oEnd);
-
-            oHostelModel.setProperty("/EndDate", sEndDate);
-            oHostelModel.setProperty("/TotalDays", iTotalDays);
-        },
+    oHostelModel.setProperty("/EndDate", sEndDate);
+    oHostelModel.setProperty("/TotalDays", iTotalDays);
+},
 
         onEditDateChange: function (oEvent) {
-            const oView = this.getView();
-            const oModel = oView.getModel("edit");
+    const oView = this.getView();
+    const oModel = oView.getModel("edit");
 
-            const sUnit = oModel.getProperty("/UnitText"); // Per Day / Per Month / Per Year
-            const sStart = oModel.getProperty("/StartDate");
+    const sUnit = oModel.getProperty("/UnitText"); // Per Day / Per Month / Per Year
+    const sStart = oModel.getProperty("/StartDate");
 
-            if (!sStart) return;
+    if (!sStart) return;
 
-            // Convert DD/MM/YYYY → JS Date
-            const toJSDate = (s) => {
-                if (s.includes("/")) {
-                    const [d, m, y] = s.split("/");
-                    return new Date(`${y}-${m}-${d}`);
-                }
-                return new Date(s);
-            };
+    // Convert DD/MM/YYYY → JS Date
+    const toJSDate = (s) => {
+        if (typeof s !== "string") return new Date(s);
+        if (s.includes("/")) {
+            const [d, m, y] = s.split("/");
+            return new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+        }
+        return new Date(s);
+    };
 
-            const oStart = toJSDate(sStart);
-            if (!(oStart instanceof Date) || isNaN(oStart)) return;
+    const oStart = toJSDate(sStart);
+    if (!(oStart instanceof Date) || isNaN(oStart)) return;
 
-            let oEnd = new Date(oStart);
+    let oEnd = new Date(oStart);
 
-            /**  GET NUMBER OF MONTHS/YEAR SELECTED */
-            let iCount = 1;
-            if (sUnit === "Per Month") {
-                iCount = parseInt(oModel.getProperty("/TotalMonths") || "1", 10);
-                oEnd.setMonth(oEnd.getMonth() + iCount); //  ADD MONTH
-            } else if (sUnit === "Per Year") {
-                iCount = parseInt(oModel.getProperty("/TotalYears") || "1", 10);
-                oEnd.setFullYear(oEnd.getFullYear() + iCount); //  ADD YEAR
-            } else {
-                // For Per Day / Per Hour → Keep your existing logic
-                const sEnd = oModel.getProperty("/EndDate");
-                if (sEnd) {
-                    oEnd = toJSDate(sEnd);
-                }
-            }
+    /** GET NUMBER OF MONTHS/YEAR SELECTED */
+    let iCount = 1;
+    if (sUnit === "Per Month") {
+        iCount = parseInt(oModel.getProperty("/TotalMonths") || "1", 10);
+        // Use fixed days per month (30)
+        const iDaysToAdd = iCount * 30;
+        oEnd.setDate(oEnd.getDate() + iDaysToAdd);
+        oModel.setProperty("/TotalDays", iDaysToAdd);
+    } else if (sUnit === "Per Year") {
+        iCount = parseInt(oModel.getProperty("/TotalYears") || "1", 10);
+        const iDaysToAdd = iCount * 365;
+        oEnd.setDate(oEnd.getDate() + iDaysToAdd);
+        oModel.setProperty("/TotalDays", iDaysToAdd);
+    } else {
+        // For Per Day / Per Hour / custom -> keep existing EndDate if present, otherwise no-op
+        const sEnd = oModel.getProperty("/EndDate");
+        if (sEnd) {
+            oEnd = toJSDate(sEnd);
+        }
+        // Compute total days by difference (no extra +1)
+        const msPerDay = 1000 * 60 * 60 * 24;
+        const iDays = Math.ceil((oEnd - oStart) / msPerDay);
+        oModel.setProperty("/TotalDays", iDays >= 0 ? iDays : 0);
+    }
 
-            /**  FORMAT DATE: JS Date → DD/MM/YYYY */
-            const formatToDDMMYYYY = (dt) => {
-                let dd = dt.getDate().toString().padStart(2, "0");
-                let mm = (dt.getMonth() + 1).toString().padStart(2, "0");
-                let yyyy = dt.getFullYear();
-                return `${dd}/${mm}/${yyyy}`;
-            };
+    /** FORMAT DATE: JS Date -> DD/MM/YYYY */
+    const sNewEndDate = this._formatDateToDDMMYYYY(oEnd);
+    oModel.setProperty("/EndDate", sNewEndDate);
 
-            /**  SET END DATE (auto updated) */
-            const sNewEndDate = formatToDDMMYYYY(oEnd);
-            oModel.setProperty("/EndDate", sNewEndDate);
+    /** UPDATE MINIMUM END DATE IN UI */
+    const oEndDP = sap.ui.getCore().byId(oView.getId() + "--FT_id_editEndDate");
+    if (oEndDP) {
+        let oMin = new Date(oStart);
+        oMin.setDate(oMin.getDate() + 1);
+        oEndDP.setMinDate(oMin);
+    }
 
-            /** CALCULATE TOTAL DAYS */
-            const iDays = Math.ceil((oEnd - oStart) / (1000 * 60 * 60 * 24))+1;
-            oModel.setProperty("/TotalDays", iDays);
-
-            /** UPDATE MINIMUM END DATE IN UI */
-            const oEndDP = sap.ui.getCore().byId(oView.getId() + "--FT_id_editEndDate");
-            if (oEndDP) {
-                let oMin = new Date(oStart);
-                oMin.setDate(oMin.getDate() + 1);
-                oEndDP.setMinDate(oMin);
-            }
-
-            utils._LCvalidateDate(oEvent);
-        },
+    utils._LCvalidateDate(oEvent);
+},
 
         // Utility function to format date
         _formatDateToDDMMYYYY: function (oDate) {
@@ -279,6 +274,12 @@ sap.ui.define([
                 return sap.m.MessageToast.show("Missing models");
 
             const sUnitText = oEditModel.getProperty("/UnitText");
+            const iTotalDays = Number(oEditModel.getProperty("/TotalDays") || 0);
+
+       if (sUnitText === "Per Day" && iTotalDays < 1) {
+    sap.m.MessageBox.error("Total Days must be at least 1 for Per Day booking.");
+    return;
+      }
 
             let sViewId = this.getView().getId();
             const oStartDate = sap.ui.core.Fragment.byId(sViewId, "FT_id_editStartDate")
@@ -499,15 +500,13 @@ oHostelModel.setProperty("/FinalTotalCost", totals.FinalTotal || totals.GrandTot
             sap.m.MessageToast.show("Facility updated successfully!");
         },
 
-        _formatDateToDDMMYYYY: function (oDate) {
-            if (!(oDate instanceof Date)) {
-                oDate = new Date(oDate);
-            }
-            const day = String(oDate.getDate()).padStart(2, "0");
-            const month = String(oDate.getMonth() + 1).padStart(2, "0");
-            const year = oDate.getFullYear();
-            return `${day}/${month}/${year}`;
-        },
+      _formatDateToDDMMYYYY: function (dt) {
+    if (!dt || !(dt instanceof Date)) return "";
+    const dd = String(dt.getDate()).padStart(2, "0");
+    const mm = String(dt.getMonth() + 1).padStart(2, "0");
+    const yyyy = dt.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+},
 
         calculateTotals: function (aPersons, roomRentPrice) {
             const msPerDay = 1000 * 60 * 60 * 24;
@@ -698,25 +697,18 @@ return {
             // };
         },
 
-        _parseDate: function (sDate) {
-            // If already a Date object → return as-is
-            if (sDate instanceof Date) {
-                return sDate;
-            }
-
-            // If empty or invalid → return null
-            if (!sDate || typeof sDate !== "string") {
-                return null;
-            }
-
-            // Expecting dd/MM/yyyy
-            const aParts = sDate.split("/");
-            if (aParts.length !== 3) {
-                return null;
-            }
-
-            return new Date(aParts[2], aParts[1] - 1, aParts[0]);
-        },
+       _parseDate: function (s) {
+    if (!s) return null;
+    if (typeof s !== "string") return new Date(s);
+    const parts = s.split("/");
+    if (parts.length === 3) {
+        const d = parseInt(parts[0], 10);
+        const m = parseInt(parts[1], 10) - 1;
+        const y = parseInt(parts[2], 10);
+        return new Date(y, m, d);
+    }
+    return new Date(s);
+},
 
         onUnitTextChange: function (oEvent) {
             const oEditModel = this.getView().getModel("edit");
