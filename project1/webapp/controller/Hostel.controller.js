@@ -1767,7 +1767,7 @@ sap.ui.define([
                     aCustomers: aCustomerDetails
                 });
                 this._oProfileDialog.setModel(oProfileModel, "profileData");
-
+                 oProfileModel.setProperty("/isEditMode", false);
                 //  Open the dialog
                 this._oProfileDialog.open();
 
@@ -1805,30 +1805,31 @@ sap.ui.define([
                     aCustomers: []
                 });
                 this._oProfileDialog.setModel(oProfileModel, "profileData");
+                 oProfileModel.setProperty("/isEditMode", false);
                 this._oProfileDialog.open();
             } finally {
                 sap.ui.core.BusyIndicator.hide();
             }
         },
 
-        onEditSaveProfile: async function () {
+         onEditSaveProfile: async function () {
             const oModel = this._oProfileDialog.getModel("profileData");
             const isEditMode = oModel.getProperty("/isEditMode");
-
             if (!isEditMode) {
                 oModel.setProperty("/isEditMode", true);
+                this._applyCountryStateCityFilters();
                 // this._oProfileDialog.close();
                 sap.ui.core.BusyIndicator.show(0);
-                if (!this._oProfileEditDialog) {
-                    this._oProfileEditDialog = await sap.ui.core.Fragment.load({
-                        name: "sap.ui.com.project1.fragment.ManageProfileEdit",
-                        controller: this
-                    });
-                    this.getView().addDependent(this._oProfileEditDialog);
-                    this._oProfileEditDialog.setModel(oModel, "profileData");
-                }
+                // if (!this._oProfileEditDialog) {
+                // this._oProfileEditDialog = await sap.ui.core.Fragment.load({
+                //     name: "sap.ui.com.project1.fragment.ManageProfileEdit",
+                //     controller: this
+                // });
+                // this.getView().addDependent(this._oProfileEditDialog);
+                // this._oProfileEditDialog.setModel(oModel, "profileData");
+                // }
                 sap.ui.core.BusyIndicator.hide();
-                this._oProfileEditDialog.open();
+                // this._oProfileEditDialog.open();
                 return;
             }
             const isMandatoryValid = (
@@ -1856,16 +1857,17 @@ sap.ui.define([
                     DateOfBirth: oModel.getData().DateOfBirth ? oModel.getData().DateOfBirth.split("/").reverse().join("-") : "",
                     Gender: oModel.getProperty("/gender"),
                     Address: oModel.getProperty("/address"),
-                    City: oModel.getProperty("/city"),
-                    State: oModel.getProperty("/state"),
-                    Country: oModel.getProperty("/country"),
-                    STDCode: oModel.getProperty("/stdCode")
+                    City: oModel.getProperty("/City"),
+                    State: oModel.getProperty("/State"),
+                    Country: oModel.getProperty("/Country"),
+                    STDCode: oModel.getProperty("/STDCode")
                 },
                 filters: { UserID: oModel.getProperty("/UserID") }
             };
 
             try {
                 sap.ui.core.BusyIndicator.show(0);
+
                 await this.ajaxUpdateWithJQuery("HM_Login", payload);
                 Object.assign(this._oLoggedInUser, payload.data);
                 sap.m.MessageToast.show("Profile Updated Successfully!");
@@ -1876,8 +1878,8 @@ sap.ui.define([
             } finally {
                 sap.ui.core.BusyIndicator.hide();
                 oModel.setProperty("/isEditMode", false);
-                this._oProfileEditDialog.close();
-                this._oProfileDialog.open();
+                // this._oProfileEditDialog.close();
+                // this._oProfileDialog.open();
             }
         },
 
@@ -1891,9 +1893,6 @@ sap.ui.define([
         },
 
         onProfileDialogClose: function () {
-            if (this._oProfileEditDialog) {
-                this._oProfileEditDialog.close();
-            }
             if (this._oProfileDialog) {
                 this._oProfileDialog.close();
             }
@@ -1932,7 +1931,7 @@ sap.ui.define([
         _onLogout: function () {
             this._oProfileActionSheet.close();
             // sap.m.MessageToast.show("Logging out...");
-            this._oLoggedInUser = null;
+             this._oLoggedInUser = {};
             if (this._oProfileDialog) {
                 this._oProfileDialog.destroy();
                 this._oProfileDialog = null;
@@ -3824,9 +3823,7 @@ sap.ui.define([
 
         onCountrySelectionChange: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
-            const oModel =
-                this._oProfileEditDialog?.getModel("profileData") ||
-                this._oProfileDialog.getModel("profileData");
+           const oModel = this._oProfileDialog.getModel("profileData");
 
             const oStateCB = sap.ui.getCore().byId("id_state");
             const oCityCB = sap.ui.getCore().byId("id_city");
@@ -3864,9 +3861,7 @@ sap.ui.define([
 
         CC_onChangeState: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
-            const oModel =
-                this._oProfileEditDialog?.getModel("profileData") ||
-                this._oProfileDialog?.getModel("profileData");
+           const oModel = this._oProfileDialog.getModel("profileData");
 
             const oCityCB = sap.ui.getCore().byId("id_city");
             const oCountryCB = sap.ui.getCore().byId("id_country");
@@ -3939,6 +3934,50 @@ sap.ui.define([
             } finally {
                 sap.ui.core.BusyIndicator.hide();
             }
+        },
+
+          _applyCountryStateCityFilters: function () {
+            const oModel = this._oProfileDialog.getModel("profileData");
+            const oCountryCB = sap.ui.getCore().byId("id_country");
+            const oStateCB = sap.ui.getCore().byId("id_state");
+            const oSourceCB = sap.ui.getCore().byId("id_city");
+
+            const sCountry = oModel.getProperty("/country");     // e.g. "Australia"
+            const sState = oModel.getProperty("/state");       // e.g. "Queensland"
+            const sSource = oModel.getProperty("/City");      // e.g. "Bongaree"
+
+            // Reset all filters
+            oStateCB.getBinding("items")?.filter([]);
+            oSourceCB.getBinding("items")?.filter([]);
+
+            if (sCountry) {
+                // Find countryCode by name
+                const aCountryData = this.getView().getModel("CountryModel").getData();
+                const oCountryObj = aCountryData.find(c => c.countryName === sCountry);
+
+                if (oCountryObj) {
+                    const sCountryCode = oCountryObj.code;
+
+                    // Filter States by Country
+                    oStateCB.getBinding("items")?.filter([
+                        new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+                    ]);
+
+                    if (sState) {
+                        // Filter Cities by State + Country
+                        const aFilters = [
+                            new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, sState),
+                            new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+                        ];
+                        oSourceCB.getBinding("items")?.filter(aFilters);
+                    }
+                }
+            }
+
+            // Ensure values are set back in UI
+            oCountryCB.setValue(sCountry || "");
+            oStateCB.setValue(sState || "");
+            oSourceCB.setValue(sSource || "");
         },
     });
 });

@@ -1767,3 +1767,14 @@ span.sapMBtnInner.sapMBtnEmphasized {
 .sapMDialog {
   filter: none !important;
 }
+
+.myclass {
+    padding: 0 10px;
+}
+
+@media (max-width: 930px) {
+    .myavatar {
+        margin-top: 10px;
+        align-self: center;
+    }
+}

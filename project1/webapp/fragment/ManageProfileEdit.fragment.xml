@@ -1,4 +1,4 @@
-<core:FragmentDefinition
+<!-- <core:FragmentDefinition
     xmlns="sap.m"
     xmlns:core="sap.ui.core"
     xmlns:l="sap.ui.layout"
@@ -318,4 +318,4 @@
             </items>
         </Table>
     </Dialog>
-</core:FragmentDefinition>
+</core:FragmentDefinition> -->

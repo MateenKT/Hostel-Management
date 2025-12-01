@@ -4,6 +4,8 @@
     xmlns:l="sap.ui.layout"
     xmlns:f="sap.ui.layout.form"
     xmlns:u="sap.ui.unified"
+    xmlns:m="sap.m"
+    xmlns:uxap="sap.uxap"
 >
     <Dialog
         stretch="{= ${device>/system/phone} }"
@@ -13,7 +15,7 @@
         draggable="true"
     >
         <customHeader>
-            <Bar class="profileHeaderBar">
+            <Bar class="barheader">
                 <contentMiddle>
                     <Title
                         text="My Account"
@@ -21,6 +23,11 @@
                     />
                 </contentMiddle>
                 <contentRight>
+                    <m:Button
+                        text="{= ${profileData>/isEditMode} ? 'Save' : 'Edit'}"
+                        class="myUnifiedBtn"
+                        press="onEditSaveProfile"
+                    />
                     <Button
                         icon="sap-icon://decline"
                         type="Transparent"
@@ -29,24 +36,16 @@
                 </contentRight>
             </Bar>
         </customHeader>
-        <HBox
-            class="sapUiMediumMargin responsiveProfileBox"
-            justifyContent="Start"
-            alignItems="Start"
-        >
-            <VBox
-                width="180px"
-                alignItems="Center"
-                class="sapUiMediumMarginEnd"
-            >
-                <Avatar
+        <FlexBox direction="Row" class="myclass" justifyContent="Center" alignItems="Center"
+            <VBox>
+                <m:Avatar
                     src="{path: 'profileData>/photo'}"
                     initials="{profileData>/initials}"
                     displayShape="Circle"
                     displaySize="XL"
                     press="onPreviewProfilePhoto"
+                    class="sapUiTinyMargin myavatar"
                 />
-
                 <Button
                     id="id_avatarEditBtn"
                     icon="sap-icon://edit"
@@ -59,101 +58,227 @@
                     uploadOnChange="false"
                     change="onAvatarFileSelected"
                     fileType="png,jpg,jpeg"
+                    maximumFileSize="2MB"
                     class="hiddenUploader"
                     buttonOnly="true"
                     iconOnly="true"
                 />
             </VBox>
-            
-                <VBox width="100%"> 
-                <Toolbar>
-                <ToolbarSpacer/>
-                <Button
-                    text="{= ${profileData>/isEditMode} ? 'Save' : 'Edit'}"
-                    press="onEditSaveProfile"
-                    class="myUnifiedBtn"
-                />
-                </Toolbar>
-                <f:Form editable="false">
-                <f:layout>
-                    <f:ColumnLayout
-                        columnsXL="3"
-                        columnsL="3"
-                        columnsM="1"
-                    />
-                </f:layout>
+            <VBox>
+                <f:SimpleForm
+                    layout="ColumnLayout"
+                    columnsM="3"
+                    columnsL="4"
+                    visible="{= !${profileData>/isEditMode}}"
+                >
+                    <f:content>
+                        <m:Label text="Full Name:" />
+                        <m:Text
+                            text="{= ${profileData>/Salutation} + ' ' + ${profileData>/name}}"
+                        />
 
-                <f:formContainers>
-                    <f:FormContainer>
-                        <f:formElements>
-                            <f:FormElement label="Full Name">
-                                <f:fields>
-                                
-                                     <Text
-                                text="{= ${profileData>/Salutation} + ' ' + ${profileData>/name}}"
+                        <m:Label text="Email:" />
+                        <Text text="{profileData>/email}" />
+
+                        <m:Label text="Date of Birth:" />
+                        <Text text="{profileData>/dob}" />
+
+                        <m:Label text="Country:" />
+                        <Text text="{profileData>/country}" />
+
+                        <m:Label text="State:" />
+                        <Text text="{profileData>/state}" />
+
+                        <m:Label text="City:" />
+                        <Text text="{profileData>/city}" />
+
+                        <m:Label text="Mobile Number:" />
+                        <!-- <HBox
+                                renderType="Bare"
+                                visible="{= !${profileData>/isEditMode}}"
+                            > -->
+                        <m:Text
+                            text="{= ${profileData>/stdCode} + ' ' + ${profileData>/phone}}"
+                        />
+
+                        <m:Label text="Gender:" />
+                        <Text text="{profileData>/gender}" />
+                    </f:content>
+                </f:SimpleForm>
+                <f:SimpleForm
+                    layout="ColumnLayout"
+                    columnsM="3"
+                    columnsL="4"
+                    visible="{profileData>/isEditMode}"
+                >
+                    <f:content>
+                        <m:Label text="Full Name:" />
+                        <Select
+                            selectedKey="{profileData>/Salutation}"
+                            width="90px"
+                        >
+                            <core:Item
+                                key="Mr."
+                                text="Mr."
                             />
-                                </f:fields>
-                            </f:FormElement>
+                            <core:Item
+                                key="Mrs."
+                                text="Mrs."
+                            />
+                            <core:Item
+                                key="Miss"
+                                text="Miss"
+                            />
+                        </Select>
+                        <m:Input
+                            id="id_Name"
+                            value="{profileData>/name}"
+                            valueStateText="Enter Customer Name"
+                            change="onChange"
+                        />
 
-                            <f:FormElement label="Email">
-                                <f:fields>
-                                    <Text text="{profileData>/email}" />
-                                </f:fields>
-                            </f:FormElement>
+                        <m:Label text="Email:" />
+                        <m:Input
+                            id="id_mail"
+                            value="{profileData>/email}"
+                            type="Email"
+                            valueStateText="Enter Email Id"
+                            change="onChange"
+                        />
 
-                            <f:FormElement label="City">
-                                <f:fields>
-                                    <Text text="{profileData>/city}" />
-                                </f:fields>
-                            </f:FormElement>
+                        <m:Label text="Date of Birth:" />
+                        <DatePicker
+                            id="id_dob"
+                            value="{profileData>/dob}"
+                            displayFormat="dd/MM/yyyy"
+                            valueFormat="dd/MM/yyyy"
+                            valueStateText="Enter Date of Birth"
+                            change="onDateChange"
+                        />
 
-                            <f:FormElement label="Date of Birth">
-                                <f:fields>
-                                    <Text text="{profileData>/dob}" />
-                                </f:fields>
-                            </f:FormElement>
+                        <m:Label text="Country:" />
+                        <ComboBox
+                            id="id_country"
+                            items="{path:'CountryModel>/',length:1000}"
+                            selectedKey="{profileData>/Country}"
+                            showSecondaryValues="true"
+                            selectionChange="onCountrySelectionChange"
+                            change="MC_onChangeCountry"
+                            placeholder="Enter Country"
+                            valueStateText="Select Country"
+                        >
+                            <core:ListItem
+                                key="{CountryModel>countryName}"
+                                text="{CountryModel>countryName}"
+                            />
+                        </ComboBox>
 
-                            <f:FormElement label="Country">
-                                <f:fields>
-                                    <Text text="{profileData>/country}" />
-                                </f:fields>
-                            </f:FormElement>
+                        <m:Label text="State:" />
+                        <ComboBox
+                            id="id_state"
+                            change="CC_onChangeState"
+                            placeholder="Enter State"
+                            valueStateText="Select State"
+                            showSecondaryValues="true"
+                            items="{path:'StateModel>/',length:1000}"
+                            selectedKey="{profileData>/state}"
+                        >
+                            <core:ListItem
+                                key="{StateModel>stateName}"
+                                text="{StateModel>stateName}"
+                            />
+                        </ComboBox>
 
-                            <f:FormElement label="Mobile Number">
-                                <f:fields>
-                                    <Text text="{= ${profileData>/stdCode} + ' ' + ${profileData>/phone}}" />
-                                </f:fields>
-                            </f:FormElement>
+                        <m:Label text="City:" />
+                        <ComboBox
+                            id="id_city"
+                            change="onChange"
+                            valueStateText="Select City"
+                            placeholder="Enter City"
+                            showSecondaryValues="true"
+                            items="{path:'CityModel>/',length:1000}"
+                            selectedKey="{profileData>/City}"
+                        >
+                            <core:ListItem
+                                key="{CityModel>cityName}"
+                                text="{CityModel>cityName}"
+                            />
+                        </ComboBox>
 
-                            <f:FormElement label="Gender">
-                                <f:fields>
-                                    <Text text="{profileData>/gender}" />
-                                </f:fields>
-                            </f:FormElement>
+                        <m:Label text="Mobile Number:" />
+                        <!-- <HBox
+                                renderType="Bare"
+                                visible="{= !${profileData>/isEditMode}}"
+                            > -->
+                        <!-- <m:Text text="{profileData>/phone}" class="sapUiSmallMarginBegin"
+                                /> -->
+                        <!-- </HBox> -->
+                        <!-- <HBox
+                                renderType="Bare"
+                                class="sapUiTinyMarginBegin sapUiTinyMarginTop"
+                                visible="{profileData>/isEditMode}"
+                            > -->
+                        <Input
+                            id="id_std"
+                            value="{profileData>/STDCode}"
+                            width="70px"
+                            editable="false"
+                        />
+                        <Input
+                            id="id_phone"
+                            value="{profileData>/phone}"
+                            editable="true"
+                            placeholder="Enter Contact Number"
+                            maxLength="10"
+                            liveChange="onChange"
+                            valueStateText="Enter Contact Number"
+                            type="Number"
+                        />
 
-                            <f:FormElement label="State">
-                                <f:fields>
-                                    <Text text="{profileData>/state}" />
-                                </f:fields>
-                            </f:FormElement>
-
-                            <f:FormElement label="Address">
-                                <f:fields>
-                                    <Text
-                                        text="{profileData>/address}"
-                                        wrapping="true"
-                                    />
-                                </f:fields>
-                            </f:FormElement>
-                        </f:formElements>
-                    </f:FormContainer>
-                </f:formContainers>
-            </f:Form>
-            </VBox> 
-        </HBox>
+                        <m:Label text="Gender:" />
+                        <ComboBox
+                            id="id_gender"
+                            selectedKey="{profileData>/gender}"
+                            valueStateText="Select Gender"
+                            change="onChange"
+                        >
+                            <core:Item
+                                key="Male"
+                                text="Male"
+                            />
+                            <core:Item
+                                key="Female"
+                                text="Female"
+                            />
+                            <core:Item
+                                key="Other"
+                                text="Other"
+                            />
+                        </ComboBox>
+                    </f:content>
+                </f:SimpleForm>
+                <HBox class="sapUiSmallMarginBegin" alignContent="Center" alignItems="Center">
+                    <m:Label text="Address:" />
+                    <TextArea
+                        id="id_address"
+                        class="sapUiTinyMarginBegin"
+                        value="{profileData>/address}"
+                        visible="{profileData>/isEditMode}"
+                        width="auto"
+                        rows="2"
+                        cols="5"
+                    />
+                </HBox>
+                <Text
+                    text="{profileData>/address}"
+                    visible="{= !${profileData>/isEditMode}}"
+                    class="sapUiSmallMarginBegin"
+                />
+            </VBox>
+        </FlexBox>
         <Table
             id="Id_ProfileaTable"
-            mode="SingleSelectLeft"
+          
             noDataText="No booking history found"
             items="{
                     path: 'profileData>/bookings',
@@ -166,7 +291,7 @@
             <headerToolbar>
                 <OverflowToolbar>
                     <Title
-                        text="Booking History ({=${profileData>/bookings}.length})"
+                        text="Booking History ({= ${profileData>/bookings}.length})"
                     />
                     <ToolbarSpacer />
                 </OverflowToolbar>
@@ -202,10 +327,15 @@
                     press="onPressBookingRow"
                 >
                     <cells>
-                        <Text text="{profileData>customerName}" />
+                        <ObjectIdentifier
+                            title="{profileData>customerName}"
+                            text="{profileData>BookingID}"
+                        />
                         <Text text="{profileData>Startdate}" />
                         <Text text="{profileData>room}" />
-                         <Text text="{path:'profileData>amount', formatter: '.Formatter.formatCurrency'}"/>
+                        <Text
+                            text="{path:'profileData>amount', formatter: '.Formatter.formatCurrency'}"
+                        />
                         <Text text="{profileData>status}" />
                     </cells>
                 </ColumnListItem>
