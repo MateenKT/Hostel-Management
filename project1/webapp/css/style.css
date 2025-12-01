@@ -1744,5 +1744,26 @@ span.sapMBtnInner.sapMBtnEmphasized {
 }
 
 
+/* ===== Base blur fallback (works everywhere) ===== */
+.blur-background > :not(.sapMDialog):not(.sapUiBLy) {
+  filter: blur(10px) saturate(0.85) brightness(0.85);
+  opacity: 0.95;
+  transition: filter 0.35s ease, opacity 0.35s ease;
+}
 
+.sapUiBLy {
+  background: rgba(0,0,0,0.18) !important;
+}
 
+/* ===== Real backdrop blur when supported ===== */
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .sapUiBLy {
+    background: rgba(0,0,0,0.12) !important;
+    backdrop-filter: blur(12px) saturate(0.9) brightness(0.85);
+    -webkit-backdrop-filter: blur(12px) saturate(0.9) brightness(0.85);
+  }
+}
+
+.sapMDialog {
+  filter: none !important;
+}

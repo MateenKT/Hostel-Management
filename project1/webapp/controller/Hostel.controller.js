@@ -739,6 +739,8 @@ sap.ui.define([
             // Reset dialog title
             vm.setProperty("/dialogTitle", "Hostel Access Portal");
 
+            this.getView().addStyleClass("blur-background");    
+
             this._oSignDialog.open();
         },
 
@@ -746,7 +748,12 @@ sap.ui.define([
 
 
         onDialogClose: function () {
+            // The afterClose event will handle removing the blur class
             if (this._oSignDialog) this._oSignDialog.close();
+            if (this._oSignDialog) {
+                this.getView().removeStyleClass("blur-background");
+                this._oSignDialog.close();
+            }
         },
 
 
@@ -1083,7 +1090,7 @@ sap.ui.define([
                     return;
                 }
 
-                sap.m.MessageBox.success("Registration Successful!", {
+                sap.m.MessageBox.success("Registration Successful", {
                     title: "Success",
                     onClose: () => {
 
@@ -1136,13 +1143,34 @@ sap.ui.define([
                 });
 
             } catch (err) {
-                sap.m.MessageToast.show("Registration failed!");
+
+                let sMsg = "Registration failed! Please try again.";
+
+                // ---- Extract backend error message safely ----
+                if (err?.responseJSON?.message) {
+                    sMsg = err.responseJSON.message;
+                }
+                else if (typeof err?.responseText === "string") {
+                    try {
+                        const oErr = JSON.parse(err.responseText);
+                        if (oErr?.message) {
+                            sMsg = oErr.message;
+                        }
+                    } catch (e) {
+                        // ignore JSON parse errors
+                    }
+                }
+
+                sap.m.MessageBox.error(sMsg, {
+                    title: "Registration Failed"
+                });
+
                 console.error("SignUp Error:", err);
 
             } finally {
-                // ✅ GUARANTEED BUSY STOP
                 sap.ui.core.BusyIndicator.hide();
             }
+
         },
         onChangeState: function (oEvent) {
 
@@ -2837,6 +2865,9 @@ sap.ui.define([
 
             // Clear all fields including forgot/otp/reset
             this._clearAllAuthFields();
+
+            // Remove blur effect from the background
+            this.getView().removeStyleClass("blur-background");
 
             // Ensure only Sign In panel is visible when dialog opens next time
 
