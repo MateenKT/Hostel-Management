@@ -89,13 +89,13 @@
                         <Text text="{profileData>/dob}" />
 
                         <m:Label text="Country" />
-                        <Text text="{profileData>/country}" />
+                        <Text text="{profileData>/Country}" />
 
                         <m:Label text="State" />
-                        <Text text="{profileData>/state}" />
+                        <Text text="{profileData>/State}" />
 
                         <m:Label text="City" />
-                        <Text text="{profileData>/city}" />
+                        <Text text="{profileData>/City}" />
 
                         <m:Label text="Mobile Number" />
                         <!-- <HBox
@@ -186,10 +186,11 @@
                             placeholder="Enter Country"
                             valueStateText="Select Country"
                         >
-                            <core:ListItem
-                                key="{CountryModel>countryName}"
-                                text="{CountryModel>countryName}"
-                            />
+                              <core:ListItem
+                        key="{CountryModel>countryName}"
+                        text="{CountryModel>countryName}"
+                        additionalText="{CountryModel>code}"
+                    />
                         </ComboBox>
 
                         <m:Label
@@ -203,12 +204,12 @@
                             valueStateText="Select State"
                             showSecondaryValues="true"
                             items="{path:'StateModel>/',length:1000}"
-                            selectedKey="{profileData>/state}"
+                            selectedKey="{profileData>/State}"
                         >
-                            <core:ListItem
-                                key="{StateModel>stateName}"
-                                text="{StateModel>stateName}"
-                            />
+                           <core:ListItem
+                        key="{StateModel>stateName}"
+                        text="{StateModel>stateName}"
+                    />
                         </ComboBox>
 
                         <m:Label
@@ -222,7 +223,7 @@
                             placeholder="Enter City"
                             showSecondaryValues="true"
                             items="{path:'CityModel>/',length:1000}"
-                            selectedKey="{profileData>/City}"
+                            selectedKey="{profileData>/City}" selectionChange="CC_onChangeCity"
                         >
                             <core:ListItem
                                 key="{CityModel>cityName}"
