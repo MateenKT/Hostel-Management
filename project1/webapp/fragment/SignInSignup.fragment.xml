@@ -65,7 +65,10 @@
 						<Label class="sapUiSmallMarginTop" text="Enter User Name" required="true" />
 						<Input id="fpUserName" placeholder="Registered Name" liveChange="onUserlivechange" valueStateText="Please enter a valid User Name" enabled="{= ${LoginViewModel>/forgotStep} === 1 }"/>
 						<HBox justifyContent="End">
-							<Button id="btnFPNext" text="Send OTP" press="onValidateUser" enabled="{= ${LoginViewModel>/forgotStep} &lt;= 2 }" class="myUnifiedBtn sapUiSmallMarginTop"/>
+						<Button id="btnFPNext" text="{LoginViewModel>/otpButtonText}" press="onValidateUser" enabled="{= ${LoginViewModel>/forgotStep} 
+	&lt;= 2 &amp;&amp; ${LoginViewModel>/canResendOTP} }" class="myUnifiedBtn sapUiSmallMarginTop"/>
+
+							<!-- <Button id="btnFPNext" text="Send OTP" press="onValidateUser" enabled="{= ${LoginViewModel>/forgotStep} &lt;= 2 }" class="myUnifiedBtn sapUiSmallMarginTop"/> -->
 						</HBox>
 					</VBox>
 					<!-- STEP 2: OTP -->

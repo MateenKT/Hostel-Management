@@ -3233,57 +3233,72 @@ sap.ui.define([
         },
 
 
+
+
+
         _onVerifyOTP: async function () {
 
             const vm = this.getView().getModel("LoginViewModel");
             const flow = vm.getProperty("/authFlow");
 
-            // Read OTP from correct field
-            const otp = (flow === "forgot")
-                ? sap.ui.getCore().byId("fpOTP").getValue().trim()
-                : sap.ui.getCore().byId("signInOTP").getValue().trim();
+            // Resolve OTP control by flow
+            const oOtpInput = (flow === "forgot")
+                ? sap.ui.getCore().byId("fpOTP")
+                : sap.ui.getCore().byId("signInOTP");
 
-            // Validate OTP format (6 digits only)
-            if (otp.length !== 6 || !/^\d{6}$/.test(otp)) {
-                const oInput = (flow === "forgot")
-                    ? sap.ui.getCore().byId("fpOTP")
-                    : sap.ui.getCore().byId("signInOTP");
+            const otp = oOtpInput.getValue().trim();
 
-                oInput.setValueState(sap.ui.core.ValueState.Error);
-                oInput.setValueStateText("Enter a valid 6-digit OTP");
+            // --- Basic validation ---
+            if (!otp) {
+                oOtpInput.setValueState(sap.ui.core.ValueState.Error);
+                oOtpInput.setValueStateText("Please enter OTP");
+                sap.m.MessageToast.show("Enter OTP");
+                return;
+            }
+
+            if (!/^\d{6}$/.test(otp)) {
+                oOtpInput.setValueState(sap.ui.core.ValueState.Error);
+                oOtpInput.setValueStateText("Enter a valid 6-digit OTP");
                 sap.m.MessageToast.show("Invalid OTP");
                 return;
             }
 
-            if (!otp) {
-                sap.m.MessageToast.show("Enter OTP");
-                sap.ui.getCore().byId("fpOTP").setValueState(sap.ui.core.ValueState.Error);
-                sap.ui.getCore().byId("fpOTP").setValueStateText("Please enter OTP");
+            // Clear any previous error state
+            oOtpInput.setValueState(sap.ui.core.ValueState.None);
+            oOtpInput.setValueStateText("");
+
+            // --- Backend verification ---
+            let isValid = false;
+
+            try {
+                isValid = await this._verifyOTPWithBackend(otp);
+            } catch (e) {
+                sap.m.MessageToast.show("OTP verification failed");
+                console.error("OTP verify error:", e);
                 return;
             }
 
-            // Verify with backend
-            const isValid = await this._verifyOTPWithBackend(otp);
             if (!isValid) {
                 sap.m.MessageToast.show("Incorrect OTP");
                 return;
             }
 
+            // ✅ OTP accepted: reset resend cooldown state
+            this._resetOtpCooldown();
+
             // --------------------------
             // 📌 Forgot Password Flow
             // --------------------------
             if (flow === "forgot") {
-
-                // switch to password reset
                 vm.setProperty("/forgotStep", 3);
-
                 return;
             }
 
             // --------------------------
-            // 📌 Normal OTP Login
+            // 📌 Normal OTP Login Flow
             // --------------------------
-            if (flow === "otp") {
+            try {
+
                 const resp = await this.ajaxReadWithJQuery("HM_Login", {
                     UserID: this._oResetUser?.UserID,
                     UserName: this._oResetUser?.UserName,
@@ -3294,10 +3309,14 @@ sap.ui.define([
                 this._setLoggedInUser(resp.data[0]);
                 this._resetAllAuthFields();
                 this._oSignDialog.close();
+
+            } catch (e) {
+
+                sap.m.MessageToast.show("Login failed");
+                console.error("OTP login error:", e);
+
             }
         },
-
-
 
 
 
@@ -3951,6 +3970,13 @@ sap.ui.define([
                 new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
             ]);
         },
+
+
+
+
+
+
+
         onValidateUser: async function () {
 
             const isValid =
@@ -3984,6 +4010,9 @@ sap.ui.define([
                     alert(oResp.OTP);
 
                     this._oResetUser = { UserID: sUserId, UserName: sUserName };
+                    // ✅ Start resend cooldown
+                    this._startOtpCooldown(20);
+
 
                     this.getView().getModel("LoginViewModel").setProperty("/forgotStep", 2);
                 } else {
@@ -3996,7 +4025,6 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide();
             }
         },
-
         _applyCountryStateCityFilters: function () {
             const oModel = this._oProfileDialog.getModel("profileData");
             const oCountryCB = sap.ui.getCore().byId("id_country");
@@ -4042,6 +4070,8 @@ sap.ui.define([
         },
 
 
+
+
         _startOtpTimer: function () {
 
             const vm = this.getView().getModel("LoginViewModel");
@@ -4077,13 +4107,13 @@ sap.ui.define([
         },
 
 
-
         _clearOtpTimer: function () {
             if (this._otpInterval) {
                 clearInterval(this._otpInterval);
                 this._otpInterval = null;
             }
         },
+
         _resetOtpState: function () {
             const vm = this.getView().getModel("LoginViewModel");
 
@@ -4099,6 +4129,58 @@ sap.ui.define([
             otpCtrl?.setValue("");
             otpCtrl?.setEnabled(false);
             otpCtrl?.setValueState("None");
+            clearInterval(this._otpInterval);
+            this._otpInterval = null;
+
+
+            vm.setProperty("/canResendOTP", true);
+            vm.setProperty("/otpTimer", 0);
+            vm.setProperty("/otpButtonText", "Send OTP");
+        },
+
+
+        _startOtpCooldown: function (iSeconds = 20) {
+
+            const vm = this.getView().getModel("LoginViewModel");
+            let remaining = iSeconds;
+
+            vm.setProperty("/canResendOTP", false);
+            vm.setProperty("/otpButtonText", `Resend OTP in ${remaining}s`);
+
+            if (this._otpInterval) {
+                clearInterval(this._otpInterval);
+                this._otpInterval = null;
+            }
+
+            this._otpInterval = setInterval(() => {
+
+                remaining--;
+
+                if (remaining <= 0) {
+                    clearInterval(this._otpInterval);
+                    this._otpInterval = null;
+
+                    vm.setProperty("/canResendOTP", true);
+                    vm.setProperty("/otpButtonText", "Resend OTP");
+                    return;
+                }
+
+                vm.setProperty("/otpButtonText", `Resend OTP in ${remaining}s`);
+
+            }, 1000);
+        },
+
+        _resetOtpCooldown: function () {
+
+            const vm = this.getView().getModel("LoginViewModel");
+
+            if (this._otpInterval) {
+                clearInterval(this._otpInterval);
+                this._otpInterval = null;
+            }
+
+            vm.setProperty("/otpButtonText", "Send OTP");
+            vm.setProperty("/canResendOTP", false);
         },
 
     });
