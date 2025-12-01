@@ -760,7 +760,16 @@
                             <ColumnListItem>
                                 <cells>
                                     <Text text="{CustomerData>FacilityName}" />
-                                    <Text text="{= ${CustomerData>Price} +' ' +  ${CustomerData>Currency}}" />
+                                    <Text
+                                        text="{
+        parts: [
+            { path: 'CustomerData>Price' },
+            { path: 'CustomerData>Currency' }
+        ],
+        formatter: '.Formatter.formatCurrency'
+    }"
+                                    />
+
                                     <Text
                                         text="{path:'CustomerData>StartDate'}"
                                     />
@@ -773,8 +782,16 @@
                                             }"
                                     />
                                     <Text text="{CustomerData>TotalDays}" />
-                                    <Text text="{= ${CustomerData>TotalAmount} +' ' +  ${CustomerData>Currency}}" />
-                                    
+                                    <!-- <Text text="{= ${CustomerData>TotalAmount} +' ' +  ${CustomerData>Currency}}" /> -->
+                                    <Text
+                                        text="{
+        parts: [
+            { path: 'CustomerData>TotalAmount' },
+            { path: 'CustomerData>Currency' }
+        ],
+        formatter: '.Formatter.formatCurrency'
+    }"
+                                    />
                                 </cells>
                             </ColumnListItem>
                         </items>
@@ -847,8 +864,6 @@
                         <HBox
                             justifyContent="End"
                             class="sapUiSmallMarginTop"
-                           
-
                         >
                             <Label
                                 text="CGST(9%):"
@@ -871,8 +886,6 @@
                         <HBox
                             justifyContent="End"
                             class="sapUiSmallMarginTop"
-                
-
 
                         >
                             <Label

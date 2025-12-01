@@ -53,6 +53,8 @@ sap.ui.define([
                     return "Indication05";
                 case "Assigned":
                     return "Success";
+                case "Completed":
+                    return "Success";
                 default:
                     return "Indication01";
 

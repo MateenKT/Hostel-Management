@@ -36,7 +36,8 @@ sap.ui.define([
             this.getView().setModel(model, "Bookingmodel");
 
             var model = new JSONModel({
-                visible: false
+                visible: false,
+                GSt:false
 
             });
             this.getView().setModel(model, "VisibleModel")
@@ -52,7 +53,20 @@ sap.ui.define([
 
              await this.OnRoom();
 
-             this.AD_onSearch()
+              this.AD_onSearch()
+ 
+//    const oResponse = await this.ajaxReadWithJQuery("HM_Branch", {});
+//                 const aBranches = Array.isArray(oResponse?.data) ? oResponse.data : (oResponse?.data ? [oResponse.data] : []);
+                
+//                 var Data=aBranches.find((item)=>{
+//                     var sBranchCode=this.getView().getModel("CustomerData").getData().BranchCode
+//                     return item.BranchID===sBranchCode
+//              })
+//              if(Data.Country==="India"){
+//                  this.getView().getModel("VisibleModel").setProperty("/GSt",true)
+//              }else{
+//                     this.getView().getModel("VisibleModel").setProperty("/GSt",false)
+//              }
 
         },
         OnRoom:function(){
@@ -350,7 +364,7 @@ sap.ui.define([
                 oCustomerData.Duration = Duration;
                 oCustomerData.DurationUnit = DurationUnit;
                 var sBranchCode = oCustomer.Bookings?.[0]?.BranchCode
-                await  this.Facilitysearch(sBranchCode)
+                 this.Facilitysearch(sBranchCode)
 
 
                 const totals = this.calculateTotals(aPersons, oCustomerData.RentPrice,sBranchCode);
