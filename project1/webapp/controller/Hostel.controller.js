@@ -792,6 +792,19 @@ sap.ui.define([
 
             vm.setProperty("/authFlow", "signup");
             vm.setProperty("/dialogTitle", "Hostel Access Portal");
+            // Set min and max dates for the Date of Birth picker
+            const oDOBpicker = sap.ui.getCore().byId("signUpDOB");
+            if (oDOBpicker) {
+                const oToday = new Date();
+
+                // Max date: 10 years ago from today
+                const oMaxDate = new Date(oToday.getFullYear() - 10, oToday.getMonth(), oToday.getDate());
+                oDOBpicker.setMaxDate(oMaxDate);
+
+                // Min date: 100 years ago from today
+                const oMinDate = new Date(oToday.getFullYear() - 100, oToday.getMonth(), oToday.getDate());
+                oDOBpicker.setMinDate(oMinDate);
+            }
         },
 
         onEmailliveChange: function (oEvent) {

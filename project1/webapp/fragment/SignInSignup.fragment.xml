@@ -92,7 +92,7 @@
 			</Panel>
 
 			<!-- Sign Up Panel -->
-			<Panel id="signUpPanel" expandable="false" visible="{= ${LoginViewModel>/authFlow} === 'signup' }">
+			<Panel id="signUpPanel" visible="{= ${LoginViewModel>/authFlow} === 'signup' }">
 				<content>
 					<f:SimpleForm id="signUpForm" editable="true" layout="ResponsiveGridLayout" labelSpanL="3" labelSpanM="3" emptySpanL="1" emptySpanM="1" columnsL="2" columnsM="1" 
 					class="sapUiNoContentPadding">
@@ -114,7 +114,7 @@
 						</HBox>
 						<Label text="Date Of Birth" required="true"  />
 						<DatePicker id="signUpDOB" value="{LoginMode>/DateOfBirth}"
-						 displayFormat="dd-MM-yyyy" 
+						 displayFormat="dd/MM/yyyy" 
 						valueFormat="yyyy-MM-dd" change="onChangeDOB" />
 						<Label text="Gender" required="true"/>
 						<Select id="signUpGender" selectedKey="" change="onChangeGender">

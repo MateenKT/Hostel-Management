@@ -409,7 +409,7 @@
   display: flex;
   justify-content: left;
   align-items: left;
-  margin: 0 auto 18px auto;
+  margin: 0 auto 1px auto;
 }
 
 .switch-toggle-btn {
@@ -418,7 +418,7 @@
   border-radius: 32px !important;
   transition: background 0.2s, color 0.2s;
   box-shadow: none !important;
-  margin: 0 2px;
+  margin: 0 0.2px;
   padding: 0.8rem 2.2rem;
   min-width: 160px;
   border: none;
@@ -436,28 +436,28 @@
 
 
 
-.switch-toggle-container {
+/* .switch-toggle-container {
   background: #fff;
   border-radius: 32px;
   box-shadow: 0 4px 12px rgba(60, 70, 90, 0.08);
   padding: 4px;
   width: 420px;
   display: flex;
-  justify-content: left;   /* center children */
+  justify-content: left;  
   align-items: stretch;
-  gap: 4px;                  /* replace margin on buttons */
+  gap: 4px;                  
   margin: 0 auto 18px auto;
 }
 
 .switch-toggle-btn {
-  flex: 1;                   /* make both buttons equal width */
+  flex: 1;                  
   text-align: center;
   font-weight: bold;
   font-size: 1.2rem;  
   border-radius: 32px !important;
   transition: background 0.2s, color 0.2s;
-  padding: 0.8rem 0;         /* even padding */
-  min-width: 0;             /* remove size fighting */
+  padding: 0.8rem 0;        
+  min-width: 0;             
   border: none;
 }
 .switch-toggle-btn {
@@ -471,7 +471,7 @@
 .switch-toggle-btn.inactive {
   background: transparent;
   color: #333 !important;
-}
+} */
 
 
 .customSearchBar.sapMInput {
