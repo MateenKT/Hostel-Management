@@ -9,8 +9,7 @@
 >
     <Dialog
         stretch="{= ${device>/system/phone} }"
-        contentWidth="80%"
-        contentHeight="auto"
+        contentWidth="{= ${device>/system/phone} ? '100%' : '80%'}"
         resizable="true"
         draggable="true"
     >
