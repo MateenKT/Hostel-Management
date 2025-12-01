@@ -1873,9 +1873,13 @@ sap.ui.define([
 
         onEditSaveProfile: async function () {
             const oModel = this._oProfileDialog.getModel("profileData");
+            var data = oModel.getData()
             const isEditMode = oModel.getProperty("/isEditMode");
             if (!isEditMode) {
                 oModel.setProperty("/isEditMode", true);
+                oModel.setProperty("/isEditMode", true);
+                oModel.setProperty("/Country", data.Country);
+
                 this._applyCountryStateCityFilters();
                 // this._oProfileDialog.close();
                 sap.ui.core.BusyIndicator.show(0);

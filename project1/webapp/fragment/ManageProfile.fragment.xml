@@ -103,7 +103,7 @@
                                 visible="{= !${profileData>/isEditMode}}"
                             > -->
                         <m:Text
-                            text="{= ${profileData>/stdCode} + ' ' + ${profileData>/phone}}"
+                            text="{= ${profileData>/STDCode} + ' ' + ${profileData>/phone}}"
                             class="sapUiSmallMarginBegin"
                         />
 
