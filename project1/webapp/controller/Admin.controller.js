@@ -86,11 +86,11 @@ sap.ui.define([
                 }
 
                 // Safely add RoomNo if Bookings exist
-                if (item.Bookings && item.Bookings.length > 0 && item.Bookings[0].RoomNo) {
-                    uniqueValues.PO_id_CompanyName.add(item.Bookings[0].RoomNo);
+                if (item.RoomNo) {
+                    uniqueValues.PO_id_CompanyName.add(item.RoomNo);
                 }
-                if (item.Bookings && item.Bookings.length > 0 && item.Bookings[0].Status) {
-                    uniqueValues.PO_id_Status.add(item.Bookings[0].Status);
+                if (item.Status) {
+                    uniqueValues.PO_id_Status.add(item.Status);
                 }
             });
 

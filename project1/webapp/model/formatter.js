@@ -47,20 +47,6 @@ sap.ui.define([
             return iDays > 0 ? iDays : 0;
         },
 
-        formatObjectStatus: function(sStatus) {
-            switch (sStatus) {
-                case "New":
-                    return "Indication05";
-                case "Assigned":
-                    return "Success";
-                case "Completed":
-                    return "Success";
-                default:
-                    return "Indication01";
-
-            }
-        },
-
         DateFormat: function(sDate) {
             if (sDate) {
                 var oDateFormat = DateFormat.getDateInstance({
@@ -187,6 +173,10 @@ sap.ui.define([
             switch (sStatus) {
                 case "New":
                     return "Indication05";
+                case "Assigned":
+                    return "Warning";
+                case "Completed":
+                    return "Success";
                 case "Renew":
                     return "Indication03";
                 case "Active":

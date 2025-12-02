@@ -61,8 +61,8 @@
                                 showClearIcon="true"
                             >
 								<core:ListItem
-                                    key="{HostelModel>Bookings/0/RoomNo}"
-                                    text="{HostelModel>Bookings/0/RoomNo}"
+                                    key="{HostelModel>RoomNo}"
+                                    text="{HostelModel>RoomNo}"
                                 />
 							</ComboBox>
 						</fb:control>
@@ -82,8 +82,8 @@
                                 showClearIcon="true"
                             >
 								<core:ListItem
-                                    key="{HostelModel>Bookings/0/Status}"
-                                    text="{HostelModel>Bookings/0/Status}"
+                                    key="{HostelModel>Status}"
+                                    text="{HostelModel>Status}"
                                 />
 							</ComboBox>
 						</fb:control>
@@ -98,7 +98,7 @@
                 busyIndicatorDelay="0"
                 class="sapUiResponsiveMargin"
                 items="{path: 'HostelModel>/',  sorter: [{
-                    path: 'HostelModel>Bookings/0/BranchCode',
+                    path: 'HostelModel>BranchCode',
                     group: true
                 }]}"
             >
@@ -203,18 +203,18 @@
                                 text="{path:'HostelModel>StartDate',formatter: '.Formatter.formatDate'}"
                             /> -->
 							<ObjectIdentifier
-                            title="{path:'HostelModel>Bookings/0/StartDate',formatter: '.Formatter.formatDate'}"
-                            text="{path:'HostelModel>Bookings/0/EndDate',formatter: '.Formatter.formatDate'}"
+                            title="{path:'HostelModel>StartDate',formatter: '.Formatter.formatDate'}"
+                            text="{path:'HostelModel>EndDate',formatter: '.Formatter.formatDate'}"
                         />
-							<!-- <Text text="{HostelModel>Bookings/0/Status}" /> -->
+							<!-- <Text text="{HostelModel>Status}" /> -->
 							<!-- <Text text="{HostelModel>RoomType}" /> -->
-							<Text text="{HostelModel>Bookings/0/RoomNo}" />
-							<Text text="{HostelModel>Bookings/0/BedType}" />
+							<Text text="{HostelModel>RoomNo}" />
+							<Text text="{HostelModel>BedType}" />
 							<ObjectStatus
                                 inverted="false"
-                                text="{HostelModel>Bookings/0/Status}"
+                                text="{HostelModel>Status}"
                                 state="{
-                               path: 'HostelModel>Bookings/0/Status',
+                               path: 'HostelModel>Status',
                               formatter: '.Formatter.formatObjectStatus'
                                    }"
                                 class="sapUiTinyMarginBottom"

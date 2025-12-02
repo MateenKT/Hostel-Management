@@ -77,6 +77,14 @@ sap.ui.define([
                   
                 });
         },  
+           Coupon:function(){
+               this.ajaxReadWithJQuery("HM_Coupon", "").then((oData) => {
+                    var aCoupon= Array.isArray(oData.data) ? oData.data: [oData.data];
+                    var model = new sap.ui.model.json.JSONModel(aCoupon);
+                    this.getView().setModel(model, "CouponModel")
+                  
+                });
+        },  
         onChekout:function(){
               var data= this.getView().getModel("CustomerData").getData()
          
@@ -236,6 +244,7 @@ sap.ui.define([
                     Person: oCustomer.Bookings?.[0]?.NoOfPersons || "",
                     RoomNo: oCustomer.Bookings?.[0]?.RoomNo || "",
                     Currency: oCustomer.Bookings?.[0]?.Currency || "",
+                    Discount: oCustomer.Bookings?.[0]?.	Discount || "",
 
                     StartDate: this.Formatter.DateFormat(oCustomer.Bookings?.[0]?.StartDate || ""),
                     EndDate: this.Formatter.DateFormat(oCustomer.Bookings?.[0]?.EndDate || ""),
@@ -360,6 +369,8 @@ sap.ui.define([
                     }
                 }
                 oCustomerData.RentPrice = Duration * roomRentPrice;
+                oCustomerData.Discount =oCustomer.Bookings?.[0]?.Discount || "0.00";
+
 
                 // Add duration to model
                 oCustomerData.Duration = Duration;
@@ -368,7 +379,7 @@ sap.ui.define([
                 await this.Facilitysearch(sBranchCode)
 
 
-                const totals = this.calculateTotals(aPersons, oCustomerData.RentPrice,sBranchCode);
+                const totals = this.calculateTotals(aPersons, oCustomerData.RentPrice,sBranchCode,oCustomerData.Discount);
 
 
                 if (totals) {
@@ -391,7 +402,7 @@ sap.ui.define([
             }
         },
 
-        calculateTotals: function (aPersons, roomRentPrice, sBranchCode) {
+        calculateTotals: function (aPersons, roomRentPrice, sBranchCode,Discount) {
             var Facilitiesdata=this.getView().getModel("Facilities").getData()
 
             let totalFacilityPricePerDay = 0;
@@ -513,11 +524,12 @@ sap.ui.define([
             // Final Price Calculation
             // -------------------------------
             const FacilityPrice = totalFacilityPricePerDay + otherFacilitiesTotal;
-            const SubTotal = FacilityPrice + roomRentPrice;
+            let DiscountAmount = Discount || 0;
+            const SubTotal = FacilityPrice + roomRentPrice -DiscountAmount;
 
-            const SGST = (FacilityPrice + roomRentPrice) * 0.09;
-            const CGST = (FacilityPrice + roomRentPrice) * 0.09;
-            const grandTotal =FacilityPrice + SGST + CGST + Number(roomRentPrice || 0);
+            const SGST = SubTotal* 0.09;
+            const CGST =SubTotal * 0.09;
+            const grandTotal =SubTotal + SGST + CGST ;
 
             // Attach facility price to each entry
             aAllFacilities = aAllFacilities.map(item => ({
@@ -877,6 +889,8 @@ sap.ui.define([
 
                 oCustomerData.CGST = (total + (oCustomerData.RentPrice || 0)) * 0.09;
                 oCustomerData.SubTotal = (total + (oCustomerData.RentPrice || 0));
+                oCustomerData.Discount="0.00"
+
 
 
                 oCustomerData.GrandTotal = total + (oCustomerData.RentPrice || 0) + oCustomerData.SGST + oCustomerData.CGST;
@@ -897,7 +911,8 @@ sap.ui.define([
 
         onEditBooking: function () {
             this.applyCountryStateCityFilters()
-
+            this.Coupon()
+           
             this.getView().getModel("VisibleModel").setProperty("/visible", true)
             var data = this.getView().getModel("CustomerData").getData()
             var model = this.getView().getModel("Bookingmodel")
@@ -1020,6 +1035,8 @@ sap.ui.define([
                 oCustomerModel.setProperty("/SGST", SGST);
                 oCustomerModel.setProperty("/CGST", SGST);
                 oCustomerModel.setProperty("/SubTotal", SubTotal);
+                oCustomerModel.setProperty("/Discount",0.00)
+
 
                 oCustomerModel.setProperty("/GrandTotal", diffDays * originalRent + (oCustomerModel.getProperty("/TotalFacilityPrice") || 0) + SGST + SGST);
 
@@ -1137,6 +1154,8 @@ sap.ui.define([
                 oCustomerData.setProperty("/SGST", CGST);
                 oCustomerData.setProperty("/CGST", CGST);
                 oCustomerData.setProperty("/SubTotal", SubTotal);
+                oCustomerData.setProperty("/Discount",0.00)
+
 
 
 
@@ -1352,6 +1371,8 @@ sap.ui.define([
                 oCustomerModel.setProperty("/SGST",CGST)
                 oCustomerModel.setProperty("/CGST",CGST)
                 oCustomerModel.setProperty("/SubTotal",SubTotal)
+                oCustomerModel.setProperty("/Discount",0.00)
+
 
                  oCustomerModel.setProperty("/GrandTotal", fPrice + fFacilityPrice + CGST * 2);
 
@@ -1447,6 +1468,8 @@ sap.ui.define([
                 oCustomerModel.setProperty("/SGST",CGST)
                 oCustomerModel.setProperty("/CGST",CGST)
                 oCustomerModel.setProperty("/SubTotal",SubTotal)
+                oCustomerModel.setProperty("/Discount",0.00)
+
 
 
                 oCustomerModel.setProperty("/GrandTotal", fOriginalRentPrice + fFacilityPrice + CGST * 2);
@@ -1649,7 +1672,9 @@ sap.ui.define([
                     "EndDate": Bookingdata.EndDate.split('/').reverse().join('-'),
                     "PaymentType": paymentMap[unit] || Bookingdata.UnitText, // fallback
                     "BedType": Bookingdata.BedTypeName,
-                    "RoomPrice": CustomerData.RentPrice
+                    "RoomPrice": CustomerData.RentPrice,
+                    "Discount": CustomerData.Discount || 0,
+
                 }],
                 "FacilityItems": CustomerData.AllSelectedFacilities.map(item => {
                     // Normalize UnitText for facility as well
@@ -1998,7 +2023,81 @@ sap.ui.define([
     this.byId("docPreviewImage").setSrc(sBase64);
 
     this._oDocPreviewDialog.open();
+},
+onApplyCoupon: function () {
+    var oCustomerData = this.getView().getModel("CustomerData").getData();
+    var Bookingmodel = this.getView().getModel("Bookingmodel").getData();
+
+    var oCouponData = this.getView().getModel("CouponModel").getData();
+
+    var sEnteredCode = oCustomerData.CouponCode; // user entered code
+    if (!sEnteredCode) {
+        sap.m.MessageToast.show("Please enter a coupon code");
+        return;
+    }
+
+    // 1. Check coupon exists
+    var oCoupon = oCouponData.find(c => c.CouponCode === sEnteredCode);
+
+    if (!oCoupon) {
+        sap.m.MessageToast.show("Invalid coupon code");
+        return;
+    }
+if(Bookingmodel.StartDate.includes("/")){
+    Bookingmodel.StartDate = Bookingmodel.StartDate.split("/").reverse().join("-");
+}else if(Bookingmodel.EndDate.includes("/")){
+    Bookingmodel.EndDate = Bookingmodel.EndDate.split("/").reverse().join("-");
 }
+    // 2. Date validation
+    var custStart = new Date(Bookingmodel.StartDate);
+    var custEnd = new Date(Bookingmodel.EndDate);
+    var coupStart = new Date(oCoupon.StartDate);
+    var coupEnd = new Date(oCoupon.EndDate);
+
+    if (custStart < coupStart && custEnd > coupEnd) {
+        sap.m.MessageToast.show("Coupon not valid for selected dates");
+        return;
+    }
+
+    // 3. Percentage discount
+    var subtotal = Number(oCustomerData.SubTotal || 0);
+
+    if(oCoupon.MinOrderValue > subtotal){
+        sap.m.MessageToast.show("Coupon not applicable for below minimum value" +' '+ oCoupon.MinOrderValue);
+        return;
+    }
+  var discountAmount = 0;
+var newSubtotal = "";
+
+// Check discount type
+if (oCoupon.DiscountType === "Percentage") {
+    discountAmount = (subtotal * Number(oCoupon.DiscountValue || 0)) / 100;
+    newSubtotal = subtotal - discountAmount;
+} else if (oCoupon.DiscountType === "Fixed Amount") {
+    discountAmount = Number(oCoupon.DiscountValue || 0);
+    newSubtotal = subtotal - discountAmount;
+}
+
+
+
+
+    var cgst = newSubtotal * 0.09;
+    var sgst = newSubtotal * 0.09;
+
+    var grandTotal = newSubtotal + cgst + sgst;
+
+    // 5. Update Model
+    oCustomerData.Discount = discountAmount.toFixed(2);
+    oCustomerData.SubTotal = newSubtotal;
+    oCustomerData.CGST = cgst;
+    oCustomerData.SGST = sgst;
+    oCustomerData.GrandTotal = grandTotal;
+
+    this.getView().getModel("CustomerData").refresh(true);
+
+    sap.m.MessageToast.show("Coupon applied successfully!");
+}
+
 
 
 

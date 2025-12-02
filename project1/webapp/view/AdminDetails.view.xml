@@ -580,6 +580,7 @@
                         >
 							<Table
                                 id="Ad_id_idFacilityRoomTableDetails1"
+                                    width="100%"
                                 class="sapUiSmallMarginTop"
                                 items="{path: 'CustomerData>/Documents'}"
                                 mode="{= ${VisibleModel>/visible} === true ? 'Delete' : 'None' }"
@@ -587,8 +588,10 @@
                                 busyIndicatorDelay="0"
                                 inset="false"
                                 selectionChange="onTableSelection"
+                                   growing="true"
+    growingScrollToLoad="true"
                             >
-								<headerToolbar>
+							<headerToolbar>
 									<Toolbar>
 										<Title
                                             text="Document Details ({=${CustomerData>/Documents}.length})"
@@ -631,6 +634,11 @@
                                         />
 									</Toolbar>
 								</headerToolbar>
+
+
+
+ 
+
 								<columns>
 									<Column demandPopin="true">
 										<Text text="File Name" />
@@ -773,13 +781,18 @@
 							</ColumnListItem>
 						</items>
 					</Table>
+                   
 					<FlexBox class="custom-flexbox sapUiContentPadding" direction="Column">
-						<VBox class="custom-vbox">
+                  
+						<VBox class="custom-vbox" width="100%" alignItems="End">
+                        <!-- Coupon Code Row -->
+
+
 							<!-- Total Facility Cost -->
 							<HBox justifyContent="SpaceBetween">
-								<Label text="Total Facility Cost ({CustomerData>/AllSelectedFacilities/0/Currency}) :"
-                     class="boldBlackText sapUiTinyMarginBottom rightAlignLabel"/>
-								<Text class="amountText"
+								<Label text="Total Facility Cost:"
+                     class="totalColumnBold1 sapUiTinyMarginBottom rightAlignLabel"/>
+								<Text class="amountText totalColumnBold1"    
                     text="{
                             parts: [
                                 { path: 'CustomerData>/TotalFacilityPrice' },
@@ -787,13 +800,14 @@
                             ],
                             formatter: '.Formatter.formatCurrency'
                         }"
-                    textAlign="End"/>
+                    textAlign="End"
+                    />
 							</HBox>
 							<!-- Room Rent -->
 							<HBox justifyContent="SpaceBetween">
-								<Label text="Room Rent ({CustomerData>/AllSelectedFacilities/0/Currency}) :"
-                     class="boldBlackText sapUiTinyMarginBottom rightAlignLabel"/>
-								<Text class="amountText"
+								<Label text="Room Rent:"
+                     class="totalColumnBold1 sapUiTinyMarginBottom rightAlignLabel"/>
+								<Text class="amountText totalColumnBold1"
                     text="{
                             parts: [
                                 { path: 'CustomerData>/RentPrice' },
@@ -803,11 +817,54 @@
                         }"
                     textAlign="End"/>
 							</HBox>
+                               <HBox  width="100%" justifyContent="End" alignItems="Center" class="sapUiSmallMarginBottom"
+                                visible="{VisibleModel>/visible}"
+                               >
+
+    <!-- Coupon Label -->
+    <Label 
+        text="Coupon Code:"
+        class="totalColumnBold1 sapUiTinyMarginEnd"
+        width="120px"
+    />
+
+    <!-- Coupon Input -->
+    <Input 
+        value="{CustomerData>/CouponCode}"
+        placeholder="Enter coupon"
+        width="150px"
+        class="sapUiTinyMarginEnd"
+        id="couponInput"
+    />
+
+    <!-- Apply Now Button -->
+    <Button
+        text="Apply Now"
+        type="Emphasized"
+        press=".onApplyCoupon"
+        class="sapUiTinyMarginEnd"
+    />
+
+</HBox>
+	<HBox justifyContent="SpaceBetween">
+								<Label text="Discount:"
+                     class="totalColumnBold1 sapUiTinyMarginBottom rightAlignLabel"/>
+								<Text class="amountText totalColumnBold1"
+                    text="{
+                            parts: [
+                                { path: 'CustomerData>/Discount' },
+                                { path: 'CustomerData>/AllSelectedFacilities/0/Currency' }
+                            ],
+                            formatter: '.Formatter.formatCurrency'
+                        }"
+                    textAlign="End"/>
+							</HBox>
+
 							<!-- Sub Total -->
 							<HBox justifyContent="SpaceBetween">
-								<Label text="Sub Total ({CustomerData>/AllSelectedFacilities/0/Currency}) :"
-                     class="boldBlackText sapUiTinyMarginBottom rightAlignLabel"/>
-								<Text class="amountText"
+								<Label text="Sub Total:"
+                     class="totalColumnBold1 sapUiTinyMarginBottom rightAlignLabel"/>
+								<Text class="amountText totalColumnBold1"
                     text="{
                             parts: [
                                 { path: 'CustomerData>/SubTotal' },
@@ -819,9 +876,9 @@
 							</HBox>
 							<!-- CGST -->
 							<HBox justifyContent="SpaceBetween">
-								<Label text="CGST (9%) ({CustomerData>/AllSelectedFacilities/0/Currency}) :"
-                     class="boldBlackText sapUiTinyMarginBottom rightAlignLabel"/>
-								<Text class="amountText"
+								<Label text="CGST (9%):"
+                     class="totalColumnBold1 sapUiTinyMarginBottom rightAlignLabel"/>
+								<Text class="amountText totalColumnBold1"
                     text="{
                             parts: [
                                 { path: 'CustomerData>/CGST' },
@@ -833,9 +890,9 @@
 							</HBox>
 							<!-- SGST -->
 							<HBox justifyContent="SpaceBetween">
-								<Label text="SGST (9%) ({CustomerData>/AllSelectedFacilities/0/Currency}) :"
-                     class="boldBlackText sapUiTinyMarginBottom rightAlignLabel"/>
-								<Text class="amountText"
+								<Label text="SGST (9%):"
+                     class="totalColumnBold1 sapUiTinyMarginBottom rightAlignLabel"/>
+								<Text class="amountText totalColumnBold1"
                     text="{
                             parts: [
                                 { path: 'CustomerData>/SGST' },
@@ -847,9 +904,9 @@
 							</HBox>
 							<!-- Grand Total -->
 							<HBox justifyContent="SpaceBetween">
-								<Label text="Grand Total ({CustomerData>/AllSelectedFacilities/0/Currency}) :"
-                     class="boldBlackText sapUiTinyMarginBottom rightAlignLabel"/>
-								<Text class="amountText"
+								<Label text="Grand Total:"
+                     class="totalColumnBold1 sapUiTinyMarginBottom rightAlignLabel"/>
+								<Text class="amountText totalColumnBold1"
                     text="{
                             parts: [
                                 { path: 'CustomerData>/GrandTotal' },
