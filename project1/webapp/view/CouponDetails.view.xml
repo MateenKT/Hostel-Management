@@ -77,9 +77,9 @@
 					<Column minScreenWidth="Tablet" demandPopin="true">
 						<Text text="End Date"/>
 					</Column>
-					<Column minScreenWidth="Tablet" demandPopin="true">
+					<!-- <Column minScreenWidth="Tablet" demandPopin="true">
 						<Text text="Status"/>
-					</Column>
+					</Column> -->
 					<Column minScreenWidth="Tablet" demandPopin="true">
 						<Text text="Created At"/>
 					</Column>
@@ -94,14 +94,13 @@
 							<Text text="{CouponModel>DiscountType}" />
 							<Text text="{   parts: [      { path: 'CouponModel>DiscountValue' },      { path: 'CouponModel>DiscountType' }   ],   formatter: '.Formatter.formatDiscountValue'
 }" />
-							<!-- <Text text="{= ${CouponModel>DiscountValue} + (${CouponModel>DiscountType} === 'Percentage' ? ' %' : '') }" /> -->
 							<Text text="{CouponModel>MaxUses}" />
 							<Text text="{CouponModel>UsedCount}" />
 							<Text text="{CouponModel>PerUserLimit}" />
 							<Text text="{CouponModel>MinOrderValue}" />
 							<Text text="{    path: 'CouponModel>StartDate',    formatter: '.Formatter.formatDate'}" />
 							<Text text="{    path: 'CouponModel>EndDate',    formatter: '.Formatter.formatDate'}" />
-							<ObjectStatus text="{CouponModel>Status}" state="{ path: 'CouponModel>Status', formatter: '.Formatter.formatStatusState' }"/>
+							<!-- <ObjectStatus text="{CouponModel>Status}" state="{ path: 'CouponModel>Status', formatter: '.Formatter.formatStatusState' }"/> -->
 							<Text text="{    path: 'CouponModel>CreatedAt',    formatter: '.Formatter.formatDate'}" />
 							<Text text="{CouponModel>CreatedBy}" />
 						</cells>

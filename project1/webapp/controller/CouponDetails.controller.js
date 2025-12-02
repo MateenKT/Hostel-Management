@@ -151,34 +151,28 @@ sap.ui.define([
          *  Table actions
          * ================= */
         onAddCoupon: function () {
+
             var oViewModel = this.getView().getModel("CouponView");
 
-            // default values for new coupon
-            var oNow = new Date();
-            var sToday = oNow.toISOString().slice(0, 10); // yyyy-MM-dd
-            var sUser = this.getView()
-                .getModel("LoginModel")
-                ?.getProperty("/EmployeeName") || "system";
-
             oViewModel.setProperty("/DialogMode", "Add");
+
+            // ✅ Blank model → placeholders only
             oViewModel.setProperty("/CurrentCoupon", {
                 DiscountType: "",
                 DiscountValue: "",
                 MaxUses: "",
-                UsedCount: "0",
-                PerUserLimit: "1",
-                StartDate: sToday,
-                EndDate: sToday,
+                UsedCount: "",
+                PerUserLimit: "",
                 MinOrderValue: "",
-                Status: "Active",                         
-                CreatedAt: oNow.toISOString().slice(0, 19).replace("T", " "),
-               
-                CreatedBy: sUser             // adjust as per your login
-              
+                StartDate: "",
+                EndDate: "",
+                Status: ""
+                // CreatedBy / CreatedAt added on SAVE only
             });
 
             this._openCouponDialog();
         },
+
 
         onEditCoupon: function () {
 
@@ -193,8 +187,11 @@ sap.ui.define([
             var oCtx = oItem.getBindingContext("CouponModel");
             var oData = Object.assign({}, oCtx.getObject());
 
-            // ✅ KEEP CouponId
-            // Don't delete it or omit it
+            // ✅ Prevent editing expired coupons
+            if (oData.Status === "Expired") {
+                MessageBox.warning("Expired coupons cannot be modified.");
+                return;
+            }
 
             var oViewModel = this.getView().getModel("CouponView");
             oViewModel.setProperty("/DialogMode", "Edit");
@@ -319,29 +316,30 @@ sap.ui.define([
 
             if (!this._oCouponDialog) {
                 this._oCouponDialog = await Fragment.load({
-                    id: oView.getId(), // important: view-prefixed IDs
+                    id: oView.getId(),
                     name: "sap.ui.com.project1.fragment.CouponDialog",
                     controller: this
                 });
 
                 oView.addDependent(this._oCouponDialog);
 
-                // make DatePickers readonly (no manual typing; use your BaseController helper)
+                // make DatePickers readonly (no manual typing)
                 var sViewId = oView.getId();
                 this._FragmentDatePickersReadOnly([
                     sViewId + "--dpStartDate",
                     sViewId + "--dpEndDate"
                 ]);
+
+                // ✅ single source of truth for cleanup
+                this._oCouponDialog.attachAfterClose(function () {
+                    this._clearTableSelection();
+                }.bind(this));
             }
 
             this._oCouponDialog.open();
         },
 
-        onCancelCouponDialog: function () {
-            if (this._oCouponDialog) {
-                this._oCouponDialog.close();
-            }
-        },
+
 
         onSaveCoupon: async function () {
 
@@ -357,10 +355,8 @@ sap.ui.define([
                     sap.ui.getCore().byId(oView.createId("cbDiscountType")), "ID"
                 ) &&
                 utils._LCvalidateMandatoryField(
-                    sap.ui.getCore().byId(this.getView().createId("inDiscountValue")),
-                    "ID"
+                    sap.ui.getCore().byId(oView.createId("inDiscountValue")), "ID"
                 ) &&
-
                 utils._LCvalidateMandatoryField(
                     sap.ui.getCore().byId(oView.createId("inMaxUses")), "ID"
                 ) &&
@@ -373,8 +369,11 @@ sap.ui.define([
                 utils._LCvalidateMandatoryField(
                     sap.ui.getCore().byId(oView.createId("inMinOrderValue")), "ID"
                 ) &&
-                utils._LCstrictValidationComboBox(
-                    sap.ui.getCore().byId(oView.createId("cbStatus")), "ID"
+                (
+                    sMode === "Add" ||
+                    utils._LCstrictValidationComboBox(
+                        sap.ui.getCore().byId(oView.createId("cbStatus")), "ID"
+                    )
                 ) &&
                 utils._LCvalidateMandatoryField(
                     sap.ui.getCore().byId(oView.createId("dpStartDate")), "ID"
@@ -383,10 +382,14 @@ sap.ui.define([
                     sap.ui.getCore().byId(oView.createId("dpEndDate")), "ID"
                 );
 
+
+            // ✅ THIS IS THE MISSING SAFETY NET
             if (!bValid) {
                 sap.m.MessageToast.show("Please fill all mandatory fields correctly.");
                 return;
             }
+
+
 
             // ✅ Date sanity
             let dStart = new Date(
@@ -409,13 +412,25 @@ sap.ui.define([
 
                 if (sMode === "Add") {
 
+                    oCoupon.Status = "Active";
+
+                    oCoupon.CreatedAt = new Date()
+                        .toISOString()
+                        .slice(0, 19)
+                        .replace("T", " ");
+
+                    oCoupon.CreatedBy =
+                        this.getView()
+                            .getModel("LoginModel")
+                            ?.getProperty("/EmployeeName") || "system";
+
                     await this.ajaxCreateWithJQuery("HM_Coupon", {
                         data: oCoupon
                     });
 
                     MessageBox.success("Coupon created successfully.");
-
-                } else {
+                }
+                else {
                     // ✅ UPDATE must include CouponId
                     if (!oCoupon.CouponId) {
                         MessageBox.error("Update failed: CouponId missing.");
@@ -450,7 +465,9 @@ sap.ui.define([
                 }
 
                 this._oCouponDialog.close();
+                this._clearTableSelection();
                 this._loadCoupons();
+
 
             } catch (err) {
                 MessageBox.error(
@@ -458,6 +475,10 @@ sap.ui.define([
                 );
             }
         },
+
+
+
+
         onCouponSearch: function () {
 
             var oTable = this.byId("couponTable");
@@ -541,34 +562,95 @@ sap.ui.define([
         onLiveChange_DiscountValue: function (oEvent) {
 
             const oInput = oEvent.getSource();
-            const sValue = oInput.getValue();
+            const sValue = oInput.getValue().trim();
 
             const sType = sap.ui.getCore()
                 .byId(this.getView().createId("cbDiscountType"))
                 .getSelectedKey();
 
-            // --- Percentage validation (1–100) ---
-            if (sType === "Percentage") {
-
-                utils._LCvalidateGrade(
-                    oInput,
-                    "ID",
-                    this.getView().createId("cbDiscountType")
-                );
-
+            // Must have discount type selected first
+            if (!sType) {
+                oInput.setValueState(sap.ui.core.ValueState.Error);
+                oInput.setValueStateText("Select Discount Type first");
                 return;
             }
 
-            // --- Fixed Amount validation ---
-            // allow positive decimal numbers only
+            // Only digits + optional decimal
+            if (!/^\d+(\.\d+)?$/.test(sValue)) {
+                oInput.setValueState(sap.ui.core.ValueState.Error);
+                oInput.setValueStateText("Only numbers allowed");
+                return;
+            }
+
             const fVal = parseFloat(sValue);
 
-            if (!sValue || isNaN(fVal) || fVal <= 0) {
+            if (sType === "Percentage") {
 
+                // ✅ Validate 1 – 100
+                if (fVal <= 0 || fVal > 100) {
+                    oInput.setValueState(sap.ui.core.ValueState.Error);
+                    oInput.setValueStateText("Percentage must be between 1 and 100");
+                    return;
+                }
+
+            } else {
+
+                // ✅ Validate currency amount
+                if (fVal <= 0) {
+                    oInput.setValueState(sap.ui.core.ValueState.Error);
+                    oInput.setValueStateText("Amount must be greater than 0");
+                    return;
+                }
+
+            }
+
+            // ✅ Clear error when valid
+            oInput.setValueState(sap.ui.core.ValueState.None);
+        },
+
+
+
+
+
+        // ===== All numeric fields =====
+        onLiveChange_Number_MinOne: function (oEvent) {
+
+            const oInput = oEvent.getSource();
+            const sValue = oInput.getValue().trim();
+
+            if (!/^\d*$/.test(sValue)) {
                 oInput.setValueState(sap.ui.core.ValueState.Error);
-                oInput.setValueStateText("Enter a valid amount greater than 0");
+                oInput.setValueStateText("Only numbers allowed");
                 return;
+            }
 
+            const iVal = parseInt(sValue, 10);
+
+            if (isNaN(iVal) || iVal < 1) {
+                oInput.setValueState(sap.ui.core.ValueState.Error);
+                oInput.setValueStateText("Value must be at least 1");
+                return;
+            }
+
+            oInput.setValueState(sap.ui.core.ValueState.None);
+        },
+        onLiveChange_Number_AllowZero: function (oEvent) {
+
+            const oInput = oEvent.getSource();
+            const sValue = oInput.getValue().trim();
+
+            if (!/^\d*$/.test(sValue)) {
+                oInput.setValueState(sap.ui.core.ValueState.Error);
+                oInput.setValueStateText("Only numbers allowed");
+                return;
+            }
+
+            const iVal = parseInt(sValue, 10);
+
+            if (isNaN(iVal) || iVal < 0) {
+                oInput.setValueState(sap.ui.core.ValueState.Error);
+                oInput.setValueStateText("Value must be 0 or more");
+                return;
             }
 
             oInput.setValueState(sap.ui.core.ValueState.None);
@@ -576,11 +658,6 @@ sap.ui.define([
 
 
 
-
-        // ===== All numeric fields =====
-        onLiveChange_Number: function (oEvent) {
-            utils._LCvalidateTimeLimit(oEvent);     // positive numbers
-        },
 
         onLiveChange_MinAmount: function (oEvent) {
             utils._LCvalidateAmount(oEvent);
@@ -596,6 +673,19 @@ sap.ui.define([
             utils._LCvalidateMandatoryField(oEvent);
         },
 
+        _clearTableSelection: function () {
+            var oTable = this.byId("couponTable");
+            if (oTable) {
+                oTable.removeSelections(true);
+            }
+        },
+
+        onCancelCouponDialog: function () {
+            if (this._oCouponDialog) {
+                this._oCouponDialog.close();
+            }
+            this._clearTableSelection();
+        },
 
 
 
