@@ -87,9 +87,9 @@
                     <Column minScreenWidth="Tablet" demandPopin="true">
 						<Text text="{i18n>invoiceReceivedAmount}" />
 					</Column>
-					<Column visible="{= ${PaymentModel>/Currency} === 'INR' &amp;&amp;  ${PaymentModel>/FlagVisCompany} === 'Company Invoice'}" minScreenWidth="Tablet" demandPopin="true">
+					<!-- <Column visible="{= ${PaymentModel>/Currency} === 'INR' &amp;&amp;  ${PaymentModel>/FlagVisCompany} === 'Company Invoice'}" minScreenWidth="Tablet" demandPopin="true">
 						<Text text="{i18n>invoiceReceivedTDS}" />
-					</Column>
+					</Column> -->
 					<Column minScreenWidth="Tablet" demandPopin="true">
 						<Text text="{i18n>invoiceDueAmount}" />
 					</Column>
@@ -107,7 +107,7 @@
 							<Text text="{PaymentDetailModel>ReceivedDate}" />
 							<Text text="{path:'PaymentDetailModel>TotalAmount',formatter: '.Formatter.fromatNumber'}" />
 							<Text text="{path:'PaymentDetailModel>ReceivedAmount',formatter: '.Formatter.fromatNumber'}" />
-							<Text text="{path:'PaymentDetailModel>ReceivedTDS',formatter: '.Formatter.fromatNumber'}" />
+							<!-- <Text text="{path:'PaymentDetailModel>ReceivedTDS',formatter: '.Formatter.fromatNumber'}" /> -->
 							<Text text="{path:'PaymentDetailModel>DueAmount',formatter: '.Formatter.fromatNumber'}" />
 							<Text text="{path:'PaymentDetailModel>ConversionRate',formatter: '.Formatter.fromatNumber'}" />
 							<Text text="{path:'PaymentDetailModel>AmountInINR',formatter: '.Formatter.fromatNumber'}" />
@@ -118,13 +118,14 @@
 		</VBox>
 		<footer >
 			<Toolbar >
+			
 				<VBox alignContent="End" width="100%">
 					<HBox justifyContent="End" width="100%" visible="{visiablityPlay>/Form}">
-						<Button text="{i18n>submit}" class="sendMail" type="Transparent" press="onChangePaymentRecived" />
-						<Button text="{i18n>close}" type="Transparent" press="onPressInvClose" />
+						<Button text="{i18n>submit}" class="sendMail" press="onChangePaymentRecived" />
+						<Button text="{i18n>close}" class="" press="onPressInvClose" />
 					</HBox>
 					<HBox justifyContent="End" width="100%"  visible="{visiablityPlay>/Table}">
-						<Button text="{i18n>close}" type="Transparent" press="onPressInvClose" />
+						<Button text="{i18n>close}" class="" press="onPressInvClose" />
 					</HBox>
 				</VBox>
 			</Toolbar>
