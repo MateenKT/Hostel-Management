@@ -135,6 +135,19 @@
                                             </TileContent>
                                         </GenericTile>	
 
+                                         <GenericTile
+                                            visible="true"
+                                            class="sapUiMediumMargin"
+                                            header="Manage Invoice"
+                                            press="TileV_onpressManageInvoice"
+                                        >
+                                            <TileContent unit="Invoice">
+                                                <ImageContent
+                                                    src="sap-icon://expense-report"
+                                                />
+                                            </TileContent>
+                                        </GenericTile>
+
                                     </layout:HorizontalLayout>
                                 </ux:blocks>
                             </ux:ObjectPageSubSection>

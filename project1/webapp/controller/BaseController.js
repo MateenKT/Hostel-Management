@@ -323,6 +323,46 @@ sap.ui.define([
         /* Auto cleanup with View destruction */
         onExit: function() {
             this._clearAllCarouselTimers();
+        },
+
+        scrollToSection: function (pageId, sectionId) {
+        var page = this.byId(pageId);
+        if (page && sectionId) {
+            page.scrollToSection(this.byId(sectionId).getId());
         }
+        },
+
+         //Date picker common function 
+    _makeDatePickersReadOnly: function (aIds) {
+      var oView = this.getView();
+      aIds.forEach(function (sId) {
+        var oControl = oView.byId(sId);
+        if (oControl) {
+          var bIsValueHelp = oControl.getMetadata().getName() === "sap.m.Input" && oControl.getShowValueHelp && oControl.getShowValueHelp();
+
+          oControl.addEventDelegate({
+            onAfterRendering: function () {
+              var oDomRef = oControl.getDomRef("inner");
+              if (oDomRef) {
+                oDomRef.setAttribute("readonly", true); // block typing
+                oDomRef.style.cursor = "pointer";
+              }
+            }
+          }, oControl);
+
+          oControl.attachBrowserEvent("click", function () {
+            var oIcon = oControl.getDomRef("icon");
+            if (oIcon) {
+              oIcon.click(); // open calendar or value help
+            }
+          });
+
+          // Optional: prevent typing via keypress too (extra safe)
+          oControl.attachBrowserEvent("keydown", function (oEvent) {
+            oEvent.preventDefault();
+          });
+        }
+      });
+    },
     })
 });

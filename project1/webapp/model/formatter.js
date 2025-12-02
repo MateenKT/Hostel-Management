@@ -151,5 +151,96 @@ sap.ui.define([
             }
             return ""; // fallback
         },
+
+         fromatNumber: function (currencyOrValue, totalAmount, amountInINR) {
+            var avalue;
+
+            // If only one argument passed, treat it as value to format
+            if (totalAmount === undefined && amountInINR === undefined) {
+                avalue = currencyOrValue;
+            } else {
+                // Multiparameter call from multi-part binding
+                avalue = currencyOrValue === "INR" ? totalAmount : amountInINR;
+            }
+
+            if (avalue === "0" || avalue === 0) {
+                return "- -";
+            }
+            var numericValue = parseFloat(avalue);
+            if (isNaN(numericValue)) {
+                return "";
+            }
+
+            var oFormatOptions = {
+                groupingBaseSize: 3,
+                groupingSize: 2,
+                minIntegerDigits: 1,
+                minFractionDigits: 2,
+                maxFractionDigits: 4
+            };
+
+            var oFloatFormat = sap.ui.core.format.NumberFormat.getFloatInstance(oFormatOptions);
+            return oFloatFormat.format(numericValue);
+        },
+
+          formatObjectStatus: function (sStatus) {
+            switch (sStatus) {
+                case "New":
+                    return "Indication05";
+                case "Renew":
+                    return "Indication03";
+                case "Active":
+                    return "Success";
+                case "Approved":
+                    return "Success";
+                case "Inactive":
+                    return "Error";
+                case "Rejected":
+                    return "Error";
+                case "Submitted":
+                    return "Indication03";
+                case "Company":
+                    return "Indication13";
+                case 'Employee':
+                    return "Success";
+                case 'Draft':
+                    return "Indication17";
+                case "Onboarded":
+                    return "Success";
+                case "Rejected":
+                    return "Error";
+                case "Offer Sent":
+                    return "Indication06";
+                case "Invoiced":
+                    return "Success";
+                case "Payment Received":
+                    return "Success";
+                case "Invoice Sent":
+                    return "Indication03";
+                case "Send back by account":
+                    return "Indication06";
+                case "PDF Generated":
+                    return "Indication18";
+                case "Send back by manager":
+                    return "Information";
+                case "Paid":
+                    return "Success";
+                case "Available":
+                    return "Success"
+                case "Returned":
+                    return "Success"
+                case "Trashed":
+                    return "Error"
+                case "Assigned":
+                    return "Information"
+                case "Transferred":
+                    return "Warning"
+                case "Saved":
+                    return "Indication03";
+                default:
+                    return "Indication01";
+
+            }
+        },
     }
 });

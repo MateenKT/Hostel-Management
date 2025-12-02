@@ -87,13 +87,18 @@
                         alignItems="Center"
                         class="sapUiSmallMarginTop"
                     >
-                        <Button
+                      <Button
                             text="Edit"
                             id="idedit"
                             class="sapUiSmallMarginBegin myUnifiedBtn"
                             press="onEditBooking"
-                            visible="{= (${CustomerData>/Status} === 'Assigned' || ${CustomerData>/Status} === 'New') 
-                           &amp;&amp; !${VisibleModel>/visible} }"
+                            visible="{=
+                                (
+                                    ${CustomerData>/Status} === 'New' ||
+                                    (${CustomerData>/Status} === 'Assigned' &amp;&amp; ${LoginModel>/Role} === 'Admin')
+                                )
+                                &amp;&amp; !${VisibleModel>/visible}
+                            }"
                         />
                         <Button
                             id="idcancel"
@@ -104,13 +109,14 @@
                             class="sapUiSmallMarginBegin myUnifiedBtn"
                         />
                         <Button
-                            text="CheckOut"
-                            id="idCheckout"
-                            class="sapUiSmallMarginBegin myUnifiedBtn"
-                            press="onChekout"
-                            visible="{= ${CustomerData>/Status} === 'Assigned' 
-                                        &amp;&amp; !${VisibleModel>/visible} }"
-                        />
+                                text="CheckOut"
+                                id="idCheckout"
+                                class="sapUiSmallMarginBegin myUnifiedBtn"
+                                press="onChekout"
+                                visible="{= ${CustomerData>/Status} === 'Assigned' 
+                                        &amp;&amp; !${VisibleModel>/visible}
+                                        &amp;&amp; ${LoginModel>/Role} === 'Admin' }"
+                            />
                         <Button
                             text="Save"
                             id="idsave"

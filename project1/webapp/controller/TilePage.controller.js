@@ -63,6 +63,10 @@ sap.ui.define([
         TileV_onpresshostelfeatures:function(){
             var oRouter = this.getOwnerComponent().getRouter();
            oRouter.navTo("RouteHostelFeatures");
+        },
+        TileV_onpressManageInvoice:function(){
+            var oRouter = this.getOwnerComponent().getRouter();
+           oRouter.navTo("RouteManageInvoice");
         }
     })
 })

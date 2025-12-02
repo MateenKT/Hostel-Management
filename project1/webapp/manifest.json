@@ -67,7 +67,12 @@
             "type": "sap.ui.model.json.JSONModel",
             "uri": "model/FacilityType.json",
             "preload": true
-      }
+      },
+      "CompanyInvoiceStatus": {
+            "type": "sap.ui.model.json.JSONModel",
+            "uri": "model/CompanyInvoiceStatus.json",
+            "preload": true
+          }
     },
     "resources": {
       "css": [
@@ -191,7 +196,21 @@
           "target": [
             "TargetMaintainData"
           ]
-        }
+        },
+        {
+                    "name": "RouteManageInvoice",
+                    "pattern": "ManageInvoice",
+                    "target": [
+                        "TargetManageInvoice"
+                    ]
+                },
+                {
+                    "name": "RouteManageInvoiceDetails",
+                    "pattern": "InvoiceDetails/{sPath}/{dash}",
+                    "target": [
+                        "TargetManageInvoiceDetails"
+                    ]
+                }
       ],
       "targets": {
         "TargetHostel": {
@@ -298,7 +317,21 @@
           "clearControlAggregation": false,
           "viewId": "MaintainData",
           "viewName": "MaintainData"
-        }
+        },
+         "TargetManageInvoice": {
+                "viewType": "XML",
+                "transition": "slide",
+                "clearControlAggregation": false,
+                "viewId": "ManageInvoice",
+                "viewName": "ManageInvoice"
+              },
+              "TargetManageInvoiceDetails": {
+                "viewType": "XML",
+                "transition": "slide",
+                "clearControlAggregation": false,
+                "viewId": "ManageInvoiceDetails",
+                "viewName": "ManageInvoiceDetails"
+              }
       }
     },
     "rootView": {

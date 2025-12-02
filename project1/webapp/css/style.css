@@ -1722,13 +1722,34 @@ span.sapMBtnInner.sapMBtnEmphasized {
         width: 100% !important;
     }
 }
+.custom-flexbox {
+  margin: 10px 0;
+  margin-right: 10px;
+}
+
 .custom-vbox {
   align-items: flex-end;
   width: 100%;
 }
-.custom-flexbox {
-  margin: 10px 0;
-  margin-right: 10px;
+
+.rightAlignLabel {
+  text-align: right;
+  margin-right: 5px;
+}
+
+.amountText {
+  text-align: end;
+  min-width: 100px;
+  margin-right: 20px;
+}
+
+.boldBlackText {
+  font-weight: bold;
+  color: #000;
+}
+
+.PayByDateClass {
+  white-space: nowrap !important;
 }
 
 
