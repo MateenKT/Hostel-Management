@@ -660,7 +660,8 @@
   height: auto;
   border-radius: 16px;
   padding: 6px;
-  background-color: #00acc1;
+   background: linear-gradient(135deg, #00b7c7, #008b96) !important;
+  color: white !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   display: flex;
@@ -693,13 +694,17 @@
   position: absolute;
   top: 10px;
   left: 10px;
-  background: #0097a7;
+   background: linear-gradient(135deg, #00b7c7, #008b96) !important;
+  color: white !important;
   padding: 4px 10px;
   border-radius: 12px;
-  color: white;
   font-size: 0.75rem;
   font-weight: bold;
   z-index: 10;
+}
+
+.areaTagBox .sapMText {
+  color: white !important;
 }
 
 .bedCardContent {
@@ -714,11 +719,12 @@
 .bedCardTitle {
   font-size: 1.2rem;
   font-weight: bold;
+  color: #fff;
 }
 
 .bedCardDesc {
   font-size: 0.95rem;
-  color: #19191a;
+  color: #ffffff;
   margin-top: 0.4rem;
   min-height: 40px;
 }

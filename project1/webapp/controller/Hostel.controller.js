@@ -10,7 +10,7 @@ sap.ui.define([
     const $C = (id) => sap.ui.getCore().byId(id);
     const $V = (id) => $C(id)?.getValue()?.trim() || "";
     return BaseController.extend("sap.ui.com.project1.controller.Hostel", {
-        // _isProfileRequested: false,
+        _isProfileRequested: false,
         Formatter: Formatter,
         onInit: function () {
             this.getOwnerComponent().getRouter().getRoute("RouteHostel").attachMatched(this._onRouteMatched, this);
@@ -1687,11 +1687,11 @@ sap.ui.define([
                 const filter = {
                     UserID: sUserID
                 };
-                // if (!this._isProfileRequested) {
-                //     this.createAvatarActionSheet();
-                //     this._oProfileActionSheet.openBy(oEvent.getSource());
-                //     return;
-                // }
+                if (!this._isProfileRequested) {
+                    this.createAvatarActionSheet();
+                    this._oProfileActionSheet.openBy(oEvent.getSource());
+                    return;
+                }
                 this._isProfileRequested = false;
                 //  Fetch only the logged-in user's data
                 sap.ui.core.BusyIndicator.show(0);
@@ -1793,6 +1793,7 @@ sap.ui.define([
                     this._isProfileDialogLoading = true;
 
                     const oDialog = await sap.ui.core.Fragment.load({
+                        id : this.getView().getId(),
                         name: "sap.ui.com.project1.fragment.ManageProfile",
                         controller: this
                     });
@@ -1841,6 +1842,7 @@ sap.ui.define([
                     }
                     this._isProfileDialogLoading = true;
                     const oDialog = await sap.ui.core.Fragment.load({
+                        id : this.getView().getId(),
                         name: "sap.ui.com.project1.fragment.ManageProfile",
                         controller: this
                     });
@@ -1896,15 +1898,15 @@ sap.ui.define([
                 return;
             }
             const isMandatoryValid = (
-                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("id_Name"), "ID") &&
-                utils._LCvalidateDate(sap.ui.getCore().byId("id_dob"), "ID") &&
-                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("id_gender"), "ID") &&
-                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("id_mail"), "ID") &&
-                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("id_country"), "ID") &&
-                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("id_state"), "ID") &&
-                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("id_city"), "ID") &&
-                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("id_phone"), "ID") &&
-                utils._LCvalidateMandatoryField(sap.ui.getCore().byId("id_address"), "ID")
+                utils._LCvalidateMandatoryField(this.byId("id_Name"), "ID") &&
+                utils._LCvalidateDate(this.byId("id_dob"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_gender"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_mail"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_country"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_state"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_city"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_phone"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("id_address"), "ID")
             );
 
             if (!isMandatoryValid) {
@@ -1988,7 +1990,8 @@ sap.ui.define([
         _onEnterProfile: async function () {
             this._oProfileActionSheet.close();
             this._isProfileRequested = true;
-            await this.onPressAvatar();
+            const oAvatarBtn = this.byId("ProfileAvatar");
+            await this.onPressAvatar({ getSource: () => oAvatarBtn });
         },
 
         _onLogout: function () {
@@ -2027,7 +2030,6 @@ sap.ui.define([
                         }).addStyleClass("myUnifiedBtn")
                     ]
                 });
-
                 this.getView().addDependent(this._oProfileActionSheet);
             }
         },

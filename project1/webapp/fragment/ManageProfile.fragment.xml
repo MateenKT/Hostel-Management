@@ -10,8 +10,6 @@
     <Dialog
         stretch="{= ${device>/system/phone} }"
         contentWidth="{= ${device>/system/phone} ? '100%' : '80%'}"
-        resizable="true"
-        draggable="true"
     >
         <customHeader>
             <Bar class="barheader">
@@ -51,8 +49,8 @@
                     class="sapUiTinyMargin myavatar"
                 />
                 <Button
-                    id="id_avatarEditBtn"
                     icon="sap-icon://edit"
+                    id="id_avatarEditBtn"
                     press="onPressAvatarEdit"
                     class="avatarEditIcon"
                 />
@@ -104,7 +102,6 @@
                             > -->
                         <m:Text
                             text="{= ${profileData>/STDCode} + ' ' + ${profileData>/phone}}"
-                            class="sapUiSmallMarginBegin"
                         />
 
                         <m:Label text="Gender" />
@@ -258,13 +255,10 @@
                         <Input
                             id="id_phone"
                             value="{profileData>/phone}"
-                            editable="true"
-                            class="sapUiTinyMarginBegin"
                             placeholder="Enter Contact Number"
                             maxLength="10"
                             liveChange="onChange"
                             valueStateText="Enter Contact Number"
-                            type="Number"
                         />
 
                         <m:Label
@@ -308,15 +302,19 @@
                         class="sapUiTinyMarginBegin"
                         value="{profileData>/address}"
                         visible="{profileData>/isEditMode}"
+                        rows="3"
+                        growing="true"
+                        growingMaxLines="6"
                         width="100%"
-                        rows="2"
-                        cols="7"
                     />
                 </HBox>
                 <Text
                     text="{profileData>/address}"
                     visible="{= !${profileData>/isEditMode}}"
                     class="sapUiSmallMarginBegin"
+                    width="100%"
+                    wrapping="true"
+
                 />
             </VBox>
         </FlexBox>
