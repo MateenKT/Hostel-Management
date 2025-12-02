@@ -182,7 +182,7 @@ sap.ui.define([
     var Model = selected.getBindingContext("HostelModel");
     this.data = Model.getObject(); // Customer data
 
-    if (this.data.Bookings[0].Status === "Cancelled" || this.data.Bookings[0].Status === "Assigned" || this.data.Bookings[0].Status === "Completed") {
+    if (this.data.Status === "Cancelled" || this.data.Status === "Assigned" || this.data.Status === "Completed") {
         sap.m.MessageToast.show("This customer can't be assign");
         return;
     }
@@ -191,22 +191,22 @@ sap.ui.define([
     var aRooms = oRoomDetailsModel.getData(); // All room details
 
     // Get BedTypes from customer's bookings
-    var customerBedTypes = [];
-    if (this.data.Bookings && this.data.Bookings.length > 0) {
-        this.data.Bookings.forEach(function(booking) {
-            if (booking.BedType) {
-                customerBedTypes.push(booking.BedType);
-            }
-        });
-    }
+    // var customerBedTypes = [];
+    // if (this.data) {
+    //     this.data.forEach(function(booking) {
+    //         if (booking.BedType) {
+    //             customerBedTypes.push(booking.BedType);
+    //         }
+    //     });
+    // }
 
-    if (customerBedTypes.length === 0) {
-        sap.m.MessageToast.show("Customer does not have any BedType assigned.");
-        return;
-    }
+    // if (customerBedTypes.length === 0) {
+    //     sap.m.MessageToast.show("Customer does not have any BedType assigned.");
+    //     return;
+    // }
 
     // Get branch code from selected booking
-    var customerBranchCode = this.data.Bookings[0].BranchCode;
+    var customerBranchCode = this.data.BranchCode;
 
     // Get all HostelModel data to check room occupancy
     var oHostelModel = this.getView().getModel("HostelModel");
@@ -220,15 +220,15 @@ sap.ui.define([
         }
 
         // BedType must match customer's booking(s)
-        if (!customerBedTypes.includes(room.BedTypeName)) {
-            return false;
-        }
+        // if (!customerBedTypes.includes(room.BedTypeName)) {
+        //     return false;
+        // }
 
         // Count how many customers already have this RoomNo and BedType
         var count = 0;
         aCustomers.forEach(function(customer) {
-            if (customer.Bookings && customer.Bookings.length > 0) {
-                customer.Bookings.forEach(function(booking) {
+            if (customer && customer.length > 0) {
+                customer.forEach(function(booking) {
                     if (booking.RoomNo === room.RoomNo && booking.BedType === room.BedTypeName && booking.Status !== "Closed") {
                         count++;
                     }
@@ -345,9 +345,9 @@ sap.ui.define([
             var facility = sap.ui.getCore().byId("id_facility").getSelectedKeys() || "";
 
             //   var FacilityName = facility.join(",");
-            if (ID.Bookings[0].RoomNo || utils._LCstrictValidationComboBox(sap.ui.getCore().byId("idRoomNumber1"), "ID")) {
+            if (ID.RoomNo || utils._LCstrictValidationComboBox(sap.ui.getCore().byId("idRoomNumber1"), "ID")) {
                 if (data === "") {
-                    var data = ID.Bookings[0].RoomNo
+                    var data = ID.RoomNo
                 }
 
                 var Payload = {
@@ -390,144 +390,98 @@ sap.ui.define([
             }
 
         },
-        HM_EditRoom: async function(oEvent) {
-            var table = this.byId("idPOTable");
-            var selected = table.getSelectedItem();
-            if (!selected) {
-                sap.m.MessageToast.show("Please select a record to checkout.");
-                return;
-            }
+      
+        // HM_ChangeRoom: function() {
+        //     var table = this.byId("idPOTable");
+        //     var selected = table.getSelectedItem();
+        //     if (!selected) {
+        //         sap.m.MessageToast.show("Please select a record to checkout.");
+        //         return;
+        //     }
 
-            var Model = selected.getBindingContext("HostelModel");
-            var data = Model.getObject();
+        //     var Model = selected.getBindingContext("HostelModel");
+        //     var data = Model.getObject();
+        //     this.RoomNo = data.RoomNo
 
-            if (data.Bookings[0].Status === "New" || data.Bookings[0].Status === "Closed") {
-                sap.m.MessageToast.show("The customer can not be Check Out");
-                return;
-            }
+        //     //      if(data.Bookings[0].Status==="New" || data.Bookings[0].Status==="Closed"){
+        //     //      sap.m.MessageToast.show("The customer can not be edited");
+        //     //        return;
+        //     //    }
 
-            var Payload = {
-                Status: "Closed"
-            };
+        //     var oRoomDetailsModel = this.getView().getModel("RoomDetailsModel");
+        //     var aRooms = oRoomDetailsModel.getData(); // All room details
 
-            var that = this;
+        //     // Get BedTypes from customer's bookings
+        //     var customerBedTypes = [];
+        //     if (data.Bookings && data.Bookings.length > 0) {
+        //         data.Bookings.forEach(function(booking) {
+        //             if (booking.BedType) {
+        //                 customerBedTypes.push(booking.BedType);
+        //             }
+        //         });
+        //     }
 
-            sap.m.MessageBox.confirm(
-                "Are you sure you want to Check out: " + data.CustomerName + " (" + data.CustomerID + ")?", {
-                    title: "Confirm Checkout",
-                    actions: [sap.m.MessageBox.Action.OK, sap.m.MessageBox.Action.CANCEL],
-                    onClose: async function(sAction) {
-                        if (sAction === sap.m.MessageBox.Action.OK) {
-                            try {
-                                await that.ajaxUpdateWithJQuery("HM_Booking", {
-                                    data: Payload,
-                                    filters: {
-                                        CustomerID: data.CustomerID
-                                    }
-                                });
+        //     if (customerBedTypes.length === 0) {
+        //         sap.m.MessageToast.show("Customer does not have any BedType assigned.");
+        //         return;
+        //     }
 
-                                await that.Cust_read();
-                                sap.m.MessageToast.show("Checkout successful.");
-                            } catch (err) {
-                                console.error("Checkout failed:", err);
-                                sap.m.MessageBox.error("Failed to checkout. Please try again.");
-                            }
-                        }
-                    }
-                }
-            );
-        },
-        HM_ChangeRoom: function() {
-            var table = this.byId("idPOTable");
-            var selected = table.getSelectedItem();
-            if (!selected) {
-                sap.m.MessageToast.show("Please select a record to checkout.");
-                return;
-            }
+        //     // Get all HostelModel data to check room occupancy
+        //     var oHostelModel = this.getView().getModel("HostelModel");
+        //     var aCustomers = oHostelModel.getData(); // All customer bookings
 
-            var Model = selected.getBindingContext("HostelModel");
-            var data = Model.getObject();
-            this.RoomNo = data.RoomNo
+        //     // Filter room numbers that match customer's BedType AND are not fully booked
+        //     var availableRoomNos = aRooms.filter(function(room) {
+        //         if (!customerBedTypes.includes(room.BedTypeName)) {
+        //             return false; // Room's bed type doesn't match customer's
+        //         }
 
-            //      if(data.Bookings[0].Status==="New" || data.Bookings[0].Status==="Closed"){
-            //      sap.m.MessageToast.show("The customer can not be edited");
-            //        return;
-            //    }
+        //         // Count how many customers already have this RoomNo and BedType
+        //         var count = 0;
+        //         aCustomers.forEach(function(customer) {
+        //             if (customer.Bookings && customer.Bookings.length > 0) {
+        //                 customer.Bookings.forEach(function(booking) {
+        //                     if (booking.RoomNo === room.RoomNo && booking.BedType === room.BedTypeName && booking.Status !== "Closed") {
+        //                         count++;
+        //                     }
+        //                 });
+        //             }
+        //         });
 
-            var oRoomDetailsModel = this.getView().getModel("RoomDetailsModel");
-            var aRooms = oRoomDetailsModel.getData(); // All room details
+        //         // Only include room if it is not fully booked
+        //         return count < room.NoofPerson; // Assuming room.Capacity exists in RoomDetailsModel
+        //     }).map(function(room) {
+        //         return {
+        //             RoomNo: room.RoomNo
+        //         }; // Only include RoomNo
+        //     });
 
-            // Get BedTypes from customer's bookings
-            var customerBedTypes = [];
-            if (data.Bookings && data.Bookings.length > 0) {
-                data.Bookings.forEach(function(booking) {
-                    if (booking.BedType) {
-                        customerBedTypes.push(booking.BedType);
-                    }
-                });
-            }
+        //     // Set AvailableRoomsModel
+        //     var oAvailableRoomsModel = new sap.ui.model.json.JSONModel(availableRoomNos);
+        //     this.getView().setModel(oAvailableRoomsModel, "AvailableRoomsModel");
 
-            if (customerBedTypes.length === 0) {
-                sap.m.MessageToast.show("Customer does not have any BedType assigned.");
-                return;
-            }
+        //     if (!this.HM_Dialog) {
+        //         var oView = this.getView();
+        //         this.HM_Dialog = sap.ui.xmlfragment("sap.ui.com.project1.fragment.Assign_Room", this);
+        //         oView.addDependent(this.HM_Dialog);
+        //     }
+        //     sap.ui.getCore().byId("idCustomerNameText").setText(data.CustomerName + " (" + data.CustomerID + ")");
+        //     sap.ui.getCore().byId("idRoomNumber1").setValue(data.Bookings[0].RoomNo).setValueState("None");
+        //     sap.ui.getCore().byId("id_BranchCode").setValue(data.BranchCode).setValueState("None");
 
-            // Get all HostelModel data to check room occupancy
-            var oHostelModel = this.getView().getModel("HostelModel");
-            var aCustomers = oHostelModel.getData(); // All customer bookings
+        //     sap.ui.getCore().byId("idBedType").setValue(data.Bookings[0].BedType).setValueState("None");
 
-            // Filter room numbers that match customer's BedType AND are not fully booked
-            var availableRoomNos = aRooms.filter(function(room) {
-                if (!customerBedTypes.includes(room.BedTypeName)) {
-                    return false; // Room's bed type doesn't match customer's
-                }
-
-                // Count how many customers already have this RoomNo and BedType
-                var count = 0;
-                aCustomers.forEach(function(customer) {
-                    if (customer.Bookings && customer.Bookings.length > 0) {
-                        customer.Bookings.forEach(function(booking) {
-                            if (booking.RoomNo === room.RoomNo && booking.BedType === room.BedTypeName && booking.Status !== "Closed") {
-                                count++;
-                            }
-                        });
-                    }
-                });
-
-                // Only include room if it is not fully booked
-                return count < room.NoofPerson; // Assuming room.Capacity exists in RoomDetailsModel
-            }).map(function(room) {
-                return {
-                    RoomNo: room.RoomNo
-                }; // Only include RoomNo
-            });
-
-            // Set AvailableRoomsModel
-            var oAvailableRoomsModel = new sap.ui.model.json.JSONModel(availableRoomNos);
-            this.getView().setModel(oAvailableRoomsModel, "AvailableRoomsModel");
-
-            if (!this.HM_Dialog) {
-                var oView = this.getView();
-                this.HM_Dialog = sap.ui.xmlfragment("sap.ui.com.project1.fragment.Assign_Room", this);
-                oView.addDependent(this.HM_Dialog);
-            }
-            sap.ui.getCore().byId("idCustomerNameText").setText(data.CustomerName + " (" + data.CustomerID + ")");
-            sap.ui.getCore().byId("idRoomNumber1").setValue(data.Bookings[0].RoomNo).setValueState("None");
-            sap.ui.getCore().byId("id_BranchCode").setValue(data.BranchCode).setValueState("None");
-
-            sap.ui.getCore().byId("idBedType").setValue(data.Bookings[0].BedType).setValueState("None");
-
-            sap.ui.getCore().byId("AR_id_StartDate").setDateValue(new Date(data.Bookings[0].StartDate)).setValueState("None");
-            sap.ui.getCore().byId("AR_id_EndDate").setDateValue(new Date(data.Bookings[0].EndDate)).setValueState("None");
+        //     sap.ui.getCore().byId("AR_id_StartDate").setDateValue(new Date(data.Bookings[0].StartDate)).setValueState("None");
+        //     sap.ui.getCore().byId("AR_id_EndDate").setDateValue(new Date(data.Bookings[0].EndDate)).setValueState("None");
 
 
-            // sap.ui.getCore().byId("id_facility").setValue(data.Bookings[0].RoomNo).setValueState("None");
-            this.getView().getModel("Visiblemodel").setProperty("/Visible", true)
+        //     // sap.ui.getCore().byId("id_facility").setValue(data.Bookings[0].RoomNo).setValueState("None");
+        //     this.getView().getModel("Visiblemodel").setProperty("/Visible", true)
 
 
-            this.getView().getModel("")
-            this.HM_Dialog.open();
-        },
+        //     this.getView().getModel("")
+        //     this.HM_Dialog.open();
+        // },
         AR_onCancelButtonPress: function() {
             this.ARD_Dialog.close();
         },
@@ -578,36 +532,15 @@ sap.ui.define([
             if (sCustomerName) {
                 aFilters.push(new sap.ui.model.Filter("CustomerName", sap.ui.model.FilterOperator.Contains, sCustomerName));
             }
-
-            if (sRoomNo) {
-                var roomFilter = new sap.ui.model.Filter({
-                    path: "Bookings",
-                    test: function(aBookings) {
-                        if (Array.isArray(aBookings)) {
-                            return aBookings.some(function(booking) {
-                                return booking.RoomNo && booking.RoomNo.toString().toLowerCase().includes(sRoomNo.toLowerCase().trim());
-                            });
-                        }
-                        return false;
-                    }
-                });
-                aFilters.push(roomFilter);
+              if (sRoomNo) {
+                aFilters.push(new sap.ui.model.Filter("RoomNo", sap.ui.model.FilterOperator.Contains, sRoomNo));
+            }
+             if (status) {
+                aFilters.push(new sap.ui.model.Filter("Status", sap.ui.model.FilterOperator.Contains, status));
             }
 
-            if (status) {
-                var statusFilter = new sap.ui.model.Filter({
-                    path: "Bookings",
-                    test: function(aBookings) {
-                        if (Array.isArray(aBookings)) {
-                            return aBookings.some(function(booking) {
-                                return booking.Status && booking.Status.toString().toLowerCase().includes(status.toLowerCase().trim());
-                            });
-                        }
-                        return false;
-                    }
-                });
-                aFilters.push(statusFilter);
-            }
+
+          
 
             var oCombinedFilter = new sap.ui.model.Filter({
                 filters: aFilters,

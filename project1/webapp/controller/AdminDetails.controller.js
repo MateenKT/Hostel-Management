@@ -885,15 +885,20 @@ sap.ui.define([
                 });
 
                 oCustomerData.TotalFacilityPrice = total;
-                oCustomerData.SGST = (total + (oCustomerData.RentPrice || 0)) * 0.09;
 
-                oCustomerData.CGST = (total + (oCustomerData.RentPrice || 0)) * 0.09;
-                oCustomerData.SubTotal = (total + (oCustomerData.RentPrice || 0));
-                oCustomerData.Discount="0.00"
+                 oCustomerData.Discount= oCustomerData.Discount || "0.00";
+                  oCustomerData.RentPrice= oCustomerData.RentPrice || 0;
+                  oCustomerData.SubTotal = (total + (oCustomerData.RentPrice || 0) - Number(oCustomerData.Discount));
+
+                oCustomerData.SGST =   oCustomerData.SubTotal * 0.09;
+
+                oCustomerData.CGST =   oCustomerData.SubTotal * 0.09;
+             
+               
 
 
 
-                oCustomerData.GrandTotal = total + (oCustomerData.RentPrice || 0) + oCustomerData.SGST + oCustomerData.CGST;
+                oCustomerData.GrandTotal =  oCustomerData.SubTotal + oCustomerData.SGST + oCustomerData.CGST;
 
                 // Update model
                 oCustomerModel.setData(oCustomerData);
@@ -2054,10 +2059,10 @@ if(Bookingmodel.StartDate.includes("/")){
     var coupStart = new Date(oCoupon.StartDate);
     var coupEnd = new Date(oCoupon.EndDate);
 
-    if (custStart < coupStart && custEnd > coupEnd) {
-        sap.m.MessageToast.show("Coupon not valid for selected dates");
-        return;
-    }
+ if (custStart < coupStart || custStart > coupEnd) {
+    sap.m.MessageToast.show("Coupon not valid for selected dates");
+    return; // Exit function immediately
+}
 
     // 3. Percentage discount
     var subtotal = Number(oCustomerData.SubTotal || 0);
@@ -2071,10 +2076,10 @@ var newSubtotal = "";
 
 // Check discount type
 if (oCoupon.DiscountType === "Percentage") {
-    discountAmount = (subtotal * Number(oCoupon.DiscountValue || 0)) / 100;
+    discountAmount = (subtotal * Number(oCoupon.DiscountValue || 0)) / 100 + Number(oCustomerData.Discount) || "0.00";
     newSubtotal = subtotal - discountAmount;
 } else if (oCoupon.DiscountType === "Fixed Amount") {
-    discountAmount = Number(oCoupon.DiscountValue || 0);
+    discountAmount = Number(oCoupon.DiscountValue || 0) + Number(oCustomerData.Discount) || "0.00";
     newSubtotal = subtotal - discountAmount;
 }
 
