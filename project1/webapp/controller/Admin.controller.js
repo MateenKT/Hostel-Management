@@ -191,7 +191,7 @@ sap.ui.define([
     var aRooms = oRoomDetailsModel.getData(); // All room details
 
     // Get BedTypes from customer's bookings
-    // var customerBedTypes = [];
+    var customerBedTypes = [];
     // if (this.data) {
     //     this.data.forEach(function(booking) {
     //         if (booking.BedType) {
@@ -199,7 +199,7 @@ sap.ui.define([
     //         }
     //     });
     // }
-
+       customerBedTypes.push(this.data.BedType);
     // if (customerBedTypes.length === 0) {
     //     sap.m.MessageToast.show("Customer does not have any BedType assigned.");
     //     return;
@@ -220,16 +220,16 @@ sap.ui.define([
         }
 
         // BedType must match customer's booking(s)
-        // if (!customerBedTypes.includes(room.BedTypeName)) {
-        //     return false;
-        // }
+        if (!customerBedTypes.includes(room.BedTypeName)) {
+            return false;
+        }
 
         // Count how many customers already have this RoomNo and BedType
         var count = 0;
         aCustomers.forEach(function(customer) {
             if (customer && customer.length > 0) {
                 customer.forEach(function(booking) {
-                    if (booking.RoomNo === room.RoomNo && booking.BedType === room.BedTypeName && booking.Status !== "Closed") {
+                    if (booking.RoomNo === room.RoomNo && booking.BedType === room.BedTypeName && booking.Status !== "Completed") {
                         count++;
                     }
                 });
