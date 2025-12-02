@@ -10,7 +10,7 @@ sap.ui.define([
     const $C = (id) => sap.ui.getCore().byId(id);
     const $V = (id) => $C(id)?.getValue()?.trim() || "";
     return BaseController.extend("sap.ui.com.project1.controller.Hostel", {
-        _isProfileRequested: false,
+        // _isProfileRequested: false,
         Formatter: Formatter,
         onInit: function () {
             this.getOwnerComponent().getRouter().getRoute("RouteHostel").attachMatched(this._onRouteMatched, this);
@@ -1687,11 +1687,11 @@ sap.ui.define([
                 const filter = {
                     UserID: sUserID
                 };
-                if (!this._isProfileRequested) {
-                    this.createAvatarActionSheet();
-                    this._oProfileActionSheet.openBy(oEvent.getSource());
-                    return;
-                }
+                // if (!this._isProfileRequested) {
+                //     this.createAvatarActionSheet();
+                //     this._oProfileActionSheet.openBy(oEvent.getSource());
+                //     return;
+                // }
                 this._isProfileRequested = false;
                 //  Fetch only the logged-in user's data
                 sap.ui.core.BusyIndicator.show(0);
@@ -1815,9 +1815,9 @@ sap.ui.define([
                     dob: this.Formatter.DateFormat(oUser.DateOfBirth) || "",
                     gender: oUser.Gender || "",
                     address: oUser.Address || "",
-                    state: oUser.State,
-                    country: oUser.Country,
-                    city: oUser.City,
+                    State: oUser.State,
+                    Country: oUser.Country,
+                    City: oUser.City,
                     stdCode: oUser.STDCode,
                     branchCode: oUser.BranchCode,
                     role: oUser.Role,
@@ -4024,12 +4024,6 @@ CC_onChangeCity: function (oEvent) {
     // oModel.setProperty("/city", sCityName);
 },
 
-
-
-
-
-
-
         onValidateUser: async function () {
 
             const isValid =
@@ -4084,8 +4078,8 @@ CC_onChangeCity: function (oEvent) {
             const oStateCB = sap.ui.getCore().byId("id_state");
             const oSourceCB = sap.ui.getCore().byId("id_city");
 
-            const sCountry = oModel.getProperty("/country");     // e.g. "Australia"
-            const sState = oModel.getProperty("/state");       // e.g. "Queensland"
+            const sCountry = oModel.getProperty("/Country");     // e.g. "Australia"
+            const sState = oModel.getProperty("/State");       // e.g. "Queensland"
             const sSource = oModel.getProperty("/City");      // e.g. "Bongaree"
 
             // Reset all filters

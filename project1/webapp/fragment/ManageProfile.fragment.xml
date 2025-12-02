@@ -142,6 +142,7 @@
                         </Select>
                         <m:Input
                             id="id_Name"
+                            maxLength="20"
                             value="{profileData>/name}"
                             valueStateText="Enter Customer Name"
                             change="onChange"
@@ -155,6 +156,7 @@
                             id="id_mail"
                             value="{profileData>/email}"
                             type="Email"
+                            maxLength="30"
                             valueStateText="Enter Email Id"
                             change="onChange"
                         />
@@ -302,6 +304,7 @@
                     />
                     <TextArea
                         id="id_address"
+                        maxLength="60"
                         class="sapUiTinyMarginBegin"
                         value="{profileData>/address}"
                         visible="{profileData>/isEditMode}"
