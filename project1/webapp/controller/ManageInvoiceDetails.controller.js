@@ -72,7 +72,9 @@ sap.ui.define([
                     SubTotalNotGST: "0",
                     SubTotalInGST: "0",
                     LUT: "",
-                    IncomePerc: "10"
+                    IncomePerc: "10",
+                    RoomNo:"",
+                    BranchCode:""
                 }), "SelectedCustomerModel");
 
                 this.SelectedCustomerModel = oView.getModel("SelectedCustomerModel");
@@ -327,6 +329,8 @@ sap.ui.define([
                     const oModel = this.getView().getModel("SelectedCustomerModel");
                     oModel.setProperty("/InvoiceDate", invoiceDate);
                     oModel.setProperty("/PayByDate", payByDate);
+                    
+                    
 
                     // 7️⃣ Calculate final items (your existing code remains same)
                     // Filter booking data
@@ -339,13 +343,15 @@ sap.ui.define([
                     }
 
                     if (oData.data.ManageCustomer && oData.data.ManageCustomer.length > 0) {
-                        this.getView().getModel("SelectedCustomerModel").setData(oData.data.ManageCustomer[0]);
+                        let mergedData = Object.assign({}, oData.data.ManageCustomer[0], {
+                            RoomNo: oData.data?.BookingData?.[0]?.RoomNo || "",
+                            BranchCode: oData.data?.BookingData?.[0]?.BranchCode || "",
+                            CustomerID: customerID,
+                            BookingID: bookingID
+                        });
+
+                        this.getView().getModel("SelectedCustomerModel").setData(mergedData);
                     }
-
-
-                    const obModel = this.getView().getModel("SelectedCustomerModel");
-                    obModel.setProperty("/CustomerID", customerID);
-                    obModel.setProperty("/BookingID", bookingID);
 
                     // Facility array
                     const facilityArray = Array.isArray(oData.data.BookingFacilityItems) ?
@@ -721,7 +727,7 @@ sap.ui.define([
                     CustomerName: (sMode === 'update') ? oSelectedCustomerModel.CustomerName : oSelectedCustomerModel.CustomerName,
                     GST: oSelectedCustomerModel.GST != null ? String(oSelectedCustomerModel.GST) : '',
                     PermanentAddress: String(oSelectedCustomerModel.PermanentAddress),
-                    PAN: String(oSelectedCustomerModel.PAN),
+                    PAN: String(oSelectedCustomerModel.PAN) || "",
                     MobileNo: oSelectedCustomerModel.MobileNo != null ? String(oSelectedCustomerModel.MobileNo) : '',
                     AmountInFCurrency: FilterModel.Currency === "INR" ?
                         (!isNaN(oSelectedCustomerModel.AmountInFCurrency) ? oSelectedCustomerModel.AmountInFCurrency : "0") : parseFloat(oModel.subTotal) || 0,
@@ -742,10 +748,12 @@ sap.ui.define([
                     PayByDate: (sMode === 'update') ? oSelectedCustomerModel.PayByDate.split('/').reverse().join('-') : this.Formatter.formatDate(oSelectedCustomerModel.PayByDate).split('/').reverse().join('-') || "",
                     SubTotalNotGST: parseFloat(oSelectedCustomerModel.SubTotalNotGST) || 0,
                     SubTotalInGST: parseFloat(oSelectedCustomerModel.SubTotalInGST) || 0,
-                    LUT: String(oSelectedCustomerModel.LUT),
+                    LUT: String(oSelectedCustomerModel.LUT) || "",
                     IncomePerc: (FilterModel.Currency === "INR") ? oSelectedCustomerModel.IncomePerc || "10" : "",
                     CustomerID: oSelectedCustomerModel.CustomerID,
-                    BookingID: oSelectedCustomerModel.BookingID
+                    BookingID: oSelectedCustomerModel.BookingID,
+                    BranchCode: oSelectedCustomerModel.BranchCode,
+                    RoomNo:oSelectedCustomerModel.RoomNo
                 };
                 const aItemsRaw = oManageInvoiceItemModel.ManageInvoiceItem || [];
                 if (aItemsRaw.length === 0) {
@@ -1618,9 +1626,9 @@ sap.ui.define([
                     });
 
                     const head = showSAC ? [
-                        ['Sl.No.', 'Particulars', 'SAC', 'StartDate', 'EndDate', 'UnitText', 'Total']
+                        ['Sl.No.', 'Particulars', 'SAC', 'Start Date', 'End Date', 'UnitText', 'Total']
                     ] : [
-                        ['Sl.No.', 'Particulars', 'StartDate', 'EndDate', 'UnitText', 'Total']
+                        ['Sl.No.', 'Particulars', 'Start Date', 'End Date', 'UnitText', 'Total']
                     ];
 
                     // ===== AUTO TABLE =====
@@ -1630,7 +1638,7 @@ sap.ui.define([
                         body: body,
                         theme: 'grid',
                         headStyles: {
-                            fillColor: [41, 128, 185]
+                            fillColor: [20, 170, 183]
                         },
                         styles: {
                             font: "times",

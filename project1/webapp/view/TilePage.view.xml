@@ -141,7 +141,7 @@
                                             header="Manage Invoice"
                                             press="TileV_onpressManageInvoice"
                                         >
-                                            <TileContent unit="Invoice">
+                                            <TileContent unit="Invoice Details">
                                                 <ImageContent
                                                     src="sap-icon://expense-report"
                                                 />
