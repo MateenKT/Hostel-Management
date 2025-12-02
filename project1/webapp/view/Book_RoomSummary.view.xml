@@ -78,8 +78,35 @@
                                         direction="Column">
         <!-- Totals for THIS person (NOTE: all RELATIVE, no leading "/") -->
         <VBox class="sapUiSmallMarginTop custom-vbox">
-        
-           <HBox justifyContent="End" class="sapUiSmallMarginTop"
+         <HBox  width="100%" justifyContent="End" alignItems="Center" class="sapUiSmallMarginBottom"
+                                visible="{VisibleModel>/visible}"
+                               >
+ 
+    <!-- Coupon Label -->
+    <Label
+        text="Coupon Code:"
+        class="totalColumnBold1 sapUiTinyMarginEnd"
+        width="120px"
+    />
+ 
+    <!-- Coupon Input -->
+    <Input
+        value="{>/CouponCode}"
+        placeholder="Enter coupon"
+        width="150px"
+        class="sapUiTinyMarginEnd"
+        id="couponInput"
+    />
+ 
+    <!-- Apply Now Button -->
+    <Button
+        text="Apply Now"
+        type="Emphasized"
+        press="onChangeCouponCode"
+        class="sapUiTinyMarginEnd"
+    />
+</HBox>
+           <HBox justifyContent="End" 
       visible="{= !${HostelModel>/IsIndia} }">
     <Label text="Sub-Total (Non-Taxable):" class="totalColumnBold1 sapUiSmallMarginEnd"/>
     <Text text="{   parts: [
