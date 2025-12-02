@@ -345,6 +345,7 @@ sap.ui.define([
                         let mergedData = Object.assign({}, oData.data.ManageCustomer[0], {
                             RoomNo: oData.data?.BookingData?.[0]?.RoomNo || "",
                             BranchCode: oData.data?.BookingData?.[0]?.BranchCode || "",
+                            CouponDiscount: oData.data.BookingData[0]?.Discount || "",
                             CustomerID: customerID,
                             BookingID: bookingID
                         });
@@ -471,15 +472,13 @@ sap.ui.define([
                 this.totalAmountCalculation();
             },
 
-            totalAmountCalculation: function() {
+            totalAmountCalculation: function () {
                 const oView = this.getView();
                 const oSOWModel = oView.getModel("FilteredSOWModel");
                 const oInvoiceModel = oView.getModel("ManageInvoiceItemModel");
                 const oCustomerModel = oView.getModel("SelectedCustomerModel");
                 let aSOWDetails = oInvoiceModel.getProperty("/ManageInvoiceItem") || [];
-                let totalWithGST = 0;
-                let totalWithoutGST = 0;
-                let NetAmount = 0;
+                let totalWithGST = 0, totalWithoutGST = 0;
 
                 aSOWDetails.forEach((item) => {
                     if (oSOWModel.getProperty("/Currency") === "INR" && !oCustomerModel.getProperty("/GST")) {
@@ -492,8 +491,7 @@ sap.ui.define([
                     let discountAmount = 0;
 
                     if (typeof item.Discount === "string" && item.Discount.trim().endsWith("%")) {
-                        const percent = parseFloat(item.Discount) / 100;
-                        discountAmount = baseAmount * percent;
+                        discountAmount = baseAmount * (parseFloat(item.Discount) / 100);
                     } else {
                         discountAmount = parseFloat(item.Discount) || 0;
                     }
@@ -508,49 +506,47 @@ sap.ui.define([
                     let finalAmount = baseAmount - discountAmount;
                     item.Total = finalAmount.toFixed(2);
 
-                    const isGSTApplicable = item.GSTCalculation === "YES" &&
-                        oSOWModel.getProperty("/Currency") === "INR";
+                    const isGSTApplicable = item.GSTCalculation === "YES" && oSOWModel.getProperty("/Currency") === "INR";
 
                     item.SAC = isGSTApplicable ? "998314" : "-";
 
-                    if (isGSTApplicable) {
-                        totalWithGST += finalAmount;
-                    } else {
-                        totalWithoutGST += finalAmount;
-                    }
+                    if (isGSTApplicable) totalWithGST += finalAmount;
+                    else totalWithoutGST += finalAmount;
                 });
 
-                const subTotalGST = totalWithGST.toFixed(2);
-                const subTotalNoGST = totalWithoutGST.toFixed(2);
-                const subtotal = (totalWithGST + totalWithoutGST).toFixed(2);
+                //  Show initial subtotals (before discount)
+                oCustomerModel.setProperty("/SubTotalInGST", totalWithGST.toFixed(2));
+                oCustomerModel.setProperty("/SubTotalNotGST", totalWithoutGST.toFixed(2));
 
-                oCustomerModel.setProperty("/SubTotalInGST", subTotalGST);
-                oCustomerModel.setProperty("/SubTotalNotGST", subTotalNoGST);
-                oCustomerModel.setProperty("/AmountInINR", subTotalGST);
-                oSOWModel.setProperty("/subTotal", subtotal);
+                //  Coupon Discount applied ONLY on GST subtotal section
+                let couponDiscount = parseFloat(oCustomerModel.getProperty("/CouponDiscount")) || 0;
+                oCustomerModel.setProperty("/CouponDiscountValue", couponDiscount.toFixed(2));
+
+                let discountedGSTSubtotal = totalWithGST - couponDiscount;
+                if (discountedGSTSubtotal < 0) discountedGSTSubtotal = 0;
+
+                // Final subtotal used for GST calc
+                let subtotalAfterDiscount = discountedGSTSubtotal + totalWithoutGST;
 
                 const type = oCustomerModel.getProperty("/Type");
                 const taxRate = parseFloat(oCustomerModel.getProperty("/Value")) || 0;
-                let gstAmount = 0,
-                    finalAmount = totalWithGST + totalWithoutGST;
+
+                let gstAmount = 0, finalAmount = subtotalAfterDiscount;
 
                 if (type === "CGST/SGST") {
-                    gstAmount = (totalWithGST * taxRate) / 100;
+                    gstAmount = (discountedGSTSubtotal * taxRate) / 100;
                     finalAmount += gstAmount * 2;
                     oCustomerModel.setProperty("/CGST", gstAmount.toFixed(2));
                     oCustomerModel.setProperty("/SGST", gstAmount.toFixed(2));
                 } else if (type === "IGST") {
-                    gstAmount = (totalWithGST * taxRate) / 100;
+                    gstAmount = (discountedGSTSubtotal * taxRate) / 100;
                     finalAmount += gstAmount;
                     oCustomerModel.setProperty("/IGST", gstAmount.toFixed(2));
                 }
 
                 let roundedAmount = Math.round(finalAmount);
                 let difference = (roundedAmount - finalAmount).toFixed(2);
-                let RoundOf = difference > 0 ? `+${difference}` : difference;
-                roundedAmount = roundedAmount - NetAmount;
-
-                oSOWModel.setProperty("/RoundOf", RoundOf);
+                oSOWModel.setProperty("/RoundOf", difference);
                 oSOWModel.setProperty("/TotalAmount", roundedAmount.toFixed(2));
                 oSOWModel.setProperty("/gstAmount", gstAmount.toFixed(2));
                 oCustomerModel.setProperty("/TotalAmount", roundedAmount.toFixed(2));
@@ -725,7 +721,7 @@ sap.ui.define([
                     InvoiceDate: (sMode === 'update') ? oSelectedCustomerModel.InvoiceDate.split('/').reverse().join('-') : this.Formatter.formatDate(oSelectedCustomerModel.InvoiceDate).split('/').reverse().join('-') || "",
                     CustomerName: (sMode === 'update') ? oSelectedCustomerModel.CustomerName : oSelectedCustomerModel.CustomerName,
                     GST: oSelectedCustomerModel.GST != null ? String(oSelectedCustomerModel.GST) : '',
-                    PermanentAddress: String(oSelectedCustomerModel.PermanentAddress),
+                    PermanentAddress: String(oSelectedCustomerModel.PermanentAddress) || "",
                     PAN: String(oSelectedCustomerModel.PAN) || "",
                     MobileNo: oSelectedCustomerModel.MobileNo != null ? String(oSelectedCustomerModel.MobileNo) : '',
                     AmountInFCurrency: FilterModel.Currency === "INR" ?
@@ -752,7 +748,8 @@ sap.ui.define([
                     CustomerID: oSelectedCustomerModel.CustomerID,
                     BookingID: oSelectedCustomerModel.BookingID,
                     BranchCode: oSelectedCustomerModel.BranchCode,
-                    RoomNo:oSelectedCustomerModel.RoomNo
+                    RoomNo:oSelectedCustomerModel.RoomNo,
+                    CouponDiscount: oSelectedCustomerModel.CouponDiscount
                 };
                 const aItemsRaw = oManageInvoiceItemModel.ManageInvoiceItem || [];
                 if (aItemsRaw.length === 0) {
@@ -1532,19 +1529,24 @@ sap.ui.define([
                     });
 
                     // ===== INVOICE TO BLOCK =====
-                    currentY = detailsStartY + 5;
+                   currentY = detailsStartY + 5;
                     doc.setFont("times", "bold");
                     doc.text("Invoice To:", margin, currentY);
 
                     currentY += 5;
                     doc.setFont("times", "normal");
                     doc.setFontSize(12);
-                    doc.text(`Name : ${oModel.CustomerName}`, margin, currentY);
-                    currentY += 5;
 
-                    const ConsultantAddressLines = doc.splitTextToSize(oModel.PermanentAddress, usableWidth / 2 - 10);
-                    doc.text(ConsultantAddressLines, margin, currentY);
-                    currentY += ConsultantAddressLines.length * 5;
+                    if (oModel.CustomerName) {
+                        doc.text(`Name : ${oModel.CustomerName}`, margin, currentY);
+                        currentY += 5;
+                    }
+
+                    if (oModel.PermanentAddress && oModel.PermanentAddress.trim() !== "" ) {
+                        const ConsultantAddressLines = doc.splitTextToSize(oModel.PermanentAddress, usableWidth / 2 - 10);
+                        doc.text(ConsultantAddressLines, margin, currentY);
+                        currentY += ConsultantAddressLines.length * 5;
+                    }
 
                     if (oModel.MobileNo) {
                         doc.text(`Mobile No : ${oModel.MobileNo}`, margin, currentY);
@@ -1630,6 +1632,13 @@ sap.ui.define([
                         summaryBody.push([
                             `Sub-Total ( Taxable ) (${data.Currency}) :`,
                             Formatter.fromatNumber(parseFloat(oModel.SubTotalInGST))
+                        ]);
+                    }
+
+                    if (parseFloat(oModel.CouponDiscount) > 0) {
+                        summaryBody.push([
+                            `Coupon Discount (${data.Currency}) :`,
+                            Formatter.fromatNumber(parseFloat(oModel.CouponDiscount))
                         ]);
                     }
 
