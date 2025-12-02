@@ -943,5 +943,148 @@ return {
             const [hour] = sTime.split(":").map(Number);
             return hour < 12 ? "Morning" : "Evening";
         },
+        onChangeCouponCode: async function (oEvent) {
+    var oHostelModel = this.getView().getModel("HostelModel");
+    const sEnteredCode = oHostelModel.getProperty("/CouponCode")?.trim();
+
+     if (!sEnteredCode) {
+
+        const originalTotal  = oHostelModel.getProperty("/OverallTotalCost");
+        const originalCGST   = oHostelModel.getProperty("/CGST");
+        const originalSGST   = oHostelModel.getProperty("/SGST");
+        const originalFinal  = oHostelModel.getProperty("/FinalTotalCost");
+
+        oHostelModel.setProperty("/AppliedDiscount", 0);
+        oHostelModel.setProperty("/OverallTotalCost", originalTotal);
+        oHostelModel.setProperty("/CGST", originalCGST);
+        oHostelModel.setProperty("/SGST", originalSGST);
+        oHostelModel.setProperty("/FinalTotalCost", originalFinal);
+
+        sap.m.MessageToast.show("Coupon removed. Prices restored.");
+        return;
+    }
+
+    if (!sEnteredCode) {
+        sap.m.MessageToast.show("Please enter coupon");
+        return;
+    }
+
+    try {
+        sap.ui.core.BusyIndicator.show(0);
+
+        // Fetch coupons
+        const response = await this.ajaxReadWithJQuery("HM_Coupon", {});
+        const aCoupons = response?.data || [];
+
+        if (!aCoupons.length) {
+            sap.m.MessageToast.show("No coupons found");
+            return;
+        }
+
+        // Match coupon
+        const oMatched = aCoupons.find(c =>
+            String(c.CouponCode).toUpperCase() === sEnteredCode.toUpperCase()
+        );
+
+         if (String(oMatched.Status).toLowerCase() !== "active") {
+            sap.m.MessageToast.show("This coupon is inactive or expired.");
+            return;
+        }
+
+        if (!oMatched) {
+            sap.m.MessageToast.show("Invalid Coupon Code");
+            return;
+        }
+
+        // Extract coupon details
+        const discountValue = Number(oMatched.DiscountValue || 0);
+        const discountType = (oMatched.DiscountType || "").toLowerCase();
+        const minOrderValue = Number(oMatched.MinOrderValue || 0);
+
+        // Read Subtotal and country
+        const isIndia = oHostelModel.getProperty("/IsIndia");
+        let subTotal = Number(oHostelModel.getProperty("/OverallTotalCost") || 0);
+
+        if (subTotal <= 0) {
+            sap.m.MessageToast.show("Subtotal is zero. Cannot apply coupon.");
+            return;
+        }
+          if (subTotal < minOrderValue) {
+            sap.m.MessageToast.show(
+                `Minimum order value ₹${minOrderValue} required to apply this coupon.`
+            );
+            return;
+        }
+            // ---------------------------------------------
+// 3️⃣ Validate Coupon Date Validity
+// ---------------------------------------------
+// const bookingStart = new Date(oHostelModel.getProperty("/StartDate"));
+// const bookingEnd   = new Date(oHostelModel.getProperty("/EndDate"));
+
+// const couponStart  = new Date(oMatched.StartDate);
+// const couponEnd    = new Date(oMatched.EndDate);
+
+// // If booking dates fall outside the coupon validity range
+// if (bookingStart < couponStart || bookingEnd > couponEnd) {
+//     sap.m.MessageToast.show(
+//         `This coupon is valid only between ${oMatched.StartDate} and ${oMatched.EndDate}`
+//     );
+//     return;
+// }
+
+
+        let discountedSubtotal = subTotal;
+         let discountAmount = 0;
+        // ------------------------------------------
+        //  APPLY DISCOUNT LOGIC
+        // ------------------------------------------
+        if (discountType === "percentage") {
+            // Example: 10% OFF
+            discountedSubtotal = subTotal - (subTotal * (discountValue / 100));
+                discountAmount = subTotal * (discountValue / 100);
+        }
+        else {
+            // Flat amount
+            discountedSubtotal = subTotal - discountValue;
+            discountAmount = discountValue;
+        }
+
+        // Prevent negative totals
+        discountedSubtotal = Math.max(0, discountedSubtotal);
+
+        // Store the discounted subtotal
+        oHostelModel.setProperty("/OverallTotalCost", discountedSubtotal);
+        oHostelModel.setProperty("/AppliedDiscount", discountAmount);
+
+        // ------------------------------------------
+        // ⭐ APPLY TAX CALCULATIONS AGAIN
+        // ------------------------------------------
+        let finalTotal = discountedSubtotal;
+        let cgst = 0, sgst = 0;
+
+        if (isIndia) {
+            cgst = discountedSubtotal * 0.09;
+            sgst = discountedSubtotal * 0.09;
+            finalTotal = discountedSubtotal + cgst + sgst;
+        }
+
+        // Update model
+        oHostelModel.setProperty("/CGST", cgst);
+        oHostelModel.setProperty("/SGST", sgst);
+        oHostelModel.setProperty("/FinalTotalCost", finalTotal);
+
+        oHostelModel.refresh(true);
+
+        sap.m.MessageToast.show(
+            `Coupon Applied Successfully! New Total: ₹${finalTotal.toFixed(2)}`
+        );
+
+    } catch (err) {
+        console.error(err);
+        sap.m.MessageToast.show("Error applying coupon");
+    } finally {
+        sap.ui.core.BusyIndicator.hide();
+    }
+},
     });
 });

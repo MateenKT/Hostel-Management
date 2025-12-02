@@ -91,7 +91,7 @@
  
     <!-- Coupon Input -->
     <Input
-        value="{>/CouponCode}"
+        value="{HostelModel>/CouponCode}"
         placeholder="Enter coupon"
         width="150px"
         class="sapUiTinyMarginEnd"
@@ -104,6 +104,16 @@
         type="Emphasized"
         press="onChangeCouponCode"
         class="sapUiTinyMarginEnd"
+    />
+</HBox>
+<HBox justifyContent="End" >
+    <Label text="Discount:" class="totalColumnBold1 sapUiSmallMarginEnd"/>
+    <Text 
+        text="{
+            parts: ['HostelModel>/AppliedDiscount','HostelModel>/Currency'],
+            formatter: '.Formatter.formatCurrency'
+        }"
+        class="totalColumnBold1"
     />
 </HBox>
            <HBox justifyContent="End" 

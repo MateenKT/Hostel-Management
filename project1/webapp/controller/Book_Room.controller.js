@@ -2691,7 +2691,8 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
                       PaymentType: oData.SelectedPriceType || "",
                       BedType: `${oData.BedType} - ${oData.ACType}`,
                       BranchCode:oData.BranchCode,
-                      Currency:oData.Currency
+                      Currency:oData.Currency,
+                      Discount:oData.AppliedDiscount
                   });
               }
               const paymentDetails = {
@@ -3814,64 +3815,6 @@ onSelectionChange: function (oEvent) {
     var oRouter = this.getOwnerComponent().getRouter()
       oRouter.navTo("RouteHostel")
  },
-
- onChangeCouponCode: async function (oEvent) {
-    const sEnteredCode = oEvent.getSource().getValue().trim();
-    if (!sEnteredCode) return;
-
-    const oHostelModel = this.getView().getModel("HostelModel");
-
-    try {
-        sap.ui.core.BusyIndicator.show(0);
-
-        //  Read all coupons from backend
-        const response = await this.ajaxReadWithJQuery("HM_Coupon", {}); 
-
-        const aCoupons = response?.data ||[];
-        if (!Array.isArray(aCoupons) || aCoupons.length === 0) {
-            sap.m.MessageToast.show("No coupons found.");
-            return;
-        }
-
-        // 🔎 Match code
-        const oMatched = aCoupons.find(c => 
-            String(c.CouponCode).toUpperCase() === sEnteredCode.toUpperCase()
-        );
-
-        if (!oMatched) {
-            sap.m.MessageToast.show("Invalid Coupon Code!");
-            return;
-        }
-
-        const discountValue = Number(oMatched.DiscountValue || 0);
-        const currentTotal = Number(oHostelModel.getProperty("/FinalTotalCost") || 0);
-
-        if (discountValue <= 0) {
-            sap.m.MessageToast.show("Coupon found but discount value is zero!");
-            return;
-        }
-
-        // 🧮 Calculate the new final total
-        const newTotal = Math.max(currentTotal - discountValue, 0);
-
-        // Save previous total for safety
-        oHostelModel.setProperty("/OriginalFinalTotalCost", currentTotal);
-
-        // Update Final Total Cost
-        oHostelModel.setProperty("/FinalTotalCost", newTotal);
-
-
-        sap.m.MessageToast.show(
-            `Coupon Applied! Discount ₹${discountValue}. New Total: ₹${newTotal}`
-        );
-
-    } catch (err) {
-        console.error(err);
-        sap.m.MessageToast.show("Error applying coupon. Try again.");
-    } finally {
-        sap.ui.core.BusyIndicator.hide();
-    }
-}
 
 
   });
