@@ -1769,7 +1769,7 @@ sap.ui.define([
                             grandTotal: booking.RentPrice,
                             paymenytype: booking.PaymentType,
                             RoomPrice: booking.RoomPrice,
-                             BookingID:booking.BookingID
+                            BookingID: booking.BookingID
                         };
                     });
                 }
@@ -1793,7 +1793,7 @@ sap.ui.define([
                     this._isProfileDialogLoading = true;
 
                     const oDialog = await sap.ui.core.Fragment.load({
-                        id : this.getView().getId(),
+                        id: this.getView().getId(),
                         name: "sap.ui.com.project1.fragment.ManageProfile",
                         controller: this
                     });
@@ -1842,7 +1842,7 @@ sap.ui.define([
                     }
                     this._isProfileDialogLoading = true;
                     const oDialog = await sap.ui.core.Fragment.load({
-                        id : this.getView().getId(),
+                        id: this.getView().getId(),
                         name: "sap.ui.com.project1.fragment.ManageProfile",
                         controller: this
                     });
@@ -3386,7 +3386,7 @@ sap.ui.define([
             }
         },
 
-        onPressAvatarEdit: function () {
+         onPressAvatarEdit: function (oEvent) {
             if (!this._oAvatarActionSheet) {
                 this._oAvatarActionSheet = new sap.m.ActionSheet({
                     buttons: [
@@ -3411,7 +3411,7 @@ sap.ui.define([
                 });
                 this.getView().addDependent(this._oAvatarActionSheet);
             }
-            this._oAvatarActionSheet.openBy(sap.ui.getCore().byId("id_avatarEditBtn"));
+            this._oAvatarActionSheet.openBy(oEvent.getSource());
         },
 
         _StartCamera: function () {
@@ -3540,7 +3540,7 @@ sap.ui.define([
         },
 
         onUploadPhoto: function () {
-            const uploader = sap.ui.getCore().byId("id_fileUploaderAvatar");
+            const uploader = this.byId("id_fileUploaderAvatar");
             if (!uploader) return;
 
             setTimeout(() => {
@@ -3907,124 +3907,124 @@ sap.ui.define([
             if (oInput.getValue() === "") oInput.setValueState("None");
         },
 
-          onCountrySelectionChange: function (oEvent) {
-    utils._LCvalidateMandatoryField(oEvent);
+        onCountrySelectionChange: function (oEvent) {
+            utils._LCvalidateMandatoryField(oEvent);
 
-    const oModel = this._oProfileDialog.getModel("profileData");
-    const oItem = oEvent.getSource().getSelectedItem();
+            const oModel = this._oProfileDialog.getModel("profileData");
+            const oItem = oEvent.getSource().getSelectedItem();
 
-    const oStateCB = sap.ui.getCore().byId("id_state");
-    const oCityCB  = sap.ui.getCore().byId("id_city");
-    const oSTD     = sap.ui.getCore().byId("id_std");
+            const oStateCB = sap.ui.getCore().byId("id_state");
+            const oCityCB = sap.ui.getCore().byId("id_city");
+            const oSTD = sap.ui.getCore().byId("id_std");
 
-    // Clear value state on country
-    oEvent.getSource().setValueState("None");
+            // Clear value state on country
+            oEvent.getSource().setValueState("None");
 
-    // Reset dependent fields in model
-    oModel.setProperty("/State", "");
-    oModel.setProperty("/City", "");
-    // if you have an explicit city property, you can also clear it:
-    // oModel.setProperty("/city", "");
+            // Reset dependent fields in model
+            oModel.setProperty("/State", "");
+            oModel.setProperty("/City", "");
+            // if you have an explicit city property, you can also clear it:
+            // oModel.setProperty("/city", "");
 
-    // Reset dependent controls
-    oStateCB?.setSelectedKey("");
-    oCityCB?.setSelectedKey("");
-    oCityCB?.setValue("");
+            // Reset dependent controls
+            oStateCB?.setSelectedKey("");
+            oCityCB?.setSelectedKey("");
+            oCityCB?.setValue("");
 
-    oStateCB?.getBinding("items")?.filter([]);
-    oCityCB?.getBinding("items")?.filter([]);
+            oStateCB?.getBinding("items")?.filter([]);
+            oCityCB?.getBinding("items")?.filter([]);
 
-    oSTD?.setValue("");
+            oSTD?.setValue("");
 
-    // If nothing is selected, clear country and exit
-    if (!oItem) {
-        oModel.setProperty("/Country", "");
-        return;
-    }
+            // If nothing is selected, clear country and exit
+            if (!oItem) {
+                oModel.setProperty("/Country", "");
+                return;
+            }
 
-    const sCountryName = oItem.getText();
-    const sCountryCode = oItem.getAdditionalText();
+            const sCountryName = oItem.getText();
+            const sCountryCode = oItem.getAdditionalText();
 
-    // Save country in model
-    oModel.setProperty("/Country", sCountryName);
+            // Save country in model
+            oModel.setProperty("/Country", sCountryName);
 
-    // Fetch country STD code from CountryModel
-    const aCountryData = this.getOwnerComponent().getModel("CountryModel").getData();
-    const oCountryObj = aCountryData.find(c => c.countryName === sCountryName);
+            // Fetch country STD code from CountryModel
+            const aCountryData = this.getOwnerComponent().getModel("CountryModel").getData();
+            const oCountryObj = aCountryData.find(c => c.countryName === sCountryName);
 
-    const sStdCode = oCountryObj?.stdCode || "";
-    oModel.setProperty("/stdCode", sStdCode);
-    oSTD?.setValue(sStdCode);
+            const sStdCode = oCountryObj?.stdCode || "";
+            oModel.setProperty("/stdCode", sStdCode);
+            oSTD?.setValue(sStdCode);
 
-    // Filter states by country code
-    oStateCB?.getBinding("items")?.filter([
-        new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
-    ]);
-},
+            // Filter states by country code
+            oStateCB?.getBinding("items")?.filter([
+                new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+            ]);
+        },
 
 
-       CC_onChangeState: function (oEvent) {
-    utils._LCvalidateMandatoryField(oEvent);
+        CC_onChangeState: function (oEvent) {
+            utils._LCvalidateMandatoryField(oEvent);
 
-    const oModel = this._oProfileDialog.getModel("profileData");
-    const oItem = oEvent.getSource().getSelectedItem();
+            const oModel = this._oProfileDialog.getModel("profileData");
+            const oItem = oEvent.getSource().getSelectedItem();
 
-    const oCityCB    = sap.ui.getCore().byId("id_city");
-    const oCountryCB = sap.ui.getCore().byId("id_country");
+            const oCityCB = sap.ui.getCore().byId("id_city");
+            const oCountryCB = sap.ui.getCore().byId("id_country");
 
-    // Clear value state on state
-    oEvent.getSource().setValueState("None");
+            // Clear value state on state
+            oEvent.getSource().setValueState("None");
 
-    // Reset city-related things
-    oModel.setProperty("/City", "");
-    // if you have a separate city property:
-    // oModel.setProperty("/city", "");
+            // Reset city-related things
+            oModel.setProperty("/City", "");
+            // if you have a separate city property:
+            // oModel.setProperty("/city", "");
 
-    oCityCB?.setSelectedKey("");
-    oCityCB?.setValue("");
-    oCityCB?.getBinding("items")?.filter([]);
+            oCityCB?.setSelectedKey("");
+            oCityCB?.setValue("");
+            oCityCB?.getBinding("items")?.filter([]);
 
-    // No state selected → clear state in model and exit
-    if (!oItem) {
-        oModel.setProperty("/State", "");
-        return;
-    }
+            // No state selected → clear state in model and exit
+            if (!oItem) {
+                oModel.setProperty("/State", "");
+                return;
+            }
 
-    const sStateName   = oItem.getKey(); // or getText(), depending on your binding
-    const sCountryCode = oCountryCB.getSelectedItem()?.getAdditionalText();
+            const sStateName = oItem.getKey(); // or getText(), depending on your binding
+            const sCountryCode = oCountryCB.getSelectedItem()?.getAdditionalText();
 
-    // Save state in model
-    oModel.setProperty("State", sStateName);
+            // Save state in model
+            oModel.setProperty("State", sStateName);
 
-    // Filter cities by state + country
-    oCityCB?.getBinding("items")?.filter([
-        new sap.ui.model.Filter("stateName",   sap.ui.model.FilterOperator.EQ, sStateName),
-        new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
-    ]);
-},
+            // Filter cities by state + country
+            oCityCB?.getBinding("items")?.filter([
+                new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, sStateName),
+                new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+            ]);
+        },
 
-CC_onChangeCity: function (oEvent) {
-    utils._LCvalidateMandatoryField(oEvent);
+        CC_onChangeCity: function (oEvent) {
+            utils._LCvalidateMandatoryField(oEvent);
 
-    const oModel = this._oProfileDialog.getModel("profileData");
-    const oItem  = oEvent.getSource().getSelectedItem();
+            const oModel = this._oProfileDialog.getModel("profileData");
+            const oItem = oEvent.getSource().getSelectedItem();
 
-    // Clear value state on city
-    oEvent.getSource().setValueState("None");
+            // Clear value state on city
+            oEvent.getSource().setValueState("None");
 
-    if (!oItem) {
-        oModel.setProperty("/City", "");
-        // oModel.setProperty("/city", "");
-        return;
-    }
+            if (!oItem) {
+                oModel.setProperty("/City", "");
+                // oModel.setProperty("/city", "");
+                return;
+            }
 
-    const sCityName = oItem.getKey(); // or getText(), as per your binding
+            const sCityName = oItem.getKey(); // or getText(), as per your binding
 
-    // Save in model
-    oModel.setProperty("/City", sCityName);
-    // If you also track explicit city:
-    // oModel.setProperty("/city", sCityName);
-},
+            // Save in model
+            oModel.setProperty("/City", sCityName);
+            // If you also track explicit city:
+            // oModel.setProperty("/city", sCityName);
+        },
 
         onValidateUser: async function () {
 

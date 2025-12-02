@@ -8,8 +8,10 @@
     xmlns:uxap="sap.uxap"
 >
     <Dialog
+        id="id_dialog"
         stretch="{= ${device>/system/phone} }"
         contentWidth="{= ${device>/system/phone} ? '100%' : '80%'}"
+        initialFocus="id_dialog"
     >
         <customHeader>
             <Bar class="barheader">
@@ -304,7 +306,7 @@
                         visible="{profileData>/isEditMode}"
                         rows="3"
                         growing="true"
-                        growingMaxLines="6"
+                        growingMaxLines="3"
                         width="100%"
                     />
                 </HBox>
