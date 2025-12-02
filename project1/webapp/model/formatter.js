@@ -232,5 +232,25 @@ sap.ui.define([
 
             }
         },
+        formatDiscountValue: function (v, t) {
+            return t === "Percentage" ? v + " %" : v;
+        },
+        formatStatusState: function (sStatus) {
+
+            if (sStatus === "Active") {
+                return "Success";   // Green
+            }
+
+            if (sStatus === "Expired") {
+                return "Warning";   // Yellow / Orange
+            }
+
+            if (sStatus === "Inactive") {
+                return "Error";     // Red
+            }
+
+            return "None";
+        },
+
     }
 });

@@ -3,14 +3,47 @@
 	xmlns="sap.m" 
 	xmlns:core="sap.ui.core" 
 	xmlns:fb="sap.ui.comp.filterbar" displayBlock="true" busyIndicatorDelay="0">
-	<Page id="couponDetailsPage" title="Manage Coupon Details" showNavButton="true" navButtonPress="onNavBack">
+	<Page id="couponDetailsPage" showHeader="true">
+		<headerContent>
+			<core:Fragment fragmentName="sap.ui.com.project1.fragment.Header" type="XML"/>
+		</headerContent>
 		<content>
-			<!-- here tabls is not responsive means demand popin is not working -->
-			<Table id="couponTable" items="{path: 'CouponModel>/'}" mode="MultiSelect" sticky="ColumnHeaders,HeaderToolbar" growing="true" busyIndicatorDelay="0" growingThreshold="100" alternateRowColors="true">
+<fb:FilterBar id="couponFilterBar" useToolbar="false" showClearOnFB="true" showFilterConfiguration="false" filterContainerWidth="auto" search="onCouponSearch" clear="onClearCoupons">
+	<fb:filterGroupItems>
+		<!-- STATUS -->
+		<fb:FilterGroupItem name="Status" groupName="Group" label="Status" visibleInFilterBar="true">
+			<fb:control>
+				<ComboBox id="fStatus" width="100%">
+					<core:Item key="" text="All"/>
+					<core:Item key="Active" text="Active"/>
+					<core:Item key="Expired" text="Expired"/>
+					<core:Item key="Inactive" text="Inactive"/>
+				</ComboBox>
+			</fb:control>
+		</fb:FilterGroupItem>
+		<!-- DISCOUNT TYPE -->
+		<fb:FilterGroupItem name="DiscountType" groupName="Group" label="Discount Type" visibleInFilterBar="true">
+			<fb:control>
+				<ComboBox id="fDiscountType" width="100%">
+					<core:Item key="" text="All"/>
+					<core:Item key="Percentage" text="Percentage"/>
+					<core:Item key="Fixed Amount" text="Fixed Amount"/>
+				</ComboBox>
+			</fb:control>
+		</fb:FilterGroupItem>
+		<!-- END DATE RANGE -->
+<fb:FilterGroupItem name="EndDateRange" groupName="Group" label="End Date" visibleInFilterBar="true">
+	<fb:control>
+		<DateRangeSelection id="fEndRange" delimiter=" to " valueFormat="yyyy-MM-dd" displayFormat="dd/MM/yyyy" width="100%" />
+	</fb:control>
+</fb:FilterGroupItem>
+	</fb:filterGroupItems>
+</fb:FilterBar>
+			<Table id="couponTable" items="{path: 'CouponModel>/', parameters: { groupHeaderFactory: '.createGroupHeader' }}" mode="MultiSelect" sticky="ColumnHeaders,HeaderToolbar" growing="true" busyIndicatorDelay="0" growingThreshold="100" alternateRowColors="true">
 				<!-- Header with actions -->
 				<headerToolbar>
 					<OverflowToolbar>
-						<Title text="Coupons ({=${CouponModel>/}.length})" />
+						<Title text="Coupons ({= ${CouponModel>/}.length })" />
 						<ToolbarSpacer/>
 						<Button text="Add" press="onAddCoupon" class="myUnifiedBtn" />
 						<Button text="Edit" press="onEditCoupon" class="myUnifiedBtn" />
@@ -20,7 +53,7 @@
 				</headerToolbar>
 				<!-- Columns -->
 				<columns>
-					<Column minScreenWidth="Tablet" demandPopin="true">
+					<Column demandPopin="true">
 						<Text text="Discount Type"/>
 					</Column>
 					<Column minScreenWidth="Tablet" demandPopin="true">
@@ -59,14 +92,16 @@
 					<ColumnListItem>
 						<cells>
 							<Text text="{CouponModel>DiscountType}" />
-							<Text text="{= ${CouponModel>DiscountValue} + (${CouponModel>DiscountType} === 'Percentage' ? ' %' : '') }" />
+							<Text text="{   parts: [      { path: 'CouponModel>DiscountValue' },      { path: 'CouponModel>DiscountType' }   ],   formatter: '.Formatter.formatDiscountValue'
+}" />
+							<!-- <Text text="{= ${CouponModel>DiscountValue} + (${CouponModel>DiscountType} === 'Percentage' ? ' %' : '') }" /> -->
 							<Text text="{CouponModel>MaxUses}" />
 							<Text text="{CouponModel>UsedCount}" />
 							<Text text="{CouponModel>PerUserLimit}" />
 							<Text text="{CouponModel>MinOrderValue}" />
 							<Text text="{    path: 'CouponModel>StartDate',    formatter: '.Formatter.formatDate'}" />
 							<Text text="{    path: 'CouponModel>EndDate',    formatter: '.Formatter.formatDate'}" />
-							<Text text="{CouponModel>Status}" />
+							<ObjectStatus text="{CouponModel>Status}" state="{ path: 'CouponModel>Status', formatter: '.Formatter.formatStatusState' }"/>
 							<Text text="{    path: 'CouponModel>CreatedAt',    formatter: '.Formatter.formatDate'}" />
 							<Text text="{CouponModel>CreatedBy}" />
 						</cells>

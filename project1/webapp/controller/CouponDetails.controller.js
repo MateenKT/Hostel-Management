@@ -6,7 +6,8 @@ sap.ui.define([
     "sap/ui/export/Spreadsheet",
     "sap/ui/export/library",
     "../model/formatter",
-], function (BaseController, JSONModel, Fragment, MessageBox, Spreadsheet, exportLibrary, Formatter) {
+    "../utils/validation"
+], function (BaseController, JSONModel, Fragment, MessageBox, Spreadsheet, exportLibrary, Formatter, utils) {
     "use strict";
 
     var EdmType = exportLibrary.EdmType;
@@ -14,9 +15,6 @@ sap.ui.define([
     return BaseController.extend("sap.ui.com.project1.controller.CouponDetails", {
         Formatter: Formatter,
 
-        /* ==========================
-         *  Lifecycle
-         * ========================== */
         onInit: function () {
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.getRoute("RouteCouponDetails").attachPatternMatched(this._onRouteMatched, this);
@@ -29,7 +27,19 @@ sap.ui.define([
             this.getView().setModel(oViewModel, "CouponView");
         },
 
+        onHome: function () {
+            var oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("RouteHostel");
+        },
+
+
         _onRouteMatched: function () {
+
+            const oLoginModel = this.getOwnerComponent().getModel("LoginModel");
+
+            if (oLoginModel) {
+                this.getView().setModel(oLoginModel, "LoginModel");
+            }
             this._loadCoupons();
         },
 
@@ -51,6 +61,7 @@ sap.ui.define([
                 else aCoupons = [];
 
                 // ✅ NORMALIZE all dates
+                // ✅ NORMALIZE all dates + derive Expired status
                 aCoupons = aCoupons.map(function (c) {
 
                     if (c.StartDate) {
@@ -65,11 +76,44 @@ sap.ui.define([
                         c.CreatedAt = c.CreatedAt.replace("T", " ").substring(0, 19);
                     }
 
+                    // ✅ DERIVE Expired status
+                    var today = new Date().toISOString().slice(0, 10);
+
+                    if (c.EndDate && c.EndDate < today && c.Status !== "Inactive") {
+                        c.Status = "Expired";
+                    }
+
                     return c;
                 });
 
+
                 var oModel = new JSONModel(aCoupons);
                 oView.setModel(oModel, "CouponModel");
+
+                // ✅ APPLY GROUP + SORT
+                var oTable = oView.byId("couponTable");
+                var oBinding = oTable.getBinding("items");
+
+                var aSorters = [
+                    // 1️⃣ Group by Status
+                    new sap.ui.model.Sorter("Status", false, function (oContext) {
+                        var sStatus = oContext.getProperty("Status");
+
+                        return {
+                            key: sStatus,
+                            text: sStatus + " Coupons"
+                        };
+                    }),
+
+                    // 2️⃣ Soonest expiry first
+                    new sap.ui.model.Sorter("EndDate", false),
+
+                    // 3️⃣ Highest value first
+                    new sap.ui.model.Sorter("DiscountValue", true)
+                ];
+
+                oBinding.sort(aSorters);
+
 
             } catch (err) {
                 MessageBox.error(
@@ -81,6 +125,12 @@ sap.ui.define([
         },
 
 
+        createGroupHeader: function (oGroup) {
+            return new sap.m.GroupHeaderListItem({
+                title: oGroup.text,
+                uppercase: false
+            });
+        },
 
 
         /* ================
@@ -106,10 +156,13 @@ sap.ui.define([
             // default values for new coupon
             var oNow = new Date();
             var sToday = oNow.toISOString().slice(0, 10); // yyyy-MM-dd
+            var sUser = this.getView()
+                .getModel("LoginModel")
+                ?.getProperty("/EmployeeName") || "system";
 
             oViewModel.setProperty("/DialogMode", "Add");
             oViewModel.setProperty("/CurrentCoupon", {
-                DiscountType: "Percentage",
+                DiscountType: "",
                 DiscountValue: "",
                 MaxUses: "",
                 UsedCount: "0",
@@ -119,7 +172,8 @@ sap.ui.define([
                 MinOrderValue: "",
                 Status: "Active",                         
                 CreatedAt: oNow.toISOString().slice(0, 19).replace("T", " "),
-                CreatedBy: "system"                 // adjust as per your login
+               
+                CreatedBy: sUser             // adjust as per your login
               
             });
 
@@ -242,10 +296,6 @@ sap.ui.define([
 
         _createColumnConfig: function () {
             return [
-                { label: "Coupon Code", property: "CouponCode", type: EdmType.String },
-    
-                    { label: "Customer ID", property: "CustomerID", type: EdmType.String },
-
                 { label: "Discount Type", property: "DiscountType", type: EdmType.String },
                 { label: "Discount Value", property: "DiscountValue", type: EdmType.Number },
                 { label: "Max Uses", property: "MaxUses", type: EdmType.Number },
@@ -259,6 +309,7 @@ sap.ui.define([
                 { label: "Created By", property: "CreatedBy", type: EdmType.String }
             ];
         },
+
 
         /* =====================
          *  Dialog handling
@@ -298,7 +349,61 @@ sap.ui.define([
             var sMode = oViewModel.getProperty("/DialogMode");
             var oCoupon = Object.assign({}, oViewModel.getProperty("/CurrentCoupon"));
 
-            oCoupon.Status = "Active";
+            // oCoupon.Status = "Active";
+            let oView = this.getView();
+
+            let bValid =
+                utils._LCstrictValidationComboBox(
+                    sap.ui.getCore().byId(oView.createId("cbDiscountType")), "ID"
+                ) &&
+                utils._LCvalidateMandatoryField(
+                    sap.ui.getCore().byId(this.getView().createId("inDiscountValue")),
+                    "ID"
+                ) &&
+
+                utils._LCvalidateMandatoryField(
+                    sap.ui.getCore().byId(oView.createId("inMaxUses")), "ID"
+                ) &&
+                utils._LCvalidateMandatoryField(
+                    sap.ui.getCore().byId(oView.createId("inUsedCount")), "ID"
+                ) &&
+                utils._LCvalidateMandatoryField(
+                    sap.ui.getCore().byId(oView.createId("inPerUserLimit")), "ID"
+                ) &&
+                utils._LCvalidateMandatoryField(
+                    sap.ui.getCore().byId(oView.createId("inMinOrderValue")), "ID"
+                ) &&
+                utils._LCstrictValidationComboBox(
+                    sap.ui.getCore().byId(oView.createId("cbStatus")), "ID"
+                ) &&
+                utils._LCvalidateMandatoryField(
+                    sap.ui.getCore().byId(oView.createId("dpStartDate")), "ID"
+                ) &&
+                utils._LCvalidateMandatoryField(
+                    sap.ui.getCore().byId(oView.createId("dpEndDate")), "ID"
+                );
+
+            if (!bValid) {
+                sap.m.MessageToast.show("Please fill all mandatory fields correctly.");
+                return;
+            }
+
+            // ✅ Date sanity
+            let dStart = new Date(
+                oView.getModel("CouponView").getProperty("/CurrentCoupon/StartDate")
+            );
+            let dEnd = new Date(
+                oView.getModel("CouponView").getProperty("/CurrentCoupon/EndDate")
+            );
+
+            if (dEnd < dStart) {
+                sap.m.MessageToast.show("End Date cannot be less than Start Date");
+                return;
+            }
+            if (sMode === "Add") {
+                oCoupon.Status = "Active";
+            }
+
 
             try {
 
@@ -333,7 +438,10 @@ sap.ui.define([
                             MinOrderValue: oCoupon.MinOrderValue,
                             Status: oCoupon.Status,
                             CreatedAt: oCoupon.CreatedAt,
-                            CreatedBy: oCoupon.CreatedBy
+                            CreatedBy: this.getView()
+                                .getModel("LoginModel")
+                                ?.getProperty("/EmployeeName") || oCoupon.CreatedBy
+
                         }
                     });
 
@@ -350,6 +458,146 @@ sap.ui.define([
                 );
             }
         },
+        onCouponSearch: function () {
+
+            var oTable = this.byId("couponTable");
+            var oBinding = oTable.getBinding("items");
+
+            var aFilters = [];
+
+            var sStatus = this.byId("fStatus").getSelectedKey();
+            var sType = this.byId("fDiscountType").getSelectedKey();
+
+            var oRange = this.byId("fEndRange");
+            var dFrom = oRange.getDateValue();
+            var dTo = oRange.getSecondDateValue();
+
+            // Status
+            if (sStatus) {
+                aFilters.push(new sap.ui.model.Filter(
+                    "Status",
+                    sap.ui.model.FilterOperator.EQ,
+                    sStatus
+                ));
+            }
+
+            // Discount type
+            if (sType) {
+                aFilters.push(new sap.ui.model.Filter(
+                    "DiscountType",
+                    sap.ui.model.FilterOperator.EQ,
+                    sType
+                ));
+            }
+
+            // ✅ Correct OVERLAP date filter
+            if (dFrom && dTo) {
+
+                var sFrom = dFrom.toISOString().slice(0, 10);
+                var sTo = dTo.toISOString().slice(0, 10);
+
+                aFilters.push(new sap.ui.model.Filter({
+                    and: true,
+                    filters: [
+                        new sap.ui.model.Filter(
+                            "StartDate",
+                            sap.ui.model.FilterOperator.LE,
+                            sTo
+                        ),
+                        new sap.ui.model.Filter(
+                            "EndDate",
+                            sap.ui.model.FilterOperator.GE,
+                            sFrom
+                        )
+                    ]
+                }));
+            }
+
+            oBinding.filter(aFilters);
+        },
+
+
+
+        onClearCoupons: function () {
+
+
+            this.byId("fStatus").setSelectedKey("");
+            this.byId("fDiscountType").setSelectedKey("");
+
+            var oRange = this.byId("fEndRange");
+
+            // ✅ Fully reset date range
+            oRange.setValue("");
+            oRange.setDateValue(null);
+            oRange.setSecondDateValue(null);
+
+        },
+        // ===== Discount Type (STRICT combo) =====
+        onChange_DiscountType: function (oEvent) {
+            utils._LCstrictValidationComboBox(oEvent);
+        },
+
+        // ===== Discount Value (PERCENT vs FIXED logic) =====
+        onLiveChange_DiscountValue: function (oEvent) {
+
+            const oInput = oEvent.getSource();
+            const sValue = oInput.getValue();
+
+            const sType = sap.ui.getCore()
+                .byId(this.getView().createId("cbDiscountType"))
+                .getSelectedKey();
+
+            // --- Percentage validation (1–100) ---
+            if (sType === "Percentage") {
+
+                utils._LCvalidateGrade(
+                    oInput,
+                    "ID",
+                    this.getView().createId("cbDiscountType")
+                );
+
+                return;
+            }
+
+            // --- Fixed Amount validation ---
+            // allow positive decimal numbers only
+            const fVal = parseFloat(sValue);
+
+            if (!sValue || isNaN(fVal) || fVal <= 0) {
+
+                oInput.setValueState(sap.ui.core.ValueState.Error);
+                oInput.setValueStateText("Enter a valid amount greater than 0");
+                return;
+
+            }
+
+            oInput.setValueState(sap.ui.core.ValueState.None);
+        },
+
+
+
+
+        // ===== All numeric fields =====
+        onLiveChange_Number: function (oEvent) {
+            utils._LCvalidateTimeLimit(oEvent);     // positive numbers
+        },
+
+        onLiveChange_MinAmount: function (oEvent) {
+            utils._LCvalidateAmount(oEvent);
+        },
+
+        // ===== Status =====
+        onChange_Status: function (oEvent) {
+            utils._LCstrictValidationComboBox(oEvent);
+        },
+
+        // ===== Dates =====
+        onChange_Date: function (oEvent) {
+            utils._LCvalidateMandatoryField(oEvent);
+        },
+
+
+
 
     });
 });

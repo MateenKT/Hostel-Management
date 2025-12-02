@@ -7,33 +7,50 @@
 		<content>
 			<f:SimpleForm editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" emptySpanXL="4" emptySpanL="4" emptySpanM="4" columnsXL="2" columnsL="2" columnsM="1">
 				<f:content>
-					<Label text="Discount Type"/>
-					<ComboBox selectedKey="{CouponView>/CurrentCoupon/DiscountType}">
+					<Label required="true" text="Discount Type"/>
+					<ComboBox id="cbDiscountType" selectedKey="{CouponView>/CurrentCoupon/DiscountType}"  change="onChange_DiscountType" valueStateText="Select Discount Type" >
+
 						<items>
 							<core:Item key="Percentage" text="Percentage"/>
 							<core:Item key="Fixed Amount" text="Fixed Amount"/>
 						</items>
 					</ComboBox>
-					<Label text="Discount Value"/>
-					<Input value="{CouponView>/CurrentCoupon/DiscountValue}" type="Number"/>
-					<Label text="Max Uses"/>
-					<Input value="{CouponView>/CurrentCoupon/MaxUses}" type="Number"/>
-					<Label text="Used Count"/>
-					<Input value="{CouponView>/CurrentCoupon/UsedCount}" type="Number"/>
-					<Label text="Per User Limit"/>
-					<Input value="{CouponView>/CurrentCoupon/PerUserLimit}" type="Number"/>
-					<Label text="Min Order Value"/>
-					<Input value="{CouponView>/CurrentCoupon/MinOrderValue}" type="Number"/>
-					<Label text="Start Date"/>
-					<DatePicker id="dpStartDate" value="{CouponView>/CurrentCoupon/StartDate}" valueFormat="yyyy-MM-dd" displayFormat="dd/MM/yyyy"/>
-					<Label text="End Date"/>
-					<DatePicker id="dpEndDate" value="{CouponView>/CurrentCoupon/EndDate}" valueFormat="yyyy-MM-dd" displayFormat="dd/MM/yyyy"/>
-					<Label text="Status"/>
-					<Input value="{CouponView>/CurrentCoupon/Status}" enabled="false"/>
-					<Label text="Created By"/>
-					<Input value="{CouponView>/CurrentCoupon/CreatedBy}"/>
-					<Label text="Created At"/>
-					<Input value="{CouponView>/CurrentCoupon/CreatedAt}" enabled="false"/>
+					<Label required="true" text="Discount Value"/>
+
+
+
+					<Input id="inDiscountValue" value="{CouponView>/CurrentCoupon/DiscountValue}" type="Number" liveChange="onLiveChange_DiscountValue" valueStateText="Enter Discount Value" />
+					<Label required="true" text="Max Uses"/>
+
+
+					<Input id="inMaxUses" value="{CouponView>/CurrentCoupon/MaxUses}" type="Number" liveChange="onLiveChange_Number" valueStateText="Enter Max Uses" />
+					<Label required="true" text="Used Count"/>
+
+
+					<Input id="inUsedCount" value="{CouponView>/CurrentCoupon/UsedCount}" type="Number"  liveChange="onLiveChange_Number" valueStateText="Enter Used Count" />
+					<Label required="true" text="Per User Limit"/>
+
+
+					<Input id="inPerUserLimit" value="{CouponView>/CurrentCoupon/PerUserLimit}" type="Number" liveChange="onLiveChange_Number" valueStateText="Enter Per User Limit" />
+					<Label required="true" text="Min Order Value"/>
+
+
+					<Input id="inMinOrderValue" value="{CouponView>/CurrentCoupon/MinOrderValue}" type="Number" liveChange="onLiveChange_MinAmount" valueStateText="Enter Min Order Value" />
+					<Label required="true" text="Status"/>
+
+
+					<ComboBox id="cbStatus" selectedKey="{CouponView>/CurrentCoupon/Status}" enabled="{= ${CouponView>/DialogMode} === 'Edit' }" change="onChange_Status" valueStateText="Select Status" >
+						<core:Item key="Active" text="Active"/>
+						<core:Item key="Inactive" text="Inactive"/>
+					</ComboBox>
+					<Label required="true" text="Start Date"/>
+
+
+					<DatePicker id="dpStartDate" value="{CouponView>/CurrentCoupon/StartDate}" valueFormat="yyyy-MM-dd" displayFormat="yyyy-MM-dd" change="onChange_Date" valueStateText="Select Start Date" />
+					<Label required="true" text="End Date"/>
+
+
+					<DatePicker id="dpEndDate" value="{CouponView>/CurrentCoupon/EndDate}" valueFormat="yyyy-MM-dd" displayFormat="yyyy-MM-dd" change="onChange_Date" valueStateText="Select End Date" />
 				</f:content>
 			</f:SimpleForm>
 		</content>
