@@ -147,6 +147,11 @@
                                                 />
                                             </TileContent>
                                         </GenericTile>
+                                        <GenericTile visible="true" class="sapUiMediumMargin" header="Manage Coupon" press="TileV_onpressCouponDetails">
+	                                        <TileContent unit="Coupon Details">
+		                                        <ImageContent src="sap-icon://tags" />
+	                                        </TileContent>
+                                        </GenericTile>  
 
                                     </layout:HorizontalLayout>
                                 </ux:blocks>

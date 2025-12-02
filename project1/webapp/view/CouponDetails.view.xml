@@ -1,0 +1,78 @@
+<mvc:View controllerName="sap.ui.com.project1.controller.CouponDetails" 
+	xmlns:mvc="sap.ui.core.mvc" 
+	xmlns="sap.m" 
+	xmlns:core="sap.ui.core" 
+	xmlns:fb="sap.ui.comp.filterbar" displayBlock="true" busyIndicatorDelay="0">
+	<Page id="couponDetailsPage" title="Manage Coupon Details" showNavButton="true" navButtonPress="onNavBack">
+		<content>
+			<!-- here tabls is not responsive means demand popin is not working -->
+			<Table id="couponTable" items="{path: 'CouponModel>/'}" mode="MultiSelect" sticky="ColumnHeaders,HeaderToolbar" growing="true" busyIndicatorDelay="0" growingThreshold="100" alternateRowColors="true">
+				<!-- Header with actions -->
+				<headerToolbar>
+					<OverflowToolbar>
+						<Title text="Coupons ({=${CouponModel>/}.length})" />
+						<ToolbarSpacer/>
+						<Button text="Add" press="onAddCoupon" class="myUnifiedBtn" />
+						<Button text="Edit" press="onEditCoupon" class="myUnifiedBtn" />
+						<Button text="Delete" press="onDeleteCoupon" class="myUnifiedBtn" />
+						<Button text="Download" press="onDownloadCoupons" class="myUnifiedBtn" />
+					</OverflowToolbar>
+				</headerToolbar>
+				<!-- Columns -->
+				<columns>
+					<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="Discount Type"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="Discount Value"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="Max Uses"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="Used Count"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="Per User Limit"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="Min Order Value"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="Start Date"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="End Date"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="Status"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="Created At"/>
+					</Column>
+					<Column minScreenWidth="Tablet" demandPopin="true">
+						<Text text="Created By"/>
+					</Column>
+				</columns>
+				<!-- Row template -->
+				<items>
+					<ColumnListItem>
+						<cells>
+							<Text text="{CouponModel>DiscountType}" />
+							<Text text="{= ${CouponModel>DiscountValue} + (${CouponModel>DiscountType} === 'Percentage' ? ' %' : '') }" />
+							<Text text="{CouponModel>MaxUses}" />
+							<Text text="{CouponModel>UsedCount}" />
+							<Text text="{CouponModel>PerUserLimit}" />
+							<Text text="{CouponModel>MinOrderValue}" />
+							<Text text="{    path: 'CouponModel>StartDate',    formatter: '.Formatter.formatDate'}" />
+							<Text text="{    path: 'CouponModel>EndDate',    formatter: '.Formatter.formatDate'}" />
+							<Text text="{CouponModel>Status}" />
+							<Text text="{    path: 'CouponModel>CreatedAt',    formatter: '.Formatter.formatDate'}" />
+							<Text text="{CouponModel>CreatedBy}" />
+						</cells>
+					</ColumnListItem>
+				</items>
+			</Table>
+		</content>
+	</Page>
+</mvc:View>

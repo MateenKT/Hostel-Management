@@ -67,6 +67,10 @@ sap.ui.define([
         TileV_onpressManageInvoice:function(){
             var oRouter = this.getOwnerComponent().getRouter();
            oRouter.navTo("RouteManageInvoice");
-        }
+        }, 
+            TileV_onpressCouponDetails: function () {
+            var oRouter = this.getOwnerComponent().getRouter();
+            oRouter.navTo("RouteCouponDetails");
+        },	
     })
 })
