@@ -364,5 +364,178 @@ sap.ui.define([
         }
       });
     },
+
+     convertNumberToWords: function (value, currency) {
+      return new Promise((resolve, reject) => {
+        if (typeof value !== 'number') {
+          value = parseFloat(value);
+          if (isNaN(value)) {
+            return reject(new TypeError('The value must be a valid number.'));
+          }
+        }
+        if (typeof currency !== 'string' || currency.trim() === '') {
+          return reject(new TypeError('The currency code must be a non-empty string.'));
+        }
+
+        const units = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine'];
+        const teens = ['Ten', 'Eleven', 'Twelve', 'Thirteen', 'Fourteen', 'Fifteen', 'Sixteen', 'Seventeen', 'Eighteen', 'Nineteen'];
+        const tens = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
+
+        const convertLessThanOneThousand = (num) => {
+          let result = '';
+          if (num >= 100) {
+            result += units[Math.floor(num / 100)] + ' Hundred';
+            num %= 100;
+            if (num > 0) result += ' ';
+          }
+          if (num >= 20) {
+            result += tens[Math.floor(num / 10)];
+            num %= 10;
+            if (num > 0) result += ' ';
+          }
+          if (num >= 10) {
+            return result + teens[num - 10];
+          }
+          if (num > 0) {
+            result += units[num];
+          }
+          return result.trim();
+        };
+
+        const toWordsIndian = (num) => {
+          if (num === 0) return 'Zero';
+          let words = '';
+          const croreOfCrores = Math.floor(num / 100000000000000);
+          if (croreOfCrores > 0) {
+            words += toWordsIndian(croreOfCrores) + ' Crore ';
+            num %= 100000000000000;
+          }
+          const lakhCrores = Math.floor(num / 1000000000000);
+          if (lakhCrores > 0) {
+            words += convertLessThanOneThousand(lakhCrores) + ' Lakh ';
+            num %= 1000000000000;
+          }
+          const thousandCrores = Math.floor(num / 10000000000);
+          if (thousandCrores > 0) {
+            words += convertLessThanOneThousand(thousandCrores) + ' Thousand ';
+            num %= 10000000000;
+          }
+          const crores = Math.floor(num / 10000000);
+          if (crores > 0) {
+            words += convertLessThanOneThousand(crores) + ' Crore ';
+            num %= 10000000;
+          }
+          const lakhs = Math.floor(num / 100000);
+          if (lakhs > 0) {
+            words += convertLessThanOneThousand(lakhs) + ' Lakh ';
+            num %= 100000;
+          }
+          const thousands = Math.floor(num / 1000);
+          if (thousands > 0) {
+            words += convertLessThanOneThousand(thousands) + ' Thousand ';
+            num %= 1000;
+          }
+          if (num > 0) {
+            words += convertLessThanOneThousand(num);
+          }
+          return words.trim();
+        };
+
+        const toWordsWestern = (num) => {
+          if (num === 0) return 'Zero';
+          let words = '';
+          const quadrillions = Math.floor(num / 1000000000000000);
+          if (quadrillions > 0) {
+            words += toWordsWestern(quadrillions) + ' Quadrillion ';
+            num %= 1000000000000;
+          }
+          const trillions = Math.floor(num / 1000000000000);
+          if (trillions > 0) {
+            words += toWordsWestern(trillions) + ' Trillion ';
+            num %= 1000000000000;
+          }
+          const billions = Math.floor(num / 1000000000);
+          if (billions > 0) {
+            words += toWordsWestern(billions) + ' Billion ';
+            num %= 1000000000;
+          }
+          const millions = Math.floor(num / 1000000);
+          if (millions > 0) {
+            words += convertLessThanOneThousand(millions) + ' Million ';
+            num %= 1000000;
+          }
+          const thousands = Math.floor(num / 1000);
+          if (thousands > 0) {
+            words += convertLessThanOneThousand(thousands) + ' Thousand ';
+            num %= 1000;
+          }
+          if (num > 0) {
+            words += convertLessThanOneThousand(num);
+          }
+          return words.trim();
+        };
+
+
+        let currencyConfig = {
+          majorSingular: 'Dollar',
+          majorPlural: 'Dollars',
+          minorSingular: 'Cent',
+          minorPlural: 'Cents',
+          system: 'Western'
+        };
+
+        const upperCurrency = currency.toUpperCase();
+
+        if (upperCurrency === 'INR') {
+          currencyConfig = {
+            majorSingular: 'Rupee',
+            majorPlural: 'Rupees',
+            minorSingular: 'Paisa',
+            minorPlural: 'Paise',
+            system: 'Indian'
+          };
+        } else if (upperCurrency === 'AED') {
+          currencyConfig = {
+            majorSingular: 'Dirham',
+            majorPlural: 'Dirhams',
+            minorSingular: 'Fils',
+            minorPlural: 'Fils',
+            system: 'Western'
+          };
+        }
+
+        const integerPart = Math.floor(value);
+        const decimalPart = Math.round((value - integerPart) * 100);
+
+        if (integerPart === 0 && decimalPart === 0) {
+          return resolve(`Zero ${currencyConfig.majorPlural}`);
+        }
+
+        let integerWords = '';
+        if (integerPart > 0) {
+          if (currencyConfig.system === 'Indian') {
+            integerWords = toWordsIndian(integerPart);
+          } else {
+            integerWords = toWordsWestern(integerPart);
+          }
+        }
+
+
+        const majorUnit = integerPart === 1 ? currencyConfig.majorSingular : currencyConfig.majorPlural;
+        let finalResult = integerPart > 0 ? `${integerWords} ${majorUnit}` : '';
+
+        if (decimalPart > 0) {
+          const decimalWords = convertLessThanOneThousand(decimalPart);
+          const minorUnit = decimalPart === 1 ? currencyConfig.minorSingular : currencyConfig.minorPlural;
+          if (finalResult) {
+            finalResult += ` and ${decimalWords} ${minorUnit}`;
+          } else {
+            finalResult = `${decimalWords} ${minorUnit}`;
+          }
+        }
+
+        resolve(finalResult.trim());
+      });
+    },
     })
 });

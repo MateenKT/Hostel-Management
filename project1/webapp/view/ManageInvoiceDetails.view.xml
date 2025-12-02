@@ -246,7 +246,7 @@
 				<m:contentRight>
 					<m:Button visible="{visiablityPlay>/createVisi}" text="{i18n>submit}" press="CID_onPressSubmit" class="sendMail myUnifiedBtn" />
 					<m:Button text="{i18n>companyInvoiceSendEmail}" class="myUnifiedBtn" press="CID_onPressSendEmail" visible="{visiablityPlay>/payByDate}" />
-					<m:Button visible="{visiablityPlay>/Edit}" type="{= ${visiablityPlay>/editable} ? 'Transparent' : 'Transparent' }" text="{= ${visiablityPlay>/editable} === true?'Save':'Edit'}" press="CID_onPressEdit" class="sendMail myUnifiedBtn"  />
+					<m:Button visible="{visiablityPlay>/Edit}" text="{= ${visiablityPlay>/editable} === true?'Save':'Edit'}" press="CID_onPressEdit" class="sendMail myUnifiedBtn"  />
 					<m:Button text="{i18n>sendInvoiceText}" press="CID_onPressSendMultipalEmail" visible="{visiablityPlay>/MultiEmail}" class="myUnifiedBtn" />
 					<m:Button text="{i18n>GeneratePDF}" press="CID_onPressGeneratePdf" visible="{visiablityPlay>/merge}" class="myUnifiedBtn"/>
 				</m:contentRight>

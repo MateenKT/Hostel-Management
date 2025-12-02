@@ -78,8 +78,8 @@ sap.ui.define([
                 this.SelectedCustomerModel = oView.getModel("SelectedCustomerModel");
 
 
-                 oView.setModel(new JSONModel({
-                    BookingID: "", 
+                oView.setModel(new JSONModel({
+                    BookingID: "",
                 }), "BookingModel");
 
                 oView.setModel(new JSONModel({
@@ -222,7 +222,9 @@ sap.ui.define([
                     this.Status = Status;
 
                     this.totalAmountCalculation();
-                    this.Readcall("InvoicePaymentDetail", { InvNo: this.decodedPath })
+                    this.Readcall("InvoicePaymentDetail", {
+                        InvNo: this.decodedPath
+                    })
                 } catch (error) {
                     MessageToast.show(error.responseText || "Failed to load invoice data.");
                 } finally {
@@ -1503,34 +1505,18 @@ sap.ui.define([
             },
 
             CID_onPressGeneratePdf: async function() {
-                const {
-                    jsPDF
-                } = window.jspdf;
-                var that = this
-                sap.ui.core.BusyIndicator.show(0);
-                const oView = this.getView();
-                const oModel = oView.getModel("SelectedCustomerModel").getData();
-                var data = this.getView().getModel("FilteredSOWModel").getData();
-                const oManageInvoiceItemModel = oView.getModel("ManageInvoiceItemModel").getData();
-                const oCompanyItemModel = oManageInvoiceItemModel.ManageInvoiceItem || [];
-                const type = this.getView().byId("CID_id_Type").getText();
-                let filter = {
-                    companyCode: oModel.CompanyCode
-                }
                 try {
-                    const oCompanyDetailsModel = await that.ajaxReadWithJQuery("CompanyCodeDetails", filter);
+                    const {
+                        jsPDF
+                    } = window.jspdf;
+                    const oView = this.getView();
+                    const oModel = oView.getModel("SelectedCustomerModel").getData();
+                    const oManageInvoiceItemModel = oView.getModel("ManageInvoiceItemModel").getData();
+                    const oCompanyItemModel = oManageInvoiceItemModel.ManageInvoiceItem || [];
+                    var data = this.getView().getModel("FilteredSOWModel").getData();
 
-                    const imgblob = new Blob([new Uint8Array(oCompanyDetailsModel.data[0].transparentComplogo?.data)], {
-                        type: "image/png"
-                    });
-                    const signBlob = new Blob([new Uint8Array(oCompanyDetailsModel.data[0].signature?.data)], {
-                        type: "image/png"
-                    });
-                    const img = await this._convertBLOBToImage(imgblob);
-                    const signature = await this._convertBLOBToImage(signBlob);
-
-                    let totalInWords = await this.convertNumberToWords(oModel.TotalAmount, data.Currency);
-                    const showSAC = oModel.GST !== undefined && oModel.GST !== "";
+                    let totalInWords = await this.convertNumberToWords(oModel.TotalAmount, oModel.Currency);
+                    const showSAC = oModel.GSTNO !== undefined && oModel.GSTNO !== "";
 
                     const margin = 15;
                     const doc = new jsPDF({
@@ -1542,28 +1528,26 @@ sap.ui.define([
                     const pageWidth = doc.internal.pageSize.getWidth();
                     const pageHeight = doc.internal.pageSize.getHeight();
                     const usableWidth = pageWidth - 2 * margin;
-                    const footerHeight = 18;
-                    let currentY = 0;
-
-                    const checkPageSpace = (requiredSpace = 40) => {
-                        if (currentY + requiredSpace > pageHeight - footerHeight) {
-                            doc.addPage();
-                            currentY = 20;
-                        }
-                    };
-
                     const headerMargin = 25.4;
-                    doc.setFontSize(14).setFont("times", "bold");
-                    doc.text("TAX - INVOICE", pageWidth - 18, headerMargin, {
+                    let currentY = headerMargin;
+
+                    // ===== HEADER =====
+                    doc.setFontSize(16);
+                    doc.setFont("times", "bold");
+                    let headerLabel = (oModel.GSTNO === undefined || oModel.GSTNO === "") ? "INVOICE" : "TAX-INVOICE";
+                    doc.text(headerLabel, pageWidth - 18, currentY, {
                         align: "right"
                     });
-                    doc.addImage(img, 'PNG', margin, 15, 40, 40);
 
-                    const detailsStartY = 35;
+                    currentY += 10;
+
+                    // ===== INVOICE DETAILS TABLE RIGHT SIDE =====
+                    const detailsStartY = currentY;
                     const rowHeight = 6.5;
                     const columnWidths = [30, 30];
-                    const rightAlignX = pageWidth - 18 - columnWidths[0] - columnWidths[1];
-                    doc.setFontSize(12).setFont("times", "bold");
+                    doc.setFontSize(12);
+                    doc.setFont("times", "normal");
+                    const rightAlignX = pageWidth - 13.5 - columnWidths[0] - columnWidths[1];
 
                     const detailsTable = [{
                             label: 'Invoice No. :',
@@ -1571,74 +1555,75 @@ sap.ui.define([
                         },
                         {
                             label: 'Date :',
-                            value: typeof(oModel.InvoiceDate) === 'string' ? oModel.InvoiceDate : Formatter.formatDate(oModel.InvoiceDate)
+                            value: (oModel.InvoiceDate)
                         },
                         {
-                            label: 'PO/SOW :',
-                            value: oModel.POSOW.toString()
+                            label: 'Room No :',
+                            value: oModel.RoomNo
                         },
                     ];
-
-                    currentY = detailsStartY;
 
                     detailsTable.forEach(row => {
                         doc.setFont("times", "bold");
                         doc.text(row.label, rightAlignX + columnWidths[0] - doc.getTextWidth(row.label), currentY + 5);
-                        doc.setFont("times", "bold");
-                        doc.text(row.value, rightAlignX + columnWidths[0] + 5, currentY + 5);
+                        doc.setFont("times", "normal");
+                        doc.text(row.value, rightAlignX + columnWidths[0] + 2, currentY + 5);
                         currentY += rowHeight;
                     });
 
-                    currentY += 15;
-                    doc.setFont("times", "bold").setFontSize(11);
-                    doc.text("To,", margin, currentY);
+                    // ===== INVOICE TO BLOCK =====
+                    currentY = detailsStartY + 5;
+                    doc.setFont("times", "bold");
+                    doc.text("Invoice To:", margin, currentY);
+
+                    currentY += 5;
+                    doc.setFont("times", "normal");
+                    doc.setFontSize(12);
+                    doc.text(`Name : ${oModel.CustomerName}`, margin, currentY);
                     currentY += 5;
 
-                    doc.setFont("times", "normal").setFontSize(11);
-                    const maxLength = 30;
-                    const customerName = oModel.CustomerName || "";
-                    const lines = [];
+                    const ConsultantAddressLines = doc.splitTextToSize(oModel.PermanentAddress, usableWidth / 2 - 10);
+                    doc.text(ConsultantAddressLines, margin, currentY);
+                    currentY += ConsultantAddressLines.length * 5;
 
-                    for (let i = 0; i < customerName.length; i += maxLength) {
-                        lines.push(customerName.substring(i, i + maxLength));
-                    }
-
-                    lines.forEach(line => {
-                        doc.text(line, margin, currentY);
-                        currentY += 5;
-                    });
-
-
-                    const customerPermanentAddressLines = doc.splitTextToSize(oModel.PermanentAddress, usableWidth / 2 - 10);
-                    doc.text(customerPermanentAddressLines, margin, currentY);
-                    currentY += customerPermanentAddressLines.length * 5;
-
-                    if (oModel.GST !== undefined && oModel.GST !== "") {
-                        doc.text(`GSTIN : ${oModel.GST}`, margin, currentY);
+                    if (oModel.MobileNo) {
+                        doc.text(`Mobile No : ${oModel.MobileNo}`, margin, currentY);
                         currentY += 5;
                     }
 
+                    if (oModel.CustomerEmail) {
+                        doc.text(`Email : ${oModel.CustomerEmail}`, margin, currentY);
+                        currentY += 5;
+                    }
+
+                    if (oModel.GSTNO !== undefined && oModel.GSTNO !== "") {
+                        doc.text(`GSTIN : ${oModel.GSTNO}`, margin, currentY);
+                        currentY += 5;
+                    }
+
                     currentY += 5;
 
-                    const body = oCompanyItemModel.map((item, index) => {
+                    // ===== TABLE BODY PREPARATION =====
+                    const body = oCompanyItemModel.filter(item => item).map((item, index) => {
                         const row = [
                             index + 1,
                             item.Particulars,
-                            item.Unit || "-",
-                            Formatter.fromatNumber(item.Rate) || '0.00',
-                            Formatter.fromatNumber(item.Discount) || '0.00',
-                            Formatter.fromatNumber(item.Total) || '0.00'
+                            (item.StartDate) || "",
+                            (item.EndDate) || "",
+                            item.UnitText,
+                            Formatter.fromatNumber(item.Total) || "0.00"
                         ];
-                        if (showSAC) row.splice(2, 0, item.SAC);
+                        if (showSAC) row.splice(2, 0, item.SAC); // Insert SAC column when GST available
                         return row;
                     });
 
                     const head = showSAC ? [
-                        ['Sl.No.', 'Particulars', 'SAC', 'Unit', 'Rate', 'Discount', 'Total']
+                        ['Sl.No.', 'Particulars', 'SAC', 'StartDate', 'EndDate', 'UnitText', 'Total']
                     ] : [
-                        ['Sl.No.', 'Particulars', 'Unit', 'Rate', 'Discount', 'Total']
+                        ['Sl.No.', 'Particulars', 'StartDate', 'EndDate', 'UnitText', 'Total']
                     ];
 
+                    // ===== AUTO TABLE =====
                     doc.autoTable({
                         startY: currentY,
                         head: head,
@@ -1661,43 +1646,18 @@ sap.ui.define([
                             },
                             1: {
                                 halign: 'left'
-                            },
-                            ...(showSAC ? {
-                                2: {
-                                    halign: 'center'
-                                },
-                                3: {
-                                    halign: 'right'
-                                },
-                                4: {
-                                    halign: 'right'
-                                },
-                                5: {
-                                    halign: 'right'
-                                },
-                                6: {
-                                    halign: 'right'
-                                }
-                            } : {
-                                2: {
-                                    halign: 'center'
-                                },
-                                3: {
-                                    halign: 'right'
-                                },
-                                4: {
-                                    halign: 'right'
-                                },
-                                5: {
-                                    halign: 'right'
-                                }
-                            })
-                        },
+                            }
+                        }
                     });
 
-                    currentY = doc.lastAutoTable.finalY;
-                    checkPageSpace(50);
+                    currentY = doc.lastAutoTable.finalY + 5;
 
+                    if (currentY + 40 > pageHeight) {
+                        doc.addPage();
+                        currentY = 20;
+                    }
+
+                    // ===== SUMMARY TABLE =====
                     const summaryBody = [];
 
                     if (parseFloat(oModel.SubTotalNotGST) > 0) {
@@ -1779,179 +1739,31 @@ sap.ui.define([
                     });
 
                     currentY = doc.lastAutoTable.finalY + 10;
-                    checkPageSpace(25);
 
+                    // ===== AMOUNT IN WORDS =====
                     oModel.AmountInWords = totalInWords;
                     doc.setFont("times", "bold");
-                    doc.text("Amount in Words:", 13, currentY);
+                    doc.text("Amount in Words :", 13, currentY);
+
                     currentY += 5;
                     doc.setFont("times", "normal");
-                    const amountHeight = doc.getTextDimensions(oModel.AmountInWords || "").h;
                     doc.text(oModel.AmountInWords || "", 13, currentY, {
                         maxWidth: 180
                     });
-                    currentY += amountHeight + 10;
 
-                    checkPageSpace(40);
-                    doc.setFont("times", "bold").setFontSize(11);
-                    doc.text("PAYMENT METHOD :", margin - 2, currentY);
-                    currentY += 5;
+                    currentY += 15;
+                    doc.setFontSize(11);
+                    doc.text("Thank you for your Visiting!", margin - 2, currentY);
 
-                    const paymentDetails = [{
-                            label: "Bank Name",
-                            value: oCompanyDetailsModel.data[0].bankName
-                        },
-                        {
-                            label: "Account Name",
-                            value: oCompanyDetailsModel.data[0].accountName
-                        },
-                        {
-                            label: "Account No",
-                            value: oCompanyDetailsModel.data[0].accountNo
-                        },
-                        {
-                            label: "IFSC Code",
-                            value: oCompanyDetailsModel.data[0].ifscCode
-                        },
-                        {
-                            label: "Swift Code",
-                            value: oCompanyDetailsModel.data[0].swiftCode
-                        },
-                        {
-                            label: 'Pay By',
-                            value: typeof(oModel.InvoiceDate) === 'string' ? oModel.PayByDate : Formatter.formatDate(oModel.PayByDate)
-                        },
-                    ];
-
-                    paymentDetails.forEach(detail => {
-                        doc.setFont("times", "bold");
-                        const label = `${detail.label} :`;
-                        const labelWidth = doc.getTextWidth(label);
-                        doc.text(label, margin - 2, currentY);
-                        doc.setFont("times", "normal");
-                        doc.text(detail.value, margin + labelWidth, currentY);
-                        currentY += 5;
-                    });
-
-                    checkPageSpace(35);
-                    const rightEdgeX = pageWidth - margin;
-                    const lineSpacing = 5;
-                    const maxLineLength = 45;
-                    const forText = "For: " + oCompanyDetailsModel.data[0].companyName;
-
-                    // Split text if more than 45 characters
-                    let forTextLines = [];
-                    if (forText.length > maxLineLength) {
-                        const words = forText.split(" ");
-                        let currentLine = "";
-                        for (const word of words) {
-                            if ((currentLine + " " + word).trim().length <= maxLineLength) {
-                                currentLine += " " + word;
-                            } else {
-                                forTextLines.push(currentLine.trim());
-                                currentLine = word;
-                            }
-                        }
-                        if (currentLine) {
-                            forTextLines.push(currentLine.trim());
-                        }
-                    } else {
-                        forTextLines = [forText];
-                    }
-
-                    // Draw wrapped "For: Company Name" right-aligned
-                    doc.setFont("helvetica", "bold").setFontSize(11);
-                    let forLabelY = currentY;
-                    for (let i = 0; i < forTextLines.length; i++) {
-                        const line = forTextLines[i];
-                        const lineWidth = doc.getTextWidth(line);
-                        doc.text(line, rightEdgeX - lineWidth, forLabelY);
-                        const isLastLine = i === forTextLines.length - 1;
-                        const isWrapped = forText.length > maxLineLength;
-
-                        if (!isLastLine || isWrapped) {
-                            forLabelY += lineSpacing;
-                        }
-                    }
-
-                    // Signature (Right-aligned under company name)
-                    const signatureWidth = 57;
-                    const signatureHeight = 13;
-                    const logoXPosition = rightEdgeX - signatureWidth + 16; // align to rightEdge
-                    const logoYPosition = forLabelY + 2;
-
-                    doc.addImage(signature, 'JPEG', logoXPosition, logoYPosition, signatureWidth, signatureHeight);
-
-                    // Head of Company (Right-aligned)
-                    const headName = oCompanyDetailsModel.data[0].headOfCompany || "";
-                    const headWidth = doc.getTextWidth(headName);
-                    const partnersYPosition = logoYPosition + signatureHeight + 2;
-
-                    doc.setFont("helvetica", "bold").setFontSize(11);
-                    doc.text(headName, rightEdgeX - headWidth, partnersYPosition);
-
-                    // Designation (Right-aligned)
-                    const designation = oCompanyDetailsModel.data[0].designation || "";
-                    const designationWidth = doc.getTextWidth(designation);
-                    doc.text(designation, rightEdgeX - designationWidth, partnersYPosition + lineSpacing);
-
-                    doc.setFont("times", "normal").setFontSize(11);
-                    doc.text("Thank you for your business!", margin - 2, partnersYPosition + 10);
-
-                    const totalPages = doc.internal.getNumberOfPages();
-                    for (let i = 1; i <= totalPages; i++) {
-                        doc.setPage(i);
-                        this.addFooter(doc, oCompanyDetailsModel, pageWidth, pageHeight, i, totalPages);
-                    }
-
+                    // ===== SAVE FILE =====
                     doc.save(`${oModel.CustomerName}-${oModel.InvNo}-Invoice.pdf`);
+
                 } catch (error) {
-                    that.closeBusyDialog();
+                    this.closeBusyDialog();
                     MessageToast.show(error.message || error.responseText);
                 } finally {
-                    sap.ui.core.BusyIndicator.hide();
+                    this.closeBusyDialog();
                 }
-            },
-
-            addFooter: function(doc, oCompanyDetailsModel, pageWidth, pageHeight, currentPage, totalPages) {
-                const footerHeight = 18;
-                const footerYPosition = pageHeight - footerHeight;
-                const footerWidth = pageWidth;
-
-                doc.setFillColor(128, 128, 128);
-                doc.rect(0, footerYPosition, footerWidth, footerHeight, 'F'); // Grey footer background
-
-                doc.setFont("helvetica", "normal").setFontSize(8);
-                doc.setTextColor(255, 255, 255); // White text
-
-                const textYPosition = footerYPosition + 5;
-                const lineHeight = 5;
-
-                doc.setFontSize(8);
-                doc.text(`SUBJECT TO ${oCompanyDetailsModel.data[0].city.toUpperCase()} JURISDICTION`, footerWidth / 2, textYPosition, {
-                    align: 'center'
-                });
-
-                doc.setFontSize(10);
-                const PermanentAddressLines = doc.splitTextToSize(oCompanyDetailsModel.data[0].longPermanentAddress, footerWidth - 100);
-                let currentYPosition = textYPosition + 5;
-
-                doc.setFontSize(10);
-                doc.text(` GSTIN : ${oCompanyDetailsModel.data[0].gstin}`, footerWidth - 5, currentYPosition, {
-                    align: 'right'
-                });
-                doc.text(` Mobile No : ${oCompanyDetailsModel.data[0].mobileNo}`, footerWidth / 2 - 44, currentYPosition + 5, {
-                    align: 'center'
-                });
-                doc.text(`LUT No : ${oCompanyDetailsModel.data[0].lutno}`, footerWidth - 5, currentYPosition + 5, {
-                    align: 'right'
-                });
-
-                PermanentAddressLines.forEach((line) => {
-                    doc.text(line, 5, currentYPosition);
-                    currentYPosition += lineHeight;
-                });
-            },
-
+            }
         });
     });
