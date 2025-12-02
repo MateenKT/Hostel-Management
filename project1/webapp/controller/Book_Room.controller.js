@@ -799,6 +799,15 @@ _createDynamicPersonsUI: function () {
     const oFile = oEvent.getParameter("files")[0];
 
     if (!oFile) return;
+     const sDocType = oModel.getProperty("/Persons/" + index + "/DocumentType");
+
+    if (!sDocType) {
+        sap.m.MessageBox.error("Please select Document Type before uploading.");
+        
+        // Reset file uploader
+        oEvent.getSource().clear();
+        return;
+    }
 
     const MAX_SIZE = 2 * 1024 * 1024; // 2MB
 
@@ -3049,7 +3058,7 @@ aSelectedFacilities.forEach(fac => {
                 sap.ui.core.BusyIndicator.hide();
             }
         },
-         onPressAvatarEdit: function () {
+         onPressAvatarEdit: function (oEvent) {
             if (!this._oAvatarActionSheet) {
                 this._oAvatarActionSheet = new sap.m.ActionSheet({
                     buttons: [
@@ -3074,7 +3083,7 @@ aSelectedFacilities.forEach(fac => {
                 });
                 this.getView().addDependent(this._oAvatarActionSheet);
             }
-            this._oAvatarActionSheet.openBy(this.byId("id_avatarEditBtn"));
+           this._oAvatarActionSheet.openBy(oEvent.getSource());
         },
         _StartCamera: function () {
             var oVideo = document.getElementById("video");

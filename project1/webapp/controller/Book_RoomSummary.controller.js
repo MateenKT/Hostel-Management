@@ -1076,7 +1076,7 @@ return {
         oHostelModel.refresh(true);
 
         sap.m.MessageToast.show(
-            `Coupon Applied Successfully! New Total: ₹${finalTotal.toFixed(2)}`
+            `Coupon Applied Successfully`
         );
 
     } catch (err) {
