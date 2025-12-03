@@ -1493,54 +1493,46 @@ sap.ui.define([
             }
         },
 
-        onEditTimeChange: function (oEvent) {
-            utils._LCvalidateMandatoryField(oEvent)
-            var oModel = this.getView().getModel("edit");
-            var oData = oModel.getData();
+       onEditTimeChange: function (oEvent) {
+    utils._LCvalidateMandatoryField(oEvent);
 
-            var sStart = oData.StartTime; // "HH:mm:ss"
-            var sEnd = oData.EndTime; // "HH:mm:ss"
+    var oModel = this.getView().getModel("edit");
+    var oData = oModel.getData();
 
-            if (!sStart || !sEnd) {
-                return;
-            }
+    var sStart = oData.StartTime;  // Example: "9" or "09"
+    var sEnd = oData.EndTime;      // Example: "17" or "17"
 
-            // Split HH:mm:ss
-            var startParts = sStart.split(":");
-            var endParts = sEnd.split(":");
+    if (!sStart || !sEnd) {
+        return;
+    }
 
-            var start = {
-                h: parseInt(startParts[0], 10),
-                m: parseInt(startParts[1], 10),
-            };
+    // Convert to number
+    var startHour = parseFloat(sStart);
+    var endHour = parseFloat(sEnd);
 
-            var end = {
-                h: parseInt(endParts[0], 10),
-                m: parseInt(endParts[1], 10),
-            };
+    // Validate numbers
+    if (isNaN(startHour) || isNaN(endHour)) {
+        sap.m.MessageToast.show("Invalid hour format");
+        oModel.setProperty("/TotalHour", "");
+        return;
+    }
 
-            // Convert to minutes
-            var startMinutes = start.h * 60 + start.m;
-            var endMinutes = end.h * 60 + end.m;
+    // Validate end > start
+    if (endHour < startHour) {
+        sap.m.MessageToast.show("End Time should be greater than Start Time");
+        oModel.setProperty("/TotalHour", "");
+        return;
+    }
 
-            // Validate
-            if (endMinutes < startMinutes) {
-                sap.m.MessageToast.show("End Time should be greater than Start Time");
-                oModel.setProperty("/TotalHour", "");
-                return;
-            }
+    // Difference
+    var diff = endHour - startHour;
 
-            // Difference in minutes
-            var diffMin = endMinutes - startMinutes;
+    // Format (optional)
+    var formatted = diff.toFixed(2);
 
-            // Convert to hours (decimal)
-            var diffHours = diffMin / 60;
+    oModel.setProperty("/TotalHour", formatted);
+},
 
-            // Format to 2 decimal places
-            var formatted = diffHours.toFixed(2);
-
-            oModel.setProperty("/TotalHour", formatted);
-        },
 
         onCountrySelectionChange: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent);
