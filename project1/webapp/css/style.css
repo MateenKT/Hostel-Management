@@ -963,6 +963,20 @@
 .paymentDialogRoot .paymentTypeGroup .sapMRbS .sapMText {
   font-weight: 600;
 }
+
+ .paymentDialogRoot,
+.paymentDialogRoot .sapMBar,
+.paymentDialogRoot .sapMBarRight,
+.paymentDialogRoot .sapMBarMiddle,
+.paymentDialogRoot .sapMBarLeft {
+  background: linear-gradient(135deg, #00b7c7, #008b96) !important;
+  color: white !important;
+}
+
+#idPaymentDialog-title-inner {
+    color: white !important;
+}
+
 .centerUPIImage {
   display: block;
   margin-left: auto;
@@ -1874,3 +1888,32 @@ span.sapMBtnInner.sapMBtnEmphasized {
         overflow-wrap: break-word;
     }
 }
+/* .customDocToolbar.sapMOverflowToolbar {
+  overflow: visible !important;
+  flex-wrap: wrap !important;
+} */
+
+/* .customDocToolbar .sapMBarChild {
+  margin-bottom: 6px;
+} */
+
+/* MOBILE SCREEN FIX */
+/* @media (max-width: 600px) { */
+
+  /* Hide spacer to prevent pushing controls */
+  /* .customDocToolbar .sapMTBSpacer {
+    display: 0 0 5px !important;
+  } */
+
+  /* Put items in new line automatically */
+  /* .customDocToolbar {
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+  } */
+
+  /* Full width child elements */
+  /* .customDocToolbar .sapMBarChild {
+    width: 100% !important;
+    margin-top: 5px !important;
+  } */
+/* } */
