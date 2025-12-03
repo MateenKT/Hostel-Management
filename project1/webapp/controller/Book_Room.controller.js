@@ -19,6 +19,7 @@ sap.ui.define([
        this.getOwnerComponent().getRouter().getRoute("RouteBookRoom").attachMatched(this._onRouteMatched, this);
     },
     _onRouteMatched: function(){
+     
       const oUserModel = sap.ui.getCore().getModel("LoginModel");
       if (oUserModel) {
         this._oLoggedInUser = oUserModel.getData();
@@ -132,15 +133,6 @@ oHostelModel.setProperty("/SelectedPerson", "1");
       setTimeout(() => {
         this.Roomdetails();
       }, 100);
-      // const oLoginModeModel = new JSONModel({
-      //   fullname: "",
-      //   Email: "",
-      //   Mobileno: "",
-      //   password: "",
-      //   comfirmpass: ""
-      // });
-      // this.getView().setModel(oLoginModeModel, "LoginMode")
-
 			this._fetchCommonData("Country", "CountryModel","");
 			this._fetchCommonData("State", "StateModel");
             this._fetchCommonData("City", "CityModel");    
@@ -406,6 +398,44 @@ _createDynamicPersonsUI: function () {
                 );
                 oView.addDependent(that._oLoginAlertDialog);
             }
+             const vm = that.getView().getModel("LoginViewModel");
+
+            // COMPLETE reset of all auth-related states
+            vm.setProperty("/authFlow", "signin");
+            vm.setProperty("/loginMode", "password");
+            vm.setProperty("/showOTPField", false);
+            vm.setProperty("/isOtpEntered", false);
+
+            // 🔥 FIX: You forgot these
+            vm.setProperty("/isOtpSelected", false);
+            vm.setProperty("/isPasswordSelected", true);
+
+            // Reset fields
+            this._resetAllAuthFields?.();
+            this._clearAllAuthFields?.();
+
+            // Reset OTP UI
+            const otpCtrl = sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signInOTP");
+            if (otpCtrl) {
+                otpCtrl.setValue("");
+                otpCtrl.setEnabled(false);
+            }
+
+            const btnSendOTP = sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "btnSignInSendOTP");
+            if (btnSendOTP) btnSendOTP.setVisible(false);
+
+            // Reset password valid state
+            const passCtrl = sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signinPassword");
+            if (passCtrl) {
+                passCtrl.setEnabled(true);
+                passCtrl.setValue("");
+                passCtrl.setValueState("None");
+            }
+
+            // Reset dialog title
+            vm.setProperty("/dialogTitle", "Hostel Access Portal");
+
+           
             that._oLoginAlertDialog.open();
               sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signInusername").setValue("").setValueState("None");
 				                                     sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signinPassword").setValue("").setValueState("None");
@@ -1141,7 +1171,6 @@ _setFacilitySelectedPrice: function (facility, selectedType, selectedPrice, iPer
 
     oModel.refresh(true);
 },
-_bStep2UIBuilt: false,
 
     onDialogNextButton: async function () {
 
@@ -1149,6 +1178,7 @@ _bStep2UIBuilt: false,
         this._createDynamicPersonsUI();
     }
         if (this._iSelectedStepIndex === 1) {
+               this._resetCouponAndDiscount()
     const aMissing = this._checkMandatoryFields();
     if (aMissing.length > 0) {
         sap.m.MessageBox.error(
@@ -1158,8 +1188,28 @@ _bStep2UIBuilt: false,
     }
 }
 
-      this._iSelectedStepIndex = this._oWizard.getSteps().indexOf(this._oSelectedStep);
-      this.oNextStep = this._oWizard.getSteps()[this._iSelectedStepIndex + 1];
+     // Ensure wizard exists
+if (!this._oWizard) {
+    this._oWizard = this.byId("TC_id_wizard");  // <-- ID of your wizard!
+}
+
+// Ensure selected step exists
+if (!this._oSelectedStep) {
+    this._oSelectedStep = this._oWizard.getCurrentStep();
+}
+
+// SAFE Step index lookup
+let aSteps = this._oWizard.getSteps();
+let iIndex = aSteps.indexOf(this._oSelectedStep);
+
+if (iIndex === -1) {
+    // Force fallback to current step index
+    iIndex = aSteps.indexOf(this._oWizard.getCurrentStep());
+}
+
+this._iSelectedStepIndex = iIndex;
+this.oNextStep = aSteps[iIndex + 1];
+
       if (this._oSelectedStep && !this._oSelectedStep.bLast) {
         this._oWizard.goToStep(this.oNextStep, true);
       } else {
@@ -1170,6 +1220,38 @@ _bStep2UIBuilt: false,
 
       this.handleButtonsVisibility();
     },
+    _resetCouponAndDiscount: function () {
+    const oModel = this.getView().getModel("HostelModel");
+
+    // Clear coupon & discount UI
+    oModel.setProperty("/CouponCode", "");
+    oModel.setProperty("/AppliedDiscount", 0);
+
+    // ❗ Skip totals recalculation if user is still on Step 0 or Step 1
+    if (this._iSelectedStepIndex < 2) {
+        // Only reset discount value, do NOT calculate totals yet
+        oModel.refresh(true);
+        return;
+    }
+
+    // From Step 2 onward — now calculate totals safely
+    const aPersons = oModel.getProperty("/Persons") || [];
+    const roomRent = oModel.getProperty("/RoomRent") || 0;
+
+    const result = this.calculateTotals(aPersons, roomRent);
+
+    oModel.setProperty("/OverallTotalCost", result.GrandTotal);
+    oModel.setProperty("/CGST", result.CGST);
+    oModel.setProperty("/SGST", result.SGST);
+    oModel.setProperty("/FinalTotalCost", result.FinalTotal);
+
+    // Reset button text
+    const oBtn = this.byId("couponApplyBtn");
+    if (oBtn) oBtn.setText("Apply Now");
+
+    oModel.refresh(true);
+},
+    
 
     onDialogBackButton: function () {
       this._iSelectedStepIndex = this._oWizard.getSteps().indexOf(this._oSelectedStep);
@@ -1225,7 +1307,7 @@ _bStep2UIBuilt: false,
           oModel.setProperty("/Cancel", true);
           oModel.setProperty("/NXTVis", false);
           oModel.setProperty("/PERVIOUSVIS", false);
-
+          
           this.TC_onDialogNextButton()
           break;
         default:
@@ -1437,11 +1519,31 @@ switch (sType) {
 },
 
     // Helper function to parse date
- _parseDate: function (sDate) {
-      const aParts = sDate.split("/");
-      return new Date(aParts[2], aParts[1] - 1, aParts[0]);
+_parseDate: function (sDate) {
+
+    // If null or empty → return null safely
+    if (!sDate) return null;
+
+    // If already a Date object → return normalized copy
+    if (sDate instanceof Date) {
+        return new Date(sDate.getFullYear(), sDate.getMonth(), sDate.getDate());
     }
-,
+
+    // If not a string → return null
+    if (typeof sDate !== "string") return null;
+
+    // Existing logic
+    if (sDate.includes("/")) {
+        const parts = sDate.split("/");
+        return new Date(parts[2], parts[1] - 1, parts[0]);
+    }
+
+    // ISO fallback
+    const d = new Date(sDate);
+    if (!isNaN(d)) return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+    return null;
+},
 
     // TC_onDialogBackButton: function () {
     //   const oWizard = this.getView().byId("TC_id_wizard");
@@ -1746,36 +1848,38 @@ onMonthSelectionChange: function (oEvent) {
             btn.setEnabled(id !== "" && name !== "");
         },
 
-         onSelectLoginMode: function (e) {
-            const vm = this.getView().getModel("LoginViewModel");
-            const mode = e.getSource().getText().toLowerCase(); // "password" or "otp"
-
-            vm.setProperty("/loginMode", mode);
-
-            //  Always reset OTP field visibility when switching modes
-            vm.setProperty("/showOTPField", false);
-            vm.setProperty("/isOtpEntered", false);
-
-            // 🔥 Clean OTP input field and disable it
-            const otpCtrl = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInOTP");
-            if (otpCtrl) {
-                otpCtrl.setValue("");
-                otpCtrl.setEnabled(false);
-            }
-
-            // 🔥 Reset password field too (fresh mode)
-            const passCtrl = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signinPassword");
-            if (passCtrl) {
-                passCtrl.setValue("");
-                passCtrl.setValueState("None");
-            }
-
-            // 🔥 Hide Send OTP button unless user is in OTP mode
-            const btnSendOtp = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "btnSignInSendOTP");
-            if (btnSendOtp) {
-                btnSendOtp.setVisible(mode === "otp");
-            }
-        },
+        onSelectLoginMode: function (e) {
+    const vm = this.getView().getModel("LoginViewModel");
+    const mode = e.getSource().getText().toLowerCase();
+ 
+    vm.setProperty("/loginMode", mode);
+ 
+    vm.setProperty("/showOTPField", false);
+    vm.setProperty("/isOtpEntered", false);
+ 
+    // ✅ guarantee button has text
+    if (mode === "otp") {
+        vm.setProperty("/otpButtonText", "Send OTP");
+    }
+ 
+    const otpCtrl = sap.ui.core.Fragment.byId(
+        this.createId("LoginAlertDialog"),
+        "signInOTP"
+    );
+    if (otpCtrl) {
+        otpCtrl.setValue("");
+        otpCtrl.setEnabled(false);
+    }
+ 
+    const passCtrl = sap.ui.core.Fragment.byId(
+        this.createId("LoginAlertDialog"),
+        "signinPassword"
+    );
+    if (passCtrl) {
+        passCtrl.setValue("");
+        passCtrl.setValueState("None");
+    }
+},
         _clearAllAuthFields: function () {
             const ids = [
                 "signInuserid", "signInusername", "signinPassword",
@@ -2703,7 +2807,8 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
                       BranchCode:oData.BranchCode,
                       Currency:oData.Currency,
                       Discount:oData.AppliedDiscount,
-                      CouponCode:oData.CouponCode
+                      CouponCode:oData.CouponCode,
+                      UserID:p.UserID
                   });
               }
               const paymentDetails = {
@@ -2786,6 +2891,9 @@ aSelectedFacilities.forEach(fac => {
           const aBookingDetails = oResponse.BookingDetails || [];
             BusyIndicator.hide()
           // Prepare message text
+        //    var oBtn = this.byId("couponApplyBtn");
+        //       oBtn.setText("Apply Now")
+              oModel.setProperty("/CouponCode","")
           let sMessage = "Booking Successful!\n\n";
 
           aBookingDetails.forEach((item, index) => {
