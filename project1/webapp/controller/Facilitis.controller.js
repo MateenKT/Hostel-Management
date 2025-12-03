@@ -338,6 +338,10 @@ sap.ui.define([
             const aSelectedFiles = Array.from(oFiles).slice(0, iAvailableSlots);
 
             aSelectedFiles.forEach((oFile) => {
+                  if (oFile.size > 2 * 1024 * 1024) {
+            sap.m.MessageToast.show(`"${oFile.name}" exceeds 2 MB size limit.`);
+            return;
+        }
                 const bIsDuplicate = aAttachments.some(att =>
                     att.filename === oFile.name   // filename duplicate
                 );

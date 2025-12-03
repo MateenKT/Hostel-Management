@@ -969,6 +969,8 @@ sap.ui.define([
                 this.byId("idMonthYearSelect").setVisible(true)
 
             }
+            this.getView().getModel("VisibleModel").setProperty("/IsCouponApplied", false);
+
 
         },
 
@@ -1294,6 +1296,10 @@ sap.ui.define([
 
         // Helper: Total Calculation
         _recalculateFacilityTotals: function (oCustomerData) {
+    var oCouponData = this.getView().getModel("CouponModel").getData().
+    find((item) => item.CouponCode === oCustomerData.CouponCode) 
+    || {};
+
             var total = 0;
 
             (oCustomerData.AllSelectedFacilities || []).forEach(function (fac) {
@@ -1301,8 +1307,11 @@ sap.ui.define([
             });
 
             oCustomerData.TotalFacilityPrice = total;
+            if(total + (oCustomerData.RentPrice || 0)<=Number(oCouponData.MinOrderValue)){
+                oCustomerData.Discount= "0.00";
+            }
             oCustomerData.SubTotal = (total + (oCustomerData.RentPrice || 0)- Number(oCustomerData.Discount));
-        
+             
             oCustomerData.SGST =   oCustomerData.SubTotal * 0.09;
             oCustomerData.CGST =   oCustomerData.SubTotal * 0.09;
             oCustomerData.GrandTotal =   oCustomerData.SubTotal + oCustomerData.SGST + oCustomerData.CGST;
@@ -1634,7 +1643,7 @@ sap.ui.define([
             const isMandatoryValid = (
                 utils._LCvalidateMandatoryField(this.byId("Ad_id_RoomType"), "ID") &&
                 utils._LCvalidateMandatoryField(this.byId("idPaymentMethod1"), "ID") &&
-                utils._LCvalidateDate(this.byId("Ad_id_editStartDate"), "ID") &&
+                utils._LCvalidateMandatoryField(this.byId("Ad_id_editStartDate"), "ID") &&
                 utils._LCvalidateMandatoryField(this.byId("AD_id_CustomerName"), "ID") &&
                 utils._LCvalidateDate(this.byId("AD_id_Date"), "ID") &&
                 utils._LCvalidateMandatoryField(this.byId("Ad_id_gender"), "ID") &&
@@ -1682,7 +1691,7 @@ sap.ui.define([
                     "BedType": Bookingdata.BedTypeName,
                     "RoomPrice": CustomerData.RentPrice,
                     "Discount": CustomerData.Discount || 0,
-
+                    "CouponCode": Bookingdata.CouponCode || 0,
                 }],
                 "FacilityItems": CustomerData.AllSelectedFacilities.map(item => {
                     // Normalize UnitText for facility as well
