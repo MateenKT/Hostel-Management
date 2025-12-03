@@ -39,8 +39,8 @@ sap.ui.define([
             sap.ui.core.BusyIndicator.show(0);
             this.BedID = oEvent.getParameter("arguments").sPath;
             await this._loadBranchCode()
-            await this._refreshFacilityDetails(this.BedID);
             await this.Onsearch()
+            await this._refreshFacilityDetails(this.BedID);
             sap.ui.core.BusyIndicator.hide();
         } catch (err) {
                 sap.ui.core.BusyIndicator.hide();

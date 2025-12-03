@@ -635,6 +635,8 @@ sap.ui.define([
 
             try {
                 await this.onReadcallforRoom();
+                await this.CustomerDetails();
+
 
                 const oBRModel = this.getView().getModel("sBRModel");
                 const oModelData = oBRModel.getData();
@@ -2550,10 +2552,10 @@ sap.ui.define([
                 }
 
                 const oRoomDetailsModel = oView.getModel("RoomCountModel");
-                // const oCustomerModel = oView.getModel("CustomerModel");
+                const oCustomerModel = oView.getModel("CustomerModel");
 
                 const roomDetails = oRoomDetailsModel.getData()?.Rooms || [];
-                // const customerData = oCustomerModel.getData() || [];
+                const customerData = oCustomerModel.getData() || [];
 
 
                 const oBranchModel = oView.getModel("sBRModel");
@@ -2593,20 +2595,18 @@ sap.ui.define([
                     let totalBooked = 0;
                     let totalCapacity = 0;
 
-                    // matchingRooms.forEach(rm => {
-                    //     totalCapacity += rm.NoofPerson || 0;
-                    //     const bookedCount = customerData.filter(cust =>
-                    //         cust.Bookings?.some(bk =>
-                    //             bk.BranchCode?.toLowerCase() === rm.BranchCode?.toLowerCase() &&
-                    //             bk.RoomNo?.toLowerCase() === rm.RoomNo?.toLowerCase() &&
-                    //             bk.BedType?.trim().toLowerCase() === rm.BedTypeName?.trim().toLowerCase()
-                    //         )
-                    //     ).length;
-                    //     totalBooked += bookedCount;
-                    // });
+                    matchingRooms.forEach(rm => {
+                        totalCapacity += rm.NoofPerson || 0;
+                        const bookedCount = customerData.filter(cust =>
+                                cust.BranchCode?.toLowerCase() === rm.BranchCode?.toLowerCase() &&
+                                cust.RoomNo?.toLowerCase() === rm.RoomNo?.toLowerCase() &&
+                                cust.BedType?.trim().toLowerCase() === rm.BedTypeName?.trim().toLowerCase()
+                        ).length;
+                        totalBooked += bookedCount;
+                    });
 
-                    // const isFull = totalBooked >= totalCapacity && totalCapacity > 0;
-                    // const isVisible = !isFull && price.trim() !== "";
+                    const isFull = totalBooked >= totalCapacity && totalCapacity > 0;
+                    const isVisible = !isFull && price.trim() !== "";
 
 
                     const oBranchInfo = aBranchData.find(b =>
@@ -2638,8 +2638,8 @@ sap.ui.define([
                         Currency: Currency,
                         BranchCode: room.BranchCode,
                         Images: aImages,
-                        Country: sCountry
-                        // Visible: isVisible
+                        Country: sCountry,
+                        Visible: isVisible
                     };
                 });
 

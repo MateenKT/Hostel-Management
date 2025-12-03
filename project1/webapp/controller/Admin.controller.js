@@ -226,15 +226,19 @@ sap.ui.define([
 
         // Count how many customers already have this RoomNo and BedType
         var count = 0;
-        aCustomers.forEach(function(customer) {
-            if (customer && customer.length > 0) {
-                customer.forEach(function(booking) {
-                    if (booking.RoomNo === room.RoomNo && booking.BedType === room.BedTypeName && booking.Status !== "Completed") {
-                        count++;
-                    }
-                });
-            }
-        });
+ aCustomers.forEach(function (customer) {
+    if (
+        customer &&
+        customer.RoomNo === room.RoomNo &&
+        customer.BedType === room.BedTypeName &&
+        customer.Status === "Assigned"
+    ) {
+        count++;
+    }
+});
+
+
+
 
         // Only include room if it is not fully booked
         return count < room.NoofPerson;

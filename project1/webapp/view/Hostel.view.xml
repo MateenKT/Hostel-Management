@@ -247,7 +247,7 @@
                                 vSpacing="2"
                                 content="{path: 'VisibilityModel>/BedTypes'}"
                             >
-                            <VBox class="bedCard" visible="{VisibilityModel>Visible}">
+                            <VBox class="bedCard" >
                                 <!-- ===== IMAGE CAROUSEL ===== -->
                                 <Carousel
                                     height="300px"
@@ -285,7 +285,7 @@
                                     formatter: '.Formatter.formatStartingPrice'}" class="bedCardPrice"/>
                                     <HBox justifyContent="Center" alignItems="Center">
                                         <Button
-                                            text="View Details"
+                                            text="{=${VisibilityModel>Visible}=== true ? 'View Details' : 'Occupied' }"
                                             type="Default"
                                             press=".viewDetails"
                                             class="viewBtn"

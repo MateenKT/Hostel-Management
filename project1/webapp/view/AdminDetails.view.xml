@@ -19,95 +19,93 @@
                     />
 					<!-- Responsive Booking Status and Buttons -->
 					<!-- Left Side Info -->
-					<FlexBox
-                        wrap="Wrap"
-                        justifyContent="Start"
-                        alignItems="Start"
-                        class="sapUiSmallMarginEnd"
-                    >
-						<!-- <VBox class="sapUiSmallMarginEnd"><Text
-                                text="Room Price"
-                                class="sapUiSmallMarginBottom"
-                            /><Text
-                                text="{CustomerData>/OrginalRentPrice}"
-                                class="largeTextBold"
-                            /></VBox><VBox class="sapUiSmallMarginEnd"><Text
-                                text="Bed Type"
-                                class="sapUiSmallMarginBottom"
-                            /><Text
-                                text="{CustomerData>/BedType}"
-                                class="largeTextBold"
-                            /></VBox> -->
-						<VBox class="sapUiSmallMarginEnd">
-							<!-- <layoutData><FlexItemData growFactor="1"/></layoutData> -->
-							<Text
-                                text="Status"
-                                class="sapUiSmallMarginBottom"
-                            />
-							<ObjectStatus
-                                text="{CustomerData>/Status}"
-                                state="{path:'CustomerData>/Status', formatter:'.Formatter.formatObjectStatus'}"
-                            />
-						</VBox>
-						<VBox
-                            visible="{= ${CustomerData>/RoomNo} ? true : false }">
-							<Text text="Room No" class="sapUiSmallMarginBottom" />
-							<Text text="{CustomerData>/RoomNo}" />
-						</VBox>
-					</FlexBox>
-					<!-- Right Side Buttons -->
-					<FlexBox
-                        wrap="NoWrap"
-                        justifyContent="End"
-                        alignItems="Center"
-                        class="sapUiSmallMarginTop"
-                    >
-						<Button
-                            text="Edit"
-                            id="idedit"
-                            class="sapUiSmallMarginBegin myUnifiedBtn"
-                            press="onEditBooking"
-                            visible="{=
-                                (
-                                    ${CustomerData>/Status} === 'New' ||
-                                    (${CustomerData>/Status} === 'Assigned' &amp;&amp; ${LoginModel>/Role} === 'Admin')
-                                )
-                                &amp;&amp; !${VisibleModel>/visible}
-                            }"
-                        />
-						<Button
-                            id="idcancel"
-                            text="Cancel Booking"
-                            press="onPressCancelBooking"
-                            visible="{= ${CustomerData>/Status} === 'New' 
-                                       &amp;&amp; !${VisibleModel>/visible} }"
-                            class="sapUiSmallMarginBegin myUnifiedBtn"
-                        />
-						<Button
-                                text="CheckOut"
-                                id="idCheckout"
-                                class="sapUiSmallMarginBegin myUnifiedBtn"
-                                press="onChekout"
-                                visible="{= ${CustomerData>/Status} === 'Assigned' 
-                                        &amp;&amp; !${VisibleModel>/visible}
-                                        &amp;&amp; ${LoginModel>/Role} === 'Admin' }"
-                            />
-						<Button
-                            text="Save"
-                            id="idsave"
-                            press="onSaveBooking"
-                            visible="{VisibleModel>/visible}"
-                            class="sapUiSmallMarginBegin myUnifiedBtn"
-                        />
-						<Button
-                            id="idcancelbtn"
-                            text="Cancel"
-                            press="onCancelBooking"
-                            visible="{VisibleModel>/visible}"
-                            class="sapUiSmallMarginBegin myUnifiedBtn"
-                        />
-					</FlexBox>
+				<FlexBox
+    wrap="Wrap"
+    justifyContent="SpaceBetween"
+    width="100%"
+>
+
+    <!-- LEFT SIDE DETAILS -->
+    <FlexBox
+        wrap="Wrap"
+        justifyContent="Start"
+        alignItems="Start"
+        class="sapUiSmallMarginEnd"
+    >
+        <VBox class="sapUiSmallMarginEnd">
+            <Text text="Status" class="sapUiSmallMarginBottom" />
+            <ObjectStatus
+                text="{CustomerData>/Status}"
+                state="{path:'CustomerData>/Status', formatter:'.Formatter.formatObjectStatus'}"
+            />
+        </VBox>
+
+        <VBox visible="{= ${CustomerData>/RoomNo} ? true : false }">
+            <Text text="Room No" class="sapUiSmallMarginBottom" />
+            <Text text="{CustomerData>/RoomNo}" />
+        </VBox>
+    </FlexBox>
+
+    <!-- RIGHT SIDE BUTTONS -->
+    <FlexBox
+        wrap="Wrap"
+        justifyContent="End"
+        alignItems="End"
+    >
+        <Button
+            text="Edit"
+            id="idedit"
+            class="sapUiSmallMarginBegin myUnifiedBtn"
+            press="onEditBooking"
+            visible="{=
+                (
+                    ${CustomerData>/Status} === 'New' ||
+                    (${CustomerData>/Status} === 'Assigned' &amp;&amp; ${LoginModel>/Role} === 'Admin')
+                )
+                &amp;&amp; !${VisibleModel>/visible}
+            }"
+        />
+
+        <Button
+            id="idcancel"
+            text="Cancel Booking"
+            press="onPressCancelBooking"
+            visible="{= ${CustomerData>/Status} === 'New' &amp;&amp; !${VisibleModel>/visible} }"
+            class="sapUiSmallMarginBegin myUnifiedBtn"
+        />
+
+        <Button
+            text="CheckOut"
+            id="idCheckout"
+            class="sapUiSmallMarginBegin myUnifiedBtn"
+            press="onChekout"
+            visible="{= ${CustomerData>/Status} === 'Assigned' 
+                   &amp;&amp; !${VisibleModel>/visible}
+                   &amp;&amp; ${LoginModel>/Role} === 'Admin' }"
+        />
+
+        <Button
+            text="Save"
+            id="idsave"
+            press="onSaveBooking"
+            visible="{VisibleModel>/visible}"
+            class="sapUiSmallMarginBegin myUnifiedBtn"
+        />
+
+        <Button
+            id="idcancelbtn"
+            text="Cancel"
+            press="onCancelBooking"
+            visible="{VisibleModel>/visible}"
+            class="sapUiSmallMarginBegin myUnifiedBtn"
+        />
+    </FlexBox>
+
+</FlexBox>
+
+                
 				</VBox>
+                 
 			</content>
 			<VBox class="sapUiMediumMarginBottom">
 				<Panel
@@ -131,7 +129,7 @@
                         emptySpanS="0"
                         columnsXL="3"
                         columnsL="2"
-                        columnsM="2"
+                        columnsM="1"
                         singleContainerFullSize="false"
                     >
 						<f:content>
@@ -818,7 +816,8 @@
                     textAlign="End"/>
 							</HBox>
                                <HBox  width="100%" justifyContent="End" alignItems="Center" class="sapUiSmallMarginBottom"
-                                visible="{VisibleModel>/visible}"
+                                                               visible="{VisibleModel>/visible}"
+
                                >
 
     <!-- Coupon Label -->
@@ -830,7 +829,7 @@
 
     <!-- Coupon Input -->
     <Input 
-        value="{CustomerData>/CouponCode}"
+        value="{Bookingmodel>/CouponCode}"
         placeholder="Enter coupon"
         width="150px"
         class="sapUiTinyMarginEnd"
@@ -839,11 +838,23 @@
 
     <!-- Apply Now Button -->
     <Button
+    id="idApplyNowButton"
         text="Apply Now"
         type="Emphasized"
         press=".onApplyCoupon"
         class="sapUiTinyMarginEnd"
+
+        visible="{= !${VisibleModel>/IsCouponApplied} }"
     />
+     <Button
+     id="idcouponCancelButton"
+        text="Cancel"
+        type="Emphasized"
+        press=".oncancelCoupon"
+        class="sapUiTinyMarginEnd"
+        visible="{= ${VisibleModel>/IsCouponApplied} }"
+    />
+    
 
 </HBox>
 	<HBox justifyContent="SpaceBetween">

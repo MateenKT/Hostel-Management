@@ -141,8 +141,8 @@
         id="editStartTime"
         value="{edit>/StartTime}"
         change="onEditTimeChange"
-        displayFormat="HH:mm"
-        valueFormat="HH:mm"
+        displayFormat="HH"
+        valueFormat="HH"
         valueStateText="Please select Time"
         visible="{= ${edit>/UnitText} === 'Per Hour'}"  
 
@@ -153,8 +153,8 @@
       <TimePicker
         id="editEndTime"
         value="{edit>/EndTime}"
-        displayFormat="HH:mm"
-        valueFormat="HH:mm"
+        displayFormat="HH"
+        valueFormat="HH"
         change="onEditTimeChange"
         valueStateText="Please select Time"
           visible="{= ${edit>/UnitText} === 'Per Hour'}" 

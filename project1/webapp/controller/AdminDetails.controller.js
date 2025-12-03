@@ -37,7 +37,8 @@ sap.ui.define([
 
             var model = new JSONModel({
                 visible: false,
-                GSt:false
+                GSt:false,
+                IsCouponApplied:false
 
             });
             this.getView().setModel(model, "VisibleModel")
@@ -245,6 +246,8 @@ sap.ui.define([
                     RoomNo: oCustomer.Bookings?.[0]?.RoomNo || "",
                     Currency: oCustomer.Bookings?.[0]?.Currency || "",
                     Discount: oCustomer.Bookings?.[0]?.	Discount || "",
+                    CouponCode: oCustomer.Bookings?.[0]?.CouponCode || "",
+
 
                     StartDate: this.Formatter.DateFormat(oCustomer.Bookings?.[0]?.StartDate || ""),
                     EndDate: this.Formatter.DateFormat(oCustomer.Bookings?.[0]?.EndDate || ""),
@@ -1298,11 +1301,11 @@ sap.ui.define([
             });
 
             oCustomerData.TotalFacilityPrice = total;
-            oCustomerData.SubTotal = (total + (oCustomerData.RentPrice || 0)) ;
-
-            oCustomerData.SGST = (total + (oCustomerData.RentPrice || 0)) * 0.09;
-            oCustomerData.CGST = (total + (oCustomerData.RentPrice || 0)) * 0.09;
-            oCustomerData.GrandTotal = (total + (oCustomerData.RentPrice || 0)) + oCustomerData.SGST + oCustomerData.CGST;
+            oCustomerData.SubTotal = (total + (oCustomerData.RentPrice || 0)- Number(oCustomerData.Discount));
+        
+            oCustomerData.SGST =   oCustomerData.SubTotal * 0.09;
+            oCustomerData.CGST =   oCustomerData.SubTotal * 0.09;
+            oCustomerData.GrandTotal =   oCustomerData.SubTotal + oCustomerData.SGST + oCustomerData.CGST;
             // oCustomerData.GrandTotal = total + (oCustomerData.RentPrice || 0);
         },
 
@@ -2035,9 +2038,14 @@ onApplyCoupon: function () {
 
     var oCouponData = this.getView().getModel("CouponModel").getData();
 
-    var sEnteredCode = oCustomerData.CouponCode; // user entered code
+    var sEnteredCode = Bookingmodel.CouponCode; // user entered code
     if (!sEnteredCode) {
         sap.m.MessageToast.show("Please enter a coupon code");
+        return;
+    }
+
+    if(oCustomerData.CouponCode === sEnteredCode){
+        sap.m.MessageToast.show("Coupon already applied");
         return;
     }
 
@@ -2099,9 +2107,43 @@ if (oCoupon.DiscountType === "Percentage") {
     oCustomerData.GrandTotal = grandTotal;
 
     this.getView().getModel("CustomerData").refresh(true);
+    this.getView().getModel("VisibleModel").setProperty("/IsCouponApplied", true);
 
     sap.m.MessageToast.show("Coupon applied successfully!");
+},
+oncancelCoupon: function () {
+    var oCustomerData = this.getView().getModel("CustomerData").getData();
+    var Bookingmodel = this.getView().getModel("Bookingmodel").getData();
+
+    // Reset coupon code and discount
+    oCustomerData.CouponCode = "";
+    var originalRent = Number(oCustomerData.RentPrice || 0);
+    var FacilitiPrice = Number(oCustomerData.FacilityPrice || 0);
+
+    var previousDiscount = Number(oCustomerData.Discount || 0);
+    
+    // Recalculate subtotal (original subtotal before coupon)
+    var subtotal = originalRent + FacilitiPrice; // Assuming SubTotal originally was just RentPrice
+    oCustomerData.SubTotal = subtotal;
+
+    // Recalculate taxes
+    var cgst = subtotal * 0.09;
+    var sgst = subtotal * 0.09;
+    var grandTotal = subtotal + cgst + sgst;
+
+    // Update model values
+    oCustomerData.Discount = 0;
+    oCustomerData.CGST = cgst;
+    oCustomerData.SGST = sgst;
+    oCustomerData.GrandTotal = grandTotal;
+
+    // Refresh model and reset coupon flag
+    this.getView().getModel("CustomerData").refresh(true);
+    this.getView().getModel("VisibleModel").setProperty("/IsCouponApplied", false);
+
+    sap.m.MessageToast.show("Coupon cancelled");
 }
+
 
 
 
