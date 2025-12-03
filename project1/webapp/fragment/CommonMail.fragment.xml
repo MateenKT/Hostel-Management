@@ -13,7 +13,7 @@
                 <headerToolbar>
                     <OverflowToolbar>
                         <ToolbarSpacer/>
-                        <u:FileUploader id="Mail_id_FileUploader" fileType="pdf,jpg,jpeg,png,doc,docx,xls,xlsx,ppt,pptx,txt,ppt" name="myFileUpload" multiple="true" uploadUrl="upload/" tooltip="{i18n>toolTipMsgSM}" change="Mail_onUpload" buttonOnly="true" buttonText="{i18n>uploadAttachment}" />
+                        <u:FileUploader id="Mail_id_FileUploader" fileType="pdf,jpg,jpeg,png,doc,docx,xls,xlsx,ppt,pptx,txt,ppt" name="myFileUpload" multiple="true" uploadUrl="upload/"  change="Mail_onUpload" buttonOnly="true" buttonText="{i18n>uploadAttachment}" />
                     </OverflowToolbar>
                 </headerToolbar>
 

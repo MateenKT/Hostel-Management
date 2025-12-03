@@ -27,7 +27,7 @@
 			columnsM="1">
 				<f:content>
 					<Label text="{i18n>invoiceTransactionID}" required="true"/>
-					<Input value="{PaymentModel>/TransactionId}" id="idTransactionID" liveChange="onLiveTransactionID" placeholder="Enter transaction Id" valueStateText="{i18n>invoiceTransactionIDValueText}" maxLength="30"/>
+					<Input value="{PaymentModel>/TransactionId}" id="MI_id_TransactionID" liveChange="onLiveTransactionID" placeholder="Enter transaction Id" valueStateText="{i18n>invoiceTransactionIDValueText}" maxLength="30"/>
 
 					<Label text="{i18n>invoiceReceivedDate}" required="true" />
 					<DatePicker displayFormat="dd/MM/yyyy" id="idReceivedDate" valueFormat="dd/MM/yyyy" value="{PaymentModel>/ReceivedDate}" change="onReceivedDateDatePickerChange" valueStateText="{i18n>dateValueState}" />

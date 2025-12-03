@@ -537,5 +537,112 @@ sap.ui.define([
         resolve(finalResult.trim());
       });
     },
+
+     getI18nText: function (sKey, aParams) {
+      const oResourceBundle = this.getOwnerComponent().getModel("i18n").getResourceBundle();
+      return oResourceBundle.getText(sKey, aParams);
+    },
+
+     handleFileUpload: function (
+      oEvent,
+      oContext,
+      sModelName,
+      sAttachmentPath,
+      sNamePath,
+      sUploadFlagPath,
+      sSuccessTextKey,
+      sDuplicateTextKey,
+      sNoFileKey,
+      sErrorKey,
+      fnValidateCallback
+    ) {
+      var that = this;
+      const oFileUploader = oEvent.getSource();
+      const oFiles = oFileUploader.oFileUpload.files;
+      const oModel = oContext.getView().getModel(sModelName);
+      const MAX_TOTAL_SIZE = 20 * 1024 * 1024; // 20 MB
+
+      // No file selected
+      if (!oFiles.length) {
+        sap.m.MessageToast.show(oContext.getI18nText(sNoFileKey));
+        return;
+      }
+
+      let attachments = oModel.getProperty(sAttachmentPath) || [];
+      let uploadedFileNames = oModel.getProperty(sNamePath)
+        ? oModel.getProperty("/attachments").map((item) => item.filename)
+        : [];
+      let currentTotalSize = attachments.reduce((sum, file) => sum + file.size, 0);
+
+      // Calculate total size including new files
+      let newFilesTotalSize = Array.from(oFiles).reduce((sum, file) => sum + file.size, 0);
+      let finalTotalSize = currentTotalSize + newFilesTotalSize;
+
+      // Check total size constraint
+      if (finalTotalSize > MAX_TOTAL_SIZE) {
+        sap.m.MessageToast.show("Total file size should not exceed 20 MB.");
+        return;
+      }
+
+      Array.from(oFiles).forEach((oFile) => {
+        if (uploadedFileNames.includes(oFile.name)) {
+          sap.m.MessageToast.show(oContext.getI18nText(sDuplicateTextKey, [oFile.name]));
+          return;
+        }
+
+        const oReader = new FileReader();
+        oReader.onload = (e) => {
+          const sFileBinary = e.target.result.split(",")[1];
+
+          attachments.push({
+            filename: oFile.name,
+            contentType: oFile.type,
+            fileType: oFile.name.split(".")[(oFile.name.split(".").length - 1)],
+            content: sFileBinary,
+            encoding: "base64",
+            size: oFile.size // Store file size for future calculations
+          });
+
+          oModel.setProperty(sAttachmentPath, attachments);
+          oModel.setProperty(sUploadFlagPath, true);
+
+          uploadedFileNames.push(oFile.name);
+          oModel.setProperty(sNamePath, uploadedFileNames.join(", "));
+
+          sap.m.MessageToast.show(oContext.getI18nText(sSuccessTextKey, [oFile.name]));
+
+          // Re-validate button
+          if (typeof fnValidateCallback === "function") {
+            fnValidateCallback.call(oContext);
+          }
+        };
+
+        oReader.onerror = () => {
+          sap.m.MessageToast.show(oContext.getI18nText(sErrorKey, [oFile.name]));
+        };
+
+        oReader.readAsDataURL(oFile);
+      });
+
+      // Clear uploader for next selection
+      oFileUploader.setValue("");
+    },
+
+    onAttachmentsTableDelete: function (oEvent) {
+      const oTableItem = oEvent.getParameter("listItem"); // the item being deleted
+      const oTable = oEvent.getSource(); // the table
+
+      // Get model
+      const oModel = this.getView().getModel("UploaderData");
+      const aItems = oModel.getProperty("/attachments");
+
+      // Find the index of the deleted item
+      const iIndex = oTable.indexOfItem(oTableItem);
+
+      if (iIndex > -1) {
+        aItems.splice(iIndex, 1); // remove 1 item at that index
+        oModel.setProperty("/attachments", aItems); // update the model
+      }
+    },
     })
 });

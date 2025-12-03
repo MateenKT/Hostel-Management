@@ -65,12 +65,12 @@
 					<Column minScreenWidth="Tablet" demandPopin="true">
 						<Text text="{i18n>totalAmount}" />
 					</Column>
-					<!-- <Column minScreenWidth="Tablet" demandPopin="true">
+					<Column minScreenWidth="Tablet" demandPopin="true">
 						<Text text="{i18n>PayByDate}"  />
 					</Column>
 					<Column minScreenWidth="Tablet" demandPopin="true">
 						<Text text="{i18n>status}"  />
-					</Column> -->
+					</Column>
 				</columns>
 				<items>
 					<ColumnListItem type="Navigation" press="CI_onPressInvoiceRow">
@@ -80,8 +80,8 @@
 							<Text text="{path:'ManageInvoiceModel>InvoiceDate',formatter: '.Formatter.formatDate'}" />
 							<ExpandableText text="{ManageInvoiceModel>InvoiceDescription}" maxCharacters="20"/>
 							<Text text="{path: 'ManageInvoiceModel>TotalAmount', formatter: '.Formatter.fromatNumber'} {ManageInvoiceModel>Currency}" textAlign="End" />
-							<!-- <ObjectStatus class="PayByDateClass" text="{path:'ManageInvoiceModel>PayByDate',formatter:'.Formatter.formatDate'}" inverted="false" state="{ parts: [{path: 'ManageInvoiceModel>PayByDate'},{path: 'ManageInvoiceModel>Status'}], formatter: '.Formatter.ManageInvoicePayByDate'}" />
-							<ObjectStatus text="{ManageInvoiceModel>Status}" inverted="false" state="{path: 'ManageInvoiceModel>Status', formatter: '.Formatter.formatObjectStatus'}" class="PayByDateClass" /> -->
+							<Text text="{path:'ManageInvoiceModel>PayByDate',formatter: '.Formatter.formatDate'}" />
+							<ObjectStatus text="{ManageInvoiceModel>Status}" inverted="false" state="{path: 'ManageInvoiceModel>Status', formatter: '.Formatter.formatObjectStatus'}" class="PayByDateClass" />
 						</cells>
 					</ColumnListItem>
 				</items>

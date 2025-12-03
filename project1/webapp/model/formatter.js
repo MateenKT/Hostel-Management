@@ -169,14 +169,10 @@ sap.ui.define([
             return oFloatFormat.format(numericValue);
         },
 
-          formatObjectStatus: function (sStatus) {
+        formatObjectStatus: function (sStatus) {
             switch (sStatus) {
                 case "New":
                     return "Indication05";
-                case "Assigned":
-                    return "Warning";
-                case "Completed":
-                    return "Success";
                 case "Renew":
                     return "Indication03";
                 case "Active":
@@ -227,16 +223,19 @@ sap.ui.define([
                     return "Warning"
                 case "Saved":
                     return "Indication03";
+                 case "Payment Partially":
+                    return "Indication01";    
                 default:
                     return "Indication01";
 
             }
         },
+
         formatDiscountValue: function (v, t) {
             return t === "Percentage" ? v + " %" : v;
         },
-        formatStatusState: function (sStatus) {
 
+        formatStatusState: function (sStatus) {
             if (sStatus === "Active") {
                 return "Success";   // Green
             }
@@ -250,6 +249,13 @@ sap.ui.define([
             }
 
             return "None";
+        },
+
+        formatCustomerTypeValue: function (sType, sValue) {
+            if (sValue && sValue !== "") {
+                return `${sType} (${sValue}%)`;
+            }
+            return sType;
         },
 
     }

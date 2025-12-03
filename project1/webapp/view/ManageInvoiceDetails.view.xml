@@ -29,7 +29,7 @@
 										</m:ComboBox>
 
 										<m:Label visible="{visiablityPlay>/createVisi}" text="{i18n>customerName}"/>
-										<m:Input visible="{visiablityPlay>/createVisi}" value="{SelectedCustomerModel>/CustomerName}" editable="false"/>
+										<m:Input visible="{visiablityPlay>/createVisi}" id="MI_id_Cname" value="{SelectedCustomerModel>/CustomerName}"/>
 										
 										<m:Label visible="{visiablityPlay>/editVisi}" text="{i18n>invoiceNo}"/>
 										<m:Input visible="{visiablityPlay>/editVisi}" id="CID_Id_NavInvoiceNo" value="{SelectedCustomerModel>/InvNo}" editable="false"/>
@@ -53,7 +53,7 @@
 										<m:Label text="{i18n>invoiceDescription}" required="true" />
 										<m:Input id="CID_id_InvoiceDesc" value="{SelectedCustomerModel>/InvoiceDescription}" placeholder="{i18n>companyInvoiceDescPlaceH}" editable="{visiablityPlay>/editable}" liveChange="CID_ValidateCommonFields" maxLength="120" valueStateText="{i18n>companyInvoiceDescPlaceH}" />
 										<m:Label visible="{visiablityPlay>/GST}" text="{i18n>type}" />
-										<m:Text visible="{visiablityPlay>/GST}" text="{ parts: [{path: 'SelectedCustomerModel>/Type'}, {path: 'SelectedCustomerModel>/Value'}], formatter: '.Formatter.formatCustomerTypeValue' }" id="CID_id_Type"/>
+										<m:Text visible="{visiablityPlay>/GST}" text="{ parts: [{path: 'SelectedCustomerModel>/Type'}, {path: 'SelectedCustomerModel>/Value'}], formatter: '.Formatter.formatCustomerTypeValue'}" id="CID_id_Type"/>
 										<m:Label visible="{visiablityPlay>/gstVisiable}" text="{i18n>cgs}" required="true"/>
 										<m:Input visible="{visiablityPlay>/gstVisiable}" value="{path:'SelectedCustomerModel>/CGST',formatter: '.Formatter.fromatNumber'}" editable="false" maxLength="15"/>
 										<m:Label visible="{visiablityPlay>/igstVisi}" text="{i18n>igst}" required="true"/>
@@ -67,15 +67,15 @@
 										<m:Label visible="{= ${FilteredSOWModel>/Currency} === 'INR'?false:true}" text="{i18n>custLutVa}" />
 										<m:Input visible="{= ${FilteredSOWModel>/Currency} === 'INR'?false:true}" value="{SelectedCustomerModel>/LUT}" maxLength="20" editable="{visiablityPlay>/editable}"/>
 										<m:Label text="{i18n>panCardCommon}" />
-										<m:Input value="{SelectedCustomerModel>/PAN}" id="CID_id_InputPAN" liveChange="CID_onPressLiveChange" maxLength="15" editable="{visiablityPlay>/CInvoice}" />
+										<m:Input value="{SelectedCustomerModel>/PAN}" id="CID_id_InputPAN" liveChange="CID_onPressLiveChange" maxLength="15" editable="{visiablityPlay>/editable}" />
 										<m:Label text="{i18n>gstNo}" visible="{visiablityPlay>/GST}"/>
-										<m:Input value="{SelectedCustomerModel>/GST}" id="CID_id_InputGST" liveChange="CID_onPressLiveChange" maxLength="50" editable="{visiablityPlay>/CInvoice}" visible="{visiablityPlay>/GST}" />
+										<m:Input value="{SelectedCustomerModel>/GST}" id="CID_id_InputGST" liveChange="CID_onPressLiveChange" maxLength="50" editable="{visiablityPlay>/editable}" visible="{visiablityPlay>/GST}" />
 										<m:Label text="{i18n>address}" />
-										<m:TextArea id="CID_id_InputAddress" value="{SelectedCustomerModel>/PermanentAddress}" maxLength="120" liveChange="CID_onPressLiveChange" editable="{visiablityPlay>/CInvoice}"/>
+										<m:TextArea id="CID_id_InputAddress" value="{SelectedCustomerModel>/PermanentAddress}" maxLength="120" liveChange="CID_onPressLiveChange" editable="{visiablityPlay>/editable}"/>
 										<m:Label text="{i18n>emailId}" required="true"/>
-										<m:Input value="{SelectedCustomerModel>/CustomerEmail}" id="CID_id_InputMailID" maxLength="500" liveChange="CID_onPressLiveChangeEmail" editable="{visiablityPlay>/CInvoice}" change="onchangeEmail" valueStateText="{i18n>emailValueState}"/>
+										<m:Input value="{SelectedCustomerModel>/CustomerEmail}" id="CID_id_InputMailID" maxLength="500" liveChange="CID_onPressLiveChangeEmail" editable="{visiablityPlay>/editable}" change="onchangeEmail" valueStateText="{i18n>emailValueState}"/>
 										<m:Label text="{i18n>mobileNo}" required="true"/>
-										<m:Input value="{SelectedCustomerModel>/MobileNo}" id="CID_id_InputMobileNo" maxLength="10" liveChange="CID_onPressLiveChangeMobileNo" editable="{visiablityPlay>/CInvoice}" valueStateText="{i18n>mobileNoValueState}" />
+										<m:Input value="{SelectedCustomerModel>/MobileNo}" id="CID_id_InputMobileNo" maxLength="10" liveChange="CID_onPressLiveChangeMobileNo" editable="{visiablityPlay>/editable}" valueStateText="{i18n>mobileNoValueState}" />
 										<!-- <m:Label visible="{visiablityPlay>/TDS}" required="true" text="{i18n>TDS}" />
 										<m:Input visible="{visiablityPlay>/TDS}" value="{SelectedCustomerModel>/IncomePerc}" id="CID_id_IncomeTaxPercentage" editable="{visiablityPlay>/editable}" maxLength="2" valueStateText="{i18n>incomeTaxValue}" liveChange="onIncomeTaxPercentageInputLiveChange"/>
 										<m:Input visible="{visiablityPlay>/TDS}" value="{SelectedCustomerModel>/IncomeTax}" id="CID_id_TDS" editable="false" /> -->
