@@ -95,7 +95,7 @@
         placeholder="Enter coupon"
         width="150px"
         class="sapUiTinyMarginEnd"
-        id="couponInput"
+        id="BookingcouponInput"
     />
  
     <!-- Apply Now Button -->
@@ -104,6 +104,7 @@
         type="Emphasized"
         press="onChangeCouponCode"
         class="sapUiTinyMarginEnd"
+        id="couponApplyBtn"
     />
 </HBox>
 <HBox justifyContent="End" >

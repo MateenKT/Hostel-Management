@@ -46,7 +46,8 @@ sap.ui.define([
           Capacity: "",
            SelectedPrice:"",
           StopPriceRecalculateByPerson:false,
-          Country:""
+          Country:"",
+          AppliedCoupons:[]
         });
         sap.ui.getCore().setModel(oHostelModel, "HostelModel");
       }
@@ -2541,8 +2542,8 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
     // Set default values
     oPaymentModel.setProperty("/PaymentDate", this.Formatter.formatDate(new Date()));
     oPaymentModel.setProperty("/PaymentType", "UPI");
-    oPaymentModel.setProperty("/Amount", oHostelModel.getProperty("/FinalTotalCost")
-    );
+    var fAmount = parseFloat(oHostelModel.getProperty("/FinalTotalCost") || 0).toFixed(2);
+    oPaymentModel.setProperty("/Amount", parseFloat(fAmount));
 
     this._oPaymentDialog.open();
 },
@@ -2701,7 +2702,8 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
                       BedType: `${oData.BedType} - ${oData.ACType}`,
                       BranchCode:oData.BranchCode,
                       Currency:oData.Currency,
-                      Discount:oData.AppliedDiscount
+                      Discount:oData.AppliedDiscount,
+                      CouponCode:oData.CouponCode
                   });
               }
               const paymentDetails = {

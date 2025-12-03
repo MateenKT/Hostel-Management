@@ -8,7 +8,8 @@ sap.ui.define([
     return Controller.extend("sap.ui.com.project1.controller.Book_RoomSummary", {
         Formatter: Formatter,
         onInit() {
-
+              var oBtn = this.byId("couponApplyBtn");
+              oBtn.setText("Apply Now")
         },
 
         onNavBack: function () {
@@ -890,62 +891,89 @@ return {
                 this._oDocPreviewDialog.close();
             }
         },
+onTimeChange: function () {
+    const oEditModel = this.getView().getModel("edit");
 
-        onTimeChange: function () {
-            const oEditModel = this.getView().getModel("edit");
+    const sStart = oEditModel.getProperty("/StartTime"); // example: "09"
+    const sEnd = oEditModel.getProperty("/EndTime");     // example: "12"
 
-            const sStart = oEditModel.getProperty("/StartTime");
-            const sEnd = oEditModel.getProperty("/EndTime");
-            const sViewId = this.getView().getId();
-            const oStartCtrl = sap.ui.core.Fragment.byId(sViewId, "FT_id_editStartTime");
-            const oEndCtrl = sap.ui.core.Fragment.byId(sViewId, "FT_id_editEndTime");
+    if (!sStart || !sEnd) {
+        oEditModel.setProperty("/TotalTime", "");
+        return;
+    }
 
-            // Morning or Evening
-            if (sStart) {
-                oEditModel.setProperty("/StartPeriod", this._getTimePeriod(sStart));
-                oStartCtrl?.setValueState("None");
-            }
-            if (sEnd) {
-                oEditModel.setProperty("/EndPeriod", this._getTimePeriod(sEnd));
-                oEndCtrl?.setValueState("None");
-            }
+    const startHour = parseInt(sStart, 10);
+    const endHour = parseInt(sEnd, 10);
 
-            // Existing time difference calculation (keep your logic)
-            if (!sStart || !sEnd) {
-                oEditModel.setProperty("/TotalTime", "");
-                return;
-            }
+    if (endHour < startHour) {
+        sap.m.MessageToast.show("End Time cannot be earlier than Start Time.");
+        oEditModel.setProperty("/TotalTime", "");
+        return;
+    }
 
-            const [sh, sm] = sStart.split(":").map(Number);
-            const [eh, em] = sEnd.split(":").map(Number);
+    const totalHours = endHour - startHour;
 
-            const startDate = new Date(0, 0, 0, sh, sm);
-            const endDate = new Date(0, 0, 0, eh, em);
+    oEditModel.setProperty("/TotalTime", totalHours.toString());
+},
 
-            if (endDate < startDate) {
-                sap.m.MessageToast.show("End Time cannot be earlier than Start Time.");
-                oEditModel.setProperty("/TotalTime", "");
-                return;
-            }
 
-            const diffMs = endDate - startDate;
-            const diffMins = Math.floor(diffMs / 60000);
-
-            const hours = Math.floor(diffMins / 60).toString().padStart(2, "0");
-            const minutes = (diffMins % 60).toString().padStart(2, "0");
-
-            const finalTime = `${hours}:${minutes}`;
-            oEditModel.setProperty("/TotalTime", finalTime);
-        },
 
         _getTimePeriod: function (sTime) {
             if (!sTime) return "";
             const [hour] = sTime.split(":").map(Number);
             return hour < 12 ? "Morning" : "Evening";
         },
+        _sumGrandTotalOfPersons: function () {
+    const oHostelModel = this.getView().getModel("HostelModel");
+    const aPersons = oHostelModel.getProperty("/Persons") || [];
+
+    let sum = 0;
+
+    aPersons.forEach(person => {
+        sum += Number(person.GrandTotal || 0);
+    });
+
+    return sum;
+},
+
         onChangeCouponCode: async function (oEvent) {
     var oHostelModel = this.getView().getModel("HostelModel");
-    const sEnteredCode = oHostelModel.getProperty("/CouponCode")?.trim();
+     var oBtn = this.byId("couponApplyBtn");
+    //  sap.ui.getCore().byId(this.createId("couponApplyBtn"))
+    var sEnteredCode = oHostelModel.getProperty("/CouponCode")?.trim();
+
+   if (oBtn.getText() === "Cancel") {
+
+    oHostelModel.setProperty("/CouponCode", "");
+    oHostelModel.setProperty("/AppliedDiscount", "");
+
+    // 1️⃣ Re-sum GrandTotal of all persons
+    const subTotal = this._sumGrandTotalOfPersons();
+    oHostelModel.setProperty("/OverallTotalCost", subTotal);
+
+    // 2️⃣ Re-apply tax logic
+    const isIndia = oHostelModel.getProperty("/IsIndia");
+    let cgst = 0, sgst = 0, finalTotal = subTotal;
+
+    if (isIndia) {
+        cgst = subTotal * 0.09;
+        sgst = subTotal * 0.09;
+        finalTotal = subTotal + cgst + sgst;
+    }
+
+    // 3️⃣ Update fields
+    oHostelModel.setProperty("/CGST", cgst);
+    oHostelModel.setProperty("/SGST", sgst);
+    oHostelModel.setProperty("/FinalTotalCost", finalTotal);
+    oHostelModel.setProperty("/AppliedDiscount", 0);
+
+    // 4️⃣ Change button back to Apply
+    oBtn.setText("Apply Now");
+
+    sap.m.MessageToast.show("Coupon removed. Prices restored.");
+    return;
+}
+
 
      if (!sEnteredCode) {
 
@@ -1074,7 +1102,7 @@ return {
         oHostelModel.setProperty("/FinalTotalCost", finalTotal);
 
         oHostelModel.refresh(true);
-
+         oBtn.setText("Cancel");
         sap.m.MessageToast.show(
             `Coupon Applied Successfully`
         );

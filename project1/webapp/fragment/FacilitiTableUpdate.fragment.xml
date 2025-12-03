@@ -14,11 +14,11 @@
 				</ComboBox>
 
 				<Label text="Start Time" visible="{= ${edit>/UnitText} === 'Per Hour' }" />
-				<TimePicker id="FT_id_editStartTime" value="{edit>/StartTime}" displayFormat="HH:mm" valueFormat="HH:mm"
+				<TimePicker id="FT_id_editStartTime" value="{edit>/StartTime}" displayFormat="HH" valueFormat="HH"
                 change=".onTimeChange" visible="{= ${edit>/UnitText} === 'Per Hour' }" valueStateText="Select Start Time"/>
 
 				<Label text="End Time"  visible="{= ${edit>/UnitText} === 'Per Hour' }"/>
-				<TimePicker id="FT_id_editEndTime" value="{edit>/EndTime}" displayFormat="HH:mm" valueFormat="HH:mm"
+				<TimePicker id="FT_id_editEndTime" value="{edit>/EndTime}" displayFormat="HH" valueFormat="HH"
                 change=".onTimeChange" visible="{= ${edit>/UnitText} === 'Per Hour' }" valueStateText="Select End Time"/>
 
 				<Label text="Total Time (HH:MM)" visible="{= ${edit>/UnitText} === 'Per Hour' }"/>
