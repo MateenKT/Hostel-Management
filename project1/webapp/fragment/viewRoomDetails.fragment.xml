@@ -64,7 +64,7 @@
 								<core:CustomData key="type" value="yearly"/>
 							</customData>
 						</GenericTile>
-						<GenericTile header="{=${VisibilityModel>Visible}=== true ? 'Book Now' : 'Occupied' }"
+						<GenericTile header="{=${HostelModel>/Visible}=== true ? 'Book Now' : 'Occupied' }"
 						 class=" defaultTile priceItem bookNowTile" 
 						 frameType="OneByHalf" press=".onConfirmBooking" >
 							<customData>
