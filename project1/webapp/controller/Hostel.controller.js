@@ -1893,7 +1893,7 @@ sap.ui.define([
                 oModel.setProperty("/isEditMode", true);
                 oModel.setProperty("/Country", data.Country);
 
-                this._applyCountryStateCityFilters();
+                // this._applyCountryStateCityFilters();
                 // this._oProfileDialog.close();
                 sap.ui.core.BusyIndicator.show(0);
                 // if (!this._oProfileEditDialog) {
@@ -3954,9 +3954,9 @@ sap.ui.define([
             const oModel = this._oProfileDialog.getModel("profileData");
             const oItem = oEvent.getSource().getSelectedItem();
 
-            const oStateCB = sap.ui.getCore().byId("id_state");
-            const oCityCB = sap.ui.getCore().byId("id_city");
-            const oSTD = sap.ui.getCore().byId("id_std");
+            const oStateCB = this.byId("id_state");
+            const oCityCB = this.byId("id_city");
+            const oSTD = this.byId("id_std");
 
             // Clear value state on country
             oEvent.getSource().setValueState("None");
@@ -4010,8 +4010,8 @@ sap.ui.define([
             const oModel = this._oProfileDialog.getModel("profileData");
             const oItem = oEvent.getSource().getSelectedItem();
 
-            const oCityCB = sap.ui.getCore().byId("id_city");
-            const oCountryCB = sap.ui.getCore().byId("id_country");
+            const oCityCB = this.byId("id_city");
+            const oCountryCB = this.byId("id_country");
 
             // Clear value state on state
             oEvent.getSource().setValueState("None");
@@ -4035,7 +4035,7 @@ sap.ui.define([
             const sCountryCode = oCountryCB.getSelectedItem()?.getAdditionalText();
 
             // Save state in model
-            oModel.setProperty("State", sStateName);
+            oModel.setProperty("/State", sStateName);
 
             // Filter cities by state + country
             oCityCB?.getBinding("items")?.filter([
@@ -4116,49 +4116,49 @@ sap.ui.define([
             }
         },
 
-        _applyCountryStateCityFilters: function () {
-            const oModel = this._oProfileDialog.getModel("profileData");
-            const oCountryCB = sap.ui.getCore().byId("id_country");
-            const oStateCB = sap.ui.getCore().byId("id_state");
-            const oSourceCB = sap.ui.getCore().byId("id_city");
+        // _applyCountryStateCityFilters: function () {
+        //     const oModel = this._oProfileDialog.getModel("profileData");
+        //     const oCountryCB = sap.ui.getCore().byId("id_country");
+        //     const oStateCB = sap.ui.getCore().byId("id_state");
+        //     const oSourceCB = sap.ui.getCore().byId("id_city");
 
-            const sCountry = oModel.getProperty("/Country");     // e.g. "Australia"
-            const sState = oModel.getProperty("/State");       // e.g. "Queensland"
-            const sSource = oModel.getProperty("/City");      // e.g. "Bongaree"
+        //     const sCountry = oModel.getProperty("/Country");     // e.g. "Australia"
+        //     const sState = oModel.getProperty("/State");       // e.g. "Queensland"
+        //     const sSource = oModel.getProperty("/City");      // e.g. "Bongaree"
 
-            // Reset all filters
-            oStateCB.getBinding("items")?.filter([]);
-            oSourceCB.getBinding("items")?.filter([]);
+        //     // Reset all filters
+        //     oStateCB.getBinding("items")?.filter([]);
+        //     oSourceCB.getBinding("items")?.filter([]);
 
-            if (sCountry) {
-                // Find countryCode by name
-                const aCountryData = this.getView().getModel("CountryModel").getData();
-                const oCountryObj = aCountryData.find(c => c.countryName === sCountry);
+        //     if (sCountry) {
+        //         // Find countryCode by name
+        //         const aCountryData = this.getView().getModel("CountryModel").getData();
+        //         const oCountryObj = aCountryData.find(c => c.countryName === sCountry);
 
-                if (oCountryObj) {
-                    const sCountryCode = oCountryObj.code;
+        //         if (oCountryObj) {
+        //             const sCountryCode = oCountryObj.code;
 
-                    // Filter States by Country
-                    oStateCB.getBinding("items")?.filter([
-                        new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
-                    ]);
+        //             // Filter States by Country
+        //             oStateCB.getBinding("items")?.filter([
+        //                 new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+        //             ]);
 
-                    if (sState) {
-                        // Filter Cities by State + Country
-                        const aFilters = [
-                            new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, sState),
-                            new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
-                        ];
-                        oSourceCB.getBinding("items")?.filter(aFilters);
-                    }
-                }
-            }
+        //             if (sState) {
+        //                 // Filter Cities by State + Country
+        //                 const aFilters = [
+        //                     new sap.ui.model.Filter("stateName", sap.ui.model.FilterOperator.EQ, sState),
+        //                     new sap.ui.model.Filter("countryCode", sap.ui.model.FilterOperator.EQ, sCountryCode)
+        //                 ];
+        //                 oSourceCB.getBinding("items")?.filter(aFilters);
+        //             }
+        //         }
+        //     }
 
-            // Ensure values are set back in UI
-            oCountryCB.setValue(sCountry || "");
-            oStateCB.setValue(sState || "");
-            oSourceCB.setValue(sSource || "");
-        },
+        //     // Ensure values are set back in UI
+        //     oCountryCB.setValue(sCountry || "");
+        //     oStateCB.setValue(sState || "");
+        //     oSourceCB.setValue(sSource || "");
+        // },
 
         _startOtpTimer: function () {
 
