@@ -2074,21 +2074,23 @@ if(Bookingmodel.StartDate.includes("/")){
 }
 
     // 3. Percentage discount
-    var subtotal = Number(oCustomerData.SubTotal || 0);
-
+   
+    var subtotal = oCustomerData.RentPrice + oCustomerData.TotalFacilityPrice
+oCoupon.MinOrderValue=Number(oCoupon.MinOrderValue)
     if(oCoupon.MinOrderValue > subtotal){
         sap.m.MessageToast.show("Coupon not applicable for below minimum value" +' '+ oCoupon.MinOrderValue);
         return;
     }
+    this.Discount=oCustomerData.Discount
   var discountAmount = 0;
 var newSubtotal = "";
 
 // Check discount type
 if (oCoupon.DiscountType === "Percentage") {
-    discountAmount = (subtotal * Number(oCoupon.DiscountValue || 0)) / 100 + Number(oCustomerData.Discount) || "0.00";
+    discountAmount = (subtotal * Number(oCoupon.DiscountValue || 0)) / 100  ;
     newSubtotal = subtotal - discountAmount;
 } else if (oCoupon.DiscountType === "Fixed Amount") {
-    discountAmount = Number(oCoupon.DiscountValue || 0) + Number(oCustomerData.Discount) || "0.00";
+    discountAmount = Number(oCoupon.DiscountValue || 0) ;
     newSubtotal = subtotal - discountAmount;
 }
 
@@ -2119,12 +2121,11 @@ oncancelCoupon: function () {
     // Reset coupon code and discount
     oCustomerData.CouponCode = "";
     var originalRent = Number(oCustomerData.RentPrice || 0);
-    var FacilitiPrice = Number(oCustomerData.FacilityPrice || 0);
+    var FacilitiPrice = Number(oCustomerData.TotalFacilityPrice || 0);
 
-    var previousDiscount = Number(oCustomerData.Discount || 0);
-    
+    var previousDiscount = Number(this.Discount || 0);
     // Recalculate subtotal (original subtotal before coupon)
-    var subtotal = originalRent + FacilitiPrice; // Assuming SubTotal originally was just RentPrice
+    var subtotal = originalRent + FacilitiPrice - previousDiscount; // Assuming SubTotal originally was just RentPrice
     oCustomerData.SubTotal = subtotal;
 
     // Recalculate taxes
@@ -2133,8 +2134,8 @@ oncancelCoupon: function () {
     var grandTotal = subtotal + cgst + sgst;
 
     // Update model values
-    oCustomerData.Discount = 0;
-    oCustomerData.CGST = cgst;
+    oCustomerData.Discount = previousDiscount;
+    oCustomerData.CGST = cgst;  
     oCustomerData.SGST = sgst;
     oCustomerData.GrandTotal = grandTotal;
 
