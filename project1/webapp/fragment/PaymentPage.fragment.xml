@@ -12,7 +12,7 @@
         title="Proceed to Payment"
         draggable="true"
         resizable="true"
-        class="paymentDialogRoot">
+        class="paymentDialogRoot barheader">
 
         <f:SimpleForm id="Exp_id_SimpleFrom"
             editable="true"

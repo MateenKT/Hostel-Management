@@ -321,6 +321,17 @@ sap.ui.define([
         onFileSelected: function(oEvent) {
             const oFile = oEvent.getParameter("files")[0];
             if (!oFile) return;
+             const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+                if (oFile.size > MAX_SIZE) {
+                    sap.m.MessageToast.show(
+                        "File size must be less than 2 MB.\nSelected file size: " +
+                        (oFile.size / 1024 / 1024).toFixed(2) + " MB"
+                    );
+
+                    // reset uploader field
+                    oEvent.getSource().clear();
+                    return;
+                }
 
             const oReader = new FileReader();
             oReader.onload = (oLoadEvent) => {

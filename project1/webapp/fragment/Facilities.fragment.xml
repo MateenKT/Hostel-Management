@@ -64,7 +64,6 @@
 						<u:FileUploader
                             id="id_fileUploader"
                             buttonOnly="true"
-                            maximumFileSize="5MB"
                             sameFilenameAllowed="false"
                             buttonText="Upload Images"
                             fileType="jpg,jpeg,png"

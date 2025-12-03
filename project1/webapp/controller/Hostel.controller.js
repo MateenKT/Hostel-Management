@@ -1695,6 +1695,13 @@ sap.ui.define([
                     return;
                 }
                 this._isProfileRequested = false;
+                //  const oPModel = new sap.ui.model.json.JSONModel({
+                //     bookings: [],
+                //     isTableBusy: true
+                // });
+                //  if (this._oProfileDialog) {
+                //     this._oProfileDialog.setModel(oPModel, "profileData");
+                // }
                 //  Fetch only the logged-in user's data
                 sap.ui.core.BusyIndicator.show(0);
                 const response = await this.ajaxReadWithJQuery("HM_Customer", filter);
@@ -1826,12 +1833,13 @@ sap.ui.define([
                     role: oUser.Role,
                     bookings: aBookingData,
                     facility: aFacilitiData,
-                    aCustomers: aCustomerDetails
+                    aCustomers: aCustomerDetails,
+                    isTableBusy: false
                 });
                 this._oProfileDialog.setModel(oProfileModel, "profileData");
                 oProfileModel.setProperty("/isEditMode", false);
                 //  Open the dialog
-                this._oProfileDialog.open();
+                // this._oProfileDialog.open();
 
             } catch (err) {
                 console.error("Profile Load Error:", err);
@@ -1868,6 +1876,7 @@ sap.ui.define([
                     aCustomers: []
                 });
                 this._oProfileDialog.setModel(oProfileModel, "profileData");
+                // this._oProfileDialog.setModel(oPModel, "profileData");
                 oProfileModel.setProperty("/isEditMode", false);
                 this._oProfileDialog.open();
             } finally {
@@ -1992,22 +2001,44 @@ sap.ui.define([
         _onEnterProfile: async function () {
             this._oProfileActionSheet.close();
             this._isProfileRequested = true;
+            const oTempModel = new sap.ui.model.json.JSONModel({
+                bookings: [],
+                isTableBusy: true
+            });
+            if (!this._oProfileDialog) {
+                this._oProfileDialog = await sap.ui.core.Fragment.load({
+                    id: this.getView().getId(),
+                    name: "sap.ui.com.project1.fragment.ManageProfile",
+                    controller: this
+                });
+                this.getView().addDependent(this._oProfileDialog);
+            }
+
+            this._oProfileDialog.setModel(oTempModel, "profileData");
+            this._oProfileDialog.open();
             const oAvatarBtn = this.byId("ProfileAvatar");
             await this.onPressAvatar({ getSource: () => oAvatarBtn });
+
+            // this._oProfileActionSheet.close();
+            // this._isProfileRequested = true;
+            // const oAvatarBtn = this.byId("ProfileAvatar");
+            // await this.onPressAvatar({ getSource: () => oAvatarBtn });
         },
 
         _onLogout: function () {
-            this._oProfileActionSheet.close();
-            // sap.m.MessageToast.show("Logging out...");
+            this._oProfileActionSheet?.close();
             this._oLoggedInUser = null;
-            if (this._oProfileDialog) {
-                this._oProfileDialog.destroy();
-                this._oProfileDialog = null;
+            delete this._oLoggedInUser;
+            const oLoginModel = this.getOwnerComponent().getModel("LoginModel");
+            if (oLoginModel) {
+                oLoginModel.setData({});
             }
-            if (this._oProfileActionSheet) {
-                this._oProfileActionSheet.destroy();
-                this._oProfileActionSheet = null;
-            }
+            this._oProfileDialog?.destroy();
+            this._oProfileDialog = null;
+
+            this._oProfileActionSheet?.destroy();
+            this._oProfileActionSheet = null;
+            console.log("After Logout:", this._oLoggedInUser);
             this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", false);
             this.getOwnerComponent().getRouter().navTo("RouteHostel");
         },
@@ -2598,9 +2629,9 @@ sap.ui.define([
                     matchingRooms.forEach(rm => {
                         totalCapacity += rm.NoofPerson || 0;
                         const bookedCount = customerData.filter(cust =>
-                                cust.BranchCode?.toLowerCase() === rm.BranchCode?.toLowerCase() &&
-                                cust.RoomNo?.toLowerCase() === rm.RoomNo?.toLowerCase() &&
-                                cust.BedType?.trim().toLowerCase() === rm.BedTypeName?.trim().toLowerCase()
+                            cust.BranchCode?.toLowerCase() === rm.BranchCode?.toLowerCase() &&
+                            cust.RoomNo?.toLowerCase() === rm.RoomNo?.toLowerCase() &&
+                            cust.BedType?.trim().toLowerCase() === rm.BedTypeName?.trim().toLowerCase()
                         ).length;
                         totalBooked += bookedCount;
                     });
@@ -3386,7 +3417,7 @@ sap.ui.define([
             }
         },
 
-         onPressAvatarEdit: function (oEvent) {
+        onPressAvatarEdit: function (oEvent) {
             if (!this._oAvatarActionSheet) {
                 this._oAvatarActionSheet = new sap.m.ActionSheet({
                     buttons: [
@@ -3561,7 +3592,17 @@ sap.ui.define([
         onAvatarFileSelected: function (oEvent) {
             const file = oEvent.getParameter("files")[0];
             if (!file) return;
+            const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+            if (file.size > MAX_SIZE) {
+                sap.m.MessageToast.show(
+                    "File size must be less than 2 MB.\nSelected file size: " +
+                    (file.size / 1024 / 1024).toFixed(2) + " MB"
+                );
 
+                // reset uploader field
+                oEvent.getSource().clear();
+                return;
+            }
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const fullDataURL = e.target.result;
@@ -3953,7 +3994,7 @@ sap.ui.define([
             const oCountryObj = aCountryData.find(c => c.countryName === sCountryName);
 
             const sStdCode = oCountryObj?.stdCode || "";
-            oModel.setProperty("/stdCode", sStdCode);
+            oModel.setProperty("/STDCode", sStdCode);
             oSTD?.setValue(sStdCode);
 
             // Filter states by country code
@@ -4074,6 +4115,7 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide();
             }
         },
+
         _applyCountryStateCityFilters: function () {
             const oModel = this._oProfileDialog.getModel("profileData");
             const oCountryCB = sap.ui.getCore().byId("id_country");
@@ -4117,9 +4159,6 @@ sap.ui.define([
             oStateCB.setValue(sState || "");
             oSourceCB.setValue(sSource || "");
         },
-
-
-
 
         _startOtpTimer: function () {
 
@@ -4231,6 +4270,5 @@ sap.ui.define([
             vm.setProperty("/otpButtonText", "Send OTP");
             vm.setProperty("/canResendOTP", false);
         },
-
     });
 });

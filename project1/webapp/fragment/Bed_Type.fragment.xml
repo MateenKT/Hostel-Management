@@ -55,7 +55,6 @@
                             id="BT_id_FileUploader"
                             fileType="jpg,jpeg,png"
                             multiple="true"
-                            maximumFileSize="5MB"
                             sameFilenameAllowed="false"
                             buttonOnly="true"
                             buttonText="Upload Images"

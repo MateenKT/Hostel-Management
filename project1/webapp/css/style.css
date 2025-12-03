@@ -1866,3 +1866,11 @@ span.sapMBtnInner.sapMBtnEmphasized {
         font-size: 1.5rem !important;
     }
 }
+@media (max-width: 600px) {
+    #id_address {
+        width: 100% !important;
+        box-sizing: border-box;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+}

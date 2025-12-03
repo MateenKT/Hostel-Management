@@ -10,6 +10,9 @@
     <Dialog
         id="id_dialog"
         stretch="{= ${device>/system/phone} }"
+        draggable="true"
+        resizable="true"
+        horizontalScrolling="false"
         contentWidth="{= ${device>/system/phone} ? '100%' : '80%'}"
         initialFocus="id_dialog"
     >
@@ -25,6 +28,7 @@
                     <m:Button
                         text="{= ${profileData>/isEditMode} ? 'Save' : 'Edit'}"
                         class="myUnifiedBtn"
+                        tooltip="Edit"
                         press="onEditSaveProfile"
                     />
                     <m:Button
@@ -53,6 +57,7 @@
                 <Button
                     icon="sap-icon://edit"
                     id="id_avatarEditBtn"
+                    tooltip="Set Profile Photo"
                     press="onPressAvatarEdit"
                     class="avatarEditIcon"
                 />
@@ -62,7 +67,6 @@
                     uploadOnChange="false"
                     change="onAvatarFileSelected"
                     fileType="png,jpg,jpeg"
-                    maximumFileSize="2MB"
                     class="hiddenUploader"
                     buttonOnly="true"
                     iconOnly="true"
@@ -124,7 +128,6 @@
                         />
                         <Select
                             selectedKey="{profileData>/Salutation}"
-                            width="90px"
                         >
                             <core:Item
                                 key="Mr."
@@ -229,6 +232,7 @@
                             <core:ListItem
                                 key="{CityModel>cityName}"
                                 text="{CityModel>cityName}"
+                                additionalText="{CityModel>branchCode}"
                             />
                         </ComboBox>
 
@@ -236,22 +240,9 @@
                             text="Mobile Number"
                             required="{profileData>/isEditMode}"
                         />
-                        <!-- <HBox
-                                renderType="Bare"
-                                visible="{= !${profileData>/isEditMode}}"
-                            > -->
-                        <!-- <m:Text text="{profileData>/phone}" class="sapUiSmallMarginBegin"
-                                /> -->
-                        <!-- </HBox> -->
-                        <!-- <HBox
-                                renderType="Bare"
-                                class="sapUiTinyMarginBegin sapUiTinyMarginTop"
-                                visible="{profileData>/isEditMode}"
-                            > -->
                         <Input
                             id="id_std"
                             value="{profileData>/STDCode}"
-                            width="70px"
                             editable="false"
                         />
                         <Input
@@ -290,8 +281,7 @@
                 </f:SimpleForm>
                 <HBox
                     class="sapUiSmallMarginBegin"
-                    alignContent="Center"
-                    alignItems="Center"
+                    alignItems="Start"
                     width="100%"
                 >
                     <m:Label
@@ -300,14 +290,13 @@
                     />
                     <TextArea
                         id="id_address"
-                        maxLength="60"
+                        maxLength="100"
                         class="sapUiTinyMarginBegin"
                         value="{profileData>/address}"
                         visible="{profileData>/isEditMode}"
-                        rows="3"
-                        growing="true"
-                        growingMaxLines="3"
+                        rows="2"
                         width="100%"
+                        growing="true"
                     />
                 </HBox>
                 <Text
@@ -322,6 +311,8 @@
         </FlexBox>
         <Table
             id="Id_ProfileaTable"
+             busy="{profileData>/isTableBusy}"
+             busyIndicatorDelay="0"
             noDataText="No booking history found"
             items="{
                     path: 'profileData>/bookings',
@@ -334,7 +325,7 @@
             <headerToolbar>
                 <OverflowToolbar>
                     <Title
-                        text="Booking History ({= ${profileData>/bookings}.length})"
+                        text="Booking History ({= ${profileData>/bookings}.length})" class="sapUiTopMargin"
                     />
                     <ToolbarSpacer />
                 </OverflowToolbar>

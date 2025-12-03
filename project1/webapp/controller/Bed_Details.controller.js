@@ -251,6 +251,17 @@ sap.ui.define([
             const aSelectedFiles = Array.from(oFiles).slice(0, iAvailableSlots);
 
             aSelectedFiles.forEach((oFile) => {
+                const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+                    if (oFile.size > MAX_SIZE) {
+                        sap.m.MessageToast.show(
+                            "File size must be less than 2 MB.\nSelected file size: " +
+                            (oFile.size / 1024 / 1024).toFixed(2) + " MB"
+                        );
+                
+                        //  Reset the FileUploader input
+                        oEvent.getSource().clear();
+                        return;
+                    }
                 const bIsDuplicate = aAttachments.some(att =>
                     att.filename === oFile.name // filename duplicate
                 );
