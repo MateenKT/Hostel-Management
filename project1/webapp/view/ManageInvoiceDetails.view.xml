@@ -100,7 +100,7 @@
 												<m:Title text="{i18n>InvoiceItemDetails} ({= ${ManageInvoiceItemModel>/ManageInvoiceItem}.length })"></m:Title>
 												<m:ToolbarSpacer />
 												<m:Button class="myUnifiedBtn" text="{i18n>btnTransaction}" press="CID_onPressDisplayPaymentDetail" visible="{= ${SelectedCustomerModel>/Status} === 'Payment Received' || ${SelectedCustomerModel>/Status} === 'Payment Partially' }"/>
-												<m:Button id="AddItem" visible="{visiablityPlay>/addInvBtn}" text="{i18n>addInvItems}" class="myUnifiedBtn" press="CID_onPressAddInvoiceItems" />
+												<!-- <m:Button id="AddItem" visible="{visiablityPlay>/addInvBtn}" text="{i18n>addInvItems}" class="myUnifiedBtn" press="CID_onPressAddInvoiceItems" /> -->
 												<!-- <m:ToolbarSeparator /> -->
 											</m:Toolbar>
 										</m:headerToolbar>

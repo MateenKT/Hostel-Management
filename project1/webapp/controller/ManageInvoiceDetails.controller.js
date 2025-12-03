@@ -138,7 +138,7 @@ sap.ui.define([
                 this.visiablityPlay.setProperty("/createVisi", false);
                 this.visiablityPlay.setProperty("/editVisi", true);
                 this.visiablityPlay.setProperty("/editable", false);
-                this.visiablityPlay.setProperty("/addInvBtn", false);
+                // this.visiablityPlay.setProperty("/addInvBtn", false);
                 this.visiablityPlay.setProperty("/MultiEmail", false);
                 this.byId("CID_id_TableInvoiceItem").setMode("None");
                 this.byId("CID_id_CurrencySelect").setEditable(false);
@@ -854,7 +854,7 @@ sap.ui.define([
                     this.visiablityPlay.setProperty("/editable", true);
                     this.visiablityPlay.setProperty("/CInvoice", true);
                     this.byId("CID_id_TableInvoiceItem").setMode("Delete");
-                    this.visiablityPlay.setProperty("/addInvBtn", true);
+                    // this.visiablityPlay.setProperty("/addInvBtn", true);
                     this.visiablityPlay.setProperty("/merge", false);
                     this.visiablityPlay.setProperty("/MultiEmail", false);
                     this.visiablityPlay.setProperty("/payByDate", false);
@@ -899,7 +899,7 @@ sap.ui.define([
                         this.visiablityPlay.setProperty("/editable", false);
                         this.visiablityPlay.setProperty("/CInvoice", false);
                         this.byId("CID_id_TableInvoiceItem").setMode("None");
-                        this.visiablityPlay.setProperty("/addInvBtn", false);
+                        // this.visiablityPlay.setProperty("/addInvBtn", false);
                         this.visiablityPlay.setProperty("/merge", true);
                         this.visiablityPlay.setProperty("/MultiEmail", true);
                         if (Status !== "Payment Received") this.visiablityPlay.setProperty("/payByDate", this.ReminderEmail);
@@ -1123,7 +1123,7 @@ sap.ui.define([
                         this.visiablityPlay.setProperty("/editable", false);
                         this.visiablityPlay.setProperty("/CInvoice", false);
                         this.visiablityPlay.setProperty("/merge", true);
-                        this.visiablityPlay.setProperty("/addInvBtn", false);
+                        // this.visiablityPlay.setProperty("/addInvBtn", false);
 
                         this.byId("CID_id_TableInvoiceItem").setMode("None");
                         MessageToast.show(this.i18nModel.getText("paymentMessage"));
