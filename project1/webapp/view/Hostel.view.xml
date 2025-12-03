@@ -285,11 +285,10 @@
                                     formatter: '.Formatter.formatStartingPrice'}" class="bedCardPrice"/>
                                     <HBox justifyContent="Center" alignItems="Center">
                                         <Button
-                                            text="{=${VisibilityModel>Visible}=== true ? 'View Details' : 'Occupied' }"
+                                            text="View Details"
                                             type="Default"
                                             press=".viewDetails"
                                             class="viewBtn"
-                                            enabled="{VisibilityModel>Visible}"
                                         />
                                     </HBox>
                                 </VBox>

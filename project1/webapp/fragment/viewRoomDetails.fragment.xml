@@ -64,7 +64,9 @@
 								<core:CustomData key="type" value="yearly"/>
 							</customData>
 						</GenericTile>
-						<GenericTile header="Book Now" class=" defaultTile priceItem bookNowTile" frameType="OneByHalf" press=".onConfirmBooking">
+						<GenericTile header="{=${VisibilityModel>Visible}=== true ? 'Book Now' : 'Occupied' }"
+						 class=" defaultTile priceItem bookNowTile" 
+						 frameType="OneByHalf" press=".onConfirmBooking" >
 							<customData>
 								<core:CustomData key="type" value="booknow"/>
 							</customData>

@@ -276,6 +276,11 @@ sap.ui.define([
             const oLocalModel = oView.getModel("HostelModel"); // Local model bound to dialog
             const oData = oLocalModel?.getData?.() || {};
 
+            if(!oData.Visible){
+                sap.m.MessageToast.show("This room is currently occupied. Please select another room.");
+                return;
+                }
+
             if (!oData.SelectedPriceType || !oData.SelectedPriceValue) {
                 sap.m.MessageToast.show("Please select a pricing plan before booking.");
                 return;
@@ -466,7 +471,8 @@ sap.ui.define([
                     ImageList: (oSelected.Images || []).map(img => img.src),
                     SelectedPriceType: "",
                     SelectedPriceValue: "",
-                    Country: oSelected.Country
+                    Country: oSelected.Country,
+                    Visible:oSelected.Visible
                 };
 
                 const oHostelModel = new sap.ui.model.json.JSONModel(oFullDetails);
