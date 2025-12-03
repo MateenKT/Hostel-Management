@@ -1,47 +1,67 @@
-sap.ui.define([
-    "./BaseController",
-    "sap/ui/model/json/JSONModel",
-    "sap/ui/core/Fragment",
-    "sap/m/MessageBox",
-    "sap/ui/export/Spreadsheet",
-    "sap/ui/export/library",
-    "../model/formatter",
-    "../utils/validation",
-], function (BaseController, JSONModel, Fragment, MessageBox, Spreadsheet, exportLibrary, Formatter, utils) {
-    "use strict";
+    sap.ui.define([
+        "./BaseController",
+        "sap/ui/model/json/JSONModel",
+        "sap/ui/core/Fragment",
+        "sap/m/MessageBox",
+        "sap/ui/export/Spreadsheet",
+        "sap/ui/export/library",
+        "../model/formatter",
+        "../utils/validation",
+    ], function (BaseController, JSONModel, Fragment, MessageBox, Spreadsheet, exportLibrary, Formatter, utils) {
+        "use strict";
 
-    var EdmType = exportLibrary.EdmType;
+        var EdmType = exportLibrary.EdmType;
 
-    return BaseController.extend("sap.ui.com.project1.controller.CouponDetails", {
-        Formatter: Formatter,
+        return BaseController.extend("sap.ui.com.project1.controller.CouponDetails", {
+            Formatter: Formatter,
 
-        onInit: function () {
-            var oRouter = this.getOwnerComponent().getRouter();
-            oRouter.getRoute("RouteCouponDetails").attachPatternMatched(this._onRouteMatched, this);
+            onInit: function () {
+                
+                var oRouter = this.getOwnerComponent().getRouter();
+                oRouter.getRoute("RouteCouponDetails").attachPatternMatched(this._onRouteMatched, this);
 
-            // View model for dialog state
-            var oViewModel = new JSONModel({
-                DialogMode: "Add",        // "Add" or "Edit"
-                CurrentCoupon: {}         // bound to dialog
-            });
-            this.getView().setModel(oViewModel, "CouponView");
-        },
+                // View model for dialog state
+                var oViewModel = new JSONModel({
+                    DialogMode: "Add",        // "Add" or "Edit"
+                    CurrentCoupon: {}         // bound to dialog
+                });
+                this.getView().setModel(oViewModel, "CouponView");
+            },
 
-        onHome: function () {
-            var oRouter = this.getOwnerComponent().getRouter();
-            oRouter.navTo("RouteHostel");
-        },
+            onHome: function () {
+                var oRouter = this.getOwnerComponent().getRouter();
+                oRouter.navTo("RouteHostel");
+            },
 
 
-        _onRouteMatched: function () {
+            _onRouteMatched: function () {
 
-            const oLoginModel = this.getOwnerComponent().getModel("LoginModel");
+                const oLoginModel = this.getOwnerComponent().getModel("LoginModel");
 
-            if (oLoginModel) {
-                this.getView().setModel(oLoginModel, "LoginModel");
+                if (oLoginModel) {
+                    this.getView().setModel(oLoginModel, "LoginModel");
+                }
+
+                this._loadCoupons();
+                this._loadRecipientContacts();
+                this._loadBranchCode();
+            },
+        _loadBranchCode: async function () {
+            try {
+                const oView = this.getView();
+                const oResponse = await this.ajaxReadWithJQuery("HM_Branch", {});
+                const aBranches = Array.isArray(oResponse?.data) ? oResponse.data : (oResponse?.data ? [oResponse.data] : []);
+
+                const oBranchModel = new sap.ui.model.json.JSONModel(aBranches);
+                oView.setModel(oBranchModel, "sBRModel");
+                this._populateUniqueFilterValues(aBranches);
+            } catch (err) {
+                console.error("Error while loading branch data:", err);
             }
-            this._loadCoupons();
         },
+
+
+
 
         _loadCoupons: async function () {
             var oView = this.getView();
@@ -162,7 +182,8 @@ sap.ui.define([
                 MinOrderValue: "",
                 StartDate: "",
                 EndDate: "",
-                Status: ""
+                Status: "",
+                BranchCode: "" 
                 // CreatedBy / CreatedAt added on SAVE only
             });
 
@@ -357,6 +378,10 @@ sap.ui.define([
             // ----------------------------
             let bValid =
                 utils._LCstrictValidationComboBox(
+                    sap.ui.getCore().byId(oView.createId("cbBranchCode")), "ID"
+                )
+                &&
+                utils._LCstrictValidationComboBox(
                     sap.ui.getCore().byId(oView.createId("cbDiscountType")), "ID"
                 ) &&
                 utils._LCvalidateMandatoryField(
@@ -447,6 +472,8 @@ sap.ui.define([
                             DiscountValue: oCoupon.DiscountValue,
                             //MaxUses: oCoupon.MaxUses,
                             //erLimit: oCoupon.PerUserLimit,
+                            BranchCode: oCoupon.BranchCode,
+
                             StartDate: oCoupon.StartDate,
                             EndDate: oCoupon.EndDate,
                             MinOrderValue: oCoupon.MinOrderValue,
@@ -484,6 +511,53 @@ sap.ui.define([
 
         
 
+        onDialogAfterClose: function () {
+
+            const oVM = this.getView().getModel("CouponView");
+
+            // Reset model
+            oVM.setProperty("/CurrentCoupon", {
+                DiscountType: "",
+                DiscountValue: "",
+                MaxUses: "",
+                MinOrderValue: "",
+                StartDate: "",
+                EndDate: "",
+                Status: "",
+                BranchCode: ""  
+            });
+
+            // Clear validation & fields
+            this._resetDialogValueStates();
+
+            // Clear table selections
+            this._clearTableSelection();
+        },
+
+        _resetDialogValueStates: function () {
+
+            const oView = this.getView();
+
+            const aFieldIds = [
+                "cbDiscountType",
+                "inDiscountValue",
+                "inMaxUses",
+                "inMinOrderValue",
+                "cbStatus",
+                "dpStartDate",
+                "dpEndDate",
+                "cbBranchCode"
+            ];
+
+            aFieldIds.forEach(id => {
+                const oCtrl = sap.ui.getCore().byId(oView.createId(id));
+                if (oCtrl) {
+                    oCtrl.setValueState(sap.ui.core.ValueState.None);
+                    oCtrl.setValueStateText("");
+                }
+            });
+        },
+
 
 
 
@@ -496,12 +570,13 @@ sap.ui.define([
 
             var sStatus = this.byId("fStatus").getSelectedKey();
             var sType = this.byId("fDiscountType").getSelectedKey();
+            var sBranch = this.byId("fBranch").getSelectedKey();   // ✅ NEW
 
             var oRange = this.byId("fEndRange");
             var dFrom = oRange.getDateValue();
             var dTo = oRange.getSecondDateValue();
 
-            // Status
+            // Status filter
             if (sStatus) {
                 aFilters.push(new sap.ui.model.Filter(
                     "Status",
@@ -510,7 +585,7 @@ sap.ui.define([
                 ));
             }
 
-            // Discount type
+            // Discount Type filter
             if (sType) {
                 aFilters.push(new sap.ui.model.Filter(
                     "DiscountType",
@@ -519,9 +594,17 @@ sap.ui.define([
                 ));
             }
 
-            // ✅ Correct OVERLAP date filter
-            if (dFrom && dTo) {
+            // ✅ Branch filter
+            if (sBranch) {
+                aFilters.push(new sap.ui.model.Filter(
+                    "BranchCode",
+                    sap.ui.model.FilterOperator.EQ,
+                    sBranch
+                ));
+            }
 
+            // Date overlap filter (unchanged)
+            if (dFrom && dTo) {
                 var sFrom = dFrom.toISOString().slice(0, 10);
                 var sTo = dTo.toISOString().slice(0, 10);
 
@@ -552,6 +635,8 @@ sap.ui.define([
 
             this.byId("fStatus").setSelectedKey("");
             this.byId("fDiscountType").setSelectedKey("");
+            this.byId("fBranch").setSelectedKey("");
+
 
             var oRange = this.byId("fEndRange");
 
@@ -688,14 +773,196 @@ sap.ui.define([
             }
         },
 
-        onCancelCouponDialog: function () {
+        onDialogClose: function () {
             if (this._oCouponDialog) {
-                this._oCouponDialog.close();
+                this._oCouponDialog.close();  
             }
-            this._clearTableSelection();
+        },
+
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+        async _loadRecipientContacts() {
+
+            const oData = await this.ajaxReadWithJQuery("HM_CustomerContact", {});
+
+            const aContacts = (oData?.data || []).map(c => ({
+                UserName: c.UserName,
+                Role: c.Role,
+                Email: c.EmailID,
+                BranchId: c.BranchId,
+                BranchCode: c.BranchCode
+            }));
+
+
+            this._aAllRecipients = aContacts;
+
+            const aRoles = [...new Set(aContacts.map(c => c.Role))];
+
+            const aBranches = [];
+
+            aContacts.forEach(c => {
+                if (!aBranches.find(b => b.BranchId === c.BranchId)) {
+                    aBranches.push({
+                        BranchId: c.BranchId,
+                        BranchCode: c.BranchCode
+                    });
+                }
+            });
+
+            this.getView().setModel(new JSONModel(aBranches), "BranchModel");
+
+
+            this.getView().setModel(new JSONModel(aContacts), "RecipientModel");
+            this.getView().setModel(new JSONModel(aRoles), "RoleModel");
+
+            return aContacts;
+        },
+        onBranchChange: function (e) {
+
+            const sBranch = e.getSource().getSelectedKey();
+
+            const aUsers = this._aAllRecipients.filter(r =>
+                r.BranchId === sBranch
+            );
+
+            this.getView()
+                .getModel("RecipientModel")
+                .setData(aUsers);
+
+            this.byId("cbUser").setSelectedKeys([]);
+            this.byId("inpEmail").setValue("");
+            this._applyUserFilter(); 
+        },
+        _applyUserFilter: function () {
+
+            const sRole = this.byId("cbRole").getSelectedKey();
+            const sBranch = this.byId("cbBranch").getSelectedKey();
+
+            let aData = this._aAllRecipients;
+
+            if (sRole) {
+                aData = aData.filter(u => u.Role === sRole);
+            }
+
+            if (sBranch) {
+                aData = aData.filter(u => u.BranchId === sBranch);
+            }
+
+            this.getView()
+                .getModel("RecipientModel")
+                .setData(aData);
+
+            this.byId("cbUser").setSelectedKeys([]);
+            this.byId("inpEmail").setValue("");
         },
 
 
+        onShareCoupon: async function () {
+
+            const oTable = this.byId("couponTable");
+            const aSel = oTable ? oTable.getSelectedItems() : [];
+
+            if (!aSel || aSel.length !== 1) {
+                sap.m.MessageToast.show("Select one coupon to share.");
+                return;
+            }
+
+            this._oCouponToShare =
+                aSel[0].getBindingContext("CouponModel").getObject();
+
+            const aRecipients = this._aAllRecipients || [];
+
+            if (!aRecipients.length) {
+                sap.m.MessageToast.show("No contacts found.");
+                return;
+            }
+
+            if (!this._oShareDialog) {
+                const oView = this.getView();
+
+                this._oShareDialog = await Fragment.load({
+                    id: oView.getId(),
+                    name: "sap.ui.com.project1.fragment.CouponShare",
+                    controller: this
+                });
+
+                oView.addDependent(this._oShareDialog);
+            }
+
+
+            this._oShareDialog.open();
+        },
+        onRoleChange: function (e) {
+
+            const sRole = e.getSource().getSelectedKey();
+
+            const aUsers = this._aAllRecipients.filter(r => r.Role === sRole);
+
+            this.getView().getModel("RecipientModel").setData(aUsers);
+
+            this.byId("cbUser").setSelectedKey("");
+            this.byId("inpEmail").setValue("");
+            this._applyUserFilter(); 
+        },
+
+
+        onConfirmShareCoupon: async function () {
+
+            const aSelectedItems = this.byId("cbUser")
+                .getSelectedItems();
+
+            if (!aSelectedItems.length) {
+                MessageToast.show("Select at least one recipient");
+                return;
+            }
+
+            const c = this._oCouponToShare;
+
+            const aUsers = aSelectedItems.map(item => ({
+                UserName: item.getText(),
+                toEmailID: item.getKey(),
+                COUPONNUMBER: c.CouponCode,
+                StartDate: c.StartDate,
+                EndDate: c.EndDate,
+                MinOrderValue: c.MinOrderValue,
+                PerUserLimit: c.PerUserLimit
+            }));
+
+            const payload = { users: aUsers };
+
+            await this.ajaxCreateWithJQuery("CouponCodeEmail", payload);
+
+            MessageToast.show("Coupons sent");
+            this._oShareDialog.close();
+        },
+
+
+
+            onUserChange: function (e) {
+                const aNames = e.getSource()
+                    .getSelectedItems()
+                    .map(i => i.getAdditionalText());
+
+                this.byId("inpEmail").setValue(aNames.join(", "));
+            },
+
+
+
+
+        onCloseShareDialog: function () {
+            this._oShareDialog.close();
+        },
+
+        onSelectAllUsers: function () {
+
+            const aUsers = this.getView().getModel("RecipientModel").getData() || [];
+
+            const aKeys = aUsers.map(u => u.Email);
+
+            this.byId("cbUser").setSelectedKeys(aKeys);
+
+        },
 
     });
 });

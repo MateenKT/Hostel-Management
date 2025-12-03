@@ -8,8 +8,16 @@
 			<core:Fragment fragmentName="sap.ui.com.project1.fragment.Header" type="XML"/>
 		</headerContent>
 		<content>
-			<fb:FilterBar id="couponFilterBar" useToolbar="false" showClearOnFB="true" showFilterConfiguration="false" filterContainerWidth="auto" search="onCouponSearch" clear="onClearCoupons">
+			<fb:FilterBar  id="couponFilterBar" useToolbar="false" showClearOnFB="true" showFilterConfiguration="false" filterContainerWidth="auto" search="onCouponSearch" clear="onClearCoupons">
 				<fb:filterGroupItems>
+				<!-- BRANCH -->
+<fb:FilterGroupItem name="BranchCode" groupName="Group" label="Branch" visibleInFilterBar="true">
+	<fb:control>
+		<ComboBox id="fBranch" width="100%" placeholder="Select branch" items="{sBRModel>/}" showSecondaryValues="true"	 >
+			<core:ListItem key="{sBRModel>BranchID}" text="{sBRModel>Name}"  additionalText="{sBRModel>BranchID}"/>
+		</ComboBox>
+	</fb:control>
+</fb:FilterGroupItem>
 					<!-- STATUS -->
 					<fb:FilterGroupItem name="Status" groupName="Group" label="Status" visibleInFilterBar="true">
 						<fb:control>
@@ -45,6 +53,7 @@
 					<OverflowToolbar>
 						<Title text="Coupons ({= ${CouponModel>/}.length })" />
 						<ToolbarSpacer/>
+						<Button text="Share Coupon" press="onShareCoupon" class="myUnifiedBtn" />						
 						<Button text="Add" press="onAddCoupon" class="myUnifiedBtn" />
 						<Button text="Edit" press="onEditCoupon" class="myUnifiedBtn" />
 						<Button text="Delete" press="onDeleteCoupon" class="myUnifiedBtn" />
@@ -53,6 +62,9 @@
 				</headerToolbar>
 				<!-- Columns -->
 				<columns>
+				<Column minScreenWidth="Tablet" demandPopin="true">
+	<Text text="Branch"/>
+</Column>
 					<Column demandPopin="true">
 						<Text text="Coupon Code"/>
 					</Column>
@@ -92,6 +104,7 @@
 				<items>
 					<ColumnListItem>
 						<cells>
+						<Text text="{CouponModel>BranchCode}" />
 							<Text text="{CouponModel>CouponCode}" />
 							<Text text="{CouponModel>DiscountType}" />
 							<Text text="{   parts: [      { path: 'CouponModel>DiscountValue' },      { path: 'CouponModel>DiscountType' }   ],   formatter: '.Formatter.formatDiscountValue'
