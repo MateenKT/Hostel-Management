@@ -8,37 +8,37 @@
 			<core:Fragment fragmentName="sap.ui.com.project1.fragment.Header" type="XML"/>
 		</headerContent>
 		<content>
-<fb:FilterBar id="couponFilterBar" useToolbar="false" showClearOnFB="true" showFilterConfiguration="false" filterContainerWidth="auto" search="onCouponSearch" clear="onClearCoupons">
-	<fb:filterGroupItems>
-		<!-- STATUS -->
-		<fb:FilterGroupItem name="Status" groupName="Group" label="Status" visibleInFilterBar="true">
-			<fb:control>
-				<ComboBox id="fStatus" width="100%">
-					<core:Item key="" text="All"/>
-					<core:Item key="Active" text="Active"/>
-					<core:Item key="Expired" text="Expired"/>
-					<core:Item key="Inactive" text="Inactive"/>
-				</ComboBox>
-			</fb:control>
-		</fb:FilterGroupItem>
-		<!-- DISCOUNT TYPE -->
-		<fb:FilterGroupItem name="DiscountType" groupName="Group" label="Discount Type" visibleInFilterBar="true">
-			<fb:control>
-				<ComboBox id="fDiscountType" width="100%">
-					<core:Item key="" text="All"/>
-					<core:Item key="Percentage" text="Percentage"/>
-					<core:Item key="Fixed Amount" text="Fixed Amount"/>
-				</ComboBox>
-			</fb:control>
-		</fb:FilterGroupItem>
-		<!-- END DATE RANGE -->
-<fb:FilterGroupItem name="EndDateRange" groupName="Group" label="End Date" visibleInFilterBar="true">
-	<fb:control>
-		<DateRangeSelection id="fEndRange" delimiter=" to " valueFormat="yyyy-MM-dd" displayFormat="dd/MM/yyyy" width="100%" />
-	</fb:control>
-</fb:FilterGroupItem>
-	</fb:filterGroupItems>
-</fb:FilterBar>
+			<fb:FilterBar id="couponFilterBar" useToolbar="false" showClearOnFB="true" showFilterConfiguration="false" filterContainerWidth="auto" search="onCouponSearch" clear="onClearCoupons">
+				<fb:filterGroupItems>
+					<!-- STATUS -->
+					<fb:FilterGroupItem name="Status" groupName="Group" label="Status" visibleInFilterBar="true">
+						<fb:control>
+							<ComboBox id="fStatus" width="100%" placeholder="Select status">
+								<!-- <core:Item key="" text="All"/> -->
+								<core:Item key="Active" text="Active"/>
+								<core:Item key="Expired" text="Expired"/>
+								<core:Item key="Inactive" text="Inactive"/>
+							</ComboBox>
+						</fb:control>
+					</fb:FilterGroupItem>
+					<!-- DISCOUNT TYPE -->
+					<fb:FilterGroupItem name="DiscountType" groupName="Group" label="Discount Type" visibleInFilterBar="true">
+						<fb:control>
+							<ComboBox id="fDiscountType" width="100%" placeholder="Select discount type">
+								<!-- <core:Item key="" text="All"/> -->
+								<core:Item key="Percentage" text="Percentage"/>
+								<core:Item key="Fixed Amount" text="Fixed Amount"/>
+							</ComboBox>
+						</fb:control>
+					</fb:FilterGroupItem>
+					<!-- END DATE RANGE -->
+					<fb:FilterGroupItem name="EndDateRange" groupName="Group" label="End Date" visibleInFilterBar="true">
+						<fb:control>
+							<DateRangeSelection id="fEndRange" delimiter=" to " valueFormat="yyyy-MM-dd" displayFormat="dd/MM/yyyy" width="100%" />
+						</fb:control>
+					</fb:FilterGroupItem>
+				</fb:filterGroupItems>
+			</fb:FilterBar>
 			<Table id="couponTable" items="{path: 'CouponModel>/', parameters: { groupHeaderFactory: '.createGroupHeader' }}" mode="MultiSelect" sticky="ColumnHeaders,HeaderToolbar" growing="true" busyIndicatorDelay="0" growingThreshold="100" alternateRowColors="true">
 				<!-- Header with actions -->
 				<headerToolbar>
@@ -53,6 +53,9 @@
 				</headerToolbar>
 				<!-- Columns -->
 				<columns>
+					<Column demandPopin="true">
+						<Text text="Coupon Code"/>
+					</Column>
 					<Column demandPopin="true">
 						<Text text="Discount Type"/>
 					</Column>
@@ -77,9 +80,7 @@
 					<Column minScreenWidth="Tablet" demandPopin="true">
 						<Text text="End Date"/>
 					</Column>
-					<!-- <Column minScreenWidth="Tablet" demandPopin="true">
-						<Text text="Status"/>
-					</Column> -->
+					<!-- <Column minScreenWidth="Tablet" demandPopin="true"><Text text="Status"/></Column> -->
 					<Column minScreenWidth="Tablet" demandPopin="true">
 						<Text text="Created At"/>
 					</Column>
@@ -91,6 +92,7 @@
 				<items>
 					<ColumnListItem>
 						<cells>
+							<Text text="{CouponModel>CouponCode}" />
 							<Text text="{CouponModel>DiscountType}" />
 							<Text text="{   parts: [      { path: 'CouponModel>DiscountValue' },      { path: 'CouponModel>DiscountType' }   ],   formatter: '.Formatter.formatDiscountValue'
 }" />

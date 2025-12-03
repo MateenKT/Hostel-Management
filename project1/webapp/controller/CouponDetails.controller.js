@@ -6,7 +6,7 @@ sap.ui.define([
     "sap/ui/export/Spreadsheet",
     "sap/ui/export/library",
     "../model/formatter",
-    "../utils/validation"
+    "../utils/validation",
 ], function (BaseController, JSONModel, Fragment, MessageBox, Spreadsheet, exportLibrary, Formatter, utils) {
     "use strict";
 
@@ -43,15 +43,12 @@ sap.ui.define([
             this._loadCoupons();
         },
 
-        /* ==========================
-         *  Backend read: HM_Coupon
-         * ========================== */
         _loadCoupons: async function () {
             var oView = this.getView();
             var oTable = oView.byId("couponTable");
 
             try {
-                oTable.setBusy(true);
+                this._showTableRowsBusy(true);
 
                 var result = await this.ajaxReadWithJQuery("HM_Coupon", {});
                 var aCoupons;
@@ -60,55 +57,53 @@ sap.ui.define([
                 else if (result.data) aCoupons = [result.data];
                 else aCoupons = [];
 
-                // ✅ NORMALIZE all dates
-                // ✅ NORMALIZE all dates + derive Expired status
                 aCoupons = aCoupons.map(function (c) {
 
-                    if (c.StartDate) {
-                        c.StartDate = c.StartDate.substring(0, 10);
-                    }
-
-                    if (c.EndDate) {
-                        c.EndDate = c.EndDate.substring(0, 10);
-                    }
+                    if (c.StartDate) c.StartDate = c.StartDate.substring(0, 10);
+                    if (c.EndDate) c.EndDate = c.EndDate.substring(0, 10);
 
                     if (c.CreatedAt && c.CreatedAt.includes("T")) {
                         c.CreatedAt = c.CreatedAt.replace("T", " ").substring(0, 19);
                     }
 
-                    // ✅ DERIVE Expired status
-                    var today = new Date().toISOString().slice(0, 10);
+                    // 🔥 Explicit priority for grouping/sorting
+                    var mPriority = {
+                        "Active": 1,
+                        "Inactive": 2,
+                        "Expired": 3
+                    };
 
-                    if (c.EndDate && c.EndDate < today && c.Status !== "Inactive") {
-                        c.Status = "Expired";
-                    }
+                    c.StatusOrder = mPriority[c.Status] || 99;
 
                     return c;
                 });
+
+                // ok if the user clicks on edit  then it has to close, 
 
 
                 var oModel = new JSONModel(aCoupons);
                 oView.setModel(oModel, "CouponModel");
 
-                // ✅ APPLY GROUP + SORT
-                var oTable = oView.byId("couponTable");
                 var oBinding = oTable.getBinding("items");
 
                 var aSorters = [
-                    // 1️⃣ Group by Status
-                    new sap.ui.model.Sorter("Status", false, function (oContext) {
+
+                    // 1️⃣ Group and order by StatusOrder (1 → 2 → 3)
+                    new sap.ui.model.Sorter("StatusOrder", false, function (oContext) {
+
                         var sStatus = oContext.getProperty("Status");
+                        var iOrder = oContext.getProperty("StatusOrder");
 
                         return {
-                            key: sStatus,
-                            text: sStatus + " Coupons"
+                            key: iOrder,                 // used for group ordering
+                            text: sStatus + " Coupons"    // what user sees
                         };
                     }),
 
-                    // 2️⃣ Soonest expiry first
+                    // 2️⃣ Inside each status group → oldest EndDate first
                     new sap.ui.model.Sorter("EndDate", false),
 
-                    // 3️⃣ Highest value first
+                    // 3️⃣ Tie-breaker → higher DiscountValue first
                     new sap.ui.model.Sorter("DiscountValue", true)
                 ];
 
@@ -120,7 +115,8 @@ sap.ui.define([
                     err?.responseJSON?.message || "Failed to load coupons (HM_Coupon)."
                 );
             } finally {
-                oTable.setBusy(false);
+                // oTable.setBusy(false);
+                this._showTableRowsBusy(false);
             }
         },
 
@@ -161,8 +157,8 @@ sap.ui.define([
                 DiscountType: "",
                 DiscountValue: "",
                 MaxUses: "",
-                UsedCount: "",
-                PerUserLimit: "",
+                // UsedCount: "",
+                // PerUserLimit: "",
                 MinOrderValue: "",
                 StartDate: "",
                 EndDate: "",
@@ -178,21 +174,17 @@ sap.ui.define([
 
             var oTable = this.getView().byId("couponTable");
             var oItem = oTable.getSelectedItem();
+            var aSel = oTable.getSelectedItems();
 
-            if (!oItem) {
-                MessageBox.warning("Please select a coupon to edit.");
+            if (!aSel || aSel.length !== 1) {
+                sap.m.MessageToast.show("Please select one coupon to edit");
                 return;
             }
+
+            var oItem = aSel[0];   // safe to use
 
             var oCtx = oItem.getBindingContext("CouponModel");
             var oData = Object.assign({}, oCtx.getObject());
-
-            // ✅ Prevent editing expired coupons
-            if (oData.Status === "Expired") {
-                MessageBox.warning("Expired coupons cannot be modified.");
-                return;
-            }
-
             var oViewModel = this.getView().getModel("CouponView");
             oViewModel.setProperty("/DialogMode", "Edit");
             oViewModel.setProperty("/CurrentCoupon", oData);
@@ -208,7 +200,8 @@ sap.ui.define([
             var aSelectedItems = oTable.getSelectedItems();
 
             if (!aSelectedItems.length) {
-                MessageBox.warning("Please select at least one coupon to delete.");
+                // MessageBox.warning("Please select at least one coupon to delete.");
+                sap.m.MessageToast.show("Please select at least one coupon to delete.");
                 return;
             }
 
@@ -239,7 +232,7 @@ sap.ui.define([
                                 });
                             }
 
-                            MessageBox.success("Selected coupons deleted successfully.");
+                            sap.m.MessageToast.show("Selected coupons deleted successfully.");
                             this._loadCoupons();
 
                         } catch (err) {
@@ -339,17 +332,29 @@ sap.ui.define([
             this._oCouponDialog.open();
         },
 
+        _showTableRowsBusy: function (bBusy) {
+            var oTable = this.byId("couponTable");
+            var oDom = oTable.$().find(".sapMListItems").get(0);
 
+            if (!oDom) return;
+
+            if (bBusy) {
+                sap.ui.core.BusyIndicator.show(0, { domRef: oDom });
+            } else {
+                sap.ui.core.BusyIndicator.hide();
+            }
+        },
 
         onSaveCoupon: async function () {
 
-            var oViewModel = this.getView().getModel("CouponView");
-            var sMode = oViewModel.getProperty("/DialogMode");
-            var oCoupon = Object.assign({}, oViewModel.getProperty("/CurrentCoupon"));
+            var oView = this.getView();
+            var oVM = oView.getModel("CouponView");
+            var sMode = oVM.getProperty("/DialogMode");
+            var oCoupon = Object.assign({}, oVM.getProperty("/CurrentCoupon"));
 
-            // oCoupon.Status = "Active";
-            let oView = this.getView();
-
+            // ----------------------------
+            // ✅ Field Validation
+            // ----------------------------
             let bValid =
                 utils._LCstrictValidationComboBox(
                     sap.ui.getCore().byId(oView.createId("cbDiscountType")), "ID"
@@ -360,12 +365,9 @@ sap.ui.define([
                 utils._LCvalidateMandatoryField(
                     sap.ui.getCore().byId(oView.createId("inMaxUses")), "ID"
                 ) &&
-                utils._LCvalidateMandatoryField(
-                    sap.ui.getCore().byId(oView.createId("inUsedCount")), "ID"
-                ) &&
-                utils._LCvalidateMandatoryField(
-                    sap.ui.getCore().byId(oView.createId("inPerUserLimit")), "ID"
-                ) &&
+                // utils._LCvalidateMandatoryField(
+                //     sap.ui.getCore().byId(oView.createId("inPerUserLimit")), "ID"
+                // ) &&
                 utils._LCvalidateMandatoryField(
                     sap.ui.getCore().byId(oView.createId("inMinOrderValue")), "ID"
                 ) &&
@@ -382,37 +384,37 @@ sap.ui.define([
                     sap.ui.getCore().byId(oView.createId("dpEndDate")), "ID"
                 );
 
-
-            // ✅ THIS IS THE MISSING SAFETY NET
             if (!bValid) {
                 sap.m.MessageToast.show("Please fill all mandatory fields correctly.");
                 return;
             }
 
-
-
+            // ----------------------------
             // ✅ Date sanity
-            let dStart = new Date(
-                oView.getModel("CouponView").getProperty("/CurrentCoupon/StartDate")
-            );
-            let dEnd = new Date(
-                oView.getModel("CouponView").getProperty("/CurrentCoupon/EndDate")
-            );
+            // ----------------------------
+            let dStart = new Date(oVM.getProperty("/CurrentCoupon/StartDate"));
+            let dEnd = new Date(oVM.getProperty("/CurrentCoupon/EndDate"));
 
             if (dEnd < dStart) {
                 sap.m.MessageToast.show("End Date cannot be less than Start Date");
                 return;
             }
+
             if (sMode === "Add") {
                 oCoupon.Status = "Active";
             }
 
+            // ----------------------------
+            // ✅ Backend Call
+            // ----------------------------
+            // ----------------------------
+            // ✅ Backend Call + Busy
+            // ----------------------------
+            sap.ui.core.BusyIndicator.show(0);
 
             try {
 
                 if (sMode === "Add") {
-
-                    oCoupon.Status = "Active";
 
                     oCoupon.CreatedAt = new Date()
                         .toISOString()
@@ -420,24 +422,22 @@ sap.ui.define([
                         .replace("T", " ");
 
                     oCoupon.CreatedBy =
-                        this.getView()
-                            .getModel("LoginModel")
+                        oView.getModel("LoginModel")
                             ?.getProperty("/EmployeeName") || "system";
 
                     await this.ajaxCreateWithJQuery("HM_Coupon", {
                         data: oCoupon
                     });
 
-                    MessageBox.success("Coupon created successfully.");
-                }
-                else {
-                    // ✅ UPDATE must include CouponId
+                    sap.m.MessageToast.show("Coupon created successfully.");
+
+                } else {
+
                     if (!oCoupon.CouponId) {
                         MessageBox.error("Update failed: CouponId missing.");
                         return;
                     }
 
-                    // ✅ PUT must send ID as FILTER not inside data
                     await this.ajaxUpdateWithJQuery("HM_Coupon", {
                         filters: {
                             CouponId: oCoupon.CouponId
@@ -445,36 +445,44 @@ sap.ui.define([
                         data: {
                             DiscountType: oCoupon.DiscountType,
                             DiscountValue: oCoupon.DiscountValue,
-                            MaxUses: oCoupon.MaxUses,
-                            UsedCount: oCoupon.UsedCount,
-                            PerUserLimit: oCoupon.PerUserLimit,
+                            //MaxUses: oCoupon.MaxUses,
+                            //erLimit: oCoupon.PerUserLimit,
                             StartDate: oCoupon.StartDate,
                             EndDate: oCoupon.EndDate,
                             MinOrderValue: oCoupon.MinOrderValue,
                             Status: oCoupon.Status,
                             CreatedAt: oCoupon.CreatedAt,
-                            CreatedBy: this.getView()
-                                .getModel("LoginModel")
-                                ?.getProperty("/EmployeeName") || oCoupon.CreatedBy
-
+                            CreatedBy:
+                                oView.getModel("LoginModel")
+                                    ?.getProperty("/EmployeeName") || oCoupon.CreatedBy
                         }
                     });
 
-                    MessageBox.success("Coupon updated successfully.");
-
+                    sap.m.MessageToast.show("Coupon updated successfully.");
                 }
 
+                // ----------------------------
+                // ✅ Post-save UI
+                // ----------------------------
                 this._oCouponDialog.close();
                 this._clearTableSelection();
                 this._loadCoupons();
 
-
             } catch (err) {
+
                 MessageBox.error(
                     err?.responseJSON?.message || "Failed to save coupon."
                 );
+
+            } finally {
+
+                sap.ui.core.BusyIndicator.hide();
+
             }
+
         },
+
+        
 
 
 
