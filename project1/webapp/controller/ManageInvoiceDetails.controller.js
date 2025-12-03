@@ -806,7 +806,7 @@ sap.ui.define([
                         });
                         const oSelectedCustomerModel = that.getView().getModel("SelectedCustomerModel");
                         oSelectedCustomerModel.setProperty("/InvNo", response.InvoiceNo);
-                        var CustomerName = oSelectedCustomerModel.getProperty("/Customer");
+                        var CustomerName = oSelectedCustomerModel.getProperty("/Customer")  || oPayload.payload.CustomerName;
                         oSelectedCustomerModel.setProperty("/CustomerName", CustomerName)
                         that.closeBusyDialog();
                         var oDialog = new sap.m.Dialog({
@@ -1721,7 +1721,7 @@ sap.ui.define([
                     }
 
                     // ===== SAVE FILE =====
-                    doc.save(`${oModel.InvNo}-Invoice.pdf`);
+                     doc.save(`${oModel.CustomerName}-${oModel.InvNo}-Invoice.pdf`);
                 } catch (error) {
                     sap.ui.core.BusyIndicator.hide();
                     MessageToast.show(error.message || error.responseText);
