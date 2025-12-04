@@ -168,8 +168,8 @@
 														editable="{visiablityPlay>/editable}" />
 												</m:cells>
 												<m:cells>
-													<m:ComboBox items="{RateType>/}" selectedKey="Per Day" value="{ManageInvoiceItemModel>UnitText}" change="CI_On_ChangeRateType" editable="{visiablityPlay>/editable}" width="100%">
-																<core:Item key="{RateType>ID}" text="{RateType>RateType}" />
+													<m:ComboBox items="{Rate>/}" selectedKey="Per Day" value="{ManageInvoiceItemModel>UnitText}" change="CI_On_ChangeRateType" editable="{visiablityPlay>/editable}" width="100%">
+																<core:Item key="{Rate>ID}" text="{Rate>Rate}" />
 															</m:ComboBox>
 												</m:cells>
 												<m:cells>

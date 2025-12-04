@@ -77,6 +77,11 @@
             "type": "sap.ui.model.json.JSONModel",
             "uri": "model/InvoiceSAC.json",
             "preload": true
+      },
+      "Rate": {
+        "type": "sap.ui.model.json.JSONModel",
+        "uri": "model/Rate.json",
+        "preload": true
       }
     },
     "resources": {

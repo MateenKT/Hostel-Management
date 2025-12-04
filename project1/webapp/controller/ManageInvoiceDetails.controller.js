@@ -336,7 +336,8 @@ sap.ui.define([
                             BranchCode: bookingDetails.BranchCode || "",
                             CouponDiscount: bookingDetails.Discount || "",
                             CustomerID: customerID,
-                            BookingID: bookingID
+                            BookingID: bookingID,
+                            UserID: bookingDetails.UserID || ""
                         });
                     }
 
@@ -731,7 +732,8 @@ sap.ui.define([
                     BookingID: oSelectedCustomerModel.BookingID || "",
                     BranchCode: oSelectedCustomerModel.BranchCode || "",
                     RoomNo: oSelectedCustomerModel.RoomNo || "",
-                    CouponDiscount: oSelectedCustomerModel.CouponDiscount || ""
+                    CouponDiscount: oSelectedCustomerModel.CouponDiscount || "",
+                    UserID: oSelectedCustomerModel.UserID || ""
                 };
                 const aItemsRaw = oManageInvoiceItemModel.ManageInvoiceItem || [];
                 if (aItemsRaw.length === 0) {
