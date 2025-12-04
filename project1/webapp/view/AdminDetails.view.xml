@@ -595,46 +595,19 @@
                                             text="Document Details ({=${CustomerData>/Documents}.length})"
                                         />
 										<ToolbarSpacer />
-										<ComboBox
-                                            id="idProofType"
-                                            placeholder="Select ID Proof"
-                                            value="{Bookingmodel>/DocumentType}"
-                                            visible="{VisibleModel>/visible}"
-                                            valueStateText="Select ID Proof"
-                                            change="onidproofchange"
-                                        >
-											<core:ListItem
-                                                key="Aadhar Card"
-                                                text="Aadhar Card"
-                                            />
-											<core:ListItem
-                                                key="Pan Card"
-                                                text="Pan Card"
-                                            />
-											<core:ListItem
-                                                key="Driving License"
-                                                text="Driving License"
-                                            />
-											<core:ListItem
-                                                key="Passport"
-                                                text="Passport"
-                                            />
-										</ComboBox>
-										<u:FileUploader
-                                            id="BT_id_FileUploader"
-                                            fileType="jpg,jpeg,png"
-                                            sameFilenameAllowed="false"
-                                            buttonOnly="true"
-                                            buttonText="Upload Images"
-                                            change="onFacilityFileChange"
-                                            visible="{VisibleModel>/visible}"
-                                            class="myUnifiedBtn"
-                                        />
+									
+
+                                        <Button
+                                    text="Upload Images"
+                                    press="onUploadDocumentFile"
+                                    class="myUnifiedBtn"
+                                    visible="{VisibleModel>/visible}"
+                                />
 									</Toolbar>
 								</headerToolbar>
 
 
-
+                        	
  
 
 								<columns>
@@ -829,11 +802,12 @@
 
     <!-- Coupon Input -->
     <Input 
+      id="couponInput"
         value="{Bookingmodel>/CouponCode}"
         placeholder="Enter coupon"
         width="150px"
         class="sapUiTinyMarginEnd"
-        id="couponInput"
+      
     />
 
     <!-- Apply Now Button -->

@@ -888,8 +888,21 @@ sap.ui.define([
                 });
 
                 oCustomerData.TotalFacilityPrice = total;
+                    var oCouponData = this.getView().getModel("CouponModel").getData();
+                        var sEnteredCode =  this.Code || oCustomerData.CouponCode; // user entered code
+                        var oMatchedCoupon = oCouponData.find(coupon => coupon.CouponCode === sEnteredCode);
 
-                 oCustomerData.Discount= this.CouponDiscount || oCustomerData.Discount || "0.00";
+                      if(oMatchedCoupon.MinOrderValue <= (total + (oCustomerData.RentPrice || 0))){
+                               oCustomerData.Discount= this.CouponDiscount || oCustomerData.Discount || "0.00";
+                               this.getView().getModel("VisibleModel").setProperty("/IsCouponApplied", true);
+
+                      } else{
+                         oCustomerData.Discount = "0.00";
+                        this.getView().getModel("VisibleModel").setProperty("/IsCouponApplied", false);
+
+                      }
+
+
                   oCustomerData.RentPrice= oCustomerData.RentPrice || 0;
                   oCustomerData.SubTotal = (total + (oCustomerData.RentPrice || 0) - Number(oCustomerData.Discount));
 
@@ -924,6 +937,8 @@ sap.ui.define([
 
 
             model.setProperty("/BedTypeName", data.BedType)
+            model.setProperty("/CouponCode", data.CouponCode)
+
 
             model.setProperty("/StartDate", data.StartDate)
             model.setProperty("/EndDate", data.EndDate)
@@ -1878,7 +1893,8 @@ sap.ui.define([
                 // Read file as Base64
                 reader.readAsDataURL(file);
             });
-            this.byId("idProofType").setValue("");
+            this.UD_Dialog.close();
+
         },
         onDocumentDelete: function (oEvent) {
             var oCustomerModel = this.getView().getModel("CustomerData");
@@ -2036,10 +2052,14 @@ onApplyCoupon: function () {
     var oCouponData = this.getView().getModel("CouponModel").getData();
 
     var sEnteredCode = Bookingmodel.CouponCode; // user entered code
+     this.Code = Bookingmodel.CouponCode; // user entered code
+
     if (!sEnteredCode) {
         sap.m.MessageToast.show("Please enter a coupon code");
         return;
     }
+
+  
 
     if(oCustomerData.CouponCode === sEnteredCode){
         sap.m.MessageToast.show("Coupon already applied");
@@ -2048,6 +2068,11 @@ onApplyCoupon: function () {
 
     // 1. Check coupon exists
     var oCoupon = oCouponData.find(c => c.CouponCode === sEnteredCode);
+
+      if(oCoupon.BranchCode !== oCustomerData.BranchCode){
+        sap.m.MessageToast.show("This coupon not available for this branch");
+        return;
+             }
 
     if (!oCoupon) {
         sap.m.MessageToast.show("Invalid coupon code");
@@ -2142,6 +2167,32 @@ oncancelCoupon: function () {
     this.getView().getModel("VisibleModel").setProperty("/IsCouponApplied", false);
 
     sap.m.MessageToast.show("Coupon cancelled");
+},
+onUploadDocumentFile: function () {
+         if (!this.UD_Dialog) {
+                var oView = this.getView();
+                this.UD_Dialog = sap.ui.xmlfragment("sap.ui.com.project1.fragment.Upload", this);
+                oView.addDependent(this.UD_Dialog);
+            }
+          
+
+             var oCombo = this.getView().byId("idProofType") || sap.ui.getCore().byId("idProofType");
+    if (oCombo) {
+        oCombo.setSelectedKey("");
+        oCombo.setValue("");
+    }
+
+    var oFileUploader = this.getView().byId("BT_id_FileUploader") || sap.ui.getCore().byId("BT_id_FileUploader");
+    if (oFileUploader) {
+        oFileUploader.clear();
+    }
+
+      this.UD_Dialog.open();
+},
+onCloseDialog:function(){
+     this.UD_Dialog.close();
+     
+
 }
 
 

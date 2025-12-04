@@ -218,7 +218,7 @@ sap.ui.define([
                 case "Trashed":
                     return "Error"
                 case "Assigned":
-                    return "Information"
+                    return "Indication03"
                 case "Transferred":
                     return "Warning"
                 case "Saved":
