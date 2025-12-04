@@ -2794,9 +2794,13 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
 
               //  FIX: Use oData for booking fields, not individual person object
               if (oData.StartDate) {
+
+                const totalCost = Number(oData.FinalTotalCost || 0);  
+const noOfPersons = Number(oData.SelectedPerson || oData.Persons.length || 1);  
+const rentPrice = totalCost / noOfPersons;
                   bookingData.push({
                       BookingDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
-                      RentPrice: oData.GrandTotal ? oData.GrandTotal.toString() : "0",
+                      RentPrice: rentPrice.toString(),
                       RoomPrice: oData.FinalPrice,
                       NoOfPersons: oData.Person || oData.Persons.length,
                       StartDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
@@ -2833,7 +2837,6 @@ aSelectedFacilities.forEach(fac => {
        facilityPrice = fac.TotalAmount || 0;
        facilityHour= fac.TotalTime || "";
   
-
     facilityData.push({
         PaymentID: "",
         FacilityName: fac.FacilityName,
@@ -2845,7 +2848,9 @@ aSelectedFacilities.forEach(fac => {
         StartTime: fac.StartTime || "",
         EndTime: fac.EndTime || "",
         TotalHour: facilityHour,
-        Currency: fac.Currency
+        Currency: fac.Currency,
+        BasicFacilityPrice:fac.Price
+
     });
 });
 
@@ -2921,9 +2926,32 @@ aSelectedFacilities.forEach(fac => {
                   }
               }.bind(this)
           });
-          } catch (err) {
-              sap.m.MessageBox.error("Error while booking: " + err);
-          }
+          } catch (e) {
+    BusyIndicator.hide();
+
+    let errorMsg = "Unknown error";
+
+    // jQuery AJAX always returns responseJSON inside e.responseJSON
+    if (e && e.responseJSON) {
+        errorMsg = e.responseJSON.message || e.responseJSON.error || JSON.stringify(e.responseJSON);
+    } 
+    // Sometimes backend returns raw responseText
+    else if (e && e.responseText) {
+        try {
+            const parsed = JSON.parse(e.responseText);
+            errorMsg = parsed.message || parsed.error || e.responseText;
+        } catch (parseErr) {
+            errorMsg = e.responseText;
+        }
+    } 
+    // Fallback — if nothing matched
+    else if (e.message) {
+        errorMsg = e.message;
+    }
+
+    sap.m.MessageToast.show(errorMsg);
+    sap.m.MessageBox.error(errorMsg);
+}
       },
       openProfileDialog: function () {
       this.onPressAvatar()

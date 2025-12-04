@@ -451,8 +451,52 @@ oHostelModel.setProperty("/FinalTotalCost", totals.FinalTotal || totals.GrandTot
     overAllTotal += totalAmount + oldRoomRent;
 });
 
-
             oHostelModel.setProperty("/OverallTotalCost", overAllTotal);
+
+            // 5 Re-apply coupon & tax after facility edit
+const discountApplied = Number(oHostelModel.getProperty("/AppliedDiscount") || 0);
+const couponCode = oHostelModel.getProperty("/CouponCode");
+let updatedSubtotal = overAllTotal;
+
+// If coupon already applied -> recalc discount
+if (couponCode && discountApplied > 0) {
+
+    // Discount can be PERCENT or FLAT, so read saved info
+    const discountType = oHostelModel.getProperty("/AppliedDiscountType");  // "percentage" or "flat"
+    const discountValue = Number(oHostelModel.getProperty("/AppliedDiscountValue") || 0);
+
+    let newDiscountAmount = 0;
+
+    // Recalculate discount based on UPDATED subtotal
+    if (discountType === "percentage") {
+        newDiscountAmount = updatedSubtotal * (discountValue / 100);
+    } else {
+        newDiscountAmount = discountValue;
+    }
+
+    // Apply discount
+    updatedSubtotal = updatedSubtotal - newDiscountAmount;
+
+    // Save updated discount value
+    oHostelModel.setProperty("/AppliedDiscount", newDiscountAmount);
+}
+
+// 6️⃣ Re-apply taxes (India → CGST+SGST)
+const isIndia = oHostelModel.getProperty("/IsIndia");
+let cgst = 0, sgst = 0, finalTotal = updatedSubtotal;
+
+if (isIndia) {
+    cgst = updatedSubtotal * 0.09;
+    sgst = updatedSubtotal * 0.09;
+    finalTotal = updatedSubtotal + cgst + sgst;
+}
+
+// Save updated tax + final total
+oHostelModel.setProperty("/OverallTotalCost", updatedSubtotal);
+oHostelModel.setProperty("/CGST", cgst);
+oHostelModel.setProperty("/SGST", sgst);
+oHostelModel.setProperty("/FinalTotalCost", finalTotal);
+
             let aSummary = oHostelModel.getProperty("/PersonFacilitiesSummary") || [];
 
             const iSummaryIndex = aSummary.findIndex(f => {
@@ -941,6 +985,12 @@ onTimeChange: function () {
      var oBtn = this.byId("couponApplyBtn");
     //  sap.ui.getCore().byId(this.createId("couponApplyBtn"))
     var sEnteredCode = oHostelModel.getProperty("/CouponCode")?.trim();
+    var sBranchCode = oHostelModel.getProperty("/BranchCode");
+
+     if( sEnteredCode === ""){
+       sap.m.MessageToast.show("Enter Coupon for Discount");
+    return;
+    }
 
    if (oBtn.getText() === "Cancel") {
 
@@ -1023,12 +1073,23 @@ onTimeChange: function () {
             sap.m.MessageToast.show("Invalid Coupon Code");
             return;
         }
+        const couponBranch = String(oMatched.BranchCode || "").trim();
+const selectedBranch = String(sBranchCode || "").trim();
+
+if (couponBranch && couponBranch !== selectedBranch) {
+    sap.m.MessageToast.show(
+        `This coupon is not valid for the selected Branch Room.`
+    );
+    return;
+}
 
         // Extract coupon details
         const discountValue = Number(oMatched.DiscountValue || 0);
         const discountType = (oMatched.DiscountType || "").toLowerCase();
         const minOrderValue = Number(oMatched.MinOrderValue || 0);
-
+          oHostelModel.setProperty("/AppliedDiscountType",discountType)
+          oHostelModel.setProperty("/AppliedDiscountValue",discountValue)
+          oHostelModel.setProperty("/MinOrdervlaue",minOrderValue)
         // Read Subtotal and country
         const isIndia = oHostelModel.getProperty("/IsIndia");
         let subTotal = Number(oHostelModel.getProperty("/OverallTotalCost") || 0);
