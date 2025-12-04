@@ -114,6 +114,8 @@
 
                         <m:Label text="Gender" />
                         <Text text="{profileData>/gender}" />
+                        <m:Label text="Address" />
+                        <Text text="{profileData>/address}" wrapping="true" width="100%" />
                     </f:content>
                 </f:SimpleForm>
                 <f:SimpleForm
@@ -279,27 +281,28 @@
                                 text="Other"
                             />
                         </ComboBox>
+                        <m:Label text="Address" required="{profileData>/isEditMode}" />
+                        <TextArea
+                            id="id_address"
+                            value="{profileData>/address}"
+                            rows="3"
+                            growing="false"
+                            width="100%"
+                        />
                     </f:content>
                 </f:SimpleForm>
-                <HBox
-                    class="sapUiSmallMarginBegin"
-                    alignItems="Start"
-                    width="100%"
+                <!-- <f:SimpleForm
+                    layout="ColumnLayout"
+                    columnsM="3"
+                    columnsL="4"
+                    visible="{profileData>/isEditMode}"
                 >
+                    <f:content>
                     <m:Label
                         text="Address"
                         required="{profileData>/isEditMode}"
                     />
-                    <TextArea
-                        id="id_address"
-                        maxLength="100"
-                        value="{profileData>/address}"
-                        visible="{profileData>/isEditMode}"
-                        rows="1"
-                        width="100%"
-                        growing="true"
-                    />
-                </HBox>
+                    
                 <Text
                     text="{profileData>/address}"
                     visible="{= !${profileData>/isEditMode}}"
@@ -308,6 +311,17 @@
                     wrapping="true"
 
                 />
+                    <TextArea
+                        id="id_address"
+                        maxLength="100"
+                        value="{profileData>/address}"
+                        visible="{profileData>/isEditMode}"
+                        rows="1"
+                        width="100%"
+                        growing="false"
+                    />
+                  </f:content>
+                </f:SimpleForm> -->
             </VBox>
         </FlexBox>
         <Table
