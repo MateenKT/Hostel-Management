@@ -1097,7 +1097,7 @@ _createFacilityActionSheet: function (facility, iPersonIndex, oCard) {
     }
 
     this._oFacilityActionSheet = new sap.m.ActionSheet({
-        placement: sap.m.PlacementType.Bottom,
+        placement: sap.m.PlacementType.Top,
         buttons: [
             new sap.m.Button({
                 text: "Per Hour – " + facility.PricePerHour + " " + facility.Currency,

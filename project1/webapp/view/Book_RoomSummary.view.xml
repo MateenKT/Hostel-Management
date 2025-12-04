@@ -96,6 +96,10 @@
         width="150px"
         class="sapUiTinyMarginEnd"
         id="BookingcouponInput"
+      showValueHelp="true"
+    valueHelpIconSrc="sap-icon://decline"
+    valueHelpRequest="oncancelCoupon"
+    liveChange="onCouponLiveChange"
     />
  
     <!-- Apply Now Button -->
@@ -105,6 +109,7 @@
         press="onChangeCouponCode"
         class="sapUiTinyMarginEnd"
         id="couponApplyBtn"
+        visible="{}"
     />
 </HBox>
 <HBox justifyContent="End" >

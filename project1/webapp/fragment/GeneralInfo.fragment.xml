@@ -18,7 +18,7 @@
         >
             <f:content>
                 <!-- Booking Details -->
-                <core:Title text="" />
+           
               <!-- <Input id="idUserID" value="{HostelModel>/UserID}" visible="true" /> -->
                <Label text="Room Type" />
                             <Text id="GI_Roomtype"  text="{=${HostelModel>/BedType} + ' - ' + ${HostelModel>/ACType}}"  width="100%" /> 

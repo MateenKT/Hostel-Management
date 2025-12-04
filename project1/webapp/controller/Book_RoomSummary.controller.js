@@ -8,8 +8,10 @@ sap.ui.define([
     return Controller.extend("sap.ui.com.project1.controller.Book_RoomSummary", {
         Formatter: Formatter,
         onInit() {
-              var oBtn = this.byId("couponApplyBtn");
-              oBtn.setText("Apply Now")
+            var oBtn = this.byId("couponApplyBtn");
+            oBtn.setText("Apply Now")
+            var inputID = this.getView().byId("BookingcouponInput")
+             inputID.setShowValueHelp(false)
         },
 
         onNavBack: function () {
@@ -150,113 +152,113 @@ sap.ui.define([
             this._oEditDialog.close();
         },
 
-      onMonthSelectionChange: function (oEvent) {
-    const oView = this.getView();
-    const oHostelModel = oView.getModel("edit");
+        onMonthSelectionChange: function (oEvent) {
+            const oView = this.getView();
+            const oHostelModel = oView.getModel("edit");
 
-    const sUnit = oHostelModel.getProperty("/UnitText");
-    const sStartDate = oHostelModel.getProperty("/StartDate") || "";
+            const sUnit = oHostelModel.getProperty("/UnitText");
+            const sStartDate = oHostelModel.getProperty("/StartDate") || "";
 
-    const iSelectedNumber = parseInt(oEvent.getSource().getSelectedKey() || "1", 10);
+            const iSelectedNumber = parseInt(oEvent.getSource().getSelectedKey() || "1", 10);
 
-    if (!sStartDate) {
-        sap.m.MessageToast.show("Please select Start Date first.");
-        return;
-    }
+            if (!sStartDate) {
+                sap.m.MessageToast.show("Please select Start Date first.");
+                return;
+            }
 
-    const oStart = this._parseDate(sStartDate);
-    if (!(oStart instanceof Date) || isNaN(oStart)) {
-        sap.m.MessageToast.show("Invalid Start Date.");
-        return;
-    }
+            const oStart = this._parseDate(sStartDate);
+            if (!(oStart instanceof Date) || isNaN(oStart)) {
+                sap.m.MessageToast.show("Invalid Start Date.");
+                return;
+            }
 
-    let iTotalDays = 0;
-    let oEnd = new Date(oStart);
+            let iTotalDays = 0;
+            let oEnd = new Date(oStart);
 
-    // Use fixed days: 30 days per month, 365 per year
-    if (sUnit === "Per Month") {
-        iTotalDays = iSelectedNumber * 30;
-        oEnd.setDate(oEnd.getDate() + iTotalDays);
-        oHostelModel.setProperty("/TotalMonths", iSelectedNumber);
-        oHostelModel.setProperty("/TotalYears", 0);
-    } else if (sUnit === "Per Year") {
-        iTotalDays = iSelectedNumber * 365;
-        oEnd.setDate(oEnd.getDate() + iTotalDays);
-        oHostelModel.setProperty("/TotalYears", iSelectedNumber);
-        oHostelModel.setProperty("/TotalMonths", 0);
-    } else {
-        return;
-    }
+            // Use fixed days: 30 days per month, 365 per year
+            if (sUnit === "Per Month") {
+                iTotalDays = iSelectedNumber * 30;
+                oEnd.setDate(oEnd.getDate() + iTotalDays);
+                oHostelModel.setProperty("/TotalMonths", iSelectedNumber);
+                oHostelModel.setProperty("/TotalYears", 0);
+            } else if (sUnit === "Per Year") {
+                iTotalDays = iSelectedNumber * 365;
+                oEnd.setDate(oEnd.getDate() + iTotalDays);
+                oHostelModel.setProperty("/TotalYears", iSelectedNumber);
+                oHostelModel.setProperty("/TotalMonths", 0);
+            } else {
+                return;
+            }
 
-    const sEndDate = this._formatDateToDDMMYYYY(oEnd);
+            const sEndDate = this._formatDateToDDMMYYYY(oEnd);
 
-    oHostelModel.setProperty("/EndDate", sEndDate);
-    oHostelModel.setProperty("/TotalDays", iTotalDays);
-},
+            oHostelModel.setProperty("/EndDate", sEndDate);
+            oHostelModel.setProperty("/TotalDays", iTotalDays);
+        },
 
         onEditDateChange: function (oEvent) {
-    const oView = this.getView();
-    const oModel = oView.getModel("edit");
+            const oView = this.getView();
+            const oModel = oView.getModel("edit");
 
-    const sUnit = oModel.getProperty("/UnitText"); // Per Day / Per Month / Per Year
-    const sStart = oModel.getProperty("/StartDate");
+            const sUnit = oModel.getProperty("/UnitText"); // Per Day / Per Month / Per Year
+            const sStart = oModel.getProperty("/StartDate");
 
-    if (!sStart) return;
+            if (!sStart) return;
 
-    // Convert DD/MM/YYYY → JS Date
-    const toJSDate = (s) => {
-        if (typeof s !== "string") return new Date(s);
-        if (s.includes("/")) {
-            const [d, m, y] = s.split("/");
-            return new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
-        }
-        return new Date(s);
-    };
+            // Convert DD/MM/YYYY → JS Date
+            const toJSDate = (s) => {
+                if (typeof s !== "string") return new Date(s);
+                if (s.includes("/")) {
+                    const [d, m, y] = s.split("/");
+                    return new Date(parseInt(y, 10), parseInt(m, 10) - 1, parseInt(d, 10));
+                }
+                return new Date(s);
+            };
 
-    const oStart = toJSDate(sStart);
-    if (!(oStart instanceof Date) || isNaN(oStart)) return;
+            const oStart = toJSDate(sStart);
+            if (!(oStart instanceof Date) || isNaN(oStart)) return;
 
-    let oEnd = new Date(oStart);
+            let oEnd = new Date(oStart);
 
-    /** GET NUMBER OF MONTHS/YEAR SELECTED */
-    let iCount = 1;
-    if (sUnit === "Per Month") {
-        iCount = parseInt(oModel.getProperty("/TotalMonths") || "1", 10);
-        // Use fixed days per month (30)
-        const iDaysToAdd = iCount * 30;
-        oEnd.setDate(oEnd.getDate() + iDaysToAdd);
-        oModel.setProperty("/TotalDays", iDaysToAdd);
-    } else if (sUnit === "Per Year") {
-        iCount = parseInt(oModel.getProperty("/TotalYears") || "1", 10);
-        const iDaysToAdd = iCount * 365;
-        oEnd.setDate(oEnd.getDate() + iDaysToAdd);
-        oModel.setProperty("/TotalDays", iDaysToAdd);
-    } else {
-        // For Per Day / Per Hour / custom -> keep existing EndDate if present, otherwise no-op
-        const sEnd = oModel.getProperty("/EndDate");
-        if (sEnd) {
-            oEnd = toJSDate(sEnd);
-        }
-        // Compute total days by difference (no extra +1)
-        const msPerDay = 1000 * 60 * 60 * 24;
-        const iDays = Math.ceil((oEnd - oStart) / msPerDay);
-        oModel.setProperty("/TotalDays", iDays >= 0 ? iDays : 0);
-    }
+            /** GET NUMBER OF MONTHS/YEAR SELECTED */
+            let iCount = 1;
+            if (sUnit === "Per Month") {
+                iCount = parseInt(oModel.getProperty("/TotalMonths") || "1", 10);
+                // Use fixed days per month (30)
+                const iDaysToAdd = iCount * 30;
+                oEnd.setDate(oEnd.getDate() + iDaysToAdd);
+                oModel.setProperty("/TotalDays", iDaysToAdd);
+            } else if (sUnit === "Per Year") {
+                iCount = parseInt(oModel.getProperty("/TotalYears") || "1", 10);
+                const iDaysToAdd = iCount * 365;
+                oEnd.setDate(oEnd.getDate() + iDaysToAdd);
+                oModel.setProperty("/TotalDays", iDaysToAdd);
+            } else {
+                // For Per Day / Per Hour / custom -> keep existing EndDate if present, otherwise no-op
+                const sEnd = oModel.getProperty("/EndDate");
+                if (sEnd) {
+                    oEnd = toJSDate(sEnd);
+                }
+                // Compute total days by difference (no extra +1)
+                const msPerDay = 1000 * 60 * 60 * 24;
+                const iDays = Math.ceil((oEnd - oStart) / msPerDay);
+                oModel.setProperty("/TotalDays", iDays >= 0 ? iDays : 0);
+            }
 
-    /** FORMAT DATE: JS Date -> DD/MM/YYYY */
-    const sNewEndDate = this._formatDateToDDMMYYYY(oEnd);
-    oModel.setProperty("/EndDate", sNewEndDate);
+            /** FORMAT DATE: JS Date -> DD/MM/YYYY */
+            const sNewEndDate = this._formatDateToDDMMYYYY(oEnd);
+            oModel.setProperty("/EndDate", sNewEndDate);
 
-    /** UPDATE MINIMUM END DATE IN UI */
-    const oEndDP = sap.ui.getCore().byId(oView.getId() + "--FT_id_editEndDate");
-    if (oEndDP) {
-        let oMin = new Date(oStart);
-        oMin.setDate(oMin.getDate() + 1);
-        oEndDP.setMinDate(oMin);
-    }
+            /** UPDATE MINIMUM END DATE IN UI */
+            const oEndDP = sap.ui.getCore().byId(oView.getId() + "--FT_id_editEndDate");
+            if (oEndDP) {
+                let oMin = new Date(oStart);
+                oMin.setDate(oMin.getDate() + 1);
+                oEndDP.setMinDate(oMin);
+            }
 
-    utils._LCvalidateDate(oEvent);
-},
+            utils._LCvalidateDate(oEvent);
+        },
 
         // Utility function to format date
         _formatDateToDDMMYYYY: function (oDate) {
@@ -277,10 +279,10 @@ sap.ui.define([
             const sUnitText = oEditModel.getProperty("/UnitText");
             const iTotalDays = Number(oEditModel.getProperty("/TotalDays") || 0);
 
-       if (sUnitText === "Per Day" && iTotalDays < 1) {
-    sap.m.MessageBox.error("Total Days must be at least 1 for Per Day booking.");
-    return;
-      }
+            if (sUnitText === "Per Day" && iTotalDays < 1) {
+                sap.m.MessageBox.error("Total Days must be at least 1 for Per Day booking.");
+                return;
+            }
 
             let sViewId = this.getView().getId();
             const oStartDate = sap.ui.core.Fragment.byId(sViewId, "FT_id_editStartDate")
@@ -394,20 +396,20 @@ sap.ui.define([
             aFacilities[iIndex] = oUpdatedData;
             oHostelModel.setProperty("/AllSelectedFacilities", aFacilities);
             // --- FIX FOR PER HOUR FACILITY (ensures TotalTime goes to payload) ---
-if (oUpdatedData.UnitText === "Per Hour") {
+            if (oUpdatedData.UnitText === "Per Hour") {
 
-    // Update global list
-    aFacilities[iIndex].TotalTime = oUpdatedData.TotalTime || "";
+                // Update global list
+                aFacilities[iIndex].TotalTime = oUpdatedData.TotalTime || "";
 
-    // Update person-wise list
-    if (aPersons[oUpdatedData.ID] &&
-        aPersons[oUpdatedData.ID].AllSelectedFacilities &&
-        aPersons[oUpdatedData.ID].AllSelectedFacilities[iIndex]) {
+                // Update person-wise list
+                if (aPersons[oUpdatedData.ID] &&
+                    aPersons[oUpdatedData.ID].AllSelectedFacilities &&
+                    aPersons[oUpdatedData.ID].AllSelectedFacilities[iIndex]) {
 
-        aPersons[oUpdatedData.ID].AllSelectedFacilities[iIndex].TotalTime =
-            oUpdatedData.TotalTime || "";
-    }
-}
+                    aPersons[oUpdatedData.ID].AllSelectedFacilities[iIndex].TotalTime =
+                        oUpdatedData.TotalTime || "";
+                }
+            }
             // 3. Apply model refresh
             oHostelModel.refresh(true);
 
@@ -426,92 +428,92 @@ if (oUpdatedData.UnitText === "Per Hour") {
                 oHostelModel.setProperty("/TotalFacilityPrice", totals.TotalFacilityPrice);
                 oHostelModel.setProperty("/GrandTotal", totals.GrandTotal);
                 // GST based on HostelModel Country (NOT person country)
-oHostelModel.setProperty("/CGST", totals.CGST || 0);
-oHostelModel.setProperty("/SGST", totals.SGST || 0);
-oHostelModel.setProperty("/FinalTotalCost", totals.FinalTotal || totals.GrandTotal);
+                oHostelModel.setProperty("/CGST", totals.CGST || 0);
+                oHostelModel.setProperty("/SGST", totals.SGST || 0);
+                oHostelModel.setProperty("/FinalTotalCost", totals.FinalTotal || totals.GrandTotal);
 
             }
 
             var overAllTotal = 0;
             // Per-person recalculation
-           aPersons.forEach((oPerson, idx) => {
-    const facs = oPerson.AllSelectedFacilities || [];
-    const totalAmount = facs.reduce((sum, facility) => {
-        return sum + (facility.TotalAmount || 0);
-    }, 0);
+            aPersons.forEach((oPerson, idx) => {
+                const facs = oPerson.AllSelectedFacilities || [];
+                const totalAmount = facs.reduce((sum, facility) => {
+                    return sum + (facility.TotalAmount || 0);
+                }, 0);
 
-    // Update only facility price
-    oHostelModel.setProperty(`/Persons/${idx}/TotalFacilityPrice`, totalAmount);
+                // Update only facility price
+                oHostelModel.setProperty(`/Persons/${idx}/TotalFacilityPrice`, totalAmount);
 
-    // DO NOT override room rent
-    const oldRoomRent = oPerson.RoomRentPerPerson || 0;
+                // DO NOT override room rent
+                const oldRoomRent = oPerson.RoomRentPerPerson || 0;
 
-    // Recalculate grand total
-    oHostelModel.setProperty(`/Persons/${idx}/GrandTotal`, totalAmount + oldRoomRent);
-    overAllTotal += totalAmount + oldRoomRent;
-});
+                // Recalculate grand total
+                oHostelModel.setProperty(`/Persons/${idx}/GrandTotal`, totalAmount + oldRoomRent);
+                overAllTotal += totalAmount + oldRoomRent;
+            });
 
             oHostelModel.setProperty("/OverallTotalCost", overAllTotal);
 
-       // 5️⃣ Re-apply coupon & tax after facility edit
-const discountApplied = Number(oHostelModel.getProperty("/AppliedDiscount") || 0);
-const couponCode = oHostelModel.getProperty("/CouponCode");
-const minOrderValue = Number(oHostelModel.getProperty("/MinOrdervlaue") || 0);
-let updatedSubtotal = overAllTotal;
-const oBtn = this.byId("couponApplyBtn");
+            // 5️⃣ Re-apply coupon & tax after facility edit
+            const discountApplied = Number(oHostelModel.getProperty("/AppliedDiscount") || 0);
+            const couponCode = oHostelModel.getProperty("/CouponCode");
+            const minOrderValue = Number(oHostelModel.getProperty("/MinOrdervlaue") || 0);
+            let updatedSubtotal = overAllTotal;
+            const oBtn = this.byId("couponApplyBtn");
 
-// If coupon already applied → try recalculating discount first
-if (couponCode && discountApplied > 0) {
+            // If coupon already applied → try recalculating discount first
+            if (couponCode && discountApplied > 0) {
 
-    const discountType = oHostelModel.getProperty("/AppliedDiscountType");  // "percentage"/"flat"
-    const discountValue = Number(oHostelModel.getProperty("/AppliedDiscountValue") || 0);
+                const discountType = oHostelModel.getProperty("/AppliedDiscountType");  // "percentage"/"flat"
+                const discountValue = Number(oHostelModel.getProperty("/AppliedDiscountValue") || 0);
 
-    let recalculatedDiscount = 0;
+                let recalculatedDiscount = 0;
 
-    if (discountType === "percentage") {
-        recalculatedDiscount = updatedSubtotal * (discountValue / 100);
-    } else {
-        recalculatedDiscount = discountValue;
-    }
+                if (discountType === "percentage") {
+                    recalculatedDiscount = updatedSubtotal * (discountValue / 100);
+                } else {
+                    recalculatedDiscount = discountValue;
+                }
 
-    // Apply discount
-    updatedSubtotal = updatedSubtotal - recalculatedDiscount;
-    oHostelModel.setProperty("/AppliedDiscount", recalculatedDiscount);
-}
+                // Apply discount
+                updatedSubtotal = updatedSubtotal - recalculatedDiscount;
+                oHostelModel.setProperty("/AppliedDiscount", recalculatedDiscount);
+            }
 
-// 🔥 CHECK MIN ORDER VALUE AFTER FACILITY UPDATE
-if (couponCode && updatedSubtotal < minOrderValue) {
+            // 🔥 CHECK MIN ORDER VALUE AFTER FACILITY UPDATE
+            if (couponCode && updatedSubtotal < minOrderValue) {
 
-    // ❌ Coupon invalid now → remove it completely
-    oHostelModel.setProperty("/CouponCode", "");
-    oHostelModel.setProperty("/AppliedDiscount", 0);
-    oHostelModel.setProperty("/AppliedDiscountType", "");
-    oHostelModel.setProperty("/AppliedDiscountValue", 0);
+                // ❌ Coupon invalid now → remove it completely
+                oHostelModel.setProperty("/CouponCode", "");
+                oHostelModel.setProperty("/AppliedDiscount", 0);
+                oHostelModel.setProperty("/AppliedDiscountType", "");
+                oHostelModel.setProperty("/AppliedDiscountValue", 0);
 
-    // Revert subtotal to original (without discount)
-    updatedSubtotal = overAllTotal;
+                // Revert subtotal to original (without discount)
+                updatedSubtotal = overAllTotal;
 
-    // Reset button
-    if (oBtn) oBtn.setText("Apply Now");
+                // Reset button
+                if (oBtn) oBtn.setText("Apply Now");
 
-    sap.m.MessageToast.show("Coupon removed. Total is less than minimum order value.");
-}
+                sap.m.MessageToast.show("Coupon removed. Total is less than minimum order value.");
+            }
 
-// 6️⃣ Re-apply taxes (India → CGST + SGST)
-const isIndia = oHostelModel.getProperty("/IsIndia");
-let cgst = 0, sgst = 0, finalTotal = updatedSubtotal;
+            // 6️⃣ Re-apply taxes (India → CGST + SGST)
+            const isIndia = oHostelModel.getProperty("/IsIndia");
+            let cgst = 0, sgst = 0, finalTotal = updatedSubtotal;
 
-if (isIndia) {
-    cgst = updatedSubtotal * 0.09;
-    sgst = updatedSubtotal * 0.09;
-    finalTotal = updatedSubtotal + cgst + sgst;
-}
+            if (isIndia) {
+                cgst = updatedSubtotal * 0.09;
+                sgst = updatedSubtotal * 0.09;
+                finalTotal = updatedSubtotal + cgst + sgst;
+            }
 
-// Save updated tax + final total
-oHostelModel.setProperty("/OverallTotalCost", updatedSubtotal);
-oHostelModel.setProperty("/CGST", cgst);
-oHostelModel.setProperty("/SGST", sgst);
-oHostelModel.setProperty("/FinalTotalCost", finalTotal);
+            // Save updated tax + final total
+            oHostelModel.setProperty("/OverallTotalCost", updatedSubtotal);
+            oHostelModel.setProperty("/CGST", cgst);
+            oHostelModel.setProperty("/SGST", sgst);
+            oHostelModel.setProperty("/FinalTotalCost", finalTotal);
 
 
             let aSummary = oHostelModel.getProperty("/PersonFacilitiesSummary") || [];
@@ -562,13 +564,13 @@ oHostelModel.setProperty("/FinalTotalCost", finalTotal);
             sap.m.MessageToast.show("Facility updated successfully!");
         },
 
-      _formatDateToDDMMYYYY: function (dt) {
-    if (!dt || !(dt instanceof Date)) return "";
-    const dd = String(dt.getDate()).padStart(2, "0");
-    const mm = String(dt.getMonth() + 1).padStart(2, "0");
-    const yyyy = dt.getFullYear();
-    return `${dd}/${mm}/${yyyy}`;
-},
+        _formatDateToDDMMYYYY: function (dt) {
+            if (!dt || !(dt instanceof Date)) return "";
+            const dd = String(dt.getDate()).padStart(2, "0");
+            const mm = String(dt.getMonth() + 1).padStart(2, "0");
+            const yyyy = dt.getFullYear();
+            return `${dd}/${mm}/${yyyy}`;
+        },
 
         calculateTotals: function (aPersons, roomRentPrice) {
             const msPerDay = 1000 * 60 * 60 * 24;
@@ -731,25 +733,25 @@ oHostelModel.setProperty("/FinalTotalCost", finalTotal);
             const grandTotal = totalFacilityPrice + Number(roomRentPrice || 0);
 
             //-------------------------------------------------------------
-// GST Based Only on HostelModel Country
-//-------------------------------------------------------------
-const sCountry = this.getView().getModel("HostelModel").getProperty("/Country") || "";
-let cgst = 0, sgst = 0, finalTotal = grandTotal;
+            // GST Based Only on HostelModel Country
+            //-------------------------------------------------------------
+            const sCountry = this.getView().getModel("HostelModel").getProperty("/Country") || "";
+            let cgst = 0, sgst = 0, finalTotal = grandTotal;
 
-if (sCountry === "India") {
-    cgst = grandTotal * 0.09;
-    sgst = grandTotal * 0.09;
-    finalTotal = grandTotal + cgst + sgst;
-}
+            if (sCountry === "India") {
+                cgst = grandTotal * 0.09;
+                sgst = grandTotal * 0.09;
+                finalTotal = grandTotal + cgst + sgst;
+            }
 
-return {
-    TotalFacilityPrice: +totalFacilityPrice.toFixed(2),
-    GrandTotal: +grandTotal.toFixed(2),
-    CGST: +cgst.toFixed(2),
-    SGST: +sgst.toFixed(2),
-    FinalTotal: +finalTotal.toFixed(2),
-    AllSelectedFacilities: aAllFacilities
-};
+            return {
+                TotalFacilityPrice: +totalFacilityPrice.toFixed(2),
+                GrandTotal: +grandTotal.toFixed(2),
+                CGST: +cgst.toFixed(2),
+                SGST: +sgst.toFixed(2),
+                FinalTotal: +finalTotal.toFixed(2),
+                AllSelectedFacilities: aAllFacilities
+            };
 
 
             // return {
@@ -759,18 +761,18 @@ return {
             // };
         },
 
-       _parseDate: function (s) {
-    if (!s) return null;
-    if (typeof s !== "string") return new Date(s);
-    const parts = s.split("/");
-    if (parts.length === 3) {
-        const d = parseInt(parts[0], 10);
-        const m = parseInt(parts[1], 10) - 1;
-        const y = parseInt(parts[2], 10);
-        return new Date(y, m, d);
-    }
-    return new Date(s);
-},
+        _parseDate: function (s) {
+            if (!s) return null;
+            if (typeof s !== "string") return new Date(s);
+            const parts = s.split("/");
+            if (parts.length === 3) {
+                const d = parseInt(parts[0], 10);
+                const m = parseInt(parts[1], 10) - 1;
+                const y = parseInt(parts[2], 10);
+                return new Date(y, m, d);
+            }
+            return new Date(s);
+        },
 
         onUnitTextChange: function (oEvent) {
             const oEditModel = this.getView().getModel("edit");
@@ -814,17 +816,17 @@ return {
             if (sSelectedUnit === "Per Month") {
                 oEditModel.setProperty("/TotalMonths", "1");
                 oEditModel.setProperty("/TotalYears", ""); // clear year
-                oEditModel.setProperty("/StartTime", ""); 
-                oEditModel.setProperty("/EndTime", ""); 
-                oEditModel.setProperty("/TotalTime", ""); 
+                oEditModel.setProperty("/StartTime", "");
+                oEditModel.setProperty("/EndTime", "");
+                oEditModel.setProperty("/TotalTime", "");
             }
 
             if (sSelectedUnit === "Per Year") {
                 oEditModel.setProperty("/TotalYears", "1");
-                oEditModel.setProperty("/TotalMonths", ""); 
-                oEditModel.setProperty("/StartTime", ""); 
-                oEditModel.setProperty("/EndTime", ""); 
-                oEditModel.setProperty("/TotalTime", ""); 
+                oEditModel.setProperty("/TotalMonths", "");
+                oEditModel.setProperty("/StartTime", "");
+                oEditModel.setProperty("/EndTime", "");
+                oEditModel.setProperty("/TotalTime", "");
             }
 
             // Update price in dialog
@@ -952,30 +954,30 @@ return {
                 this._oDocPreviewDialog.close();
             }
         },
-onTimeChange: function () {
-    const oEditModel = this.getView().getModel("edit");
+        onTimeChange: function () {
+            const oEditModel = this.getView().getModel("edit");
 
-    const sStart = oEditModel.getProperty("/StartTime"); // example: "09"
-    const sEnd = oEditModel.getProperty("/EndTime");     // example: "12"
+            const sStart = oEditModel.getProperty("/StartTime"); // example: "09"
+            const sEnd = oEditModel.getProperty("/EndTime");     // example: "12"
 
-    if (!sStart || !sEnd) {
-        oEditModel.setProperty("/TotalTime", "");
-        return;
-    }
+            if (!sStart || !sEnd) {
+                oEditModel.setProperty("/TotalTime", "");
+                return;
+            }
 
-    const startHour = parseInt(sStart, 10);
-    const endHour = parseInt(sEnd, 10);
+            const startHour = parseInt(sStart, 10);
+            const endHour = parseInt(sEnd, 10);
 
-    if (endHour < startHour) {
-        sap.m.MessageToast.show("End Time cannot be earlier than Start Time.");
-        oEditModel.setProperty("/TotalTime", "");
-        return;
-    }
+            if (endHour < startHour) {
+                sap.m.MessageToast.show("End Time cannot be earlier than Start Time.");
+                oEditModel.setProperty("/TotalTime", "");
+                return;
+            }
 
-    const totalHours = endHour - startHour;
+            const totalHours = endHour - startHour;
 
-    oEditModel.setProperty("/TotalTime", totalHours.toString());
-},
+            oEditModel.setProperty("/TotalTime", totalHours.toString());
+        },
 
 
 
@@ -985,40 +987,33 @@ onTimeChange: function () {
             return hour < 12 ? "Morning" : "Evening";
         },
         _sumGrandTotalOfPersons: function () {
-    const oHostelModel = this.getView().getModel("HostelModel");
-    const aPersons = oHostelModel.getProperty("/Persons") || [];
+            const oHostelModel = this.getView().getModel("HostelModel");
+            const aPersons = oHostelModel.getProperty("/Persons") || [];
 
-    let sum = 0;
+            let sum = 0;
 
-    aPersons.forEach(person => {
-        sum += Number(person.GrandTotal || 0);
-    });
+            aPersons.forEach(person => {
+                sum += Number(person.GrandTotal || 0);
+            });
 
-    return sum;
-},
+            return sum;
+        },
+       oncancelCoupon: function () {
 
-        onChangeCouponCode: async function (oEvent) {
     var oHostelModel = this.getView().getModel("HostelModel");
-     var oBtn = this.byId("couponApplyBtn");
-    //  sap.ui.getCore().byId(this.createId("couponApplyBtn"))
-    var sEnteredCode = oHostelModel.getProperty("/CouponCode")?.trim();
-    var sBranchCode = oHostelModel.getProperty("/BranchCode");
+    var inputID = sap.ui.core.Fragment.byId(this.getView().getId(), "BookingcouponInput");
 
-     if( sEnteredCode === ""){
-       sap.m.MessageToast.show("Enter Coupon for Discount");
-    return;
-    }
-
-   if (oBtn.getText() === "Cancel") {
-
+    // Clear model
     oHostelModel.setProperty("/CouponCode", "");
-    oHostelModel.setProperty("/AppliedDiscount", "");
+    oHostelModel.setProperty("/AppliedDiscount", 0);
 
-    // 1️⃣ Re-sum GrandTotal of all persons
+    // Force UI update
+    oHostelModel.refresh(true);
+
+    // Reset cost
     const subTotal = this._sumGrandTotalOfPersons();
     oHostelModel.setProperty("/OverallTotalCost", subTotal);
 
-    // 2️⃣ Re-apply tax logic
     const isIndia = oHostelModel.getProperty("/IsIndia");
     let cgst = 0, sgst = 0, finalTotal = subTotal;
 
@@ -1028,169 +1023,191 @@ onTimeChange: function () {
         finalTotal = subTotal + cgst + sgst;
     }
 
-    // 3️⃣ Update fields
     oHostelModel.setProperty("/CGST", cgst);
     oHostelModel.setProperty("/SGST", sgst);
     oHostelModel.setProperty("/FinalTotalCost", finalTotal);
-    oHostelModel.setProperty("/AppliedDiscount", 0);
 
-    // 4️⃣ Change button back to Apply
-    oBtn.setText("Apply Now");
-
-    sap.m.MessageToast.show("Coupon removed. Prices restored.");
-    return;
-}
-
-
-     if (!sEnteredCode) {
-
-        const originalTotal  = oHostelModel.getProperty("/OverallTotalCost");
-        const originalCGST   = oHostelModel.getProperty("/CGST");
-        const originalSGST   = oHostelModel.getProperty("/SGST");
-        const originalFinal  = oHostelModel.getProperty("/FinalTotalCost");
-
-        oHostelModel.setProperty("/AppliedDiscount", 0);
-        oHostelModel.setProperty("/OverallTotalCost", originalTotal);
-        oHostelModel.setProperty("/CGST", originalCGST);
-        oHostelModel.setProperty("/SGST", originalSGST);
-        oHostelModel.setProperty("/FinalTotalCost", originalFinal);
-
-        sap.m.MessageToast.show("Coupon removed. Prices restored.");
-        return;
+    // Hide icon
+    if (inputID) {
+        inputID.setShowValueHelp(false);
     }
+    var oBtn = this.byId("couponApplyBtn");
+oBtn.setVisible(true);  
+},
 
-    if (!sEnteredCode) {
-        sap.m.MessageToast.show("Please enter coupon");
-        return;
-    }
+           onCouponLiveChange: function(oEvent) {
+    var oInput = oEvent.getSource();
+    var sValue = oInput.getValue();
+  var oBtn = this.byId("couponApplyBtn");
+  
+    // Show icon only if there is value
+    oInput.setShowValueHelp(!!sValue);
 
-    try {
-        sap.ui.core.BusyIndicator.show(0);
-
-        // Fetch coupons
-        const response = await this.ajaxReadWithJQuery("HM_Coupon", {});
-        const aCoupons = response?.data || [];
-
-        if (!aCoupons.length) {
-            sap.m.MessageToast.show("No coupons found");
-            return;
-        }
-
-        // Match coupon
-        const oMatched = aCoupons.find(c =>
-            String(c.CouponCode).toUpperCase() === sEnteredCode.toUpperCase()
-        );
-
-         if (String(oMatched.Status).toLowerCase() !== "active") {
-            sap.m.MessageToast.show("This coupon is inactive or expired.");
-            return;
-        }
-
-        if (!oMatched) {
-            sap.m.MessageToast.show("Invalid Coupon Code");
-            return;
-        }
-        const couponBranch = String(oMatched.BranchCode || "").trim();
-const selectedBranch = String(sBranchCode || "").trim();
-
-if (couponBranch && couponBranch !== selectedBranch) {
-    sap.m.MessageToast.show(
-        `This coupon is not valid for the selected Branch Room.`
-    );
-    return;
-}
-
-        // Extract coupon details
-        const discountValue = Number(oMatched.DiscountValue || 0);
-        const discountType = (oMatched.DiscountType || "").toLowerCase();
-        const minOrderValue = Number(oMatched.MinOrderValue || 0);
-          oHostelModel.setProperty("/AppliedDiscountType",discountType)
-          oHostelModel.setProperty("/AppliedDiscountValue",discountValue)
-          oHostelModel.setProperty("/MinOrdervlaue",minOrderValue)
-        // Read Subtotal and country
-        const isIndia = oHostelModel.getProperty("/IsIndia");
-        let subTotal = Number(oHostelModel.getProperty("/OverallTotalCost") || 0);
-
-        if (subTotal <= 0) {
-            sap.m.MessageToast.show("Subtotal is zero. Cannot apply coupon.");
-            return;
-        }
-          if (subTotal < minOrderValue) {
-            sap.m.MessageToast.show(
-                `Minimum order value ₹${minOrderValue} required to apply this coupon.`
-            );
-            return;
-        }
-            // ---------------------------------------------
-// 3️⃣ Validate Coupon Date Validity
-// ---------------------------------------------
-// const bookingStart = new Date(oHostelModel.getProperty("/StartDate"));
-// const bookingEnd   = new Date(oHostelModel.getProperty("/EndDate"));
-
-// const couponStart  = new Date(oMatched.StartDate);
-// const couponEnd    = new Date(oMatched.EndDate);
-
-// // If booking dates fall outside the coupon validity range
-// if (bookingStart < couponStart || bookingEnd > couponEnd) {
-//     sap.m.MessageToast.show(
-//         `This coupon is valid only between ${oMatched.StartDate} and ${oMatched.EndDate}`
-//     );
-//     return;
-// }
-
-
-        let discountedSubtotal = subTotal;
-         let discountAmount = 0;
-        // ------------------------------------------
-        //  APPLY DISCOUNT LOGIC
-        // ------------------------------------------
-        if (discountType === "percentage") {
-            // Example: 10% OFF
-            discountedSubtotal = subTotal - (subTotal * (discountValue / 100));
-                discountAmount = subTotal * (discountValue / 100);
-        }
-        else {
-            // Flat amount
-            discountedSubtotal = subTotal - discountValue;
-            discountAmount = discountValue;
-        }
-
-        // Prevent negative totals
-        discountedSubtotal = Math.max(0, discountedSubtotal);
-
-        // Store the discounted subtotal
-        oHostelModel.setProperty("/OverallTotalCost", discountedSubtotal);
-        oHostelModel.setProperty("/AppliedDiscount", discountAmount);
-
-        // ------------------------------------------
-        // ⭐ APPLY TAX CALCULATIONS AGAIN
-        // ------------------------------------------
-        let finalTotal = discountedSubtotal;
-        let cgst = 0, sgst = 0;
-
-        if (isIndia) {
-            cgst = discountedSubtotal * 0.09;
-            sgst = discountedSubtotal * 0.09;
-            finalTotal = discountedSubtotal + cgst + sgst;
-        }
-
-        // Update model
-        oHostelModel.setProperty("/CGST", cgst);
-        oHostelModel.setProperty("/SGST", sgst);
-        oHostelModel.setProperty("/FinalTotalCost", finalTotal);
-
-        oHostelModel.refresh(true);
-         oBtn.setText("Cancel");
-        sap.m.MessageToast.show(
-            `Coupon Applied Successfully`
-        );
-
-    } catch (err) {
-        console.error(err);
-        sap.m.MessageToast.show("Error applying coupon");
-    } finally {
-        sap.ui.core.BusyIndicator.hide();
+     if (sValue && sValue.trim().length > 0) {
+        oBtn.setVisible(true);
+    } else {
+        oBtn.setVisible(true); // Always show when blank
     }
 },
+  onChangeCouponCode: async function (oEvent) {
+            var oHostelModel = this.getView().getModel("HostelModel");
+            var oBtn = this.byId("couponApplyBtn");
+            //  sap.ui.getCore().byId(this.createId("couponApplyBtn"))
+            var sEnteredCode = oHostelModel.getProperty("/CouponCode")?.trim();
+            var sBranchCode = oHostelModel.getProperty("/BranchCode");
+
+            if (sEnteredCode === "") {
+                sap.m.MessageToast.show("Enter Coupon for Discount");
+                return;
+            }
+
+            if (!sEnteredCode) {
+
+                const originalTotal = oHostelModel.getProperty("/OverallTotalCost");
+                const originalCGST = oHostelModel.getProperty("/CGST");
+                const originalSGST = oHostelModel.getProperty("/SGST");
+                const originalFinal = oHostelModel.getProperty("/FinalTotalCost");
+
+                oHostelModel.setProperty("/AppliedDiscount", 0);
+                oHostelModel.setProperty("/OverallTotalCost", originalTotal);
+                oHostelModel.setProperty("/CGST", originalCGST);
+                oHostelModel.setProperty("/SGST", originalSGST);
+                oHostelModel.setProperty("/FinalTotalCost", originalFinal);
+
+                sap.m.MessageToast.show("Coupon removed. Prices restored.");
+                return;
+            }
+
+            if (!sEnteredCode) {
+                sap.m.MessageToast.show("Please enter coupon");
+                return;
+            }
+
+            try {
+                sap.ui.core.BusyIndicator.show(0);
+
+                const filter = {
+                    CouponCode: sEnteredCode,
+                    Status: "Active"
+                }
+                // Fetch coupons
+                const response = await this.ajaxReadWithJQuery("HM_Coupon", filter
+                );
+                const aCoupons = response?.data || [];
+
+                if (!aCoupons.length) {
+                    sap.m.MessageToast.show("No coupons found");
+                    return;
+                }
+              const CouponCodeEnddate = aCoupons[0].EndDate;
+
+
+
+const couponEndISO = new Date(CouponCodeEnddate).toISOString().split("T")[0];
+const todayISO = new Date().toISOString().split("T")[0];
+
+// Compare
+if (couponEndISO < todayISO) {
+    sap.m.MessageToast.show("Coupon is expired.");
+    return;
+}
+
+
+              
+
+                // Match coupon
+                const oMatched = aCoupons.find(c =>
+                    String(c.CouponCode).toUpperCase() === sEnteredCode.toUpperCase()
+                );
+
+
+                if (!oMatched) {
+                    sap.m.MessageToast.show("Invalid Coupon Code");
+                    return;
+                }
+                const couponBranch = String(oMatched.BranchCode || "").trim();
+                const selectedBranch = String(sBranchCode || "").trim();
+
+                if (couponBranch && couponBranch !== selectedBranch) {
+                    sap.m.MessageToast.show(
+                        `This coupon is not valid for the selected Branch Room.`
+                    );
+                    return;
+                }
+
+                // Extract coupon details
+                const discountValue = Number(oMatched.DiscountValue || 0);
+                const discountType = (oMatched.DiscountType || "").toLowerCase();
+                const minOrderValue = Number(oMatched.MinOrderValue || 0);
+                oHostelModel.setProperty("/AppliedDiscountType", discountType)
+                oHostelModel.setProperty("/AppliedDiscountValue", discountValue)
+                oHostelModel.setProperty("/MinOrdervlaue", minOrderValue)
+                // Read Subtotal and country
+                const isIndia = oHostelModel.getProperty("/IsIndia");
+                let subTotal = Number(oHostelModel.getProperty("/OverallTotalCost") || 0);
+
+                if (subTotal <= 0) {
+                    sap.m.MessageToast.show("Subtotal is zero. Cannot apply coupon.");
+                    return;
+                }
+                if (subTotal < minOrderValue) {
+                    sap.m.MessageToast.show(
+                        `Minimum order value ₹${minOrderValue} required to apply this coupon.`
+                    );
+                    return;
+                }
+
+                let discountedSubtotal = subTotal;
+                let discountAmount = 0;
+
+                //  APPLY DISCOUNT LOGIC
+                if (discountType === "percentage") {
+                    // Example: 10% OFF
+                    discountedSubtotal = subTotal - (subTotal * (discountValue / 100));
+                    discountAmount = subTotal * (discountValue / 100);
+                }
+                else {
+                    // Flat amount
+                    discountedSubtotal = subTotal - discountValue;
+                    discountAmount = discountValue;
+                }
+
+                // Prevent negative totals
+                discountedSubtotal = Math.max(0, discountedSubtotal);
+
+                // Store the discounted subtotal
+                oHostelModel.setProperty("/OverallTotalCost", discountedSubtotal);
+                oHostelModel.setProperty("/AppliedDiscount", discountAmount);
+
+                // ------------------------------------------
+                // ⭐ APPLY TAX CALCULATIONS AGAIN
+                // ------------------------------------------
+                let finalTotal = discountedSubtotal;
+                let cgst = 0, sgst = 0;
+
+                if (isIndia) {
+                    cgst = discountedSubtotal * 0.09;
+                    sgst = discountedSubtotal * 0.09;
+                    finalTotal = discountedSubtotal + cgst + sgst;
+                }
+
+                // Update model
+                oHostelModel.setProperty("/CGST", cgst);
+                oHostelModel.setProperty("/SGST", sgst);
+                oHostelModel.setProperty("/FinalTotalCost", finalTotal);
+
+                oHostelModel.refresh(true);
+              oBtn.setVisible(false);
+                sap.m.MessageToast.show(
+                    `Coupon Applied Successfully`
+                );
+
+            } catch (err) {
+                console.error(err);
+                sap.m.MessageToast.show("Error applying coupon");
+            } finally {
+                sap.ui.core.BusyIndicator.hide();
+            }
+        },
     });
 });
