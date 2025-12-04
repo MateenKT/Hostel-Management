@@ -644,5 +644,57 @@ sap.ui.define([
         oModel.setProperty("/attachments", aItems); // update the model
       }
     },
+
+     showConfirmationDialog: function (sTitle, sMessage, fnOnConfirm, fnOnCancel, sOkText, sCancelText) {
+      var oResourceBundle = this.getOwnerComponent().getModel("i18n").getResourceBundle();
+
+      var dialog = new sap.m.Dialog({
+        title: sTitle,
+        type: "Message",
+        icon: "sap-icon://question-mark",
+        content: new sap.m.Text({ text: sMessage }),
+        beginButton: new sap.m.Button({
+          text: sOkText || oResourceBundle.getText("OkButton"),
+          type: "Transparent",
+          press: function () {
+            dialog.close();
+
+            // this.getBusyDialog(); // open BusyDialog immediately
+            Promise.resolve()
+              .then(function () {
+                if (typeof fnOnConfirm === "function") {
+                  return fnOnConfirm();
+                }
+              }.bind(this))
+              .finally(function () {
+                // this.closeBusyDialog(); // Always close BusyDialog
+              }.bind(this));
+          }.bind(this)
+        }),
+        endButton: new sap.m.Button({
+          text: sCancelText || oResourceBundle.getText("CancelButton"),
+          type: "Transparent",
+          press: function () {
+            dialog.close();
+
+            // this.getBusyDialog(); // open BusyDialog immediately
+            Promise.resolve()
+              .then(function () {
+                if (typeof fnOnCancel === "function") {
+                  return fnOnCancel();
+                }
+              }.bind(this))
+              .finally(function () {
+                // this.closeBusyDialog(); // Always close BusyDialog
+              }.bind(this));
+          }.bind(this)
+        }),
+        afterClose: function () {
+          dialog.destroy();
+        }
+      });
+
+      dialog.open();
+    },
     })
 });

@@ -72,6 +72,11 @@
         "type": "sap.ui.model.json.JSONModel",
         "uri": "model/CompanyInvoiceStatus.json",
         "preload": true
+      },
+      "InvoiceSAC": {
+            "type": "sap.ui.model.json.JSONModel",
+            "uri": "model/InvoiceSAC.json",
+            "preload": true
       }
     },
     "resources": {

@@ -56,6 +56,9 @@
 					<Column demandPopin="true">
 						<Text text="{i18n>customerName}" />
 					</Column>
+					<Column demandPopin="true">
+						<Text text="Customer" />
+					</Column>
 					<Column minScreenWidth="Tablet" demandPopin="true">
 						<Text text="{i18n>invoiceDate}" />
 					</Column>
@@ -77,6 +80,7 @@
 						<cells>
 							<Text text="{ManageInvoiceModel>InvNo}" />
 							<Text text="{ManageInvoiceModel>CustomerName}" />
+							<ObjectIdentifier title="{ManageInvoiceModel>CustomerID}" text="{ManageInvoiceModel>BookingID}"/>
 							<Text text="{path:'ManageInvoiceModel>InvoiceDate',formatter: '.Formatter.formatDate'}" />
 							<ExpandableText text="{ManageInvoiceModel>InvoiceDescription}" maxCharacters="20"/>
 							<Text text="{path: 'ManageInvoiceModel>TotalAmount', formatter: '.Formatter.fromatNumber'} {ManageInvoiceModel>Currency}" textAlign="End" />

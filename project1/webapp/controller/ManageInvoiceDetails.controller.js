@@ -52,6 +52,7 @@ sap.ui.define([
                         var LastInvoiceDate = new Date(this.getView().getModel("ManageInvoiceModel").getData()[0].InvoiceDate)
                     }
                 }
+
                 oView.setModel(new JSONModel({
                     CustomerID: "",
                     BookingID: "",
@@ -78,7 +79,6 @@ sap.ui.define([
                     RoomNo: "",
                     BranchCode: ""
                 }), "SelectedCustomerModel");
-
                 this.SelectedCustomerModel = oView.getModel("SelectedCustomerModel");
 
                 oView.setModel(new JSONModel({
@@ -138,7 +138,7 @@ sap.ui.define([
                 this.visiablityPlay.setProperty("/createVisi", false);
                 this.visiablityPlay.setProperty("/editVisi", true);
                 this.visiablityPlay.setProperty("/editable", false);
-                // this.visiablityPlay.setProperty("/addInvBtn", false);
+                this.visiablityPlay.setProperty("/addInvBtn", false);
                 this.visiablityPlay.setProperty("/MultiEmail", false);
                 this.byId("CID_id_TableInvoiceItem").setMode("None");
                 this.byId("CID_id_CurrencySelect").setEditable(false);
@@ -273,7 +273,8 @@ sap.ui.define([
 
                     // Filter booking list for selected customer
                     const bookingList = allData.filter(item => item.CustomerID === this.SelectKey).map(i => ({
-                        BookingID: i.BookingID
+                        BookingID: i.BookingID,
+                        Status: i.Status
                     }));
 
                     const bookingModel = new sap.ui.model.json.JSONModel(bookingList);
@@ -291,7 +292,7 @@ sap.ui.define([
                 }
             },
 
-            onChangeBookingID: async function(oEvent) {
+            onChangeBookingID: async function (oEvent) {
                 try {
                     const bookingID = oEvent.getSource().getSelectedKey();
                     const customerID = this.SelectKey;
@@ -307,13 +308,9 @@ sap.ui.define([
                         }
                     });
 
-                    const selectedMonth = oData.data.Month;
-                    const selectedYear = oData.data.Year;
-
-                    const allBookings = this.getView().getModel("ManageCustomerModel").getData();
-                    const bookingDetails = allBookings.find(b => b.BookingID === bookingID);
+                    const bookingDetails = oData.data?.BookingData?.[0];
                     if (!bookingDetails) {
-                        sap.m.MessageToast.show("Booking details not found");
+                        sap.m.MessageToast.show("Booking details not found from API");
                         return;
                     }
 
@@ -327,29 +324,35 @@ sap.ui.define([
                         invoiceDate = startDate;
                         payByDate = endDate;
                     } else {
-                        invoiceDate = new Date(selectedYear, selectedMonth - 1, 1);
-                        payByDate = new Date(selectedYear, selectedMonth, 5);
+                        invoiceDate = startDate;
+                        payByDate = new Date(startDate.getFullYear(), startDate.getMonth() + 1, 3);
                     }
 
                     const oModel = this.getView().getModel("SelectedCustomerModel");
                     let mergedData = {};
                     if (oData.data.ManageCustomer && oData.data.ManageCustomer.length > 0) {
                         mergedData = Object.assign({}, oData.data.ManageCustomer[0], {
-                            RoomNo: oData.data?.BookingData?.[0]?.RoomNo || "",
-                            BranchCode: oData.data?.BookingData?.[0]?.BranchCode || "",
-                            CouponDiscount: oData.data.BookingData[0]?.Discount || "",
+                            RoomNo: bookingDetails.RoomNo || "",
+                            BranchCode: bookingDetails.BranchCode || "",
+                            CouponDiscount: bookingDetails.Discount || "",
                             CustomerID: customerID,
                             BookingID: bookingID
                         });
                     }
 
-                    // Add Invoice / PayBy after merge
                     mergedData.InvoiceDate = new Date(invoiceDate);
                     mergedData.PayByDate = new Date(payByDate);
                     oModel.setData(mergedData);
 
-                    const facilityArray = Array.isArray(oData.data.BookingFacilityItems) ?
-                        oData.data.BookingFacilityItems : [oData.data.BookingFacilityItems];
+                    this.byId("CID_id_Invoice").setMinDate(invoiceDate);
+                    this.byId("CID_id_Payby").setMinDate(invoiceDate);
+
+                    this.byId("CID_id_Invoice").setDateValue(invoiceDate);
+                    this.byId("CID_id_Payby").setDateValue(payByDate);
+
+                    const facilityArray = Array.isArray(oData.data.BookingFacilityItems)
+                        ? oData.data.BookingFacilityItems
+                        : [oData.data.BookingFacilityItems];
 
                     let finalInvoiceItems = [];
 
@@ -358,28 +361,30 @@ sap.ui.define([
                         InvNo: this.newID,
                         Particulars: `${bookingDetails.BedType} - Room Rent`,
                         UnitText: bookingDetails.PaymentType,
-                        SAC: "998314",
+                        SAC: "996322",
                         GSTCalculation: "YES",
-                        Discount: "",
+                        Discount: "0.00",
                         Total: parseFloat(bookingDetails.RoomPrice),
                         StartDate: this.Formatter.DateFormat(bookingDetails.StartDate),
                         EndDate: this.Formatter.DateFormat(bookingDetails.EndDate),
-                        Currency: bookingDetails.Currency
+                        Currency: bookingDetails.Currency,
+                        editable: false
                     });
 
                     facilityArray.forEach((item, index) => {
                         finalInvoiceItems.push({
                             IndexNo: index + 2,
                             InvNo: this.newID,
-                            Particulars: `${item.FacilityName} - Facility`,
+                            Particulars: item.FacilityName === "Penalty Charges" ? "Penalty Charges" : `${item.FacilityName} - Facility`,
                             UnitText: item.UnitText,
-                            SAC: "998314",
+                            SAC: "996322",
                             GSTCalculation: "YES",
-                            Discount: "",
-                            Total: parseFloat(item.FacilitiPrice),
+                            Discount:"0.00",
+                            Total: parseFloat(item.BasicFacilityPrice),
                             StartDate: this.Formatter.DateFormat(item.StartDate),
                             EndDate: this.Formatter.DateFormat(item.EndDate),
-                            Currency: item.Currency
+                            Currency: item.Currency,
+                            editable: false
                         });
                     });
 
@@ -393,15 +398,15 @@ sap.ui.define([
                 }
             },
 
-            // DATE PICKER CHANGES
-            onChangeInvoiceDate: function(oEvent) {
+            onChangeInvoiceDate: function (oEvent) {
                 const selectedDate = oEvent.getSource().getDateValue();
                 if (!selectedDate) return;
 
-                const payByDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 5);
+                const payByDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1, 3);
 
                 this.byId("CID_id_Payby").setDateValue(payByDate);
-                this.byId("CID_id_Payby").setMinDate(payByDate);
+                this.byId("CID_id_Invoice").setMinDate(selectedDate);
+                this.byId("CID_id_Payby").setMinDate(selectedDate);
 
                 this.getView().getModel("SelectedCustomerModel").setProperty("/PayByDate", payByDate);
                 utils._LCvalidateDate(oEvent);
@@ -421,14 +426,15 @@ sap.ui.define([
                 const newItem = {
                     IndexNo: this.IndexNo,
                     Particulars: "",
-                    SAC: "998314",
+                    SAC: "996322",
                     GSTCalculation: (currency === "INR") ? "YES" : "",
                     StartDate: "",
                     EndDate: "",
-                    UnitText: "Per Day",
+                    UnitText: "Fix Bid",
                     Currency: currency,
-                    Discount: "",
+                    Discount: "0.00",
                     Total: "",
+                    editable: true
                 };
                 if (this.Update) {
                     newItem.flag = "create";
@@ -459,6 +465,17 @@ sap.ui.define([
                 }
                 // Optionally update the model (if using two-way binding or need manual update)
                 this.getView().getModel("ManageInvoiceItemModel").refresh(true);
+                this.totalAmountCalculation();
+            },
+
+            onChangeTotal: function (oEvent) {
+                const oInput = oEvent.getSource();
+                const oCtx = oInput.getBindingContext("ManageInvoiceItemModel");
+                if (!oCtx) return;
+
+                let value = oEvent.getParameter("value") || "0";
+                value = value.replace(/,/g, "");  // remove formatting commas
+                this.getView().getModel("ManageInvoiceItemModel").setProperty(oCtx.getPath() + "/Total", value);
                 this.totalAmountCalculation();
             },
 
@@ -499,7 +516,7 @@ sap.ui.define([
 
                     const isGSTApplicable = item.GSTCalculation === "YES" && oSOWModel.getProperty("/Currency") === "INR";
 
-                    item.SAC = isGSTApplicable ? "998314" : "-";
+                    item.SAC = isGSTApplicable ? "996322" : "-";
 
                     if (isGSTApplicable) totalWithGST += finalAmount;
                     else totalWithoutGST += finalAmount;
@@ -854,7 +871,7 @@ sap.ui.define([
                     this.visiablityPlay.setProperty("/editable", true);
                     this.visiablityPlay.setProperty("/CInvoice", true);
                     this.byId("CID_id_TableInvoiceItem").setMode("Delete");
-                    // this.visiablityPlay.setProperty("/addInvBtn", true);
+                    this.visiablityPlay.setProperty("/addInvBtn", true);
                     this.visiablityPlay.setProperty("/merge", false);
                     this.visiablityPlay.setProperty("/MultiEmail", false);
                     this.visiablityPlay.setProperty("/payByDate", false);
@@ -867,6 +884,18 @@ sap.ui.define([
 
             CID_onPressLiveChangeMobileNo: function(oEvent) {
                 this.mobileNo = utils._LCvalidateMobileNumber(oEvent);
+            },
+
+            CID_onPressLiveChangeGST:function(oEvent) {
+                 var oInput = oEvent.getSource();
+                utils._LCvalidateGstNumber(oEvent)
+                if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
+            },
+
+            CID_onPressLiveChangePAN:function(oEvent) {
+                 var oInput = oEvent.getSource();
+                utils._LCvalidatePanCard(oEvent)
+                if (oInput.getValue() === "") oInput.setValueState("None"); // Clear error state on empty input
             },
 
             onPressUpdateInvoice: async function() {
@@ -899,7 +928,7 @@ sap.ui.define([
                         this.visiablityPlay.setProperty("/editable", false);
                         this.visiablityPlay.setProperty("/CInvoice", false);
                         this.byId("CID_id_TableInvoiceItem").setMode("None");
-                        // this.visiablityPlay.setProperty("/addInvBtn", false);
+                        this.visiablityPlay.setProperty("/addInvBtn", false);
                         this.visiablityPlay.setProperty("/merge", true);
                         this.visiablityPlay.setProperty("/MultiEmail", true);
                         if (Status !== "Payment Received") this.visiablityPlay.setProperty("/payByDate", this.ReminderEmail);
@@ -1123,7 +1152,7 @@ sap.ui.define([
                         this.visiablityPlay.setProperty("/editable", false);
                         this.visiablityPlay.setProperty("/CInvoice", false);
                         this.visiablityPlay.setProperty("/merge", true);
-                        // this.visiablityPlay.setProperty("/addInvBtn", false);
+                        this.visiablityPlay.setProperty("/addInvBtn", false);
 
                         this.byId("CID_id_TableInvoiceItem").setMode("None");
                         MessageToast.show(this.i18nModel.getText("paymentMessage"));
@@ -1199,46 +1228,45 @@ sap.ui.define([
                 this._oPopover.openBy(oEvent.getSource());
             },
 
-            CID_onPressDelete: function(oEvent) {
+           CID_onPressDelete: function (oEvent) {
                 var that = this;
                 var oModel = this.getView().getModel("ManageInvoiceItemModel");
                 var oContext = oEvent.getParameter("listItem").getBindingContext("ManageInvoiceItemModel");
                 var sIndex = oContext.getPath().split("/")[2];
-                var aData = oModel.getData();
-
+                var aData = oModel.getData().ManageInvoiceItem;
                 if (oContext.getObject().ItemID) {
                     this.showConfirmationDialog(
                         this.i18nModel.getText("msgBoxConfirm"),
                         this.i18nModel.getText("msgBoxConfirmDelete"),
-                        function() {
+                        function () {
                             that.getBusyDialog();
-                            that.ajaxDeleteWithJQuery("/ManageInvoiceItem", {
-                                filters: {
-                                    ItemID: oContext.getObject().ItemID
-                                }
+                            that.ajaxDeleteWithJQuery("/HM_ManageInvoiceItem", {
+                                filters: { ItemID: oContext.getObject().ItemID }
                             }).then(() => {
-                                aData.ManageInvoiceItem.splice(oContext.getPath().split('/')[2], 1);
-                                aData.ManageInvoiceItem.forEach((item, index) => item.IndexNo = index + 1);
-                                oModel.setProperty("/HM_ManageInvoiceItem", aData.ManageInvoiceItem);
-                                that.SNoValue = aData.ManageInvoiceItem.length;
+
+                                aData.splice(sIndex, 1);
+                                aData.forEach((item, idx) => item.IndexNo = idx + 1);
+
+                                oModel.setProperty("/ManageInvoiceItem", aData);
+                                that.SNoValue = aData.length;
                                 that.totalAmountCalculation();
                                 MessageToast.show(that.i18nModel.getText("ManageInvoiceDeleteSuccess"));
                                 that.closeBusyDialog();
+
                             }).catch((error) => {
                                 that.closeBusyDialog();
                                 MessageToast.show(error.responseText);
                             });
                         },
-                        function() {
+                        function () {
                             that.closeBusyDialog();
                         }
                     );
                 } else {
-                    // Local item – delete directly
-                    aData.ManageInvoiceItem.splice(sIndex, 1);
-                    aData.ManageInvoiceItem.forEach((item, index) => item.IndexNo = index + 1);
-                    oModel.setProperty("/HM_ManageInvoiceItem", aData.ManageInvoiceItem);
-                    this.SNoValue = aData.ManageInvoiceItem.length;
+                    aData.splice(sIndex, 1);
+                    aData.forEach((item, idx) => item.IndexNo = idx + 1);
+                    oModel.setProperty("/ManageInvoiceItem", aData);
+                    this.SNoValue = aData.length;
                     this.totalAmountCalculation();
                 }
             },
@@ -1452,6 +1480,7 @@ sap.ui.define([
                     var data = this.getView().getModel("FilteredSOWModel").getData();
                     var paymentModel = this.getView().getModel("InvoicePayment");
                     var allDueAmount = paymentModel ? (paymentModel.getProperty("/AllDueAmount") || 0) : 0;
+                    var AllReceivedAmount = paymentModel ? (paymentModel.getProperty("/AllReceivedAmount") || 0) : 0;
 
                     let filter = {
                         BranchID: oModel.BranchCode
@@ -1544,8 +1573,8 @@ sap.ui.define([
                         currentY += 5;
                     }
 
-                    if (oModel.GSTNO !== undefined && oModel.GSTNO !== "") {
-                        doc.text(`GSTIN : ${oModel.GSTNO}`, margin, currentY);
+                    if (oModel.GST !== undefined && oModel.GST !== "") {
+                        doc.text(`GSTIN : ${oModel.GST}`, margin, currentY);
                         currentY += 5;
                     }
 
@@ -1651,8 +1680,12 @@ sap.ui.define([
                         summaryBody.push([`Round Off (${data.Currency}) :`, data.RoundOf]);
                     }
 
-                    if (allDueAmount && allDueAmount !== "0") {
+                    if (parseFloat(allDueAmount) > 0) {
                         summaryBody.push([`Due Amount (${data.Currency}) :`, allDueAmount]);
+                    }
+  
+                    if (parseFloat(AllReceivedAmount) > 0) {
+                        summaryBody.push([`Received Amount (${data.Currency}) :`, AllReceivedAmount]);
                     }
 
                     const totalRowIndex = summaryBody.length;

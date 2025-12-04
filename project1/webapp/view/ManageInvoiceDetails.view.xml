@@ -25,7 +25,7 @@
 										</m:ComboBox>
 										<m:Label visible="{visiablityPlay>/createVisi}" text="{i18n>bookingID}" required="true" />
 										<m:ComboBox  change="onChangeBookingID" showClearIcon="true" id="CID_id_AddBooking" showButton="true" visible="{visiablityPlay>/createVisi}" items="{BookingModel>/}" value="{BookingModel>/BookingID }" valueStateText="{i18n>selectBookingID}" showSecondaryValues="true">
-										<core:ListItem key="{BookingModel>BookingID}" text="{BookingModel>BookingID}"/>
+										<core:ListItem key="{BookingModel>BookingID}" text="{BookingModel>BookingID}" additionalText="{BookingModel>Status}"/>
 										</m:ComboBox>
 
 										<m:Label visible="{visiablityPlay>/createVisi}" text="{i18n>customerName}"/>
@@ -53,7 +53,7 @@
 										<m:Label text="{i18n>invoiceDescription}" required="true" />
 										<m:Input id="CID_id_InvoiceDesc" value="{SelectedCustomerModel>/InvoiceDescription}" placeholder="{i18n>companyInvoiceDescPlaceH}" editable="{visiablityPlay>/editable}" liveChange="CID_ValidateCommonFields" maxLength="120" valueStateText="{i18n>companyInvoiceDescPlaceH}" />
 										<m:Label visible="{visiablityPlay>/GST}" text="{i18n>type}" />
-										<m:Text visible="{visiablityPlay>/GST}" text="{ parts: [{path: 'SelectedCustomerModel>/Type'}, {path: 'SelectedCustomerModel>/Value'}], formatter: '.Formatter.formatCustomerTypeValue'}" id="CID_id_Type"/>
+										<m:Text visible="{visiablityPlay>/GST}" text="{ parts: [{path: 'SelectedCustomerModel>/Type'}, {path: 'SelectedCustomerModel>/Value'}], formatter: '.Formatter.formatCustomerTypeValue'}" id="CID_id_Type" />
 										<m:Label visible="{visiablityPlay>/gstVisiable}" text="{i18n>cgs}" required="true"/>
 										<m:Input visible="{visiablityPlay>/gstVisiable}" value="{path:'SelectedCustomerModel>/CGST',formatter: '.Formatter.fromatNumber'}" editable="false" maxLength="15"/>
 										<m:Label visible="{visiablityPlay>/igstVisi}" text="{i18n>igst}" required="true"/>
@@ -67,9 +67,10 @@
 										<m:Label visible="{= ${FilteredSOWModel>/Currency} === 'INR'?false:true}" text="{i18n>custLutVa}" />
 										<m:Input visible="{= ${FilteredSOWModel>/Currency} === 'INR'?false:true}" value="{SelectedCustomerModel>/LUT}" maxLength="20" editable="{visiablityPlay>/editable}"/>
 										<m:Label text="{i18n>panCardCommon}" />
-										<m:Input value="{SelectedCustomerModel>/PAN}" id="CID_id_InputPAN" liveChange="CID_onPressLiveChange" maxLength="15" editable="{visiablityPlay>/editable}" />
+										<m:Input value="{SelectedCustomerModel>/PAN}" id="CID_id_InputPAN" liveChange="CID_onPressLiveChangePAN" maxLength="10" editable="{visiablityPlay>/editable}" 
+										valueStateText="{i18n>enterPin}"/>
 										<m:Label text="{i18n>gstNo}" visible="{visiablityPlay>/GST}"/>
-										<m:Input value="{SelectedCustomerModel>/GST}" id="CID_id_InputGST" liveChange="CID_onPressLiveChange" maxLength="50" editable="{visiablityPlay>/editable}" visible="{visiablityPlay>/GST}" />
+										<m:Input value="{SelectedCustomerModel>/GST}" id="CID_id_InputGST" liveChange="CID_onPressLiveChangeGST" maxLength="15" editable="{visiablityPlay>/editable}" visible="{visiablityPlay>/GST}" valueStateText="{i18n>enterGST}"/>
 										<m:Label text="{i18n>address}" />
 										<m:TextArea id="CID_id_InputAddress" value="{SelectedCustomerModel>/PermanentAddress}" maxLength="120" liveChange="CID_onPressLiveChange" editable="{visiablityPlay>/editable}"/>
 										<m:Label text="{i18n>emailId}" required="true"/>
@@ -100,7 +101,7 @@
 												<m:Title text="{i18n>InvoiceItemDetails} ({= ${ManageInvoiceItemModel>/ManageInvoiceItem}.length })"></m:Title>
 												<m:ToolbarSpacer />
 												<m:Button class="myUnifiedBtn" text="{i18n>btnTransaction}" press="CID_onPressDisplayPaymentDetail" visible="{= ${SelectedCustomerModel>/Status} === 'Payment Received' || ${SelectedCustomerModel>/Status} === 'Payment Partially' }"/>
-												<!-- <m:Button id="AddItem" visible="{visiablityPlay>/addInvBtn}" text="{i18n>addInvItems}" class="myUnifiedBtn" press="CID_onPressAddInvoiceItems" /> -->
+												<m:Button id="AddItem" visible="{visiablityPlay>/addInvBtn}" text="{i18n>addInvItems}" class="myUnifiedBtn" press="CID_onPressAddInvoiceItems" />
 												<!-- <m:ToolbarSeparator /> -->
 											</m:Toolbar>
 										</m:headerToolbar>
@@ -175,7 +176,7 @@
 													<m:Input value="{ManageInvoiceItemModel>Discount}"  valueHelpRequest="CD_onDiscountInfoPress" valueHelpIconSrc="sap-icon://message-information" editable="{visiablityPlay>/editable}" change="Comp_OnChangeDiscount" textAlign="End" maxLength="15" valueStateText="{i18n>discountInfoText}" />
 												</m:cells>
 												<m:cells>
-													<m:Input value="{path:'ManageInvoiceItemModel>Total',formatter: '.Formatter.fromatNumber'}" editable="false" textAlign="End" />
+													<m:Input value="{path:'ManageInvoiceItemModel>Total',formatter: '.Formatter.fromatNumber'}" editable="{ManageInvoiceItemModel>editable}" textAlign="End" change="onChangeTotal" />
 												</m:cells>
 											</m:ColumnListItem>
 										</m:items>
@@ -183,7 +184,7 @@
 									<m:FlexBox class="custom-flexbox sapUiContentPadding" direction="Column">
 										<m:VBox class="custom-vbox">
 											<!-- Sub Total (Non-Taxable) -->
-											<m:HBox justifyContent="SpaceBetween">
+											<m:HBox justifyContent="SpaceBetween" visible="{= ${SelectedCustomerModel>/SubTotalNotGST} > 0 }">
 												<m:Label text="{i18n>subTotal} ({i18n>NonTaxable}) ({FilteredSOWModel>/Currency}) :" class="boldBlackText sapUiTinyMarginBottom rightAlignLabel" />
 												<m:Text class="amountText" text="{path:'SelectedCustomerModel>/SubTotalNotGST',formatter: '.Formatter.fromatNumber'}" textAlign="End" />
 											</m:HBox>
@@ -227,7 +228,6 @@
 												<m:Label text="{i18n>invoiceReceivedAmount} ({FilteredSOWModel>/Currency}) :" class="boldBlackText sapUiTinyMarginBottom rightAlignLabel" />
 												<m:Text class="amountText" text="{path:'InvoicePayment>/AllReceivedAmount',formatter: '.Formatter.fromatNumber'}" textAlign="End" />
 											</m:HBox>
-											
 											<!-- Due Amount -->
 											<m:HBox justifyContent="SpaceBetween" visible="{= ${SelectedCustomerModel>/Status} === 'Payment Received' || ${SelectedCustomerModel>/Status} === 'Payment Partially' }">
 												<m:Label text="{i18n>invoiceDueAmount} ({FilteredSOWModel>/Currency}) :" class="boldBlackText sapUiTinyMarginBottom rightAlignLabel" />
