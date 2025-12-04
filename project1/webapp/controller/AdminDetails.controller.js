@@ -889,7 +889,7 @@ sap.ui.define([
 
                 oCustomerData.TotalFacilityPrice = total;
 
-                 oCustomerData.Discount= oCustomerData.Discount || "0.00";
+                 oCustomerData.Discount= this.CouponDiscount || oCustomerData.Discount || "0.00";
                   oCustomerData.RentPrice= oCustomerData.RentPrice || 0;
                   oCustomerData.SubTotal = (total + (oCustomerData.RentPrice || 0) - Number(oCustomerData.Discount));
 
@@ -897,10 +897,6 @@ sap.ui.define([
 
                 oCustomerData.CGST =   oCustomerData.SubTotal * 0.09;
              
-               
-
-
-
                 oCustomerData.GrandTotal =  oCustomerData.SubTotal + oCustomerData.SGST + oCustomerData.CGST;
 
                 // Update model
@@ -2082,6 +2078,8 @@ oCoupon.MinOrderValue=Number(oCoupon.MinOrderValue)
         return;
     }
     this.Discount=oCustomerData.Discount
+    this.CouponDiscount=oCoupon.DiscountValue
+
   var discountAmount = 0;
 var newSubtotal = "";
 
