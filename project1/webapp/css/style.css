@@ -661,7 +661,7 @@
   border-radius: 16px;
   padding: 6px;
    background: linear-gradient(135deg, #00b7c7, #008b96) !important;
-  color: white !important;
+  color: rgb(0, 0, 0) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   display: flex;
@@ -704,12 +704,12 @@
 }
 
 .areaTagBox .sapMText {
-  color: white !important;
+  color: rgb(0, 0, 0) !important;
 }
 
 .bedCardContent {
   padding: 1rem;
-  color: #fff;
+  color: #000000;
   text-align: center;
   display: flex;
   flex-direction: column;
@@ -719,12 +719,12 @@
 .bedCardTitle {
   font-size: 1.2rem;
   font-weight: bold;
-  color: #fff;
+  color: #000000;
 }
 
 .bedCardDesc {
   font-size: 0.95rem;
-  color: #ffffff;
+  color: #080808;
   margin-top: 0.4rem;
   min-height: 40px;
 }
@@ -732,7 +732,7 @@
 .bedCardPrice {
   font-size: 1rem;
   font-weight: 600;
-  color: #fff;
+  color: #040404;
   margin-top: 0.5rem;
 }
 
@@ -1917,3 +1917,8 @@ span.sapMBtnInner.sapMBtnEmphasized {
     margin-top: 5px !important;
   } */
 /* } */
+.dialogBlur {
+  filter: blur(6px);
+  pointer-events: none;
+  opacity: 0.75;
+}

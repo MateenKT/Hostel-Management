@@ -12,6 +12,7 @@
         stretch="{= ${device>/system/phone} }"
         draggable="true"
         resizable="true"
+        class="profileContentBlur loading"
         horizontalScrolling="false"
         contentWidth="{= ${device>/system/phone} ? '100%' : '80%'}"
         initialFocus="id_dialog"
@@ -39,6 +40,7 @@
                 </contentRight>
             </Bar>
         </customHeader>
+        <BusyIndicator id="globalProfileLoader" class="globalLoader" visible="false"/>
         <FlexBox
             direction="Row"
             class="myclass"
@@ -291,10 +293,9 @@
                     <TextArea
                         id="id_address"
                         maxLength="100"
-                        class="sapUiTinyMarginBegin"
                         value="{profileData>/address}"
                         visible="{profileData>/isEditMode}"
-                        rows="2"
+                        rows="1"
                         width="100%"
                         growing="true"
                     />

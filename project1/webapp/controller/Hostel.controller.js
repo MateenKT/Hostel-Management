@@ -276,10 +276,10 @@ sap.ui.define([
             const oLocalModel = oView.getModel("HostelModel"); // Local model bound to dialog
             const oData = oLocalModel?.getData?.() || {};
 
-            if(!oData.Visible){
+            if (!oData.Visible) {
                 sap.m.MessageToast.show("This room is currently occupied. Please select another room.");
                 return;
-                }
+            }
 
             if (!oData.SelectedPriceType || !oData.SelectedPriceValue) {
                 sap.m.MessageToast.show("Please select a pricing plan before booking.");
@@ -472,7 +472,7 @@ sap.ui.define([
                     SelectedPriceType: "",
                     SelectedPriceValue: "",
                     Country: oSelected.Country,
-                    Visible:oSelected.Visible
+                    Visible: oSelected.Visible
                 };
 
                 const oHostelModel = new sap.ui.model.json.JSONModel(oFullDetails);
@@ -1685,7 +1685,6 @@ sap.ui.define([
         onPressAvatar: async function (oEvent) {
             const oUser = this._oLoggedInUser || {};
             const fullUserData = this._oLoggedInUser || {};
-            console.log(" FULL HM_Login DATA:", fullUserData);
             try {
                 const sUserID = oUser.UserID || "";
                 if (!sUserID) {
@@ -1701,17 +1700,7 @@ sap.ui.define([
                     return;
                 }
                 this._isProfileRequested = false;
-                //  const oPModel = new sap.ui.model.json.JSONModel({
-                //     bookings: [],
-                //     isTableBusy: true
-                // });
-                //  if (this._oProfileDialog) {
-                //     this._oProfileDialog.setModel(oPModel, "profileData");
-                // }
-                //  Fetch only the logged-in user's data
-                sap.ui.core.BusyIndicator.show(0);
                 const response = await this.ajaxReadWithJQuery("HM_Customer", filter);
-                // Handle correct structure
                 const aCustomers = response?.commentData || response?.Customers || response?.value || [];
 
                 if (!Array.isArray(aCustomers) || aCustomers.length === 0) {
@@ -1734,7 +1723,6 @@ sap.ui.define([
                     Address: response.PermanentAddress
 
                 }));
-                // Combine all bookings from all customers
                 const aAllBookings = aCustomers.flatMap(customer =>
                     Array.isArray(customer.Bookings) ? customer.Bookings : []
                 );
@@ -1743,7 +1731,7 @@ sap.ui.define([
                 );
                 let aBookingData = [];
                 const today = new Date();
-                today.setHours(0, 0, 0, 0); // avoid timezone issues
+                today.setHours(0, 0, 0, 0);
 
                 if (aAllBookings.length === 0) {
                 } else {
@@ -1768,11 +1756,10 @@ sap.ui.define([
                         const sSalutation = customer?.Salutation || "";
                         const sFullName = customer?.CustomerName || "N/A";
                         return {
-                            salutation: sSalutation,                // ✔ Add salutation
+                            salutation: sSalutation,
                             customerName: `${sSalutation} ${sFullName}`.trim(),
                             Startdate: oStart ? oStart.toLocaleDateString("en-GB") : "N/A",
-                            EndDate: booking.EndDate
-                                ? new Date(booking.EndDate).toLocaleDateString("en-GB") : "N/A",
+                            EndDate: booking.EndDate ? new Date(booking.EndDate).toLocaleDateString("en-GB") : "N/A",
                             room: booking.BedType || "N/A",
                             amount: booking.RentPrice || "N/A",
                             status: booking.Status || "N/A",
@@ -1844,6 +1831,9 @@ sap.ui.define([
                 });
                 this._oProfileDialog.setModel(oProfileModel, "profileData");
                 oProfileModel.setProperty("/isEditMode", false);
+                oProfileModel.setProperty("/isTableBusy", false);
+                this.byId("id_dialog").removeStyleClass("dialogBlur");
+
                 //  Open the dialog
                 // this._oProfileDialog.open();
 
@@ -2007,6 +1997,10 @@ sap.ui.define([
         _onEnterProfile: async function () {
             this._oProfileActionSheet.close();
             this._isProfileRequested = true;
+            //          const dialog = this.byId("id_dialog");
+            // const wrapper = this.byId("id_dialog");
+
+            // wrapper.addStyleClass("loading");
             const oTempModel = new sap.ui.model.json.JSONModel({
                 bookings: [],
                 isTableBusy: true
@@ -2022,6 +2016,7 @@ sap.ui.define([
 
             this._oProfileDialog.setModel(oTempModel, "profileData");
             this._oProfileDialog.open();
+            this.byId("id_dialog").addStyleClass("dialogBlur");
             const oAvatarBtn = this.byId("ProfileAvatar");
             await this.onPressAvatar({ getSource: () => oAvatarBtn });
 
@@ -2032,20 +2027,24 @@ sap.ui.define([
         },
 
         _onLogout: function () {
-            this._oProfileActionSheet?.close();
-            this._oLoggedInUser = null;
-            delete this._oLoggedInUser;
-            const oLoginModel = this.getOwnerComponent().getModel("LoginModel");
-            if (oLoginModel) {
-                oLoginModel.setData({});
+            if (this._oProfileActionSheet) {
+                this._oProfileActionSheet.close();
+                this._oProfileActionSheet.destroy();
+                this._oProfileActionSheet = null;
             }
-            this._oProfileDialog?.destroy();
-            this._oProfileDialog = null;
+            if (this._oProfileDialog) {
+                this._oProfileDialog.destroy();
+                this._oProfileDialog = null;
+            }
+            sap.ui.getCore().setModel(null, "profileData");
 
-            this._oProfileActionSheet?.destroy();
-            this._oProfileActionSheet = null;
-            console.log("After Logout:", this._oLoggedInUser);
+            this._oLoggedInUser = null;
+            this._isProfileRequested = false;
+
+            // Reset Login State
             this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", false);
+
+            // Navigate to home
             this.getOwnerComponent().getRouter().navTo("RouteHostel");
         },
 
@@ -2057,13 +2056,11 @@ sap.ui.define([
                         new sap.m.Button({
                             text: "Enter into Profile",
                             icon: "sap-icon://customer",
-                            class: "myUnifiedBtn",
                             press: this._onEnterProfile.bind(this)
                         }).addStyleClass("myUnifiedBtn"),
 
                         new sap.m.Button({
                             text: "Logout",
-                            class: "myUnifiedBtn",
                             icon: "sap-icon://log",
                             press: this._onLogout.bind(this)
                         }).addStyleClass("myUnifiedBtn")
@@ -2637,8 +2634,8 @@ sap.ui.define([
                         const bookedCount = customerData.filter(cust =>
                             cust.BranchCode?.toLowerCase() === rm.BranchCode?.toLowerCase() &&
                             cust.RoomNo?.toLowerCase() === rm.RoomNo?.toLowerCase() &&
-                            cust.BedType?.trim().toLowerCase() === rm.BedTypeName?.trim().toLowerCase() && 
-                            cust.Status === "Assigned" 
+                            cust.BedType?.trim().toLowerCase() === rm.BedTypeName?.trim().toLowerCase() &&
+                            cust.Status === "Assigned"
                         ).length;
                         totalBooked += bookedCount;
                     });
@@ -3787,6 +3784,7 @@ sap.ui.define([
         onSigninPasswordLive: function (oEvent) {
             utils._LCvalidatePassword(oEvent.getSource());
         },
+
         onSignIn: async function () {
 
             const vm = this.getView().getModel("LoginViewModel");
