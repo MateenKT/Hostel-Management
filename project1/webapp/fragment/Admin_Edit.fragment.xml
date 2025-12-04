@@ -50,7 +50,7 @@
     </ComboBox>
 
     <!-- Facility Price -->
-    <Label text="Facility Price (₹)" />
+    <Label text="Facility Price" />
     <Input
         id="editPrice"
         value="{edit>/Price}"

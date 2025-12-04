@@ -79,7 +79,12 @@ sap.ui.define([
                 });
         },  
            Coupon:function(){
-               this.ajaxReadWithJQuery("HM_Coupon", "").then((oData) => {
+    var oCustomerData = this.getView().getModel("CustomerData").getData();
+  const filter = {
+                    CouponCode: oCustomerData.CouponCode || "",
+                    Status: "Active"
+                };
+               this.ajaxReadWithJQuery("HM_Coupon", filter).then((oData) => {
                     var aCoupon= Array.isArray(oData.data) ? oData.data: [oData.data];
                     var model = new sap.ui.model.json.JSONModel(aCoupon);
                     this.getView().setModel(model, "CouponModel")
@@ -888,9 +893,12 @@ sap.ui.define([
                 });
 
                 oCustomerData.TotalFacilityPrice = total;
+
+                if(oCustomerData.CouponCode ||  this.Code){
                     var oCouponData = this.getView().getModel("CouponModel").getData();
                         var sEnteredCode =  this.Code || oCustomerData.CouponCode; // user entered code
                         var oMatchedCoupon = oCouponData.find(coupon => coupon.CouponCode === sEnteredCode);
+
 
                       if(oMatchedCoupon.MinOrderValue <= (total + (oCustomerData.RentPrice || 0))){
                                oCustomerData.Discount= this.CouponDiscount || oCustomerData.Discount || "0.00";
@@ -901,6 +909,7 @@ sap.ui.define([
                         this.getView().getModel("VisibleModel").setProperty("/IsCouponApplied", false);
 
                       }
+                    }
 
 
                   oCustomerData.RentPrice= oCustomerData.RentPrice || 0;
@@ -928,13 +937,15 @@ sap.ui.define([
 
         onEditBooking: function () {
             this.applyCountryStateCityFilters()
-            this.Coupon()
+          
            
             this.getView().getModel("VisibleModel").setProperty("/visible", true)
             var data = this.getView().getModel("CustomerData").getData()
             var model = this.getView().getModel("Bookingmodel")
 
-
+               if(data.CouponCode){
+                this.Coupon()
+               }
 
             model.setProperty("/BedTypeName", data.BedType)
             model.setProperty("/CouponCode", data.CouponCode)
@@ -1307,20 +1318,25 @@ sap.ui.define([
 
         // Helper: Total Calculation
         _recalculateFacilityTotals: function (oCustomerData) {
-    var oCouponData = this.getView().getModel("CouponModel").getData().
-    find((item) => item.CouponCode === oCustomerData.CouponCode) 
-    || {};
 
-            var total = 0;
+           
+             var total = 0;
 
             (oCustomerData.AllSelectedFacilities || []).forEach(function (fac) {
                 total += Number(fac.TotalAmount) || 0;
             });
-
             oCustomerData.TotalFacilityPrice = total;
-            if(total + (oCustomerData.RentPrice || 0)<=Number(oCouponData.MinOrderValue)){
+
+   if(oCustomerData.CouponCode || this.Code){
+    var oCouponData = this.getView().getModel("CouponModel").getData().
+    find((item) => item.CouponCode === this.Code || oCustomerData.CouponCode ) 
+    || {};
+
+         if(total + (oCustomerData.RentPrice || 0)<Number(oCouponData.MinOrderValue)){
                 oCustomerData.Discount= "0.00";
             }
+        }
+
             oCustomerData.SubTotal = (total + (oCustomerData.RentPrice || 0)- Number(oCustomerData.Discount));
              
             oCustomerData.SGST =   oCustomerData.SubTotal * 0.09;
@@ -2045,13 +2061,28 @@ sap.ui.define([
 
     this._oDocPreviewDialog.open();
 },
-onApplyCoupon: function () {
+onApplyCoupon:async function () {
+    
     var oCustomerData = this.getView().getModel("CustomerData").getData();
     var Bookingmodel = this.getView().getModel("Bookingmodel").getData();
 
-    var oCouponData = this.getView().getModel("CouponModel").getData();
+    var sEnteredCode = Bookingmodel.CouponCode || this.getView().byId("couponInput").getValue();
+   const filter = {
+                    CouponCode: sEnteredCode,
+                    Status: "Active"
+                };
+                sap.ui.core.BusyIndicator.show(0);
+      await  this.ajaxReadWithJQuery("HM_Coupon", filter).then((oData) => {
+                    var aCoupon= Array.isArray(oData.data) ? oData.data: [oData.data];
+                    var model = new sap.ui.model.json.JSONModel(aCoupon);
+                    this.getView().setModel(model, "CouponModel")
+                  
+                });
+        sap.ui.core.BusyIndicator.hide();
 
-    var sEnteredCode = Bookingmodel.CouponCode; // user entered code
+                    var oCouponData = this.getView().getModel("CouponModel").getData();
+
+ // user entered code
      this.Code = Bookingmodel.CouponCode; // user entered code
 
     if (!sEnteredCode) {
@@ -2067,17 +2098,20 @@ onApplyCoupon: function () {
     }
 
     // 1. Check coupon exists
+      
+                
     var oCoupon = oCouponData.find(c => c.CouponCode === sEnteredCode);
-
-      if(oCoupon.BranchCode !== oCustomerData.BranchCode){
+  if (!oCoupon) {
+        sap.m.MessageToast.show("Invalid coupon code");
+        return;
+    }
+      if(oCoupon.BranchCode !== oCustomerData.BranchCode)
+          {
         sap.m.MessageToast.show("This coupon not available for this branch");
         return;
              }
 
-    if (!oCoupon) {
-        sap.m.MessageToast.show("Invalid coupon code");
-        return;
-    }
+  
 if(Bookingmodel.StartDate.includes("/")){
     Bookingmodel.StartDate = Bookingmodel.StartDate.split("/").reverse().join("-");
 }else if(Bookingmodel.EndDate.includes("/")){
@@ -2089,15 +2123,21 @@ if(Bookingmodel.StartDate.includes("/")){
     var coupStart = new Date(oCoupon.StartDate);
     var coupEnd = new Date(oCoupon.EndDate);
 
- if (custStart < coupStart || custStart > coupEnd) {
+    
+
+ if (custStart < coupStart || custStart > coupEnd ) {
     sap.m.MessageToast.show("Coupon not valid for selected dates");
     return; // Exit function immediately
+}
+if(!oCoupon.Status === "Active"){
+    sap.m.MessageToast.show("Coupon not active");
+    return;
 }
 
     // 3. Percentage discount
    
     var subtotal = oCustomerData.RentPrice + oCustomerData.TotalFacilityPrice
-oCoupon.MinOrderValue=Number(oCoupon.MinOrderValue)
+    oCoupon.MinOrderValue=Number(oCoupon.MinOrderValue)
     if(oCoupon.MinOrderValue > subtotal){
         sap.m.MessageToast.show("Coupon not applicable for below minimum value" +' '+ oCoupon.MinOrderValue);
         return;
@@ -2165,6 +2205,10 @@ oncancelCoupon: function () {
     // Refresh model and reset coupon flag
     this.getView().getModel("CustomerData").refresh(true);
     this.getView().getModel("VisibleModel").setProperty("/IsCouponApplied", false);
+    this.getView().getModel("Bookingmodel").setProperty("/CouponCode", "");
+      var oInput = this.getView().byId("couponInput");
+    oInput.setValue("");
+    oInput.setShowValueHelp(false); 
 
     sap.m.MessageToast.show("Coupon cancelled");
 },
@@ -2193,11 +2237,14 @@ onCloseDialog:function(){
      this.UD_Dialog.close();
      
 
+},
+onCouponLiveChange: function(oEvent) {
+    var oInput = oEvent.getSource();
+    var sValue = oInput.getValue();
+
+    // Show icon only if there is value
+    oInput.setShowValueHelp(!!sValue);
 }
-
-
-
-
 
 
 

@@ -129,8 +129,8 @@
                         emptySpanS="0"
                         columnsXL="3"
                         columnsL="2"
-                        columnsM="1"
-                        singleContainerFullSize="false"
+                        columnsM="2"
+                        singleContainerFullSize="true"
                     >
 						<f:content>
 							<!-- Booking Details -->
@@ -138,11 +138,6 @@
 							<Label
                                 text="Desired Room Type"
                                 required="{= ${VisibleModel>/visible} ? true : false }"
-                            />
-							<Text
-                                id="Ad_id_RoomType3"
-                                text="{CustomerData>/BedType}"
-                                visible="{= !${VisibleModel>/visible} }"
                             />
 							<ComboBox
                                 id="Ad_id_RoomType"
@@ -152,12 +147,23 @@
                                 selectedKey="{Bookingmodel>/BedTypeName}"
                                 selectionChange="onRoomBedChange"
                                 valueStateText="Select Room Type"
+                                width="40%"
                             >
 								<core:ListItem
                                     key="{Availablebeds>BedTypeName}"
                                     text="{Availablebeds>BedTypeName}"
                                 />
 							</ComboBox>
+
+                            	<Label
+                                text="Desired Room Type"
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                            />
+							<Text
+                                id="Ad_id_RoomType3"
+                                text="{CustomerData>/BedType}"
+                                visible="{= !${VisibleModel>/visible} }"
+                            />
 							<!-- Price -->
 							<Label
                                 text="Price"
@@ -176,15 +182,20 @@
                                 text="{CustomerData>/PaymentType}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
+                            <Label
+                                text="Payment Method"
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                            />
 							<ComboBox
                                 id="idPaymentMethod1"
                                 placeholder="Select Payment Method"
                                 selectedKey="{Bookingmodel>/UnitText}"
-                                width="100%"
+                                width="40%"
                                 selectionChange="onRoomDurationChange"
                                 visible="{VisibleModel>/visible}"
                                 valueStateText="Select Payment Type"
                                 change="onChange"
+                                
                             >
 								<core:ListItem
                                     key="daily"
@@ -212,6 +223,10 @@
                                 text="{CustomerData>/StartDate}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
+                            <Label
+                                text="Start Date"
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                            />
 							<DatePicker
                                 id="Ad_id_editStartDate"
                                 visible="{VisibleModel>/visible}"
@@ -220,6 +235,8 @@
                                 valueFormat="dd/MM/yyyy"
                                 change="onBookingEditDateChange"
                                 valueStateText="Select Star Date"
+                                width="40%"
+
                             />
 							<!-- Month/Year Select -->
 							<Label
@@ -287,6 +304,10 @@
                                 text="{CustomerData>/EndDate}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
+                            <Label
+                                text="End Date"
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                            />
 							<DatePicker
                                 id="editEndDate"
                                 visible="{VisibleModel>/visible}"
@@ -294,7 +315,9 @@
                                 value="{Bookingmodel>/EndDate}"
                                 displayFormat="dd/MM/yyyy"
                                 valueFormat="dd/MM/yyyy"
-                                change="onBookingEditDateChange"
+                                change="onBookingEditDateChange" 
+                                width="40%"
+
                             />
 							<Label
                                 text="Duration"
@@ -344,6 +367,10 @@
                                 text="{= ${CustomerData>/Salutation} + ' ' + ${CustomerData>/CustomerName} }"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
+                            	<Label
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                                text="Full Name"
+                            />
 							<!-- <Text text="{CustomerData>/CustomerName}" visible="{= !${VisibleModel>/visible} }" /> -->
 							<Select
                                 selectedKey="{Bookingmodel>/Salutation}"
@@ -374,7 +401,12 @@
                                 text="{CustomerData>/DateOfBirth}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
+                            <Label
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                                text="Date of Birth"
+                            />
 							<DatePicker
+                                 width="40%"
                                 value="{Bookingmodel>/DateOfBirth}"
                                 displayFormat="dd/MM/yyyy"
                                 valueFormat="dd/MM/yyyy"
@@ -391,7 +423,12 @@
                                 text="{CustomerData>/Gender}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
+                            	<Label
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                                text="Gender"
+                            />
 							<ComboBox
+                                width="40%"
                                 selectedKey="{Bookingmodel>/Gender}"
                                 visible="{VisibleModel>/visible}"
                                 id="Ad_id_gender"
@@ -419,7 +456,12 @@
                                 text="{CustomerData>/CustomerEmail}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
+                            <Label
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                                text="Email"
+                            />
 							<Input
+                                width="40%"
                                 value="{Bookingmodel>/CustomerEmail}"
                                 type="Email"
                                 maxLength="50"
@@ -436,7 +478,12 @@
                                 text="{CustomerData>/Country}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
+                            	<Label
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                                text="Country"
+                            />
 							<ComboBox
+                                width="40%"
                                 id="CC_id_Country"
                                 change="MC_onChangeCountry"
                                 placeholder="Enter Country"
@@ -461,7 +508,12 @@
                                 text="{CustomerData>/State}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
+                            	<Label
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                                text="State"
+                            />
 							<ComboBox
+                                width="40%"
                                 id="CC_id_State"
                                 change="CC_onChangeState"
                                 placeholder="Enter State"
@@ -484,7 +536,12 @@
                                 text="{CustomerData>/City}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
+                            		<Label
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                                text="City"
+                            />
 							<ComboBox
+                                width="40%"
                                 id="CC_id_City"
                                 change="onChange"
                                 valueStateText="Select City"
@@ -512,6 +569,10 @@
                                 visible="{= !${VisibleModel>/visible} }"
                             />
 							<!-- <Text text="{CustomerData>/MobileNo}" visible="{= !${VisibleModel>/visible} }" /> -->
+                            	<Label
+                                required="{= ${VisibleModel>/visible} ? true : false }"
+                                text="Mobile Number"
+                            />
 							<Input
                                 id="CC_id_STDCode"
                                 value="{Bookingmodel>/STDCode}"
@@ -801,14 +862,18 @@
     />
 
     <!-- Coupon Input -->
-    <Input 
-      id="couponInput"
-        value="{Bookingmodel>/CouponCode}"
-        placeholder="Enter coupon"
-        width="150px"
-        class="sapUiTinyMarginEnd"
-      
-    />
+ <Input 
+    id="couponInput"
+    value="{Bookingmodel>/CouponCode}"
+    placeholder="Enter coupon"
+    width="150px"
+    class="sapUiTinyMarginEnd"
+    showValueHelp="true"
+    valueHelpIconSrc="sap-icon://decline"
+    valueHelpRequest="oncancelCoupon"
+      liveChange="onCouponLiveChange"
+/>
+
 
     <!-- Apply Now Button -->
     <Button
@@ -820,14 +885,7 @@
 
         visible="{= !${VisibleModel>/IsCouponApplied} }"
     />
-     <Button
-     id="idcouponCancelButton"
-        text="Cancel"
-        type="Emphasized"
-        press=".oncancelCoupon"
-        class="sapUiTinyMarginEnd"
-        visible="{= ${VisibleModel>/IsCouponApplied} }"
-    />
+ 
     
 
 </HBox>
