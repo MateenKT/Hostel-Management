@@ -37,7 +37,7 @@
     <core:Item  text="Per Year"/>
 </ComboBox>
                                
-                <core:Title text="" />
+              
             <Label text="No of Persons" required="true" />
 <Select
     id="id_Noofperson1"

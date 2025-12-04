@@ -1097,7 +1097,7 @@ _createFacilityActionSheet: function (facility, iPersonIndex, oCard) {
     }
 
     this._oFacilityActionSheet = new sap.m.ActionSheet({
-        placement: sap.m.PlacementType.Left,
+        placement: sap.m.PlacementType.Bottom,
         buttons: [
             new sap.m.Button({
                 text: "Per Hour – " + facility.PricePerHour + " " + facility.Currency,
@@ -2652,29 +2652,62 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
     this._oPaymentDialog.open();
 },
 
-   onPaymentTypeSelect: function (oEvent) {
+  onPaymentTypeSelect: function (oEvent) {
     const index = oEvent.getSource().getSelectedIndex();
+
     const isUPI = index === 0;
-    this._togglePaymentSections(isUPI);
+    const isCard = index === 1;
+    const isPayOnCheckIn = index === 2;
+
+    this._togglePaymentSections(isUPI, isCard, isPayOnCheckIn);
 
     var oPaymentModel = this.getView().getModel("PaymentModel");
     var oHostelModel = this.getView().getModel("HostelModel");
 
+    if (isPayOnCheckIn) {
+        // No payment needed now
+        oPaymentModel.setProperty("/PaymentType", "PayOnCheckIn");
+        oPaymentModel.setProperty("/Amount", oHostelModel.getProperty("/FinalTotalCost"));
+        oPaymentModel.setProperty("/PaymentDate", "");
+        return;
+    }
+
+    // For UPI and CARD
     oPaymentModel.setProperty("/PaymentType", isUPI ? "UPI" : "CARD");
     oPaymentModel.setProperty("/PaymentDate", this.Formatter.formatDate(new Date()));
     oPaymentModel.setProperty("/Amount", oHostelModel.getProperty("/FinalTotalCost"));
 },
 
-    _togglePaymentSections: function(isUPI) {
-        sap.ui.getCore().byId("idUPISection").setVisible(isUPI);
-        sap.ui.getCore().byId("idCardSection").setVisible(!isUPI);
 
-        const aFields = [
-           "idAmount", "idPaymentTypeField", "idTransactionID",
-            "idPaymentDate", "idCardNumber", "idCardExpiry", "idCardCVV"
-        ];
-        aFields.forEach(id => sap.ui.getCore().byId(id)?.setValue(""));
-    },
+ _togglePaymentSections: function(isUPI, isCard, isPayOnCheckIn) {
+
+    // LEFT SIDE visibility
+    sap.ui.getCore().byId("idUPISection")?.setVisible(isUPI);
+    sap.ui.getCore().byId("idCardSection")?.setVisible(isCard);
+
+    // RIGHT SIDE (Payment Verification section)
+    const oRightPanel = sap.ui.getCore().byId("idRightPanel");
+
+    if (isPayOnCheckIn) {
+        // Hide everything for Pay on Check-In
+        sap.ui.getCore().byId("idUPISection")?.setVisible(false);
+        sap.ui.getCore().byId("idCardSection")?.setVisible(false);
+        oRightPanel?.setVisible(false);
+    } else {
+        // For UPI or Card → show verification panel
+        oRightPanel?.setVisible(true);
+    }
+
+    // Clear all fields when switching types
+    const aFields = [
+        "idAmount", "idPaymentTypeField", "idTransactionID",
+        "idPaymentDate", "idCardNumber", "idCardExpiry", "idCardCVV"
+    ];
+
+    aFields.forEach(id => sap.ui.getCore().byId(id)?.setValue(""));
+}
+,
+
 
     onAmountChange: function(oEvent) {
         const oInput = oEvent.getSource();
@@ -2715,7 +2748,14 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
              "idAmount", "idPaymentTypeField", "idTransactionID",
             "idPaymentDate", "idCardNumber", "idCardExpiry", "idCardCVV"
         ];
-        aFields.forEach(id => sap.ui.getCore().byId(id)?.setValue(""));
+       aFields.forEach(id => {
+    const oField = sap.ui.getCore().byId(id);
+    if (oField) {
+        oField.setValue("");
+        oField.setValueState("None");   
+        oField.setValueStateText(""); 
+    }
+});
     },
 
     onBankNameChange: function(oEvent) {
@@ -2761,17 +2801,33 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
       onSubmitPress: async function() {
       const oModel = this.getView().getModel("HostelModel");
       const oData = oModel.getData();
-      // Mandatory validation
-      const isMandatoryValid = (
-          utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idPaymentTypeField"), "ID") &&
-          utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idTransactionID"), "ID") &&
-          utils._LCvalidateDate(sap.ui.getCore().byId("idPaymentDate"), "ID")
-      );
+        const oPaymentModel = this.getView().getModel("PaymentModel");
+         const paymentType = oPaymentModel.getProperty("/PaymentType");
+       const isPayOnCheckIn = paymentType === "PayOnCheckIn";
 
-      if (!isMandatoryValid) {
-          sap.m.MessageToast.show("Please fill all mandatory fields.");
-          return;
-      }
+    if (!isPayOnCheckIn) {
+        const isMandatoryValid = (
+            utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idPaymentTypeField"), "ID") &&
+            utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idTransactionID"), "ID") &&
+            utils._LCvalidateDate(sap.ui.getCore().byId("idPaymentDate"), "ID")
+        );
+
+        if (!isMandatoryValid) {
+            sap.m.MessageToast.show("Please fill all mandatory fields.");
+            return;
+        }
+    }
+    //   // Mandatory validation
+    //   const isMandatoryValid = (
+    //       utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idPaymentTypeField"), "ID") &&
+    //       utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idTransactionID"), "ID") &&
+    //       utils._LCvalidateDate(sap.ui.getCore().byId("idPaymentDate"), "ID")
+    //   );
+
+    //   if (!isMandatoryValid) {
+    //       sap.m.MessageToast.show("Please fill all mandatory fields.");
+    //       return;
+    //   }
 
       const oAmountInput = sap.ui.getCore().byId("idAmount");
       const enteredAmount = Number(oAmountInput.getValue());
@@ -2798,8 +2854,10 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
                 const totalCost = Number(oData.FinalTotalCost || 0);  
 const noOfPersons = Number(oData.SelectedPerson || oData.Persons.length || 1);  
 const rentPrice = totalCost / noOfPersons;
+const today = new Date();
+const todayDate = today.toISOString().split("T")[0];
                   bookingData.push({
-                      BookingDate: oData.StartDate ? oData.StartDate.split("/").reverse().join("-") : "",
+                      BookingDate: todayDate,
                       RentPrice: rentPrice.toString(),
                       RoomPrice: oData.FinalPrice,
                       NoOfPersons: oData.Person || oData.Persons.length,

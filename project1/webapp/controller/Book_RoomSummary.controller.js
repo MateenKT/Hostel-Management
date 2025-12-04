@@ -453,35 +453,51 @@ oHostelModel.setProperty("/FinalTotalCost", totals.FinalTotal || totals.GrandTot
 
             oHostelModel.setProperty("/OverallTotalCost", overAllTotal);
 
-            // 5 Re-apply coupon & tax after facility edit
+       // 5️⃣ Re-apply coupon & tax after facility edit
 const discountApplied = Number(oHostelModel.getProperty("/AppliedDiscount") || 0);
 const couponCode = oHostelModel.getProperty("/CouponCode");
+const minOrderValue = Number(oHostelModel.getProperty("/MinOrdervlaue") || 0);
 let updatedSubtotal = overAllTotal;
+const oBtn = this.byId("couponApplyBtn");
 
-// If coupon already applied -> recalc discount
+// If coupon already applied → try recalculating discount first
 if (couponCode && discountApplied > 0) {
 
-    // Discount can be PERCENT or FLAT, so read saved info
-    const discountType = oHostelModel.getProperty("/AppliedDiscountType");  // "percentage" or "flat"
+    const discountType = oHostelModel.getProperty("/AppliedDiscountType");  // "percentage"/"flat"
     const discountValue = Number(oHostelModel.getProperty("/AppliedDiscountValue") || 0);
 
-    let newDiscountAmount = 0;
+    let recalculatedDiscount = 0;
 
-    // Recalculate discount based on UPDATED subtotal
     if (discountType === "percentage") {
-        newDiscountAmount = updatedSubtotal * (discountValue / 100);
+        recalculatedDiscount = updatedSubtotal * (discountValue / 100);
     } else {
-        newDiscountAmount = discountValue;
+        recalculatedDiscount = discountValue;
     }
 
     // Apply discount
-    updatedSubtotal = updatedSubtotal - newDiscountAmount;
-
-    // Save updated discount value
-    oHostelModel.setProperty("/AppliedDiscount", newDiscountAmount);
+    updatedSubtotal = updatedSubtotal - recalculatedDiscount;
+    oHostelModel.setProperty("/AppliedDiscount", recalculatedDiscount);
 }
 
-// 6️⃣ Re-apply taxes (India → CGST+SGST)
+// 🔥 CHECK MIN ORDER VALUE AFTER FACILITY UPDATE
+if (couponCode && updatedSubtotal < minOrderValue) {
+
+    // ❌ Coupon invalid now → remove it completely
+    oHostelModel.setProperty("/CouponCode", "");
+    oHostelModel.setProperty("/AppliedDiscount", 0);
+    oHostelModel.setProperty("/AppliedDiscountType", "");
+    oHostelModel.setProperty("/AppliedDiscountValue", 0);
+
+    // Revert subtotal to original (without discount)
+    updatedSubtotal = overAllTotal;
+
+    // Reset button
+    if (oBtn) oBtn.setText("Apply Now");
+
+    sap.m.MessageToast.show("Coupon removed. Total is less than minimum order value.");
+}
+
+// 6️⃣ Re-apply taxes (India → CGST + SGST)
 const isIndia = oHostelModel.getProperty("/IsIndia");
 let cgst = 0, sgst = 0, finalTotal = updatedSubtotal;
 
@@ -496,6 +512,7 @@ oHostelModel.setProperty("/OverallTotalCost", updatedSubtotal);
 oHostelModel.setProperty("/CGST", cgst);
 oHostelModel.setProperty("/SGST", sgst);
 oHostelModel.setProperty("/FinalTotalCost", finalTotal);
+
 
             let aSummary = oHostelModel.getProperty("/PersonFacilitiesSummary") || [];
 

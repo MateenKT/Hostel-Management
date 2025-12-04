@@ -7,16 +7,18 @@
     <Panel
         expandable="false"
     >
-        <f:SimpleForm
-            editable="true"
+     <f:SimpleForm
+            editable="false"
             layout="ColumnLayout"
-            columnsM="3"
-            columnsL="3"
-            columnsXL="6"
-        >
+            columnsM="1"
+            columnsL="2"
+            columnsXL="2"
+            labelSpanXL="4"
+            labelSpanL="3"
+            labelSpanM="4"
+            labelSpanS="12">
             <f:content>
-                <!-- Booking Details -->
-                <core:Title text="{i18n>bookingDetailsTitle}" />
+             <core:Title text="{i18n>bookingDetailsTitle}" />
                <Label text="Room Type" />
                             <Text id="idRoomType2" text="{HostelModel>/BedType}"  />
                             <Label text="Rent Price" /> 
@@ -25,12 +27,12 @@
                  <Label text="Payment Method" />
                             <Text text="{HostelModel>/SelectedPriceType}"/>
                 <!-- Project Address -->
-                <core:Title text="Select Person" />
+              
                <Label text="No of Persons"/>
                <Text text="{HostelModel>/SelectedPerson}"/>
 
                 <!-- Site Contact -->
-                <core:Title text="Dates" />
+             
                 <Label text="Start Date" />
                            <Text text="{HostelModel>/StartDate}"/>
                             <Label text="End Date" />
@@ -40,5 +42,42 @@
              
             </f:content>
         </f:SimpleForm>
+        <!-- <f:SimpleForm
+            editable="false"
+            layout="ColumnLayout"
+            columnsM="1"
+            columnsL="3"
+            columnsXL="3"
+            labelSpanXL="4"
+            labelSpanL="3"
+            labelSpanM="4"
+            labelSpanS="12"
+        >
+            <f:content> -->
+                <!-- Booking Details -->
+               
+               <!-- <Label text="Room Type" />
+                            <Text id="idRoomType2" text="{HostelModel>/BedType}"  />
+                            <Label text="Rent Price" /> 
+                            <Text id="idPrice3" text="{HostelModel>/FinalPrice} {HostelModel>/Currency}"   />
+                
+                 <Label text="Payment Method" />
+                            <Text text="{HostelModel>/SelectedPriceType}"/>
+           
+              
+               <Label text="No of Persons"/>
+               <Text text="{HostelModel>/SelectedPerson}"/>
+
+            
+             
+                <Label text="Start Date" />
+                           <Text text="{HostelModel>/StartDate}"/>
+                            <Label text="End Date" />
+                           <Text text="{HostelModel>/EndDate}"/>
+                            <Label text="Month/Year"  />
+                           <Text text="{HostelModel>/SelectedMonths}" /> -->
+             
+            <!-- </f:content>
+        </f:SimpleForm> -->
     </Panel>
 </core:FragmentDefinition>
