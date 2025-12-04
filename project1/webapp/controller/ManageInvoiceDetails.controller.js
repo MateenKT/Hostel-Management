@@ -166,7 +166,8 @@ sap.ui.define([
                         ...item,
                         IndexNo: index + 1,
                         StartDate: item.StartDate ? this.Formatter.DateFormat(item.StartDate) : "",
-                        EndDate: item.EndDate ? this.Formatter.DateFormat(item.EndDate) : ""
+                        EndDate: item.EndDate ? this.Formatter.DateFormat(item.EndDate) : "",
+                        editable :false
                     }));
 
                     oView.setModel(new JSONModel({
