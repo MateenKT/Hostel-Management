@@ -56,10 +56,6 @@ sap.ui.define([
           
              this.valuestate()
 
-
-
-
-
             await this.OnRoom();
 
             this.AD_onSearch()
@@ -705,7 +701,7 @@ this.getView().setModel(oModel, "Availablebedprice");
             utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
             var editdata = this.getView().getModel("edit")
             var data = this.getView().getModel("Facilities").getData()
-            var Sfacilityname = sap.ui.getCore().byId("editFacilityName").getSelectedKey() || editdata.getProperty("/FacilityName")
+            var Sfacilityname = sap.ui.getCore().byId("editFacilityName").getValue() || editdata.getProperty("/FacilityName")
 
             var Duration = sap.ui.getCore().byId("idUnitType").getSelectedKey();
 
@@ -946,12 +942,15 @@ this.getView().setModel(oModel, "Availablebedprice");
 
 
                     if (oMatchedCoupon.MinOrderValue <= (total + (oCustomerData.RentPrice || 0))) {
+
+                        if(oMatchedCoupon.DiscountType==="Percentage" && this.CouponDiscount ){
+                             oCustomerData.Discount =  (total + (oCustomerData.RentPrice || 0)) * Number(this.CouponDiscount) / 100
+                        }else{
                         oCustomerData.Discount = this.CouponDiscount || oCustomerData.Discount || "0.00";
-                        this.getView().getModel("VisibleModel").setProperty("/IsCouponApplied", true);
+                        }
 
                     } else {
                         oCustomerData.Discount = "0.00";
-                        this.getView().getModel("VisibleModel").setProperty("/IsCouponApplied", false);
 
                     }
                 }
@@ -1441,8 +1440,14 @@ this.getView().setModel(oModel, "Availablebedprice");
                 if (total + (oCustomerData.RentPrice || 0) < Number(oCouponData.MinOrderValue)) {
                     oCustomerData.Discount = "0.00";
                 }
+                        if(oCouponData.DiscountType==="Percentage"){
+                             oCustomerData.Discount =  (total + (oCustomerData.RentPrice || 0)) * Number(this.CouponDiscount) / 100
+                        }else{
+                        oCustomerData.Discount = (total + (oCustomerData.RentPrice || 0)) -oCouponData.DiscountValue
+                        }
             }
 
+           
             oCustomerData.SubTotal = (total + (oCustomerData.RentPrice || 0) - Number(oCustomerData.Discount));
 
             oCustomerData.SGST = oCustomerData.SubTotal * 0.09;
@@ -1814,9 +1819,9 @@ this.getView().setModel(oModel, "Availablebedprice");
                     "EndDate": Bookingdata.EndDate.split('/').reverse().join('-'),
                     "PaymentType": paymentMap[unit] || Bookingdata.UnitText, // fallback
                     "BedType": Bookingdata.BedTypeName,
-                    "RoomPrice": CustomerData.RentPrice,
+                    "RoomPrice": CustomerData.OrginalRentPrice,
                     "Discount": CustomerData.Discount || 0,
-                    "CouponCode": Bookingdata.CouponCode || 0,
+                    "CouponCode": Bookingdata.CouponCode,
                 }],
                 "FacilityItems": CustomerData.AllSelectedFacilities.map(item => {
                     // Normalize UnitText for facility as well
@@ -1833,7 +1838,9 @@ this.getView().setModel(oModel, "Availablebedprice");
                         CustomerID: CustomerData.CustomerID,
                         Currency: item.Currency,
                         StartTime: item.StartTime,
-                        EndTime: item.EndTime
+                        EndTime: item.EndTime,
+                        BasicFacilityPrice:item.Price
+
 
                     };
                 }),

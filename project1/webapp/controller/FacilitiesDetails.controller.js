@@ -43,10 +43,8 @@ sap.ui.define([
                 await this._refreshFacilityDetails(this.BedID);
                 sap.ui.core.BusyIndicator.hide();
             } catch (err) {
-                sap.ui.core.BusyIndicator.hide();
                 sap.m.MessageToast.show(err.message || err.responseText);
             } finally {
-                sap.ui.core.BusyIndicator.hide();
             }
         },
 
