@@ -19,6 +19,8 @@ sap.ui.define([
        this.getOwnerComponent().getRouter().getRoute("RouteBookRoom").attachMatched(this._onRouteMatched, this);
     },
     _onRouteMatched: function(){
+
+        
      
       const oUserModel = sap.ui.getCore().getModel("LoginModel");
       if (oUserModel) {
@@ -1142,8 +1144,8 @@ oActionSheet.openBy(oEvent.getSource());
         oVBox.addItem(oDocument);
         oVBox.addItem(oFacilities);
       }
-oFacilityModel.refresh(true);
-      oModel.refresh(true);
+if (oFacilityModel) oFacilityModel.refresh(true);
+if (oModel) oModel.refresh(true);
 },
 _createFacilityActionSheet: function (facility, iPersonIndex, oCard) {
     const that = this;
@@ -2874,20 +2876,31 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
             return;
         }
     }
-   
-
       const oAmountInput = sap.ui.getCore().byId("idAmount");
-      const enteredAmount = Number(oAmountInput.getValue());
-      const grandTotal = Number(this.getView().getModel("HostelModel").getProperty("/FinalTotalCost"));
+     const rawEntered = oAmountInput.getValue();
+const rawGrand = this.getView().getModel("HostelModel").getProperty("/FinalTotalCost");
 
-      if (enteredAmount > grandTotal) {
-          oAmountInput.setValueState("Error");
-          oAmountInput.setValueStateText("Amount cannot be greater than Grand Total");
-          sap.m.MessageToast.show("Amount cannot be greater than Grand Total");
-          return; // STOP further processing
-      } else {
-          oAmountInput.setValueState("None");
-      }
+// Clean and convert
+const enteredAmount = parseFloat((rawEntered || "").toString().replace(/,/g, "").trim());
+const grandTotal = parseFloat((rawGrand || "").toString().replace(/,/g, "").trim());
+
+// Handle invalid values
+if (isNaN(enteredAmount) || isNaN(grandTotal)) {
+    oAmountInput.setValueState("Error");
+    sap.m.MessageToast.show("Invalid amount format");
+    return;
+}
+
+// Final validation
+if (enteredAmount > grandTotal) {
+    oAmountInput.setValueState("Error");
+    oAmountInput.setValueStateText("Amount cannot be greater than Grand Total");
+    sap.m.MessageToast.show("Amount cannot be greater than Grand Total");
+    return;
+}
+
+oAmountInput.setValueState("None");
+
 
       try {
           // Format payload according to your new structure

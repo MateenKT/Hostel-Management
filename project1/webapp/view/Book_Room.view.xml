@@ -116,7 +116,7 @@
                     press="onOpenProceedtoPay"
                 />
                 <Button
-                    text="Cancel"
+                    text="Cancel Booking"
                     visible="{OBTNModel>/Cancel}"
                     class="myUnifiedBtn"
                     press="onCancelPress"
