@@ -58,7 +58,7 @@
         editable="false" />
 
     <!-- Currency -->
-    <Label text="Currency" required="true" />
+    <Label text="Currency" />
     <ComboBox
         enabled="false"
         id="FU_id_Currency"

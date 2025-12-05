@@ -11,6 +11,7 @@ sap.ui.define([
         onInit: function () {
             this.getOwnerComponent().getRouter().getRoute("RouteAdminDetails").attachMatched(this._onRouteMatched, this);
         },
+      
 
         _onRouteMatched: async function (oEvent) {
             var model = new JSONModel({
@@ -52,6 +53,13 @@ sap.ui.define([
             var sPath = oEvent.getParameter("arguments").sPath;
             this.decodedPath = decodeURIComponent(decodeURIComponent(sPath));
 
+          
+             this.valuestate()
+
+
+
+
+
             await this.OnRoom();
 
             this.AD_onSearch()
@@ -69,6 +77,28 @@ sap.ui.define([
             //                     this.getView().getModel("VisibleModel").setProperty("/GSt",false)
             //              }
 
+        },
+        valuestate:function(){
+              this.getView().byId("Ad_id_RoomType").setValueState("None")
+
+            this.getView().byId("idPaymentMethod1").setValueState("None")
+
+            this.getView().byId("Ad_id_editStartDate").setValueState("None")
+            this.getView().byId("editEndDate").setValueState("None")
+
+            this.getView().byId("AD_id_CustomerName").setValueState("None")
+
+            this.getView().byId("AD_id_Date").setValueState("None")
+
+            this.getView().byId("Ad_id_gender").setValueState("None")
+
+            this.getView().byId("Ad_id_CustomerEmail").setValueState("None")
+
+            this.getView().byId("CC_id_Country").setValueState("None")
+            this.getView().byId("CC_id_State").setValueState("None")
+
+            this.getView().byId("CC_id_City").setValueState("None")
+            this.getView().byId("CD_ID_idPhone").setValueState("None")
         },
         OnRoom: function () {
             this.ajaxReadWithJQuery("HM_Rooms", "").then((oData) => {
@@ -311,17 +341,24 @@ sap.ui.define([
 
 
                 // })
-                var aFilteredRooms = this.getView().getModel("Availablebeds").getData().filter(function (room) {
-                    return room.BranchCode === sBranchCode;
-                });
-                this.getView().getModel("Availablebeds").setData(aFilteredRooms)
+            var aAllRooms = this.getView().getModel("Availablebeds").getData();
 
-                var RoomBedprice = this.getView().getModel("Availablebeds").getData().filter(function (item) {
-                    return item.BedTypeName === BedType
-                });
-                var oModel = new sap.ui.model.json.JSONModel(RoomBedprice);
+// Filter by BranchCode
+var aFilteredRooms = aAllRooms.filter(function (room) {
+    return room.BranchCode === sBranchCode;
+});
 
-                this.getView().setModel(oModel, "Availablebedprice");
+// Set the filtered rooms to Availablebeds model if you want
+this.getView().getModel("Availablebeds").setData(aFilteredRooms);
+
+// Now filter by BedTypeName for Availablebedprice
+var RoomBedprice = aFilteredRooms.filter(function (item) {
+    return item.BedTypeName === BedType;
+});
+
+// Set to new model
+var oModel = new sap.ui.model.json.JSONModel(RoomBedprice);
+this.getView().setModel(oModel, "Availablebedprice");
 
                 var Availablebedprice = this.getView().getModel("Availablebedprice").getData()
 
@@ -634,10 +671,17 @@ sap.ui.define([
                 NewStartDate: "",
                 NewEndDate: ""
             });
-            sap.ui.getCore().byId("idUnitType").setVisible(false)
-            sap.ui.getCore().byId("editStartTime").setVisible(false)
-            sap.ui.getCore().byId("editEndTime").setVisible(false)
+            sap.ui.getCore().byId("idUnitType").setVisible(false).setValueState("None")
+            sap.ui.getCore().byId("editStartTime").setVisible(false).setValueState("None")
+            sap.ui.getCore().byId("editEndTime").setVisible(false).setValueState("None")
             sap.ui.getCore().byId("editHours").setVisible(false)
+            sap.ui.getCore().byId("editFacilityName").setValueState("None")
+
+            sap.ui.getCore().byId("editStartDate").setValueState("None")
+
+            sap.ui.getCore().byId("editEndDate").setValueState("None")
+
+
 
             sap.ui.getCore().byId("idMonthYearSelectFragment").setSelectedKey("1")
         },
@@ -936,20 +980,57 @@ sap.ui.define([
             }
         },
 
-        onEditBooking: function () {
+        onEditBooking: async function () {
             this.applyCountryStateCityFilters()
+            sap.ui.core.BusyIndicator.show(0);
+            const response = await this.ajaxReadWithJQuery("HM_Customer", "");
+            sap.ui.core.BusyIndicator.hide();
+            const oCustomer = response?.Customers || response?.value?.[0] || {};
+
 
 
             this.getView().getModel("VisibleModel").setProperty("/visible", true)
             var data = this.getView().getModel("CustomerData").getData()
             var model = this.getView().getModel("Bookingmodel")
 
+            var aAvailableBeds = this.getView().getModel("Availablebeds").getData()
+
+
+            var filteredBeds = aAvailableBeds.filter(function (bed) {
+
+                // 1) Count assigned customers for this bed
+                var assignedCount = oCustomer.filter(function (cust) {
+                    return cust.BranchCode === bed.BranchCode &&
+                        cust.BedType === bed.BedTypeName &&
+                        cust.Status === "Assigned" 
+                }).length;
+
+                   var customerHasThisBed = oCustomer.some(function (cust) {
+            return cust.CustomerID === data.CustomerID && // replace with your customer identifier
+               cust.BedType === bed.BedTypeName &&
+               (cust.Status === "Assigned" || cust.Status === "New")
+             });
+
+                // 2) If assignedCount reaches bed capacity → remove bed from available list
+                if (assignedCount >= Number(bed.NoofPerson) && !customerHasThisBed) {
+                    return false; // remove bed
+                }
+
+                return true; // keep bed
+            });
+
+            this.getView().getModel("Availablebeds").setData(filteredBeds);
             if (data.CouponCode) {
                 this.Coupon()
+            }else{
+                 this.getView().byId("couponInput").setShowValueHelp(false);
             }
 
             model.setProperty("/BedTypeName", data.BedType)
             model.setProperty("/CouponCode", data.CouponCode)
+            model.setProperty("/UnitText", data.PaymentType)
+
+
 
 
             model.setProperty("/StartDate", data.StartDate)
@@ -1199,6 +1280,7 @@ sap.ui.define([
         },
 
         onCancelBooking: function () {
+             this.valuestate()
             this.getView().getModel("VisibleModel").setProperty("/visible", false)
             this.byId("idMonthYearSelect").setVisible(false)
             var oCustomerData = this.getView().getModel("CustomerData").getData()
@@ -2220,7 +2302,7 @@ sap.ui.define([
             var grandTotal = subtotal + cgst + sgst;
 
             // Update model values
-            this.originalDis=oCustomerData.Discount
+            this.originalDis = oCustomerData.Discount
             oCustomerData.Discount = previousDiscount;
             oCustomerData.CGST = cgst;
             oCustomerData.SGST = sgst;
@@ -2234,7 +2316,6 @@ sap.ui.define([
             oInput.setValue("");
             oInput.setShowValueHelp(false);
 
-            sap.m.MessageToast.show("Coupon cancelled");
         },
         onUploadDocumentFile: function () {
             if (!this.UD_Dialog) {

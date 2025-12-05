@@ -9,7 +9,7 @@
 	xmlns:u="sap.ui.unified">
 	<Page showHeader="false" class="sapUiResponsivePadding--footer sapUiResponsivePadding--floatingFooter"
         enableScrolling="true">
-		<ScrollContainer>
+		<ScrollContainer id="idMainScroll">
 			<core:Fragment fragmentName="sap.ui.com.project1.fragment.Header" type="XML"/>
 			<content>
 				<VBox class="sapUiSmallMargin">
@@ -145,6 +145,7 @@
                                 showClearIcon="true"
                                 visible="{VisibleModel>/visible}"
                                 selectedKey="{Bookingmodel>/BedTypeName}"
+
                                 selectionChange="onRoomBedChange"
                                 valueStateText="Select Room Type"
                                 width="40%"
@@ -188,6 +189,7 @@
                             />
 							<ComboBox
                                 id="idPaymentMethod1"
+                                showClearIcon="true"
                                 placeholder="Select Payment Method"
                                 selectedKey="{Bookingmodel>/UnitText}"
                                 width="40%"
