@@ -490,25 +490,27 @@ sap.ui.define([
                         name: "sap.ui.com.project1.fragment.viewRoomDetails",
                         controller: this
                     }).then(fragment => {
+
                         this._oRoomDetailFragment = fragment;
                         this.getView().addDependent(fragment);
 
-                        // Bind initial models
+                        // ✅ Attach models
                         fragment.setModel(oHostelModel, "HostelModel");
                         fragment.setModel(oView.getModel("FacilityModel"), "FacilityModel");
 
-                        // Open immediately
+                        // ✅ THIS WAS THE MISSING LINE
+                        const bPhone = sap.ui.Device.system.phone;
+                        fragment.setContentWidth(bPhone ? "100%" : "70%");
+
+                        // ✅ Open dialog AFTER models are set
                         fragment.open();
 
-                        // Bind carousel
                         this._bindCarousel();
-
-
-
-                        // Now load facilities in background
                         this._LoadFacilities(oSelected.BranchCode);
                         this._updateBookTileState();
+
                     });
+
 
                     return; // stop here because first-time load is async via .then()
                 }

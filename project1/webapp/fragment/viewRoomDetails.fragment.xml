@@ -6,7 +6,11 @@
 	xmlns:f="sap.f" 
 	xmlns:et="sap.m" 
 	xmlns:card="sap.ui.integration.widgets">
-	<Dialog draggable="true" afterOpen=".onRoomDetailOpened" resizable="true" contentHeight="auto" contentWidth="70%" id="roomDetailID" title="Room Details" type="Message" class="sapUiContentPadding" afterClose=".onDialogAfterClose">
+	<!-- <Dialog draggable="true" afterOpen=".onRoomDetailOpened" resizable="true"  contentHeight="auto" contentWidth="{= ${device>/system/phone} ? '100%' : '70%' }" id="roomDetailID" title="Room Details" type="Message" class="sapUiContentPadding" afterClose=".onDialogAfterClose"> -->
+
+
+		
+		<Dialog id="roomDetailID" draggable="true" resizable="true" stretch="{= ${device>/system/phone} }" class="sapUiContentPadding" contentWidth="70%" afterOpen=".onRoomDetailOpened" afterClose=".onDialogAfterClose">
 		<customHeader>
 			<Bar class="barheader">
 				<contentMiddle>
