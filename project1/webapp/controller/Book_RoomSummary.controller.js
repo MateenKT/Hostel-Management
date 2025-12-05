@@ -389,7 +389,6 @@ sap.ui.define([
             //aFacilities[iIndex] = oUpdatedData;
             // After updating aFacilities and setting it globally:
             const aPersons = oHostelModel.getProperty("/Persons") || [];
-            // aPersons[oUpdatedData.ID].AllSelectedFacilities[iIndex] = oUpdatedData; // Example of updating // 1. Update person's facility list
             aPersons[oUpdatedData.ID].AllSelectedFacilities[iIndex] = oUpdatedData;
 
             // 2. Update global list so table refreshes
@@ -708,6 +707,8 @@ sap.ui.define([
                         Price: fPrice,
                         StartDate: f.StartDate,
                         EndDate: f.EndDate,
+                         StartTime:f.StartTime,
+                        EndTime:f.EndTime,
                         // hoursPerDay (user provided) and overallHours
                         HoursPerDay: hoursPerDay,
                         TotalHours: +(hoursPerDay * fDays).toFixed(2),

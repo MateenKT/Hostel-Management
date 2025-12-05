@@ -922,33 +922,90 @@ _createDynamicPersonsUI: function () {
                     new sap.m.CheckBox({
     text: "Select For All Person",
     selected: !!oData.ForBothSelected,
-    select: function (e) {
-        const bSel = e.getParameter("selected");
-        oData.ForBothSelected = bSel;
+   select: function (e) {
+    const bSel = e.getParameter("selected");
+    const aPersons = oData.Persons || [];
+    oData.ForBothSelected = bSel;
 
-        if (bSel) {
-            // copy person 0 to all
-            const master = oData.Persons[0].Facilities.SelectedFacilities.map(f => ({ ...f }));
-            for (let p = 1; p < iPersons; p++) {
-                oData.Persons[p].Facilities.SelectedFacilities = master.map(f => ({ ...f }));
-            }
-        } else {
-            // unselected → clear all others
-            for (let p = 1; p < iPersons; p++) {
-                oData.Persons[p].Facilities.SelectedFacilities = [];
-            }
+    // -------------------------
+    // CHECKBOX CHECKED (Copy Person 1 -> All)
+    // -------------------------
+    if (bSel) {
 
-            // 🟢 Reset UI selection classes
-            setTimeout(() => {
-                $(".serviceCardSelected").removeClass("serviceCardSelected");
-            }, 50);
+        const master = aPersons[0].Facilities.SelectedFacilities.map(f => ({ ...f }));
+
+        for (let p = 1; p < iPersons; p++) {
+            aPersons[p].Facilities.SelectedFacilities = master.map(f => ({ ...f }));
         }
 
+        oModel.setProperty("/Persons", aPersons);
         oModel.refresh(true);
-    }
-})
 
-                ] : []),
+        // After UI render → Apply selection styles for all persons
+        setTimeout(() => {
+            $(".serviceCard").each(function () {
+
+                const domId = $(this).attr("id");
+                const ctrl = sap.ui.getCore().byId(domId);
+                if (!ctrl) return;
+
+                const ctx = ctrl.getBindingContext("FacilityModel");
+                if (!ctx) return;
+
+                const facilityObj = ctx.getObject();
+                const found = master.find(f => f.FacilityName === facilityObj.FacilityName);
+
+                if (found) {
+                    ctrl.addStyleClass("serviceCardSelected");
+                } else {
+                    ctrl.removeStyleClass("serviceCardSelected");
+                }
+            });
+        }, 120);
+
+        return;
+    }
+
+    // -------------------------
+    // CHECKBOX UNCHECKED (Clear All Others, Fix UI)
+    // -------------------------
+    // 1) Clear facilities for persons except Person 1
+    for (let p = 1; p < iPersons; p++) {
+        aPersons[p].Facilities.SelectedFacilities = [];
+    }
+
+    oModel.setProperty("/Persons", aPersons);
+    oModel.refresh(true);
+
+    // 2) Fix UI highlight → Only keep Person 1’s selected items
+    setTimeout(() => {
+        const firstSelected = aPersons[0].Facilities.SelectedFacilities;
+
+        $(".serviceCard").each(function () {
+            const domId = $(this).attr("id");
+            const ctrl = sap.ui.getCore().byId(domId);
+            if (!ctrl) return;
+
+            const ctx = ctrl.getBindingContext("FacilityModel");
+            if (!ctx) return;
+
+            const facilityObj = ctx.getObject();
+
+            // Check if this card belongs to person 1’s selected list
+            const stillSelected = firstSelected.some(
+                f => f.FacilityName === facilityObj.FacilityName
+            );
+
+            if (stillSelected) {
+                ctrl.addStyleClass("serviceCardSelected");  // KEEP selected
+            } else {
+                ctrl.removeStyleClass("serviceCardSelected"); // REMOVE highlight
+            }
+        });
+    }, 120);
+}
+})
+   ] : []),
 
             new sap.m.FlexBox({
               wrap: "Wrap",
@@ -2817,17 +2874,7 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
             return;
         }
     }
-    //   // Mandatory validation
-    //   const isMandatoryValid = (
-    //       utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idPaymentTypeField"), "ID") &&
-    //       utils._LCvalidateMandatoryField(sap.ui.getCore().byId("idTransactionID"), "ID") &&
-    //       utils._LCvalidateDate(sap.ui.getCore().byId("idPaymentDate"), "ID")
-    //   );
-
-    //   if (!isMandatoryValid) {
-    //       sap.m.MessageToast.show("Please fill all mandatory fields.");
-    //       return;
-    //   }
+   
 
       const oAmountInput = sap.ui.getCore().byId("idAmount");
       const enteredAmount = Number(oAmountInput.getValue());
@@ -2889,11 +2936,29 @@ const todayDate = today.toISOString().split("T")[0];
            const aSelectedFacilities = p.AllSelectedFacilities || [];
 
 aSelectedFacilities.forEach(fac => {
-    let facilityPrice = 0;
-    let facilityHour = 0;
+   let facilityPrice = fac.TotalAmount || 0;
+    let facilityHour = "";   // default empty
 
-       facilityPrice = fac.TotalAmount || 0;
-       facilityHour= fac.TotalTime || "";
+    // -------------------------------
+    // FIXED LOGIC FOR TOTAL HOUR
+    // -------------------------------
+    if (fac.SelectedPriceType === "Per Hour") {
+
+        // If user did not select specific time → default 1 hour
+        if (!fac.TotalTime || fac.TotalTime === "" || fac.TotalTime === 0 || fac.TotalTime === undefined) {
+            facilityHour = 1;
+        } else {
+            facilityHour = fac.TotalTime; // use actual
+        }
+
+    } else {
+        // For Day/Month/Year → use TotalTime ONLY IF user selected time
+        if (fac.TotalTime && fac.TotalTime !== "") {
+            facilityHour = fac.TotalTime;
+        } else {
+            facilityHour = "";  // no time selection
+        }
+    }
   
     facilityData.push({
         PaymentID: "",
@@ -2907,7 +2972,9 @@ aSelectedFacilities.forEach(fac => {
         EndTime: fac.EndTime || "",
         TotalHour: facilityHour,
         Currency: fac.Currency,
-        BasicFacilityPrice:fac.Price
+        BasicFacilityPrice:fac.Price,
+        StartTime:fac.StartTime,
+        EndTime:fac.EndTime,
 
     });
 });
