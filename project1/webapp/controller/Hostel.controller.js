@@ -264,14 +264,30 @@ sap.ui.define([
 
             oTile.removeStyleClass("defaultTile");
             oTile.addStyleClass("selectedTile");
-
-            // // Toast using label, not raw key
-            // sap.m.MessageToast.show(
-            //     `Selected ${mTypeLabel[sType]} — ${sCurrency} ${sPriceValue}`
-            // );
         },
 
+        // _isUserLoggedIn: function () {
+        //     const oUI = sap.ui.getCore().getModel("UIModel");
+        //     return !!oUI?.getProperty("/isLoggedIn");
+        // },
+        // _continueAfterLogin: function () {
+        //     if (this._pendingBooking === true) {
+        //         this._pendingBooking = false;
+        //         this.onConfirmBooking();   // 🔥 Resume booking where the user stopped
+        //     }
+        // },
+
+
+        // focus focus focus every thing is working: need to implement A.from viewroomdetails.fragment > book now Tile(ononConfirmBooking()) - 
+        // 1. we hve to check weather the user has logged in, if yes continue as it is, else open login dialog(signinsignup.fragment and after s
+        // ucessful sign in continue as it is)
+
         onConfirmBooking: function () {
+            // if (!this._isUserLoggedIn()) {
+            //     this._pendingBooking = true;
+            //     this.onpressLogin();   // open SignInSignup dialog
+            //     return;                // stop booking flow here
+            // }
             const oView = this.getView();
             const oLocalModel = oView.getModel("HostelModel"); // Local model bound to dialog
             const oData = oLocalModel?.getData?.() || {};
