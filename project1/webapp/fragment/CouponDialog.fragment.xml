@@ -18,7 +18,6 @@
 			<f:SimpleForm editable="true" layout="ResponsiveGridLayout" labelSpanXL="3" labelSpanL="3" labelSpanM="3" emptySpanXL="4" emptySpanL="4" emptySpanM="4" columnsXL="2" columnsL="2" columnsM="1">
 				<f:content>
 				<Label required="true" text="Branch"/>
-<Label required="true" text="Branch"/>
 
 <ComboBox id="cbBranchCode" width="100%" placeholder="Select Branch" items="{sBRModel>/}" selectedKey="{CouponView>/CurrentCoupon/BranchCode}" showSecondaryValues="true" > 
 	<core:ListItem key="{sBRModel>BranchID}" text="{sBRModel>Name}"  additionalText="{sBRModel>BranchID}"/>

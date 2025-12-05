@@ -1201,7 +1201,7 @@
   }
   .bookNowTile .sapMGTContent {
     justify-content: center !important;
-    align-items: center !important;
+    /* align-items: center !important; */
   }
   .priceRow {
     gap: 10px !important;
@@ -1243,6 +1243,7 @@
     margin-bottom: 0 !important;
   }
 }
+
 .roomTopAligned {
   margin-top: 12px !important;
 }
@@ -1441,6 +1442,7 @@ span.sapMBtnInner.sapMBtnEmphasized {
 .defaultTile * {
   color: whitesmoke !important;
 }
+
 .selectedTile *,
 .tileSelected * {
   color: #2c3e50 !important;
@@ -1459,10 +1461,10 @@ span.sapMBtnInner.sapMBtnEmphasized {
   padding: 8px 0 !important;
   margin: 0 !important;
   height: 100% !important;
-  display: flex !important;
+  /* display: flex !important; */
   flex-direction: column !important;
-  justify-content: center !important;
-  align-items: center !important;
+  /* justify-content: center !important;
+  align-items: center !important; */
 }
 .defaultTile,
 .bookNowTile,
@@ -1488,14 +1490,14 @@ span.sapMBtnInner.sapMBtnEmphasized {
   height: 90px !important;
   min-height: 90px !important;
 }
-.bookNowTile {
+/* .bookNowTile {
   background: linear-gradient(135deg, #74c7ce, #008c9e) !important;
   color: white !important;
   border-radius: 14px !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
   transition: all 0.25s ease;
   height: 90px !important;
-}
+} */
 .bookNowTile:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25) !important;
@@ -1503,7 +1505,7 @@ span.sapMBtnInner.sapMBtnEmphasized {
 .bookNowTile * {
   font-size: 20px !important;
   font-weight: bold !important;
-  color: white !important;
+  /* color: white !important; */
 }
 .bookNowTile .sapMGTContent {
   padding-top: 12px !important;
@@ -1515,10 +1517,11 @@ span.sapMBtnInner.sapMBtnEmphasized {
 }
 .bookNowTile .sapMGTContent {
   height: 100% !important;
-  display: flex !important;
+  /* display: flex !important; */
   flex-direction: column !important;
-  justify-content: center !important;
+  /* justify-content: center !important; */
 }
+
 .bookNowTile .sapMGTHdrTxt > .sapMText {
   line-height: 1.8 !important;
   padding: 0 !important;
@@ -1922,3 +1925,25 @@ span.sapMBtnInner.sapMBtnEmphasized {
   pointer-events: none;
   opacity: 0.75;
 }
+
+
+/* default tile style already matches price tile */
+.sapMGT.bookNowTile.occupied {
+    background: linear-gradient(
+        135deg,
+        #e9e9e9,
+        #b5b5b5
+    ) !important;
+}
+.sapMGT.bookNowTile.occupied * {
+    color: #555 !important;
+}
+/* Kill UI5 overlay glare */
+.sapMGTOverlay { display: none !important; }
+
+/* Center header text */
+.bookNowTile .sapMGTHdrTxt {
+    margin: 0 !important;
+    text-align: center !important;
+}
+  

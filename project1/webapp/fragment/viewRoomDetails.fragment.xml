@@ -48,8 +48,7 @@
 				</l:Grid>
 				<FlexBox id="priceFlex" class="priceFlex sapUiTinyMarginBeginEnd sapUiSmallMarginTop" wrap="Wrap">
 					<items>
-						<GenericTile header="Per Day" subheader="{ parts:['HostelModel>/Price','HostelModel>/Currency'], formatter: '.Formatter.formatCurrency' }" class=" defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan"
-						 visible="{= parseInt(${HostelModel>/Price}.trim()) !== 0 }">
+						<GenericTile header="Per Day" subheader="{ parts:['HostelModel>/Price','HostelModel>/Currency'], formatter: '.Formatter.formatCurrency' }" class=" defaultTile priceItem" frameType="OneByHalf" press=".onSelectPricePlan" visible="{= parseInt(${HostelModel>/Price}.trim()) !== 0 }">
 							<customData>
 								<core:CustomData key="type" value="daily"/>
 							</customData>
@@ -64,68 +63,54 @@
 								<core:CustomData key="type" value="yearly"/>
 							</customData>
 						</GenericTile>
-						<GenericTile header="{=${HostelModel>/Visible}=== true ? 'Book Now' : 'Occupied' }"
-						 class=" defaultTile priceItem bookNowTile" 
-						 frameType="OneByHalf" press=".onConfirmBooking" >
-							<customData>
-								<core:CustomData key="type" value="booknow"/>
-							</customData>
-						</GenericTile>
+						<!-- <GenericTile header="{= ${HostelModel>/Visible} ? 'Book Now' : 'Occupied' }" state="{= ${HostelModel>/Visible} ? 'Loaded' : 'Disabled' }" class="priceItem defaultTile bookNowTile" frameType="OneByHalf" press=".onConfirmBooking"/> -->
+					
+					<GenericTile id="bookTile" class="priceItem defaultTile bookNowTile" frameType="OneByHalf" header="{= ${HostelModel>/Visible} ? 'Book Now' : 'Occupied' }" state="Loaded" press=".onConfirmBooking" />
 					</items>
 				</FlexBox>
 				<!-- Facilities Header -->
-	<VBox visible="{= ${FacilityModel>/Facilities}.length > 0 || ${FacilityModel>/loading} }">
-	<Bar design="Header" class="sapUiMediumMarginTop">
-		<contentLeft>
-			<Title text="Available Facilities" />
-		</contentLeft>
-	</Bar>
-	<HBox justifyContent="Center" visible="{FacilityModel>/loading}">
-		<BusyIndicator size="0.8rem" />
-	</HBox>
-	<!-- REAL Responsive Grid -->
-	<HBox class="facilityGrid" wrap="Wrap" items="{FacilityModel>/Facilities}">
-		<items>
-			<VBox class="unifiedCard" visible="{= parseFloat(${FacilityModel>Price}) > 0 }">
-				<Image src="{FacilityModel>Image}" class="unifiedCardImg" />
-				<Text text="{FacilityModel>FacilityName}" class="unifiedCardTitle" />
-				<Text class="unifiedCardText" text="{ parts: ['FacilityModel>Price','FacilityModel>Currency'], formatter: '.Formatter.formatCurrency' } {FacilityModel>UnitText} Onwards" />
-			</VBox>
-		</items>
-	</HBox>
-</VBox>
-
-
-
-
-
-
-
-
-
-<VBox visible="{= ${AmenityModel>/Amenities}.length > 0 || ${AmenityModel>/loading} }">
-<!-- <VBox visible="{= !${AmenityModel>/loading} && ${AmenityModel>/Amenities}.length > 0 }"> -->
-	<Bar design="Header" class="sapUiMediumMarginTop sapUiTinyMarginBeginEnd">
-		<contentLeft>
-			<Title text="Amenities" />
-		</contentLeft>
-	</Bar>
-	<!-- Content -->
-	<HBox class="facilityGrid" wrap="Wrap" items="{AmenityModel>/Amenities}">
-		<items>
-			<VBox class="unifiedCard">
-				<Image src="{AmenityModel>ImageSrc}" class="unifiedCardImg" />
-				<Text text="{AmenityModel>FacilityName}" class="unifiedCardTitle" />
-				<Text text="{AmenityModel>Description}" class="amenityDesc expandableAmenityText" />
-			</VBox>
-		</items>
-	</HBox>
-</VBox>
-<!-- Loader outside so it shows only while loading -->
-<HBox justifyContent="Center" visible="{AmenityModel>/loading}">
-	<BusyIndicator size="0.8rem" />
-</HBox>
-
+				<VBox visible="{= ${FacilityModel>/Facilities}.length > 0 || ${FacilityModel>/loading} }">
+					<Bar design="Header" class="sapUiMediumMarginTop">
+						<contentLeft>
+							<Title text="Available Facilities" />
+						</contentLeft>
+					</Bar>
+					<HBox justifyContent="Center" visible="{FacilityModel>/loading}">
+						<BusyIndicator size="0.8rem" />
+					</HBox>
+					<!-- REAL Responsive Grid -->
+					<HBox class="facilityGrid" wrap="Wrap" items="{FacilityModel>/Facilities}">
+						<items>
+							<VBox class="unifiedCard" visible="{= parseFloat(${FacilityModel>Price}) > 0 }">
+								<Image src="{FacilityModel>Image}" class="unifiedCardImg" />
+								<Text text="{FacilityModel>FacilityName}" class="unifiedCardTitle" />
+								<Text class="unifiedCardText" text="{ parts: ['FacilityModel>Price','FacilityModel>Currency'], formatter: '.Formatter.formatCurrency' } {FacilityModel>UnitText} Onwards" />
+							</VBox>
+						</items>
+					</HBox>
+				</VBox>
+				<VBox visible="{= ${AmenityModel>/Amenities}.length > 0 || ${AmenityModel>/loading} }">
+					<!-- <VBox visible="{= !${AmenityModel>/loading} && ${AmenityModel>/Amenities}.length > 0 }"> -->
+					<Bar design="Header" class="sapUiMediumMarginTop sapUiTinyMarginBeginEnd">
+						<contentLeft>
+							<Title text="Amenities" />
+						</contentLeft>
+					</Bar>
+					<!-- Content -->
+					<HBox class="facilityGrid" wrap="Wrap" items="{AmenityModel>/Amenities}">
+						<items>
+							<VBox class="unifiedCard">
+								<Image src="{AmenityModel>ImageSrc}" class="unifiedCardImg" />
+								<Text text="{AmenityModel>FacilityName}" class="unifiedCardTitle" />
+								<Text text="{AmenityModel>Description}" class="amenityDesc expandableAmenityText" />
+							</VBox>
+						</items>
+					</HBox>
+				</VBox>
+				<!-- Loader outside so it shows only while loading -->
+				<HBox justifyContent="Center" visible="{AmenityModel>/loading}">
+					<BusyIndicator size="0.8rem" />
+				</HBox>
 			</VBox>
 		</content>
 	</Dialog>

@@ -486,6 +486,7 @@ sap.ui.define([
                 // Load / reuse fragment
                 if (!this._oRoomDetailFragment) {
                     sap.ui.core.Fragment.load({
+                        id: "roomDetailsFrag",
                         name: "sap.ui.com.project1.fragment.viewRoomDetails",
                         controller: this
                     }).then(fragment => {
@@ -506,6 +507,7 @@ sap.ui.define([
 
                         // Now load facilities in background
                         this._LoadFacilities(oSelected.BranchCode);
+                        this._updateBookTileState();
                     });
 
                     return; // stop here because first-time load is async via .then()
@@ -524,11 +526,29 @@ sap.ui.define([
 
                 // Load facilities asynchronously
                 this._LoadFacilities(oSelected.BranchCode);
+                this._updateBookTileState();
 
             } catch (err) {
                 console.error(" viewDetails error:", err);
             }
         },
+        _updateBookTileState: function () {
+
+            const oTile =
+                sap.ui.core.Fragment.byId("roomDetailsFrag", "bookTile");
+
+            if (!oTile) return;
+
+            const bOccupied =
+                !this.getView().getModel("HostelModel").getProperty("/Visible");
+
+            if (bOccupied) {
+                oTile.addStyleClass("occupied");
+            } else {
+                oTile.removeStyleClass("occupied");
+            }
+        },
+
 
         _LoadAmenities: async function (sBranchCode) {
             const oAmenityModel = new sap.ui.model.json.JSONModel({
