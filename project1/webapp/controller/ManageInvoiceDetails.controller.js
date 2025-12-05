@@ -5,8 +5,9 @@ sap.ui.define([
         "../utils/validation",
         "sap/ui/model/odata/type/Currency",
         "../model/formatter",
+        "sap/m/MessageBox",
     ],
-    function(BaseController, JSONModel, MessageToast, utils, Currency, Formatter) {
+    function(BaseController, JSONModel, MessageToast, utils, Currency, Formatter, MessageBox) {
         "use strict";
         return BaseController.extend("sap.ui.com.project1.controller.ManageInvoiceDetails", {
             Formatter: Formatter,
@@ -311,7 +312,21 @@ sap.ui.define([
 
                     const bookingDetails = oData.data?.BookingData?.[0];
                     if (!bookingDetails) {
-                        sap.m.MessageToast.show("Booking details not found from API");
+                        sap.m.MessageToast.show("Booking details not found");
+                        return;
+                    }
+
+                    const facilityArray = Array.isArray(oData.data.BookingFacilityItems)
+                        ? oData.data.BookingFacilityItems
+                        : [oData.data.BookingFacilityItems];
+
+                    const hasRoomPrice = bookingDetails.RoomPrice && parseFloat(bookingDetails.RoomPrice) > 0;
+                    const hasFacilityPrice = facilityArray.some(item => 
+                        item.BasicFacilityPrice && parseFloat(item.BasicFacilityPrice) > 0
+                    );
+
+                    if (hasRoomPrice === 0 && hasFacilityPrice === false) {
+                        MessageBox.information("Booking is fully completed. No new invoice can be generated.");
                         return;
                     }
 
@@ -352,10 +367,6 @@ sap.ui.define([
                     this.byId("CID_id_Invoice").setDateValue(invoiceDate);
                     this.byId("CID_id_Payby").setDateValue(payByDate);
 
-                    const facilityArray = Array.isArray(oData.data.BookingFacilityItems)
-                        ? oData.data.BookingFacilityItems
-                        : [oData.data.BookingFacilityItems];
-
                     let finalInvoiceItems = [];
 
                     finalInvoiceItems.push({
@@ -381,7 +392,7 @@ sap.ui.define([
                             UnitText: item.UnitText,
                             SAC: "996322",
                             GSTCalculation: "YES",
-                            Discount:"0.00",
+                            Discount: "0.00",
                             Total: parseFloat(item.BasicFacilityPrice),
                             StartDate: this.Formatter.DateFormat(item.StartDate),
                             EndDate: this.Formatter.DateFormat(item.EndDate),
