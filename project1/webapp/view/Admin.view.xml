@@ -28,8 +28,8 @@
             >
 				<fb:filterGroupItems>
 					<fb:FilterGroupItem
-                        name="Customer Name"
-                        label="Customer Name"
+                        name="Customer ID"
+                        label="Customer ID"
                         groupName="Group"
                         visibleInFilterBar="true"
                     >
@@ -40,8 +40,30 @@
                                 showClearIcon="true"
                             >
 								<core:Item
-                                    key="{HostelModel>CustomerName}"
-                                    text="{HostelModel>CustomerName}"
+                                    key="{HostelModel>CustomerID}"
+                                    text="{HostelModel>CustomerID}"
+                                />
+							</ComboBox>
+						</fb:control>
+					</fb:FilterGroupItem>
+				</fb:filterGroupItems>
+
+                <fb:filterGroupItems>
+					<fb:FilterGroupItem
+                        name="Booking ID"
+                        label="Booking ID"
+                        groupName="Group"
+                        visibleInFilterBar="true"
+                    >
+						<fb:control>
+							<ComboBox
+                                id="PO_id_BookingId"
+                                items="{HostelModel>/}"
+                                showClearIcon="true"
+                            >
+								<core:Item
+                                    key="{HostelModel>BookingID}"
+                                    text="{HostelModel>BookingID}"
                                 />
 							</ComboBox>
 						</fb:control>
@@ -129,6 +151,10 @@
 					<Column demandPopin="true">
 						<Text text="Customer" />
 					</Column>
+                    	<Column demandPopin="true"   
+                        minScreenWidth="Tablet">
+						<Text text="Booking ID" />
+					</Column>
 					<!-- <Column demandPopin="true"><Text text="Customer Name" /></Column> -->
 					<Column
                         minScreenWidth="Tablet"
@@ -187,6 +213,8 @@
                             title="{HostelModel>CustomerID}"
                             text="{HostelModel>CustomerName}"
                         />
+							<Text text="{HostelModel>BookingID}" />
+
 							<!-- <Text text="{HostelModel>CustomerID}" /><Text text="{HostelModel>CustomerName}" /> -->
 							<Text text="{HostelModel>Gender}" />
 							<!-- <Text

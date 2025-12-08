@@ -73,21 +73,23 @@ sap.ui.define([
         _populateUniqueFilterValues: function(data) {
             let uniqueValues = {
                 PO_id_CustomerName: new Set(),
+                PO_id_BookingId: new Set(),
                 PO_id_CompanyName: new Set(),
                 PO_id_Status: new Set(),
-
-
             };
 
             data.forEach(item => {
                 // Add customer name
-                if (item.CustomerName) {
-                    uniqueValues.PO_id_CustomerName.add(item.CustomerName);
+                if (item.CustomerID) {
+                    uniqueValues.PO_id_CustomerName.add(item.CustomerID);
                 }
 
                 // Safely add RoomNo if Bookings exist
                 if (item.RoomNo) {
                     uniqueValues.PO_id_CompanyName.add(item.RoomNo);
+                }
+                 if (item.BookingID) {
+                    uniqueValues.PO_id_BookingId.add(item.BookingID);
                 }
                 if (item.Status) {
                     uniqueValues.PO_id_Status.add(item.Status);
@@ -95,7 +97,7 @@ sap.ui.define([
             });
 
             let oView = this.getView();
-            ["PO_id_CustomerName", "PO_id_CompanyName", "PO_id_Status"].forEach(field => {
+            ["PO_id_CustomerName", "PO_id_BookingId", "PO_id_CompanyName","PO_id_Status"].forEach(field => {
                 let oComboBox = oView.byId(field);
                 oComboBox.destroyItems();
                 Array.from(uniqueValues[field]).sort().forEach(value => {
@@ -528,24 +530,26 @@ sap.ui.define([
             var oBinding = oTable.getBinding("items");
 
             var sCustomerName = oView.byId("PO_id_CustomerName").getSelectedKey() || oView.byId("PO_id_CustomerName").getValue();
+            var sBookingId = oView.byId("PO_id_BookingId").getSelectedKey() || oView.byId("PO_id_BookingId").getValue();
+
             var sRoomNo = oView.byId("PO_id_CompanyName").getSelectedKey() || oView.byId("PO_id_CompanyName").getValue();
             var status = oView.byId("PO_id_Status").getSelectedKey() || oView.byId("PO_id_Status").getValue();
 
             var aFilters = [];
 
             if (sCustomerName) {
-                aFilters.push(new sap.ui.model.Filter("CustomerName", sap.ui.model.FilterOperator.Contains, sCustomerName));
+                aFilters.push(new sap.ui.model.Filter("CustomerID", sap.ui.model.FilterOperator.EQ, sCustomerName));
             }
               if (sRoomNo) {
-                aFilters.push(new sap.ui.model.Filter("RoomNo", sap.ui.model.FilterOperator.Contains, sRoomNo));
+                aFilters.push(new sap.ui.model.Filter("RoomNo", sap.ui.model.FilterOperator.EQ, sRoomNo));
             }
              if (status) {
-                aFilters.push(new sap.ui.model.Filter("Status", sap.ui.model.FilterOperator.Contains, status));
+                aFilters.push(new sap.ui.model.Filter("Status", sap.ui.model.FilterOperator.EQ, status));
             }
-
-
-          
-
+             if (sBookingId) {
+                aFilters.push(new sap.ui.model.Filter("BookingID", sap.ui.model.FilterOperator.EQ, sBookingId));
+            }
+            
             var oCombinedFilter = new sap.ui.model.Filter({
                 filters: aFilters,
                 and: true
@@ -561,6 +565,8 @@ sap.ui.define([
             this.getView().byId("PO_id_CustomerName").setSelectedKey("")
             this.getView().byId("PO_id_CompanyName").setSelectedKey("")
             this.getView().byId("PO_id_Status").setSelectedKey("")
+            this.getView().byId("PO_id_BookingId").setSelectedKey("")
+
         },
         onRoomNoChange: function(oEvent) {
             utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
