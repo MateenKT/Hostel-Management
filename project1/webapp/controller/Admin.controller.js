@@ -396,6 +396,17 @@ sap.ui.define([
             }
 
         },
+
+         onTableUpdateFinished: function() {
+            this._updateRowCount();
+        },
+
+        _updateRowCount: function() {
+            const oTable = this.byId("idPOTable");
+            const oBinding = oTable.getBinding("items");
+            const iLength = oBinding.getLength(); // filtered result count
+            this.getView().getModel("HostelModel").setProperty("/count", iLength);
+        },
       
         // HM_ChangeRoom: function() {
         //     var table = this.byId("idPOTable");
@@ -556,6 +567,7 @@ sap.ui.define([
             });
 
             oBinding.filter(oCombinedFilter);
+            this._updateRowCount();
         },
         onHome: function() {
             var oRouter = this.getOwnerComponent().getRouter();
