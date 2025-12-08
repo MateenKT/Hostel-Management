@@ -99,7 +99,7 @@
       showValueHelp="true"
     valueHelpIconSrc="sap-icon://decline"
     valueHelpRequest="oncancelCoupon"
-    liveChange="onCouponLiveChange"
+    change="onCouponLiveChange"
     />
  
     <!-- Apply Now Button -->

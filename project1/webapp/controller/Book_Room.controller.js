@@ -167,6 +167,7 @@ oHostelModel.setProperty("/SelectedPerson", "1");
             // Add only your required properties (safe, isolated)
             vm.setProperty("/loginMode", "password");   // "password" or "otp"
             vm.setProperty("/showOTPField", false);     // show OTP input box only after Send OTP success
+             vm.setProperty("/authFlow", "signin");
             vm.setProperty("/isOtpEntered", false); 
              oView.setModel(new JSONModel({
                 CustomerName: "",
@@ -408,8 +409,6 @@ _createDynamicPersonsUI: function () {
     const oVBox = this.getView().byId("idPersonalContainer1");
     const oData = oModel.getData();
 
-          // ---- LOGIN INFO BANNER (Before Document Section) ----
-
     // Reset container & model array
     oData.Persons = [];
     oVBox.destroyItems();
@@ -477,7 +476,7 @@ _createDynamicPersonsUI: function () {
                 oView.addDependent(that._oLoginAlertDialog);
             }
              const vm = that.getView().getModel("LoginViewModel");
-
+              
             // COMPLETE reset of all auth-related states
             vm.setProperty("/authFlow", "signin");
             vm.setProperty("/loginMode", "password");
@@ -522,6 +521,10 @@ _createDynamicPersonsUI: function () {
             oEvent.getSource().setSelected(false);
             return;
         }
+         oLoginModel.setProperty("/UserID", oUser.UserID);
+        oLoginModel.setProperty("/UserName", oUser.UserName);
+        oLoginModel.setProperty("/EmailID", oUser.EmailID);
+        oLoginModel.setProperty("/MobileNo", oUser.MobileNo);
          const DOB =that.Formatter.DateFormat(oUser.DateOfBirth)
         // Already logged in → auto-fill
         aPersons.forEach(p => {
@@ -896,8 +899,8 @@ _createDynamicPersonsUI: function () {
             }),
             new sap.ui.unified.FileUploader({
               width: "100%",
-               fileType: ["pdf", "jpg", "jpeg", "png"],
-               mimeType: ["application/pdf", "image/jpeg", "image/png"],
+               fileType: ["jpg", "jpeg", "png"],
+               mimeType: ["image/jpeg", "image/png"],
                multiple: false,
               customData: [new sap.ui.core.CustomData({
                 key: "index",
@@ -2211,6 +2214,8 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
 
         // Auto-check the "Fill Yourself" checkbox
         const oCheck = sap.ui.getCore().byId(this.createId("IDSelfCheck_0"));
+        const oUserModel = new JSONModel(oMatchedUser);
+      sap.ui.getCore().setModel(oUserModel, "LoginModel");
         if (oCheck) {
             oCheck.setSelected(true);
         }
@@ -3530,14 +3535,33 @@ const todayDate = today.toISOString().split("T")[0];
                       UserID:p.UserID
                   });
               }
-              const paymentDetails = {
-                  //  BankName: sap.ui.getCore().byId("idBankName").getValue(),
-                  Amount: sap.ui.getCore().byId("idAmount").getValue(),
-                  PaymentType: sap.ui.getCore().byId("idPaymentTypeField").getValue(),
-                  BankTransactionID: sap.ui.getCore().byId("idTransactionID").getValue(),
-                  Date: sap.ui.getCore().byId("idPaymentDate").getValue() ? sap.ui.getCore().byId("idPaymentDate").getValue().split("/").reverse().join("-") : "",
-                  //  Currency: sap.ui.getCore().byId("idCurrency").getValue()
-              };
+              let paymentDetails;
+
+if (isPayOnCheckIn) {
+    const today = new Date();
+const todayDate = today.toISOString().split("T")[0];
+
+    // ✔ Pay on checkin → Amount must be 0
+    paymentDetails = {
+        Amount: "0",
+        PaymentType: "PayOnCheckIn",
+        BankTransactionID: "",
+        Date: todayDate
+    };
+
+} else {
+
+    // ✔ Normal payment → take user input
+    paymentDetails = {
+        Amount: sap.ui.getCore().byId("idAmount").getValue(),
+        PaymentType: sap.ui.getCore().byId("idPaymentTypeField").getValue(),
+        BankTransactionID: sap.ui.getCore().byId("idTransactionID").getValue(),
+        Date: sap.ui.getCore().byId("idPaymentDate").getValue()
+            ? sap.ui.getCore().byId("idPaymentDate").getValue().split("/").reverse().join("-")
+            : "",
+    };
+
+}
 
               // Store in model temporarily
                oData.PaymentDetails = paymentDetails;
@@ -3583,12 +3607,8 @@ aSelectedFacilities.forEach(fac => {
         TotalHour: facilityHour,
         Currency: fac.Currency,
         BasicFacilityPrice:fac.Price,
-        StartTime:fac.StartTime,
-        EndTime:fac.EndTime,
-
     });
 });
-
 
               // Return formatted entry
               return {
@@ -3668,19 +3688,7 @@ if (!isLoggedIn) {
 this._navigateAfterBooking();
 
 
-                  // Navigate to hostel page
-                //   var oRoute = this.getOwnerComponent().getRouter();
-                //   oRoute.navTo("RouteHostel");
-
-                //   setTimeout(function () {
-                //     this.resetAllBookingData()
-                //       this.openProfileDialog();
-                //   }.bind(this), 500);
-                //   // --- SHOW AVATAR AUTOMATICALLY ---
-                //   const oAvatar = sap.ui.getCore().byId("ProfileAvatar");
-                //   if (oAvatar) {
-                //       oAvatar.setVisible(true);   
-                //   }
+            
               }.bind(this)
           });
           } catch (e) {
@@ -3720,7 +3728,7 @@ this._navigateAfterBooking();
     }.bind(this), 500);
 
     // Show avatar
-    const oAvatar = sap.ui.getCore().byId("ProfileAvatar");
+    const oAvatar = this.byId("ProfileAvatar");
     if (oAvatar) {
         oAvatar.setVisible(true);
     }
