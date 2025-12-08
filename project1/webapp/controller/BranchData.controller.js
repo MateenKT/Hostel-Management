@@ -11,30 +11,32 @@ sap.ui.define([
             this.getOwnerComponent().getRouter().getRoute("RouteBranchData").attachMatched(this._onRouteMatched, this);
         },
 
-        _onRouteMatched: function() {
-             try {
-            this.i18nModel = this.getView().getModel("i18n").getResourceBundle();
+        _onRouteMatched: async function() {
+            try {
+                this.i18nModel = this.getView().getModel("i18n").getResourceBundle();
 
-            const oMDmodel = new sap.ui.model.json.JSONModel({
-                BranchID: "",
-                Name: "",
-                Address: "",
-                Pincode: "",
-                Contact: "",
-                stdCode: "",
-                country: "",
-                state: "",
-                City: "",
-                Penalty: "",
-            });
-            this.getView().setModel(oMDmodel, "MDmodel");
-            var oeditable = new sap.ui.model.json.JSONModel({
-                isEdit: false
-            });
-            this.getView().setModel(oeditable, "editableModel");
-            this.onClearAndSearch("MD_id_Filterbar");
-            this.Onsearch();
-         } catch (err) {
+                const oMDmodel = new sap.ui.model.json.JSONModel({
+                    BranchID: "",
+                    Name: "",
+                    Address: "",
+                    Pincode: "",
+                    Contact: "",
+                    stdCode: "",
+                    country: "",
+                    state: "",
+                    City: "",
+                    Penalty: "",
+                });
+                this.getView().setModel(oMDmodel, "MDmodel");
+
+                var oeditable = new sap.ui.model.json.JSONModel({
+                    isEdit: false
+                });
+                this.getView().setModel(oeditable, "editableModel");
+
+                await this.onClearAndSearch("MD_id_Filterbar");
+                await this.Onsearch();
+            } catch (err) {
                 sap.ui.core.BusyIndicator.hide();
                 sap.m.MessageToast.show(err.message || err.responseText);
             } finally {
@@ -54,32 +56,48 @@ sap.ui.define([
 
         MD_onPressClear: function() {
             this.getView().byId("MD_id_BranchCode").setSelectedKey("")
-            this.getView().byId("MD_id_Pincode").setSelectedKey("")
+            this.getView().byId("MD_id_SearchField").setValue("");
         },
 
         MD_onSearch: function() {
-            var oView = this.getView();
-            var oTable = oView.byId("id_MD_Table");
-            var oBinding = oTable.getBinding("items");
+            const oView = this.getView();
+            const oTable = oView.byId("id_MD_Table");
+            const oBinding = oTable.getBinding("items");
 
-            var sCustomerName = oView.byId("MD_id_BranchCode").getSelectedKey() || oView.byId("MD_id_BranchCode").getValue();
-            var sCustomerID = oView.byId("MD_id_Pincode").getSelectedKey() || oView.byId("MD_id_Pincode").getValue();
+            const sCustomerName = oView.byId("MD_id_BranchCode").getSelectedKey() || oView.byId("MD_id_BranchCode").getValue();
+            let aFilters = [];
 
-            var aFilters = [];
             if (sCustomerName) {
                 aFilters.push(new sap.ui.model.Filter("BranchID", sap.ui.model.FilterOperator.Contains, sCustomerName));
             }
 
-            if (sCustomerID) {
-                aFilters.push(new sap.ui.model.Filter("Pincode", sap.ui.model.FilterOperator.Contains, sCustomerID));
+            oBinding.filter(aFilters);
+            this._updateRowCount();
+        },
+
+        onGlobalSearch: function(oEvent) {
+            const sQuery = oEvent.getParameter("newValue");
+            const oTable = this.byId("id_MD_Table");
+            const oBinding = oTable.getBinding("items");
+
+            let aFilters = [];
+            if (sQuery) {
+                aFilters.push(new sap.ui.model.Filter("Pincode", sap.ui.model.FilterOperator.Contains, sQuery));
             }
 
-            var oCombinedFilter = new sap.ui.model.Filter({
-                filters: aFilters,
-                and: true
-            });
+            oBinding.filter(aFilters);
+            this._updateRowCount();
+        },
 
-            oBinding.filter(oCombinedFilter);
+        _updateRowCount: function() {
+            const oTable = this.byId("id_MD_Table");
+            const oBinding = oTable.getBinding("items");
+            const iLength = oBinding.getLength(); // filtered result count
+            this.getView().getModel("mainModel").setProperty("/count", iLength);
+        },
+
+        onTableUpdateFinished: function() {
+            this._updateRowCount();
         },
 
         createTableSheet: function() {
@@ -372,11 +390,8 @@ sap.ui.define([
         _resetFacilityValueStates: function() {
             var oView = this.getView();
             var aFields = [
-                "idBranch",
-                "idBName",
-                "idAddress",
-                "idPin",
-                "idPhone", "idPenalty"
+                "idBranch", "idBName", "idAddress",
+                "idPin", "idPhone", "idPenalty"
             ];
 
             aFields.forEach(function(sId) {
@@ -657,26 +672,6 @@ sap.ui.define([
             }
             const sCityName = oItem.getKey();
             oModel.setProperty("/baseLocation", sCityName);
-        },
-
-        onGlobalSearch: function (oEvent) {
-            const sQuery = oEvent.getParameter("newValue");
-            const oTable = this.byId("id_MD_Table");
-            const oBinding = oTable.getBinding("items");
-
-            let aFilters = [];
-
-            if (sQuery) {
-                aFilters = [
-                    new sap.ui.model.Filter({
-                        filters: [
-                            new sap.ui.model.Filter("Pincode", sap.ui.model.FilterOperator.Contains, sQuery)
-                        ],
-                        and: false
-                    })
-                ];
-            }
-            oBinding.filter(aFilters);
-        },
+        }
     })
 });
