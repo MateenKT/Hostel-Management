@@ -80,8 +80,7 @@
         displayFormat="dd/MM/yyyy"
         valueFormat="yyyy-MM-dd"
         change="onEditDateChange"
-      
-        
+        minDate="{CustomerData>/BookingDate}"
          valueStateText="Plaese Select Date"
         
      />
@@ -120,6 +119,7 @@
         displayFormat="dd/MM/yyyy"
         valueFormat="yyyy-MM-dd"
         change="onEditDateChange"
+         minDate="{CustomerData>/BookingDate}"
          valueStateText="Plaese Select Date"
 
   />

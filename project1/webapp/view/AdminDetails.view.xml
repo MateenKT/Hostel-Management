@@ -668,11 +668,6 @@
                                 />
 									</Toolbar>
 								</headerToolbar>
-
-
-                        	
- 
-
 								<columns>
 									<Column demandPopin="true">
 										<Text text="File Name" />

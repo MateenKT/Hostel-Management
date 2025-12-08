@@ -158,13 +158,11 @@
 					</Column>
 					<!-- <Column minScreenWidth="Tablet" demandPopin="true"><Text text="Room Type" /></Column> -->
 					<Column
-                        minScreenWidth="Tablet"
                         demandPopin="true"
                     >
 						<Text text="Room Number" />
 					</Column>
 					<Column
-                        minScreenWidth="Tablet"
                         demandPopin="true"
                     >
 						<Text text="Bed Type" />

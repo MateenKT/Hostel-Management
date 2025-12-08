@@ -6,7 +6,6 @@
     xmlns:u="sap.ui.unified"
 >
     <Dialog
-        id="sds1"
         title="Manage Room Details"
         type="Message"
         class="sapUiContentPadding"

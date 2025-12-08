@@ -11,7 +11,7 @@ sap.ui.define([
         onInit: function () {
             this.getOwnerComponent().getRouter().getRoute("RouteAdminDetails").attachMatched(this._onRouteMatched, this);
         },
-      
+
 
         _onRouteMatched: async function (oEvent) {
             var model = new JSONModel({
@@ -53,8 +53,8 @@ sap.ui.define([
             var sPath = oEvent.getParameter("arguments").sPath;
             this.decodedPath = decodeURIComponent(decodeURIComponent(sPath));
 
-          
-             this.valuestate()
+
+            this.valuestate()
 
             await this.OnRoom();
 
@@ -74,8 +74,8 @@ sap.ui.define([
             //              }
 
         },
-        valuestate:function(){
-              this.getView().byId("Ad_id_RoomType").setValueState("None")
+        valuestate: function () {
+            this.getView().byId("Ad_id_RoomType").setValueState("None")
 
             this.getView().byId("idPaymentMethod1").setValueState("None")
 
@@ -269,6 +269,8 @@ sap.ui.define([
                     // RentPrice: oCustomer.Bookings?.[0]?.RentPrice || 0,
                     // OrginalRentPrice: oCustomer.Bookings?.[0]?.RoomPrice || 0,
                     BedType: oCustomer.Bookings?.[0]?.BedType || "",
+                    BookingDate: new Date(oCustomer.Bookings?.[0]?.BookingDate || ""),
+
                     BookingID: oCustomer.Bookings?.[0]?.BookingID || "",
                     BranchCode: oCustomer.Bookings?.[0]?.BranchCode || "",
                     NoOfPersons: oCustomer.Bookings?.[0]?.NoOfPersons || "",
@@ -337,24 +339,24 @@ sap.ui.define([
 
 
                 // })
-            var aAllRooms = this.getView().getModel("Availablebeds").getData();
+                var aAllRooms = this.getView().getModel("Availablebeds").getData();
 
-// Filter by BranchCode
-var aFilteredRooms = aAllRooms.filter(function (room) {
-    return room.BranchCode === sBranchCode;
-});
+                // Filter by BranchCode
+                var aFilteredRooms = aAllRooms.filter(function (room) {
+                    return room.BranchCode === sBranchCode;
+                });
 
-// Set the filtered rooms to Availablebeds model if you want
-this.getView().getModel("Availablebeds").setData(aFilteredRooms);
+                // Set the filtered rooms to Availablebeds model if you want
+                this.getView().getModel("Availablebeds").setData(aFilteredRooms);
 
-// Now filter by BedTypeName for Availablebedprice
-var RoomBedprice = aFilteredRooms.filter(function (item) {
-    return item.BedTypeName === BedType;
-});
+                // Now filter by BedTypeName for Availablebedprice
+                var RoomBedprice = aFilteredRooms.filter(function (item) {
+                    return item.BedTypeName === BedType;
+                });
 
-// Set to new model
-var oModel = new sap.ui.model.json.JSONModel(RoomBedprice);
-this.getView().setModel(oModel, "Availablebedprice");
+                // Set to new model
+                var oModel = new sap.ui.model.json.JSONModel(RoomBedprice);
+                this.getView().setModel(oModel, "Availablebedprice");
 
                 var Availablebedprice = this.getView().getModel("Availablebedprice").getData()
 
@@ -861,18 +863,36 @@ this.getView().setModel(oModel, "Availablebedprice");
 
             ) {
                 if (oPayload.UnitText === "Per Hour") {
-                    // Validate Start Time first
-                    if (!utils._LCvalidateMandatoryField(sap.ui.getCore().byId("editStartTime"), "ID")) {
+                    var oStartTime = sap.ui.getCore().byId("editStartTime");
+                    var oEndTime = sap.ui.getCore().byId("editEndTime");
+
+                    // Validate Start Time
+                    if (!utils._LCvalidateMandatoryField(oStartTime, "ID")) {
                         sap.m.MessageToast.show("Please enter Start Time");
-                        return; // Stop execution, only Start Time shows error
+                        return;
                     }
 
-                    // Validate End Time next
-                    if (!utils._LCvalidateMandatoryField(sap.ui.getCore().byId("editEndTime"), "ID")) {
+                    // Validate End Time
+                    if (!utils._LCvalidateMandatoryField(oEndTime, "ID")) {
                         sap.m.MessageToast.show("Please enter End Time");
-                        return; // Stop execution, now End Time shows error
+                        return;
+                    }
+
+                    // Get actual time values
+                    var sStartTime = oStartTime.getValue(); // assuming format HH:MM
+                    var sEndTime = oEndTime.getValue();
+
+                    // Convert to Date objects for comparison
+                    var start = new Date("1970-01-01T" + sStartTime + ":00");
+                    var end = new Date("1970-01-01T" + sEndTime + ":00");
+
+                    // Check if Start Time is greater than or equal to End Time
+                    if (start >= end) {
+                        sap.m.MessageToast.show("Start Time should be less than End Time");
+                        return;
                     }
                 }
+
                 // Format Dates
                 if (oPayload.StartDate.includes("-")) {
                     oPayload.StartDate = this.Formatter.DateFormat(oPayload.StartDate);
@@ -943,10 +963,10 @@ this.getView().setModel(oModel, "Availablebedprice");
 
                     if (oMatchedCoupon.MinOrderValue <= (total + (oCustomerData.RentPrice || 0))) {
 
-                        if(oMatchedCoupon.DiscountType==="Percentage" && this.CouponDiscount ){
-                             oCustomerData.Discount =  (total + (oCustomerData.RentPrice || 0)) * Number(this.CouponDiscount) / 100
-                        }else{
-                        oCustomerData.Discount = this.CouponDiscount || oCustomerData.Discount || "0.00";
+                        if (oMatchedCoupon.DiscountType === "Percentage" && this.CouponDiscount) {
+                            oCustomerData.Discount = (total + (oCustomerData.RentPrice || 0)) * Number(this.CouponDiscount) / 100
+                        } else {
+                            oCustomerData.Discount = this.CouponDiscount || oCustomerData.Discount || "0.00";
                         }
 
                     } else {
@@ -1001,14 +1021,14 @@ this.getView().setModel(oModel, "Availablebedprice");
                 var assignedCount = oCustomer.filter(function (cust) {
                     return cust.BranchCode === bed.BranchCode &&
                         cust.BedType === bed.BedTypeName &&
-                        cust.Status === "Assigned" 
+                        cust.Status === "Assigned"
                 }).length;
 
-                   var customerHasThisBed = oCustomer.some(function (cust) {
-            return cust.CustomerID === data.CustomerID && // replace with your customer identifier
-               cust.BedType === bed.BedTypeName &&
-               (cust.Status === "Assigned" || cust.Status === "New")
-             });
+                var customerHasThisBed = oCustomer.some(function (cust) {
+                    return cust.CustomerID === data.CustomerID && // replace with your customer identifier
+                        cust.BedType === bed.BedTypeName &&
+                        (cust.Status === "Assigned" || cust.Status === "New")
+                });
 
                 // 2) If assignedCount reaches bed capacity → remove bed from available list
                 if (assignedCount >= Number(bed.NoofPerson) && !customerHasThisBed) {
@@ -1021,8 +1041,8 @@ this.getView().setModel(oModel, "Availablebedprice");
             this.getView().getModel("Availablebeds").setData(filteredBeds);
             if (data.CouponCode) {
                 this.Coupon()
-            }else{
-                 this.getView().byId("couponInput").setShowValueHelp(false);
+            } else {
+                this.getView().byId("couponInput").setShowValueHelp(false);
             }
 
             model.setProperty("/BedTypeName", data.BedType)
@@ -1279,7 +1299,7 @@ this.getView().setModel(oModel, "Availablebedprice");
         },
 
         onCancelBooking: function () {
-             this.valuestate()
+            this.valuestate()
             this.getView().getModel("VisibleModel").setProperty("/visible", false)
             this.byId("idMonthYearSelect").setVisible(false)
             var oCustomerData = this.getView().getModel("CustomerData").getData()
@@ -1440,14 +1460,14 @@ this.getView().setModel(oModel, "Availablebedprice");
                 if (total + (oCustomerData.RentPrice || 0) < Number(oCouponData.MinOrderValue)) {
                     oCustomerData.Discount = "0.00";
                 }
-                        if(oCouponData.DiscountType==="Percentage"){
-                             oCustomerData.Discount =  (total + (oCustomerData.RentPrice || 0)) * Number(this.CouponDiscount) / 100
-                        }else{
-                        oCustomerData.Discount = (total + (oCustomerData.RentPrice || 0)) -oCouponData.DiscountValue
-                        }
+                if (oCouponData.DiscountType === "Percentage") {
+                    oCustomerData.Discount = (total + (oCustomerData.RentPrice || 0)) * Number(this.CouponDiscount) / 100
+                } else {
+                    oCustomerData.Discount = Number(oCouponData.DiscountValue)
+                }
             }
 
-           
+
             oCustomerData.SubTotal = (total + (oCustomerData.RentPrice || 0) - Number(oCustomerData.Discount));
 
             oCustomerData.SGST = oCustomerData.SubTotal * 0.09;
@@ -1839,7 +1859,7 @@ this.getView().setModel(oModel, "Availablebedprice");
                         Currency: item.Currency,
                         StartTime: item.StartTime,
                         EndTime: item.EndTime,
-                        BasicFacilityPrice:item.Price
+                        BasicFacilityPrice: item.Price
 
 
                     };
@@ -2077,118 +2097,118 @@ this.getView().setModel(oModel, "Availablebedprice");
                 sap.m.MessageToast.show("Document removed");
             }
         },
-      onFileNameLinkPress: function (oEvent) {
+        onFileNameLinkPress: function (oEvent) {
 
-    function autoDecodeBase64(b64) {
-        b64 = b64.replace(/\s/g, "");
+            function autoDecodeBase64(b64) {
+                b64 = b64.replace(/\s/g, "");
 
-        let last = b64;
+                let last = b64;
 
-        // Try decoding multiple times (max 5 to prevent infinite loop)
-        for (let i = 0; i < 5; i++) {
-            try {   
-                let decoded = atob(last);
+                // Try decoding multiple times (max 5 to prevent infinite loop)
+                for (let i = 0; i < 5; i++) {
+                    try {
+                        if (last.startsWith("iVB") || last.startsWith("/9j")) {
+                            return decoded;
+                        }
+                        let decoded = atob(last);
 
-                // If decoded looks like IMAGE base64 → return
-                if (decoded.startsWith("iVB") || decoded.startsWith("/9j")) {
-                    return decoded;
+                        // If decoded looks like IMAGE base64 → return
+
+                        // Continue decoding if possible
+                        last = decoded;
+                    } catch (e) {
+                        break;
+                    }
                 }
 
-                // Continue decoding if possible
-                last = decoded;
-            } catch (e) {
-                break;
+                return last;
             }
-        }
 
-        return last;
-    }
+            // Get document from model
+            var oContext = oEvent.getSource().getBindingContext("CustomerData");
+            var oDoc = oContext.getObject();
 
-    // Get document from model
-    var oContext = oEvent.getSource().getBindingContext("CustomerData");
-    var oDoc = oContext.getObject();
+            if (!oDoc) {
+                sap.m.MessageBox.error("No document found!");
+                return;
+            }
 
-    if (!oDoc) {
-        sap.m.MessageBox.error("No document found!");
-        return;
-    }
+            var sBase64 = oDoc.FileContent || oDoc.File;
 
-    var sBase64 = oDoc.FileContent || oDoc.File;
+            if (!sBase64) {
+                sap.m.MessageBox.error("No image found for this document!");
+                return;
+            }
 
-    if (!sBase64) {
-        sap.m.MessageBox.error("No image found for this document!");
-        return;
-    }
+            // Auto fix decoding
+            var fixed = autoDecodeBase64(sBase64);
 
-    // Auto fix decoding
-    var fixed = autoDecodeBase64(sBase64);
+            // Now detect type
+            let finalSrc = "";
 
-    // Now detect type
-    let finalSrc = "";
+            if (fixed.startsWith("iVB")) {
+                finalSrc = "data:image/png;base64," + fixed;
+            } else if (fixed.startsWith("/9j")) {
+                finalSrc = "data:image/jpeg;base64," + fixed;
+            } else {
+                finalSrc = fixed
 
-    if (fixed.startsWith("iVB")) {
-        finalSrc = "data:image/png;base64," + fixed;
-    } else if (fixed.startsWith("/9j")) {
-        finalSrc = "data:image/jpeg;base64," + fixed;
-    } else {
-        finalSrc=fixed
-    
-    }
+            }
 
-    // Create or reuse dialog
-    if (!this._oDocPreviewDialog) {
+            // Create or reuse dialog
+            if (!this._oDocPreviewDialog) {
 
-        var oFlex = new sap.m.FlexBox({
-            width: "100%",
-            height: "100%",
-            renderType: "Div",
-            justifyContent: "Center",
-            alignItems: "Center",
-            items: [
-                new sap.m.Image({
-                    id: this.createId("docPreviewImage"),
-                    densityAware: false,
+                var oFlex = new sap.m.FlexBox({
                     width: "100%",
                     height: "100%",
-                    style: "object-fit: contain; display:block;"
-                })
-            ]
-        });
+                    renderType: "Div",
+                    justifyContent: "Center",
+                    alignItems: "Center",
+                    items: [
+                        new sap.m.Image({
+                            id: this.createId("docPreviewImage"),
+                            densityAware: false,
+                            width: "100%",
+                            height: "100%",
+                            style: "object-fit: contain; display:block;"
+                        })
+                    ]
+                });
 
-        this._oDocPreviewDialog = new sap.m.Dialog({
-            title: oDoc.FileName || "Document Image",
-            contentWidth: "50%",
-            contentHeight: "60%",
-            draggable: true,
-            resizable: true,
-            contentPadding: "0rem",
-            horizontalScrolling: false,
-            verticalScrolling: false,
-            content: [oFlex],
+                this._oDocPreviewDialog = new sap.m.Dialog({
+                    title: oDoc.FileName || "Document Image",
+                    contentWidth: "50%",
+                    contentHeight: "60%",
+                    draggable: true,
+                    resizable: true,
+                    contentPadding: "0rem",
+                    horizontalScrolling: false,
+                    verticalScrolling: false,
+                    content: [oFlex],
 
-            beginButton: new sap.m.Button({
-                text: "Close",
-                press: function () {
-                    this._oDocPreviewDialog.close();
-                }.bind(this)
-            }),
+                    beginButton: new sap.m.Button({
+                        text: "Close",
+                        press: function () {
+                            this._oDocPreviewDialog.close();
+                        }.bind(this)
+                    }),
 
-            afterClose: function () {
-                this._oDocPreviewDialog.destroy();
-                this._oDocPreviewDialog = null;
-            }.bind(this)
-        });
+                    afterClose: function () {
+                        this._oDocPreviewDialog.destroy();
+                        this._oDocPreviewDialog = null;
+                    }.bind(this)
+                });
 
-        this.getView().addDependent(this._oDocPreviewDialog);
-    } else {
-        this._oDocPreviewDialog.setTitle(oDoc.FileName || "Document Image");
-    }
+                this.getView().addDependent(this._oDocPreviewDialog);
+            } else {
+                this._oDocPreviewDialog.setTitle(oDoc.FileName || "Document Image");
+            }
 
-    // Set final image
-    this.byId("docPreviewImage").setSrc(finalSrc);
+            // Set final image
+            this.byId("docPreviewImage").setSrc(finalSrc);
 
-    this._oDocPreviewDialog.open();
-},
+            this._oDocPreviewDialog.open();
+        },
         onApplyCoupon: async function () {
 
             var oCustomerData = this.getView().getModel("CustomerData").getData();
