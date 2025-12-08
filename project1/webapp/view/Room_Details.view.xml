@@ -20,7 +20,7 @@
                 useToolbar="false"
                 clear="RD_onPressClear"
                 showClearOnFB="true"
-                search="RD_onSearch"
+                search="Onsearch"
                 filterChange="IA_.onFilterChange"
                 afterVariantLoad="IA_.onAfterVariantLoad"
                 showFilterConfiguration="false"

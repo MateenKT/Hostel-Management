@@ -20,7 +20,7 @@
                 useToolbar="false"
                 clear="PO_onPressClear"
                 showClearOnFB="true"
-                search="HM_onSearch"
+                search="Onsearch"
                 filterChange="IA_.onFilterChange"
                 afterVariantLoad="IA_.onAfterVariantLoad"
                 showFilterConfiguration="false"
@@ -42,13 +42,13 @@
 				</fb:filterGroupItems>
 				<fb:filterGroupItems>
 					<fb:FilterGroupItem
-                        name="Branch Code"
-                        label="Branch Code"
+                        name="Room Type"
+                        label="Room Type"
                         groupName="Group"
                         visibleInFilterBar="true">
 						<fb:control>
 							<ComboBox id="PO_id_CompanyName" items="{BedDetails>/}" showClearIcon="true">
-								<core:ListItem  key="{BedDetails>BranchCode}"  text="{BedDetails>BranchCode}"/>
+								<core:ListItem  key="{BedDetails>ACType}"  text="{BedDetails>ACType}"/>
 							</ComboBox>
 						</fb:control>
 					</fb:FilterGroupItem>

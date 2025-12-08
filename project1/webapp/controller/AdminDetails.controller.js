@@ -2077,103 +2077,118 @@ this.getView().setModel(oModel, "Availablebedprice");
                 sap.m.MessageToast.show("Document removed");
             }
         },
-        onFileNameLinkPress: function (oEvent) {
+      onFileNameLinkPress: function (oEvent) {
 
-            // Get document object from CustomerData model
-            var oContext = oEvent.getSource().getBindingContext("CustomerData");
-            var oDoc = oContext.getObject();
+    function autoDecodeBase64(b64) {
+        b64 = b64.replace(/\s/g, "");
 
-            if (!oDoc) {
-                sap.m.MessageBox.error("No document found!");
-                return;
-            }
+        let last = b64;
 
-            // Base64 image from model (FileContent or File)
-            var sBase64 = oDoc.FileContent || oDoc.File;
+        // Try decoding multiple times (max 5 to prevent infinite loop)
+        for (let i = 0; i < 5; i++) {
+            try {   
+                let decoded = atob(last);
 
-            if (!sBase64) {
-                sap.m.MessageBox.error("No image found for this document!");
-                return;
-            }
-
-            sBase64 = sBase64.replace(/\s/g, ""); // remove whitespace
-
-            var imagePart = sBase64; // initialize
-
-            if (sBase64.startsWith("iVB")) {
-                imagePart = sBase64;
-                sBase64 = "data:image/png;base64," + imagePart;
-            } else if (sBase64.startsWith("/9j")) {
-                imagePart = sBase64;
-                sBase64 = "data:image/jpeg;base64," + imagePart;
-            } else {
-                // decode only for other cases
-                var decoded = "";
-                try {
-                    decoded = atob(sBase64);
-                } catch (e) {
-                    decoded = sBase64; // fallback if decode fails
+                // If decoded looks like IMAGE base64 → return
+                if (decoded.startsWith("iVB") || decoded.startsWith("/9j")) {
+                    return decoded;
                 }
 
-                imagePart = decoded.includes("base64,") ? decoded.split("base64,")[1] : decoded;
-                sBase64 = "data:image/jpeg;base64," + imagePart; // fallback to JPEG
+                // Continue decoding if possible
+                last = decoded;
+            } catch (e) {
+                break;
             }
+        }
 
+        return last;
+    }
 
-            // --- Create Dialog like onImagePress ---
-            if (!this._oDocPreviewDialog) {
+    // Get document from model
+    var oContext = oEvent.getSource().getBindingContext("CustomerData");
+    var oDoc = oContext.getObject();
 
-                var oFlex = new sap.m.FlexBox({
+    if (!oDoc) {
+        sap.m.MessageBox.error("No document found!");
+        return;
+    }
+
+    var sBase64 = oDoc.FileContent || oDoc.File;
+
+    if (!sBase64) {
+        sap.m.MessageBox.error("No image found for this document!");
+        return;
+    }
+
+    // Auto fix decoding
+    var fixed = autoDecodeBase64(sBase64);
+
+    // Now detect type
+    let finalSrc = "";
+
+    if (fixed.startsWith("iVB")) {
+        finalSrc = "data:image/png;base64," + fixed;
+    } else if (fixed.startsWith("/9j")) {
+        finalSrc = "data:image/jpeg;base64," + fixed;
+    } else {
+        sap.m.MessageBox.error("Unsupported image format!");
+        return;
+    }
+
+    // Create or reuse dialog
+    if (!this._oDocPreviewDialog) {
+
+        var oFlex = new sap.m.FlexBox({
+            width: "100%",
+            height: "100%",
+            renderType: "Div",
+            justifyContent: "Center",
+            alignItems: "Center",
+            items: [
+                new sap.m.Image({
+                    id: this.createId("docPreviewImage"),
+                    densityAware: false,
                     width: "100%",
                     height: "100%",
-                    renderType: "Div",
-                    justifyContent: "Center",
-                    alignItems: "Center",
-                    items: [
-                        new sap.m.Image({
-                            id: this.createId("docPreviewImage"),
-                            densityAware: false,
-                            width: "100%",
-                            height: "100%",
-                            style: "object-fit: contain; display:block; margin:0; padding:0;"
-                        })
-                    ]
-                });
+                    style: "object-fit: contain; display:block;"
+                })
+            ]
+        });
 
-                this._oDocPreviewDialog = new sap.m.Dialog({
-                    title: oDoc.FileName || "Document Image",
-                    contentWidth: "50%",
-                    contentHeight: "60%",
-                    draggable: true,
-                    resizable: true,
-                    horizontalScrolling: false,
-                    verticalScrolling: false,
-                    contentPadding: "0rem",
-                    content: [oFlex],
+        this._oDocPreviewDialog = new sap.m.Dialog({
+            title: oDoc.FileName || "Document Image",
+            contentWidth: "50%",
+            contentHeight: "60%",
+            draggable: true,
+            resizable: true,
+            contentPadding: "0rem",
+            horizontalScrolling: false,
+            verticalScrolling: false,
+            content: [oFlex],
 
-                    beginButton: new sap.m.Button({
-                        text: "Close",
-                        press: function () {
-                            this._oDocPreviewDialog.close();
-                        }.bind(this)
-                    }),
+            beginButton: new sap.m.Button({
+                text: "Close",
+                press: function () {
+                    this._oDocPreviewDialog.close();
+                }.bind(this)
+            }),
 
-                    afterClose: function () {
-                        this._oDocPreviewDialog.destroy();
-                        this._oDocPreviewDialog = null;
-                    }.bind(this)
-                });
+            afterClose: function () {
+                this._oDocPreviewDialog.destroy();
+                this._oDocPreviewDialog = null;
+            }.bind(this)
+        });
 
-                this.getView().addDependent(this._oDocPreviewDialog);
-            } else {
-                this._oDocPreviewDialog.setTitle(oDoc.FileName || "Document Image");
-            }
+        this.getView().addDependent(this._oDocPreviewDialog);
+    } else {
+        this._oDocPreviewDialog.setTitle(oDoc.FileName || "Document Image");
+    }
 
-            // Set image
-            this.byId("docPreviewImage").setSrc(sBase64);
+    // Set final image
+    this.byId("docPreviewImage").setSrc(finalSrc);
 
-            this._oDocPreviewDialog.open();
-        },
+    this._oDocPreviewDialog.open();
+},
         onApplyCoupon: async function () {
 
             var oCustomerData = this.getView().getModel("CustomerData").getData();

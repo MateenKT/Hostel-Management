@@ -635,7 +635,7 @@
 					</FlexBox>
 					<VBox class="sapUiMediumMarginBottom">
 						<Panel
-                            headerText="{= 'Customer Document - ' + ${CustomerData>/CustomerName} }"
+                            headerText="Customer Documents"
                             expandable="false"
                             class="customPanelHeader"
                         >
@@ -650,7 +650,7 @@
                                 inset="false"
                                 selectionChange="onTableSelection"
                                    growing="true"
-    growingScrollToLoad="true"
+                                 growingScrollToLoad="true"
                             >
 							<headerToolbar>
 									<Toolbar>

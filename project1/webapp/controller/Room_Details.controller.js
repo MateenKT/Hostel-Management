@@ -624,7 +624,7 @@ sap.ui.define([
                                 "Room added successfully!" :
                                 "Room updated successfully!"
                             );
-                            this.Onsearch();
+                            this.Onsearch("true");
                             this.BedTypedetails()
 
                              this.AR_Dialog.close();
@@ -691,7 +691,7 @@ sap.ui.define([
                                 // Refresh table + bed details after delete
                                  
                                 await this.BedTypedetails();
-                                await this.Onsearch();
+                                await this.Onsearch("true");
                                 sap.m.MessageToast.show("Selected room(s) deleted successfully!");
 
                                 //  sap.ui.core.BusyIndicator.hide();
@@ -707,29 +707,40 @@ sap.ui.define([
                 }
             );
         },
-        Onsearch: function() {
-                                         sap.ui.core.BusyIndicator.show(0);
+        Onsearch: function(flag) {
+               var oView = this.getView();
 
-            $.ajax({
-                url: "https://rest.kalpavrikshatechnologies.com/HM_Rooms",
-                method: "GET",
-                contentType: "application/json",
-                headers: {
-                    name: "$2a$12$LC.eHGIEwcbEWhpi9gEA.umh8Psgnlva2aGfFlZLuMtPFjrMDwSui",
-                    password: "$2a$12$By8zKifvRcfxTbabZJ5ssOsheOLdAxA2p6/pdaNvv1xy1aHucPm0u"
-                },
-                success: function(response) {
-                    var model = new JSONModel(response.commentData);
-                    this.getView().setModel(model, "RoomDetailsModel");
-                    this._populateUniqueFilterValues(response.commentData);
+            var oFilterBar = oView.byId("RD_id_FilterbarEmployee");
+
+            var oTable = oView.byId("id_ARD_Table");
+            var oBinding = oTable.getBinding("items");
+
+            var sRoomNo = oView.byId("RD_id_CustomerName1").getSelectedKey() || oView.byId("RD_id_CustomerName1").getValue();
+            var sbedtype = oView.byId("RD_id_CompanyName1").getSelectedKey() || oView.byId("RD_id_CompanyName1").getValue();
+
+          var filters={
+
+            }
+
+            if(sRoomNo){
+                 filters.RoomNo=sRoomNo
+            }
+            if(sbedtype){
+                filters.BedTypeName=sbedtype
+            }
+
+             sap.ui.core.BusyIndicator.show(0);
+            this.ajaxReadWithJQuery("HM_Rooms", filters).then((oData) => {
+
+                    if (!this._originalRoomdata || flag==="true") {
+                           this._originalRoomdata = oData.commentData;  
+                             }
+                     var model = new JSONModel(oData.commentData);
+                       this.getView().setModel(model, "RoomDetailsModel");
+                    this._populateUniqueFilterValues(this._originalRoomdata);
                                  sap.ui.core.BusyIndicator.hide();
-                }.bind(this),
-                error: function(err) {
-                     sap.ui.core.BusyIndicator.hide();
-                    sap.m.MessageBox.error("Error uploading data or file.");
-                }
-            });
-        },
+                            })
+                 },
         RD_onSearch: function() {
             var oView = this.getView();
 

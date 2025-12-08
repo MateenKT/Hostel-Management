@@ -190,7 +190,7 @@ sap.ui.define([
                     oView.getModel("tokenModel").setData({
                         tokens: []
                     });
-                    await this.Onsearch();
+                    await this.Onsearch("true");
                     sap.m.MessageToast.show("Bed saved successfully.");
                     this.ARD_Dialog.close();
                 } catch (err) {
@@ -331,25 +331,58 @@ sap.ui.define([
             oRouter.navTo("RouteHostel");
         },
 
-        Onsearch: function() {
-            sap.ui.core.BusyIndicator.show(0); // <-- Show here also (optional but safe)
+       Onsearch: function (flag) {
+    var oView = this.getView();
+    var oTable = oView.byId("id_BedTable");
+    var oBinding = oTable.getBinding("items");
 
-            return this.ajaxReadWithJQuery("HM_BedType", "")
-                .then((oData) => {
-                    const oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
-                    const model = new sap.ui.model.json.JSONModel(oFCIAerData);
+    var sCustomerName = oView.byId("PO_id_CustomerName").getSelectedKey() 
+                     || oView.byId("PO_id_CustomerName").getValue();
+    var sCustomerID = oView.byId("PO_id_CompanyName").getSelectedKey() 
+                    || oView.byId("PO_id_CompanyName").getValue();
 
-                    this.getView().setModel(model, "BedDetails");
-                    this._populateUniqueFilterValues(oFCIAerData);
-                })
-                .catch((err) => {
-                    console.error("Error in search", err);
-                    sap.m.MessageBox.error("Failed to load bed details.");
-                })
-                .finally(() => {
-                    sap.ui.core.BusyIndicator.hide(); // <-- Always executed
-                });
-        },
+    var filters = {};
+
+    if (sCustomerName) filters.Name = sCustomerName;
+    if (sCustomerID) filters.ACType = sCustomerID;
+
+    sap.ui.core.BusyIndicator.show(0);
+
+    return this.ajaxReadWithJQuery("HM_BedType", filters)
+        .then((oData) => {
+
+            const response = Array.isArray(oData.data) ? oData.data : [oData.data];
+
+            if (!this._originalBedData || flag==="true") {
+                this._originalBedData = response;  
+            }
+
+         
+            if (Object.keys(filters).length === 0) {
+                const model = new sap.ui.model.json.JSONModel(this._originalBedData);
+                this.getView().setModel(model, "BedDetails");
+
+                this._populateUniqueFilterValues(this._originalBedData);
+                return;
+            }
+
+          
+            const filteredData = response[0].data;
+
+            const model = new sap.ui.model.json.JSONModel(filteredData);
+            this.getView().setModel(model, "BedDetails");
+
+            this._populateUniqueFilterValues(this._originalBedData);
+        })
+        .catch((err) => {
+            console.error("Error in search", err);
+            sap.m.MessageBox.error("Failed to load bed details.");
+        })
+        .finally(() => {
+            sap.ui.core.BusyIndicator.hide();
+        });
+}
+,
 
         _populateUniqueFilterValues: function(data) {
             let uniqueValues = {
@@ -360,7 +393,7 @@ sap.ui.define([
 
             data.forEach(item => {
                 uniqueValues.PO_id_CustomerName.add(item.Name);
-                uniqueValues.PO_id_CompanyName.add(item.BranchCode);
+                uniqueValues.PO_id_CompanyName.add(item.ACType);
             });
 
             let oView = this.getView();
@@ -466,7 +499,7 @@ sap.ui.define([
                                 // Wait for all deletions to complete
                                 await Promise.all(deletePromises);
 
-                                await this.Onsearch();
+                                await this.Onsearch("true");
                                 sap.m.MessageToast.show("Selected bed(s) deleted successfully!");
 
                             } catch (error) {
