@@ -2002,3 +2002,24 @@ span.sapMBtnInner.sapMBtnEmphasized {
   background: rgba(255,255,255,0.4);
   z-index: 5;
 } */
+.loginBannerBox {
+    background-color: #00b6c6 !important;      /* Light blue */
+    border-radius: 6px;
+    padding: 16px !important;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.loginBannerText {
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.loginBannerButton {
+    /* border: 1px solid #00b6c6 !important; */
+    border-radius: 5px;
+    color: #007bff !important;
+    font-weight: bold !important;
+    background: white !important;
+}

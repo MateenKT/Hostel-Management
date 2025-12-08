@@ -10,6 +10,16 @@ sap.ui.define([
         onInit() {
             var oBtn = this.byId("couponApplyBtn");
             oBtn.setText("Apply Now")
+       var oModel = sap.ui.getCore().getModel("LoginModel");
+    // var userId = oModel.getProperty("/UserID");
+
+    // var oHBox = this.byId("SummaryCouponid");
+
+    // if (userId) {
+    //     oHBox.setVisible(true);   // Show when UserID exists
+    // } else {
+    //     oHBox.setVisible(false);  // Hide when UserID is empty/null
+    // }
             var inputID = this.getView().byId("BookingcouponInput")
              inputID.setShowValueHelp(false)
         },
@@ -327,16 +337,17 @@ sap.ui.define([
                 }
 
                 var StartDate = sap.ui.core.Fragment.byId(sViewId, "FT_id_editStartDate")
-                if (!utils._LCvalidateDate(StartDate, "ID")) {
-                    sap.m.MessageToast.show("Please Select Start Date");
+                  var EndDate = sap.ui.core.Fragment.byId(sViewId, "FT_id_editEndDate")
+                if (!utils._LCvalidateDate(StartDate, "ID")&& !utils._LCvalidateDate(EndDate, "ID")) {
+                    sap.m.MessageToast.show("Please Select Date");
                     return;
                 }
 
-                var EndDate = sap.ui.core.Fragment.byId(sViewId, "FT_id_editEndDate")
-                if (!utils._LCvalidateDate(EndDate, "ID")) {
-                    sap.m.MessageToast.show("Please Select End Date");
-                    return;
-                }
+              
+                // if () {
+                //     sap.m.MessageToast.show("Please Select End Date");
+                //     return;
+                // }
             }
 
             const oUpdatedData = Object.assign({}, oEditModel.getData()); // shallow copy
@@ -955,30 +966,39 @@ sap.ui.define([
                 this._oDocPreviewDialog.close();
             }
         },
-        onTimeChange: function () {
-            const oEditModel = this.getView().getModel("edit");
+      onTimeChange: function (oEvent) {
+    const oEditModel = this.getView().getModel("edit");
+    const oTimePicker = oEvent.getSource(); // StartTime or EndTime field
 
-            const sStart = oEditModel.getProperty("/StartTime"); // example: "09"
-            const sEnd = oEditModel.getProperty("/EndTime");     // example: "12"
+    const sStart = oEditModel.getProperty("/StartTime");
+    const sEnd = oEditModel.getProperty("/EndTime");
 
-            if (!sStart || !sEnd) {
-                oEditModel.setProperty("/TotalTime", "");
-                return;
-            }
+    // If one field is empty, clear total time but remove error
+    if (!sStart || !sEnd) {
+        oEditModel.setProperty("/TotalTime", "");
+        oTimePicker.setValueState("None"); 
+        return;
+    }
 
-            const startHour = parseInt(sStart, 10);
-            const endHour = parseInt(sEnd, 10);
+    const startHour = parseInt(sStart, 10);
+    const endHour = parseInt(sEnd, 10);
 
-            if (endHour < startHour) {
-                sap.m.MessageToast.show("End Time cannot be earlier than Start Time.");
-                oEditModel.setProperty("/TotalTime", "");
-                return;
-            }
+    // Validate
+    if (endHour < startHour) {
+        oTimePicker.setValueState("Error");
+        oTimePicker.setValueStateText("End Time cannot be earlier than Start Time.");
+        oEditModel.setProperty("/TotalTime", "");
+        return;
+    }
 
-            const totalHours = endHour - startHour;
+    // If valid → clear error
+    oTimePicker.setValueState("None");
 
-            oEditModel.setProperty("/TotalTime", totalHours.toString());
-        },
+    // Calculate
+    const totalHours = endHour - startHour;
+    oEditModel.setProperty("/TotalTime", totalHours.toString());
+}
+,
 
 
 

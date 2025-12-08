@@ -78,18 +78,41 @@
                         />
                     </WizardStep>
                     <!-- Step 2: Service Selection -->
-                    <WizardStep
-        id="idStepPersonal1"
-        title="Personal  Information"
-        validated="true"
-        
-    >
+                   <WizardStep
+    id="idStepPersonal1"
+    title="Personal Information"
+    validated="true">
 
-        <ScrollContainer width="100%" height="100%" vertical="true" horizontal="false">
-      
-            <VBox id="idPersonalContainer1" class="sapUiSmallMargin" width="100%"/>
-        </ScrollContainer>
-    </WizardStep>
+    <ScrollContainer width="100%" height="100%" vertical="true" horizontal="false">
+
+        <!-- 🔵 LOGIN BANNER HERE -->
+        <HBox
+            width="100%"
+            alignItems="Center"
+          justifyContent="SpaceBetween"
+        >
+        
+            	<MessageStrip
+				text="Login to prefill traveller details and get access to secret deals"
+				showIcon="true"
+				showCloseButton="false"
+				>
+			</MessageStrip>
+
+            <Button
+                text="LOGIN"
+                type="Emphasized"
+                class="loginBannerButton"
+                press="onPressLoginBanner"
+            />
+        </HBox>
+
+        <!-- Your dynamic content container -->
+        <VBox id="idPersonalContainer1" class="sapUiSmallMargin" width="100%" />
+
+    </ScrollContainer>
+</WizardStep>
+
 
                     <!-- Step 3: Work Scope -->
                     <WizardStep

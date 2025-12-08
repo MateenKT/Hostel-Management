@@ -78,7 +78,7 @@ sap.ui.define([
             oView.setModel(new JSONModel({
                 isOtpSelected: false,
                 isPasswordSelected: true,
-                authFlow: "signin", // [signin, forgot, otp, reset]
+                authFlow: "signin", 
                 isOtpBoxVisible: false
 
             }), "LoginViewModel");
@@ -3370,11 +3370,6 @@ sap.ui.define([
                 sap.ui.core.BusyIndicator.hide();
             }
         },
-
-
-
-
-
         _onVerifyOTP: async function () {
 
             const vm = this.getView().getModel("LoginViewModel");

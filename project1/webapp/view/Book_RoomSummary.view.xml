@@ -72,14 +72,14 @@
         </ColumnListItem>
     </items>
 
-</Table>
+</Table>    
       
       <FlexBox class="custom-flexbox"
                                         direction="Column">
         <!-- Totals for THIS person (NOTE: all RELATIVE, no leading "/") -->
         <VBox class="sapUiSmallMarginTop custom-vbox">
-         <HBox  width="100%" justifyContent="End" alignItems="Center" class="sapUiSmallMarginBottom"
-                                visible="{VisibleModel>/visible}"
+         <HBox id="SummaryCouponid"  width="100%" justifyContent="End" alignItems="Center" class="sapUiSmallMarginBottom"
+                               visible="{= ${LoginModel>/UserID} ? true : false }"
                                >
  
     <!-- Coupon Label -->
@@ -109,7 +109,7 @@
         press="onChangeCouponCode"
         class="sapUiTinyMarginEnd"
         id="couponApplyBtn"
-        visible="{}"
+      
     />
 </HBox>
 <HBox justifyContent="End" >
