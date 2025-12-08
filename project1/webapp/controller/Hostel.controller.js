@@ -2140,14 +2140,16 @@ sap.ui.define([
                 this._oProfileDialog = null;
             }
             sap.ui.getCore().setModel(null, "profileData");
-
+            const oLoginModel = sap.ui.getCore().getModel("LoginModel");
+            if (oLoginModel) {
+                oLoginModel.setData({});
+                console.log("LoginModel after logout:", oLoginModel.getData());
+            }
             this._oLoggedInUser = null;
             this._isProfileRequested = false;
 
             // Reset Login State
             this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", false);
-
-            // Navigate to home
             this.getOwnerComponent().getRouter().navTo("RouteHostel");
         },
 

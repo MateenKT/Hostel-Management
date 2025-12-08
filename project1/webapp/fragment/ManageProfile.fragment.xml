@@ -446,8 +446,12 @@
                     <cells>
                         <Text text="{profileData>InvNo}" />
                         <Text text="{profileData>CustomerName}" />
-                        <Text text="{profileData>TotalAmount}" />
-                        <Text text="{profileData>DueAmount}" />
+                        <Text
+                            text="{ parts: [ 'profileData>TotalAmount', 'profileData>currency' ], formatter: '.Formatter.formatCurrency' }"
+                        />
+                        <Text
+                            text="{ parts: [ 'profileData>DueAmount', 'profileData>currency' ], formatter: '.Formatter.formatCurrency' }"
+                        />
                     </cells>
                 </ColumnListItem>
             </items>
