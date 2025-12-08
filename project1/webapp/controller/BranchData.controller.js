@@ -13,6 +13,7 @@ sap.ui.define([
 
         _onRouteMatched: async function() {
             try {
+                 sap.ui.core.BusyIndicator.show(0);
                 this.i18nModel = this.getView().getModel("i18n").getResourceBundle();
 
                 const oMDmodel = new sap.ui.model.json.JSONModel({
@@ -39,8 +40,6 @@ sap.ui.define([
             } catch (err) {
                 sap.ui.core.BusyIndicator.hide();
                 sap.m.MessageToast.show(err.message || err.responseText);
-            } finally {
-                sap.ui.core.BusyIndicator.hide();
             }
         },
 
