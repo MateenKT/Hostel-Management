@@ -12,11 +12,16 @@
         stretch="{= ${device>/system/phone} }"
         draggable="true"
         resizable="true"
-        class="profileContentBlur loading"
         horizontalScrolling="false"
         contentWidth="{= ${device>/system/phone} ? '100%' : '80%'}"
         initialFocus="id_dialog"
     >
+     <BusyIndicator
+        id="profileBusy"
+        size="2rem"
+        visible="false"
+        class="dialogBusyOverlay"
+    />
         <customHeader>
             <Bar class="barheader">
                 <contentMiddle>
@@ -40,10 +45,6 @@
                 </contentRight>
             </Bar>
         </customHeader>
-        <BusyIndicator
-            class="globalLoader"
-            visible="false"
-        />
         <FlexBox
             direction="Row"
             class="myclass"
@@ -106,10 +107,6 @@
                         <Text text="{profileData>/City}" />
 
                         <m:Label text="Mobile Number" />
-                        <!-- <HBox
-                                renderType="Bare"
-                                visible="{= !${profileData>/isEditMode}}"
-                            > -->
                         <m:Text
                             text="{= ${profileData>/STDCode} + ' ' + ${profileData>/phone}}"
                         />
@@ -299,63 +296,34 @@
                         />
                     </f:content>
                 </f:SimpleForm>
-                <!-- <f:SimpleForm
-                    layout="ColumnLayout"
-                    columnsM="3"
-                    columnsL="4"
-                    visible="{profileData>/isEditMode}"
-                >
-                    <f:content>
-                    <m:Label
-                        text="Address"
-                        required="{profileData>/isEditMode}"
-                    />
-                    
-                <Text
-                    text="{profileData>/address}"
-                    visible="{= !${profileData>/isEditMode}}"
-                    class="sapUiSmallMarginBegin"
-                    width="100%"
-                    wrapping="true"
-
-                />
-                    <TextArea
-                        id="id_address"
-                        maxLength="100"
-                        value="{profileData>/address}"
-                        visible="{profileData>/isEditMode}"
-                        rows="1"
-                        width="100%"
-                        growing="false"
-                    />
-                  </f:content>
-                </f:SimpleForm> -->
             </VBox>
         </FlexBox>
-                    <SearchField
-                        width="250px"
-                        class="sapUiSmallMargin"
-                        liveChange="onGlobalSearch"
-                        placeholder="Search"
+        <OverflowToolbar>
+            <IconTabHeader
+                id="id_tabBar"
+                mode="Inline"
+                select="onTableSelect"
+            >
+                <items>
+                    <IconTabFilter
+                        key="Booking History"
+                        text="Booking History ({profileData>/bookingCount})"
                     />
-                <OverflowToolbar>
-                    <IconTabHeader
-                        mode="Inline"
-                        select="onTableSelect"
-                    >
-                        <items>
-                            <IconTabFilter
-                                key="Booking History"
-                                text="Booking History ({profileData>/bookingCount})"
-                            />
-                            <IconTabFilter
-                                key="Payment"
-                                text="Payment ({= ${profileData>/paymentCount} })"
-                            />
-                        </items>
-                    </IconTabHeader>
-                    <ToolbarSpacer />
-                </OverflowToolbar>
+                    <IconTabFilter
+                        key="Payment"
+                        text="Payment ({= ${profileData>/paymentCount} })"
+                    />
+                </items>
+            </IconTabHeader>
+            <ToolbarSpacer />
+            
+        <SearchField
+            width="250px"
+            class="sapUiSmallMargin"
+            liveChange="onGlobalSearch"
+            placeholder="Search"
+        />
+        </OverflowToolbar>
         <Table
             id="Id_ProfileaTable"
             visible="{= ${profileData>/selectedTab} !== 'Payment' }"
@@ -366,7 +334,7 @@
                     path: 'profileData>/bookings',
                     sorter: [
                         { path: 'bookingGroup', descending: false, group: true },
-                        { path: 'Startdate', descending: true }
+                        { path: 'StartDate', descending: true }
                     ]
                 }"
         >
@@ -404,7 +372,7 @@
                             title="{profileData>customerName}"
                             text="{profileData>BookingID}"
                         />
-                        <Text text="{profileData>Startdate}" />
+                        <Text text="{profileData>StartDate}" />
                         <Text text="{profileData>room}" />
                         <Text
                             text="{ parts: [ 'profileData>amount', 'profileData>currency' ], formatter: '.Formatter.formatCurrency' }"
@@ -446,9 +414,13 @@
                     <cells>
                         <Text text="{profileData>InvNo}" />
                         <Text text="{profileData>CustomerName}" />
-                        <Text
+
+                        <Text text="{path: 'profileData>TotalAmount', formatter: '.Formatter.fromatNumber'} {profileData>currency}"
+                         textAlign="End" />
+
+                        <!-- <Text
                             text="{ parts: [ 'profileData>TotalAmount', 'profileData>currency' ], formatter: '.Formatter.formatCurrency' }"
-                        />
+                        /> -->
                         <Text
                             text="{ parts: [ 'profileData>DueAmount', 'profileData>currency' ], formatter: '.Formatter.formatCurrency' }"
                         />

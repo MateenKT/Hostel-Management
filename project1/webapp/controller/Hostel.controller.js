@@ -1371,7 +1371,7 @@ sap.ui.define([
             this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", false);
         },
 
-        onPressAvatar: async function (oEvent) {
+         onPressAvatar: async function (oEvent) {
             const oUser = this._oLoggedInUser || {};
             const fullUserData = this._oLoggedInUser || {};
             try {
@@ -1442,11 +1442,9 @@ sap.ui.define([
                         room: booking.BedType || "",
                         Startdate: new Date(booking.StartDate).toLocaleDateString("en-GB"),
                         EndDate: booking.EndDate ? new Date(booking.EndDate).toLocaleDateString("en-GB") : "",
-                        StartdateDisplay: new Date(booking.StartDate),
                         amount: booking.RentPrice,
                         status: booking.Status,
                         customerID: booking.CustomerID,
-                        currency: booking.Currency,
                         BookingID: booking.BookingID,
                         bookingGroup: bookingGroup
                     }
@@ -1457,7 +1455,8 @@ sap.ui.define([
                     InvNo: payment.InvNo,
                     CustomerName: payment.CustomerName,
                     TotalAmount: payment.TotalAmount,
-                    DueAmount: payment.DueAmount
+                    DueAmount: payment.DueAmount,
+                    currency: payment.Currency,
                 }));
 
                 const oProfileModel = new JSONModel({
@@ -3347,7 +3346,11 @@ sap.ui.define([
                 this._oLoggedInUser.FileContent = fileContent;
                 this._oLoggedInUser.Photo = "data:image/png;base64," + fileContent;
 
-                sap.m.MessageToast.show("Profile photo updated!");
+                 if (!fileContent) {
+                    sap.m.MessageToast.show("Profile photo removed successfully");
+                } else {
+                    sap.m.MessageToast.show("Profile photo updated successfully");
+                }
 
             } catch (err) {
                 console.error(err);
@@ -3865,24 +3868,6 @@ sap.ui.define([
             const sKey = oEvent.getParameter("key");
             const oModel = this._oProfileDialog.getModel("profileData");
             oModel.setProperty("/selectedTab", sKey);
-            // if (sKey === "Payment") {
-            //     oModel.setProperty("/isTableBusy", true);
-
-            //     const sUserID = this._oLoggedInUser;
-            //     const filter = { UserID: sUserID };
-            //     const response = await this.ajaxReadWithJQuery("HM_ManageInvoice", filter);
-
-            //     const aPayments = response?.value?.map(invoice => ({
-            //         InvNo: invoice.InvNo,
-            //         CustomerName: invoice.CustomerName,
-            //         TotalAmount: invoice.TotalAmount,
-            //         DueAmount: invoice.DueAmount
-            //     }));
-
-            //     oModel.setProperty("/Payments", aPayments);
-            //     oModel.setProperty("/paymentCount", aPayments.length);
-            //     oModel.setProperty("/isTableBusy", false);
-            // }
         }
     });
 });
