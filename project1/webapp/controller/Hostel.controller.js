@@ -78,7 +78,7 @@ sap.ui.define([
             oView.setModel(new JSONModel({
                 isOtpSelected: false,
                 isPasswordSelected: true,
-                authFlow: "signin", 
+                authFlow: "signin",
                 isOtpBoxVisible: false
 
             }), "LoginViewModel");
@@ -1757,8 +1757,8 @@ sap.ui.define([
                 // oProfileModel.refresh(true); 
                 this._oProfileDialog.open();
                 setTimeout(() => {
-                this.byId("id_dialog")?.addStyleClass("dialogBlur");
-            }, 200);
+                    this.byId("id_dialog")?.addStyleClass("dialogBlur");
+                }, 200);
 
                 const filter = { UserID: sUserID }
                 const response = await this.ajaxReadWithJQuery("CustomerAndPayment", filter);
@@ -1972,11 +1972,11 @@ sap.ui.define([
                 });
                 this._oProfileDialog.setModel(oProfileModel, "profileData");
                 oProfileModel.setProperty("/isEditMode", false);
-                oProfileModel.refresh(true); 
+                oProfileModel.refresh(true);
                 this._oProfileDialog.open();
                 setTimeout(() => {
-                this.byId("id_dialog")?.addStyleClass("dialogBlur");
-            }, 200);
+                    this.byId("id_dialog")?.addStyleClass("dialogBlur");
+                }, 200);
 
             } finally {
                 sap.ui.core.BusyIndicator.hide();
@@ -2097,7 +2097,7 @@ sap.ui.define([
             this.getOwnerComponent().getModel("UIModel").setProperty("/isLoggedIn", false);
         },
 
-         _onEnterProfile: async function () {
+        _onEnterProfile: async function () {
             this._oProfileActionSheet.close();
             this._isProfileRequested = true;
             //          const dialog = this.byId("id_dialog");
@@ -2121,7 +2121,7 @@ sap.ui.define([
             // this._oProfileDialog.open();
             // this.byId("id_dialog").addStyleClass("dialogBlur");
             // const oAvatarBtn = this.byId("ProfileAvatar");
-           this.onPressAvatar({ getSource: this.byId("ProfileAvatar") });
+            this.onPressAvatar({ getSource: this.byId("ProfileAvatar") });
 
             // this._oProfileActionSheet.close();
             // this._isProfileRequested = true;
@@ -2726,6 +2726,13 @@ sap.ui.define([
                     );
 
                     const firstRoom = matchingRooms[0];
+                    const getValidPrice = (value) => value && value !== "0.00" && value !== "0";
+
+                    const BasicPrice =
+                        (getValidPrice(firstRoom?.Price) ? " " + firstRoom.Price : "") ||
+                        (getValidPrice(firstRoom?.MonthPrice) ? " " + firstRoom.MonthPrice : "") ||
+                        (getValidPrice(firstRoom?.YearPrice) ? " " + firstRoom.YearPrice : "");
+
                     const price = firstRoom?.Price ? " " + firstRoom.Price : "";
                     const MonthPrice = firstRoom?.MonthPrice ? " " + firstRoom.MonthPrice : "";
                     const YearPrice = firstRoom?.YearPrice ? " " + firstRoom.YearPrice : "";
@@ -2773,6 +2780,7 @@ sap.ui.define([
                         NoOfPerson: room.NoOfPerson,
                         Description: room.Description || "",
                         Price: price,
+                        BasicPrice: BasicPrice,
                         MonthPrice: MonthPrice,
                         YearPrice: YearPrice,
                         Currency: Currency,
@@ -3512,28 +3520,28 @@ sap.ui.define([
         },
 
         onPressAvatarEdit: function (oEvent) {
-                this._oAvatarActionSheet = new sap.m.ActionSheet({
-                    buttons: [
-                        new sap.m.Button({
-                            text: "Take Photo",
-                            icon: "sap-icon://camera",
-                            press: this.onTakePhoto.bind(this)
-                        }),
-                        new sap.m.Button({
-                            text: "Upload from Gallery",
-                            icon: "sap-icon://add-photo",
-                            press: this.onUploadPhoto.bind(this)
-                        }),
-                        new sap.m.Button({
-                            text: "Remove Photo",
-                            icon: "sap-icon://delete",
-                            type: "Reject",
-                            press: this.onRemovePhoto.bind(this)
-                        })
-                    ],
-                    placement: "Bottom"
-                });
-                this.getView().addDependent(this._oAvatarActionSheet);
+            this._oAvatarActionSheet = new sap.m.ActionSheet({
+                buttons: [
+                    new sap.m.Button({
+                        text: "Take Photo",
+                        icon: "sap-icon://camera",
+                        press: this.onTakePhoto.bind(this)
+                    }),
+                    new sap.m.Button({
+                        text: "Upload from Gallery",
+                        icon: "sap-icon://add-photo",
+                        press: this.onUploadPhoto.bind(this)
+                    }),
+                    new sap.m.Button({
+                        text: "Remove Photo",
+                        icon: "sap-icon://delete",
+                        type: "Reject",
+                        press: this.onRemovePhoto.bind(this)
+                    })
+                ],
+                placement: "Bottom"
+            });
+            this.getView().addDependent(this._oAvatarActionSheet);
             this._oAvatarActionSheet.openBy(oEvent.getSource());
         },
 
@@ -4364,7 +4372,7 @@ sap.ui.define([
             vm.setProperty("/canResendOTP", false);
         },
 
-         onGlobalSearch: function (oEvent) {
+        onGlobalSearch: function (oEvent) {
             const sQuery = oEvent.getParameter("newValue");
             const oTable = this.byId("Id_ProfileaTable");
             const oBinding = oTable.getBinding("items");

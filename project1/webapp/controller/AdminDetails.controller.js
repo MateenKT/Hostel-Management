@@ -211,11 +211,11 @@ sap.ui.define([
         },
 
         Facilitysearch: async function (sBranchCode) {
-            const oData = await this.ajaxReadWithJQuery("HM_Facilities", {
+            const oData = await this.ajaxReadWithJQuery("HM_ExtraFacilities", {
                 BranchCode: sBranchCode
             });
 
-            const aFacilities = Array.isArray(oData.data) ? oData.data : [oData.data];
+            const aFacilities = Array.isArray(oData.data.data) ? oData.data.data : [oData.data.data];
 
             const oModel = new sap.ui.model.json.JSONModel(aFacilities);
             this.getView().setModel(oModel, "Facilities");
@@ -2131,8 +2131,8 @@ this.getView().setModel(oModel, "Availablebedprice");
     } else if (fixed.startsWith("/9j")) {
         finalSrc = "data:image/jpeg;base64," + fixed;
     } else {
-        sap.m.MessageBox.error("Unsupported image format!");
-        return;
+        finalSrc=fixed
+    
     }
 
     // Create or reuse dialog

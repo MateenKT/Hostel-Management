@@ -281,15 +281,19 @@
                                         class="bedCardTitle"
                                     />
                                     <Text text="{VisibilityModel>Description}" class="bedCardDesc" />
-                                    <Text text="{parts: ['VisibilityModel>Currency','VisibilityModel>Price'],
+                                    <Text text="{parts: ['VisibilityModel>Currency','VisibilityModel>BasicPrice'],
                                     formatter: '.Formatter.formatStartingPrice'}" class="bedCardPrice"/>
-                                    <HBox justifyContent="Center" alignItems="Center">
-                                        <Button
+                                    <HBox justifyContent="Center" alignItems="Center" class="sapUiTinyMarginTop">
+                                        <!-- <Button
                                             text="View Details"
-                                            type="Default"
                                             press=".viewDetails"
-                                            class="viewBtn"
-                                        />
+                                              class="btnViewDetails"
+                                            /> -->
+                                            <Link
+                                                text="View Details"
+                                                press="viewDetails"
+                                                class="btnViewDetails"
+                                            />
                                     </HBox>
                                 </VBox>
                             </VBox>
