@@ -40,7 +40,10 @@
                 </contentRight>
             </Bar>
         </customHeader>
-        <BusyIndicator id="globalProfileLoader" class="globalLoader" visible="false"/>
+        <BusyIndicator
+            class="globalLoader"
+            visible="false"
+        />
         <FlexBox
             direction="Row"
             class="myclass"
@@ -58,7 +61,6 @@
                 />
                 <Button
                     icon="sap-icon://edit"
-                    id="id_avatarEditBtn"
                     tooltip="Set Profile Photo"
                     press="onPressAvatarEdit"
                     class="avatarEditIcon"
@@ -115,7 +117,11 @@
                         <m:Label text="Gender" />
                         <Text text="{profileData>/gender}" />
                         <m:Label text="Address" />
-                        <Text text="{profileData>/address}" wrapping="true" width="100%" />
+                        <Text
+                            text="{profileData>/address}"
+                            wrapping="true"
+                            width="100%"
+                        />
                     </f:content>
                 </f:SimpleForm>
                 <f:SimpleForm
@@ -130,9 +136,7 @@
                             text="Full Name"
                             required="{profileData>/isEditMode}"
                         />
-                        <Select
-                            selectedKey="{profileData>/Salutation}"
-                        >
+                        <Select selectedKey="{profileData>/Salutation}">
                             <core:Item
                                 key="Mr."
                                 text="Mr."
@@ -194,11 +198,11 @@
                             placeholder="Enter Country"
                             valueStateText="Select Country"
                         >
-                              <core:ListItem
-                        key="{CountryModel>countryName}"
-                        text="{CountryModel>countryName}"
-                        additionalText="{CountryModel>code}"
-                    />
+                            <core:ListItem
+                                key="{CountryModel>countryName}"
+                                text="{CountryModel>countryName}"
+                                additionalText="{CountryModel>code}"
+                            />
                         </ComboBox>
 
                         <m:Label
@@ -214,10 +218,10 @@
                             items="{path:'StateModel>/',length:1000}"
                             selectedKey="{profileData>/State}"
                         >
-                           <core:ListItem
-                        key="{StateModel>stateName}"
-                        text="{StateModel>stateName}"
-                    />
+                            <core:ListItem
+                                key="{StateModel>stateName}"
+                                text="{StateModel>stateName}"
+                            />
                         </ComboBox>
 
                         <m:Label
@@ -231,7 +235,8 @@
                             placeholder="Enter City"
                             showSecondaryValues="true"
                             items="{path:'CityModel>/',length:1000}"
-                            selectedKey="{profileData>/City}" selectionChange="CC_onChangeCity"
+                            selectedKey="{profileData>/City}"
+                            selectionChange="CC_onChangeCity"
                         >
                             <core:ListItem
                                 key="{CityModel>cityName}"
@@ -281,7 +286,10 @@
                                 text="Other"
                             />
                         </ComboBox>
-                        <m:Label text="Address" required="{profileData>/isEditMode}" />
+                        <m:Label
+                            text="Address"
+                            required="{profileData>/isEditMode}"
+                        />
                         <TextArea
                             id="id_address"
                             value="{profileData>/address}"
@@ -324,10 +332,35 @@
                 </f:SimpleForm> -->
             </VBox>
         </FlexBox>
+                    <SearchField
+                        width="250px"
+                        class="sapUiSmallMargin"
+                        liveChange="onGlobalSearch"
+                        placeholder="Search"
+                    />
+                <OverflowToolbar>
+                    <IconTabHeader
+                        mode="Inline"
+                        select="onTableSelect"
+                    >
+                        <items>
+                            <IconTabFilter
+                                key="Booking History"
+                                text="Booking History ({profileData>/bookingCount})"
+                            />
+                            <IconTabFilter
+                                key="Payment"
+                                text="Payment ({= ${profileData>/paymentCount} })"
+                            />
+                        </items>
+                    </IconTabHeader>
+                    <ToolbarSpacer />
+                </OverflowToolbar>
         <Table
             id="Id_ProfileaTable"
-             busy="{profileData>/isTableBusy}"
-             busyIndicatorDelay="0"
+            visible="{= ${profileData>/selectedTab} !== 'Payment' }"
+            busy="{profileData>/isTableBusy}"
+            busyIndicatorDelay="0"
             noDataText="No booking history found"
             items="{
                     path: 'profileData>/bookings',
@@ -337,15 +370,6 @@
                     ]
                 }"
         >
-            <headerToolbar>
-                <OverflowToolbar>
-                    <Title
-                        text="Booking History ({= ${profileData>/bookings}.length})" class="sapUiTopMargin"
-                    />
-                    <ToolbarSpacer />
-                </OverflowToolbar>
-            </headerToolbar>
-
             <columns>
                 <Column demandPopin="true">
                     <Text text="Customer Name" />
@@ -382,8 +406,48 @@
                         />
                         <Text text="{profileData>Startdate}" />
                         <Text text="{profileData>room}" />
-                        <Text text="{ parts: [ 'profileData>amount', 'profileData>currency' ], formatter: '.Formatter.formatCurrency' }" />
-                        <Text text="{profileData>status}" />
+                        <Text
+                            text="{ parts: [ 'profileData>amount', 'profileData>currency' ], formatter: '.Formatter.formatCurrency' }"
+                        />
+                        <ObjectStatus
+                            inverted="false"
+                            text="{profileData>status}"
+                            state="{
+                            path: 'HostelModel>status',
+                              formatter: '.Formatter.formatObjectStatus'
+                                   }"
+                        />
+                    </cells>
+                </ColumnListItem>
+            </items>
+        </Table>
+        <Table
+            id="Id_PaymentTable"
+            visible="{= ${profileData>/selectedTab} === 'Payment' }"
+            items="{ path:'profileData>/Payments' }"
+        >
+            <columns>
+                <Column>
+                    <Text text="Invoice No" />
+                </Column>
+                <Column>
+                    <Text text="Customer Name" />
+                </Column>
+                <Column>
+                    <Text text="Total Amount" />
+                </Column>
+                <Column>
+                    <Text text="Due Amount" />
+                </Column>
+            </columns>
+
+            <items>
+                <ColumnListItem>
+                    <cells>
+                        <Text text="{profileData>InvNo}" />
+                        <Text text="{profileData>CustomerName}" />
+                        <Text text="{profileData>TotalAmount}" />
+                        <Text text="{profileData>DueAmount}" />
                     </cells>
                 </ColumnListItem>
             </items>

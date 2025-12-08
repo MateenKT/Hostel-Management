@@ -658,5 +658,25 @@ sap.ui.define([
             const sCityName = oItem.getKey();
             oModel.setProperty("/baseLocation", sCityName);
         },
+
+        onGlobalSearch: function (oEvent) {
+            const sQuery = oEvent.getParameter("newValue");
+            const oTable = this.byId("id_MD_Table");
+            const oBinding = oTable.getBinding("items");
+
+            let aFilters = [];
+
+            if (sQuery) {
+                aFilters = [
+                    new sap.ui.model.Filter({
+                        filters: [
+                            new sap.ui.model.Filter("Pincode", sap.ui.model.FilterOperator.Contains, sQuery)
+                        ],
+                        and: false
+                    })
+                ];
+            }
+            oBinding.filter(aFilters);
+        },
     })
 });

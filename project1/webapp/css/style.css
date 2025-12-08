@@ -1976,7 +1976,29 @@ span.sapMBtnInner.sapMBtnEmphasized {
     text-align: center !important;
 }
   
-
 #roomDetailID.sapMDialog.sapMDialogStretched {
     width: 100% !important;
 }
+
+.dialogBlur .sapMDialogSection .sapMDialogScrollCont{
+  filter: blur(10px);
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+/* Blur only Dialog inner content */
+/* .profileContentBlur .sapMDialogSection,
+.profileContentBlur .sapMDialogScrollCont {
+  filter: blur(6px);
+  pointer-events: none;
+  opacity: 0.5;   /* adjust if needed */
+/* } */
+
+/* Optional overlay effect (optional) */
+/* .profileContentBlur::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.4);
+  z-index: 5;
+} */
