@@ -14,33 +14,14 @@
 			<core:Fragment fragmentName="sap.ui.com.project1.fragment.Header" type="XML"/>
 		</headerContent>
 		<content>
-			<fb:FilterBar
-                id="HF_id_FilterbarEmployee"
-                persistencyKey="myPersKey"
-                useToolbar="false"
-                clear="FC_onPressClear"
-                showClearOnFB="true"
-                search="FC_onSearch"
-                filterChange="IA_.onFilterChange"
-                afterVariantLoad="IA_.onAfterVariantLoad"
-                showFilterConfiguration="false"
-                filterContainerWidth="auto">
+			<fb:FilterBar id="HF_id_FilterbarEmployee" persistencyKey="myPersKey" useToolbar="false" clear="FC_onPressClear"
+                showClearOnFB="true" search="Onsearch" filterChange="IA_.onFilterChange" afterVariantLoad="IA_.onAfterVariantLoad"
+                showFilterConfiguration="false"  filterContainerWidth="auto">
 				<fb:filterGroupItems>
-					<fb:FilterGroupItem
-                        name="Facility Name"
-                        label="Facility Name"
-                        groupName="Group"
-                        visibleInFilterBar="true">
+					<fb:FilterGroupItem name="FacilityName" label="Facility Name" groupName="Group" visibleInFilterBar="true">
 						<fb:control>
-							<ComboBox
-                                id="HF_id_FacilityName"
-                                items="{HostelFeatures>/}"
-                                showClearIcon="true"
-                            >
-								<core:Item
-                                    key="{HostelFeatures>FacilityName}"
-                                    text="{HostelFeatures>FacilityName}"
-                                />
+							<ComboBox id="HF_id_FacilityName" items="{HostelFeatures>/}" showClearIcon="true">
+								<core:Item key="{HostelFeatures>FacilityName}" text="{HostelFeatures>FacilityName}"/>
 							</ComboBox>
 						</fb:control>
 					</fb:FilterGroupItem>
@@ -53,13 +34,12 @@
                 width="auto"
                 busyIndicatorDelay="0"
                 class="sapUiResponsiveMargin"
-                items="{path:'HostelFeatures>/', sorter: {path: 'BranchCode',descending: false,group: true}}"
-            >
+                items="{path:'HostelFeatures>/', sorter: {path: 'BranchCode',descending: false,group: true}}">
 				<headerToolbar>
 					<OverflowToolbar>
 						<Title text="Hostel Features ({=${HostelFeatures>/}.length})" />
-						<ToolbarSpacer />
-						<Button  text="Add Hostel Features" press="HM_AddHostelFeature" class="myUnifiedBtn"/>
+						<ToolbarSpacer/>
+						<Button text="Add Hostel Features" press="HM_AddHostelFeature" class="myUnifiedBtn"/>
 						<Button text="Edit"  press="HM_EditHostelFeature" class="myUnifiedBtn"/>
 						<Button text="Delete" press="HM_DeleteHostelFeature" class="myUnifiedBtn"/>
 					</OverflowToolbar>

@@ -1,5 +1,4 @@
-<mvc:View
-    controllerName="sap.ui.com.project1.controller.Facilitis"
+<mvc:View controllerName="sap.ui.com.project1.controller.Facilitis"
 	xmlns:mvc="sap.ui.core.mvc"
 	xmlns="sap.m"
 	xmlns:m="sap.m"
@@ -8,66 +7,31 @@
 	xmlns:core="sap.ui.core"
     displayBlock="true"
     height="100%"
-    busyIndicatorDelay="0"
->
+    busyIndicatorDelay="0">
 	<Page showHeader="true">
 		<headerContent>
-			<core:Fragment
-                fragmentName="sap.ui.com.project1.fragment.Header"
-                type="XML"
-            />
+			<core:Fragment fragmentName="sap.ui.com.project1.fragment.Header" type="XML"/>
 		</headerContent>
 		<content>
-			<fb:FilterBar
-                id="FO_id_FilterbarEmployee"
-                persistencyKey="myPersKey"
-                useToolbar="false"
-                clear="FC_onPressClear"
-                showClearOnFB="true"
-                search="FC_onSearch"
-                filterChange="IA_.onFilterChange"
-                afterVariantLoad="IA_.onAfterVariantLoad"
-                showFilterConfiguration="false"
-                filterContainerWidth="auto"
-            >
+			<fb:FilterBar id="FO_id_FilterbarEmployee" persistencyKey="myPersKey" useToolbar="false"
+                clear="FC_onPressClear" showClearOnFB="true" search="FC_onSearch" filterChange="IA_.onFilterChange"
+                afterVariantLoad="IA_.onAfterVariantLoad" showFilterConfiguration="false" filterContainerWidth="auto">
 				<fb:filterGroupItems>
-					<fb:FilterGroupItem
-                        name="FacilityName"
-                        label="Facility Name"
-                        groupName="Group"
-                        visibleInFilterBar="true"
-                    >
+					<fb:FilterGroupItem name="FacilityName" label="Facility Name" groupName="Group" visibleInFilterBar="true">
 						<fb:control>
-							<ComboBox
-                                id="FN_id_FacilityName"
-                                items="{facilitiesDataModelInitial>/}"
-                                showClearIcon="true" busyIndicatorDelay="0"
-                            >
-								<core:Item
-                                    key="{facilitiesDataModelInitial>FacilityName}"
-                                    text="{facilitiesDataModelInitial>FacilityName}"
-                                />
+							<ComboBox id="FN_id_FacilityName" items="{facilitiesDataModelInitial>/}"
+                                showClearIcon="true" busyIndicatorDelay="0">
+								<core:Item key="{facilitiesDataModelInitial>FacilityName}"
+                                    text="{facilitiesDataModelInitial>FacilityName}"/>
 							</ComboBox>
 						</fb:control>
 					</fb:FilterGroupItem>
 				</fb:filterGroupItems>
 				<fb:filterGroupItems>
-					<fb:FilterGroupItem
-                        name="BranchCode"
-                        label="Branch Code"
-                        groupName="Group"
-                        visibleInFilterBar="true" 
-                    >
+					<fb:FilterGroupItem name="BranchCode" label="Branch Code" groupName="Group" visibleInFilterBar="true" >
 						<fb:control>
-							<ComboBox
-                                id="FN_id_BranchCode"
-                                items="{branchDataModelInitial>/}"
-                                showClearIcon="true" busyIndicatorDelay="0"
-                            >
-								<core:ListItem
-                                    key="{branchDataModelInitial>BranchCode}"
-                                    text="{branchDataModelInitial>BranchCode}"
-                                />
+							<ComboBox id="FN_id_BranchCode" items="{branchDataModelInitial>/}" showClearIcon="true" busyIndicatorDelay="0">
+							<core:ListItem key="{branchDataModelInitial>BranchCode}" text="{branchDataModelInitial>BranchCode}"/>
 							</ComboBox>
 						</fb:control>
 					</fb:FilterGroupItem>
@@ -84,7 +48,7 @@
 				<headerToolbar>
 					<OverflowToolbar>
 						<Title text="Facilities ({=${Facilities>/}.length})" />
-						<ToolbarSpacer />
+						<ToolbarSpacer/>
 						<Button text="Add Facility" press="FD_RoomDetails" class="myUnifiedBtn"/>
 						<Button text="Delete" press="HM_DeleteDetails" class="myUnifiedBtn"/>
 					</OverflowToolbar>
@@ -96,16 +60,16 @@
 					<Column demandPopin="true">
 						<Text text="Type" />
 					</Column>
-					<Column demandPopin="true">
+					<Column demandPopin="true" minScreenWidth="Tablet">
 						<Text text="Hourly Price" />
 					</Column>
-					<Column demandPopin="true">
+					<Column demandPopin="true" minScreenWidth="Tablet">
 						<Text text="Daily Price" />
 					</Column>
-					<Column demandPopin="true">
+					<Column demandPopin="true" minScreenWidth="Tablet">
 						<Text text="Monthly Price" />
 					</Column>
-					<Column demandPopin="true">
+					<Column demandPopin="true" minScreenWidth="Tablet">
 						<Text text="Yearly Price" />
 					</Column>
 				</columns>
@@ -113,7 +77,7 @@
 					<ColumnListItem type="Navigation" press="FD_onFacilityRowPress">
 						<cells>
 							<Text text="{Facilities>FacilityName}" />
-							<Text text="{Facilities>Type}" />
+							<Text text="{Facilities>Type}"/>
 							<Text text="{parts: ['Facilities>PerHourPrice','Facilities>Currency'],
 									formatter: '.Formatter.formatPrice'}"/>
 							<Text text="{parts: ['Facilities>PerDayPrice','Facilities>Currency'],
