@@ -42,7 +42,7 @@ sap.ui.define([
         },
         TileV_onpressextrafacilities: function() {
             var oRouter = this.getOwnerComponent().getRouter();
-            oRouter.navTo("RouteFacilitis");
+            oRouter.navTo("RouteFacilitis", {value: "Facilities", });
         },
         TileV_onpressBedImages: function() {
             var oRouter = this.getOwnerComponent().getRouter();
@@ -72,5 +72,6 @@ sap.ui.define([
             var oRouter = this.getOwnerComponent().getRouter();
             oRouter.navTo("RouteCouponDetails");
         },	
+
     })
 })

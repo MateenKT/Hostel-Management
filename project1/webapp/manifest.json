@@ -160,7 +160,7 @@
         },
         {
           "name": "RouteFacilitis",
-          "pattern": "Facilities",
+          "pattern": "Facilities/{value}",
           "target": [
             "TargetFacilitis"
           ]

@@ -32,7 +32,7 @@
             >
 				<fb:filterGroupItems>
 					<fb:FilterGroupItem
-                        name="Facility Name"
+                        name="FacilityName"
                         label="Facility Name"
                         groupName="Group"
                         visibleInFilterBar="true"
@@ -40,12 +40,12 @@
 						<fb:control>
 							<ComboBox
                                 id="FN_id_FacilityName"
-                                items="{Facilities>/}"
+                                items="{facilitiesDataModelInitial>/}"
                                 showClearIcon="true" busyIndicatorDelay="0"
                             >
 								<core:Item
-                                    key="{Facilities>FacilityName}"
-                                    text="{Facilities>FacilityName}"
+                                    key="{facilitiesDataModelInitial>FacilityName}"
+                                    text="{facilitiesDataModelInitial>FacilityName}"
                                 />
 							</ComboBox>
 						</fb:control>
@@ -53,7 +53,7 @@
 				</fb:filterGroupItems>
 				<fb:filterGroupItems>
 					<fb:FilterGroupItem
-                        name="Branch Code"
+                        name="BranchCode"
                         label="Branch Code"
                         groupName="Group"
                         visibleInFilterBar="true" 
@@ -61,12 +61,12 @@
 						<fb:control>
 							<ComboBox
                                 id="FN_id_BranchCode"
-                                items="{Facilities>/}"
+                                items="{branchDataModelInitial>/}"
                                 showClearIcon="true" busyIndicatorDelay="0"
                             >
 								<core:ListItem
-                                    key="{Facilities>BranchCode}"
-                                    text="{Facilities>BranchCode}"
+                                    key="{branchDataModelInitial>BranchCode}"
+                                    text="{branchDataModelInitial>BranchCode}"
                                 />
 							</ComboBox>
 						</fb:control>

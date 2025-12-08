@@ -1,11 +1,8 @@
 sap.ui.define([
     "./BaseController",
-    "sap/m/MessageBox",
     "../utils/validation",
-    "sap/ui/model/json/JSONModel",
-    "sap/ui/model/odata/type/Currency",
     "../model/formatter",
-], function(BaseController, MessageBox, utils, JSONModel, Currency, Formatter) {
+], function(BaseController, utils, Formatter) {
     "use strict";
     return BaseController.extend("sap.ui.com.project1.controller.Facilitis", {
         Formatter: Formatter,
@@ -13,33 +10,39 @@ sap.ui.define([
             this.getOwnerComponent().getRouter().getRoute("RouteFacilitis").attachMatched(this._onRouteMatched, this);
         },
 
-        _onRouteMatched: async function() {
+        _onRouteMatched: async function(oEvent) {
+            this.i18nModel = this.getView().getModel("i18n").getResourceBundle(); // Get i18n model
+
+            var model = new sap.ui.model.json.JSONModel({
+                BranchCode: "",
+                Type: "",
+                PerHourPrice: "",
+                PerDayPrice: "",
+                PerMonthPrice: "",
+                PerYearPrice: "",
+                FacilityName: ""
+            });
+            this.getView().setModel(model, "FacilitiesModel")
+
+            const oTokenModel = new sap.ui.model.json.JSONModel({
+                tokens: []
+            });
+            const oUploaderData = new sap.ui.model.json.JSONModel({
+                attachments: []
+            });
+
+            this.getView().setModel(oTokenModel, "tokenModel");
+            this.getView().setModel(oUploaderData, "UploaderData");
+            this.onClearAndSearch("FO_id_FilterbarEmployee");
+            await this._loadBranchCode()
+            this.oValue = oEvent.getParameter("arguments").value;
             try {
-                this.i18nModel = this.getView().getModel("i18n").getResourceBundle(); // Get i18n model
-
-                var model = new sap.ui.model.json.JSONModel({
-                    BranchCode: "",
-                    Type: "",
-                    PerHourPrice: "",
-                    PerDayPrice: "",
-                    PerMonthPrice: "",
-                    PerYearPrice: "",
-                    FacilityName: ""
-                });
-                this.getView().setModel(model, "FacilitiesModel")
-
-                const oTokenModel = new sap.ui.model.json.JSONModel({
-                    tokens: []
-                });
-                const oUploaderData = new sap.ui.model.json.JSONModel({
-                    attachments: []
-                });
-
-                this.getView().setModel(oTokenModel, "tokenModel");
-                this.getView().setModel(oUploaderData, "UploaderData");
-                this.onClearAndSearch("FO_id_FilterbarEmployee");
-                await this._loadBranchCode()
-                await this.Onsearch()
+                if (this.oValue === "Facilities") {
+                    await this.readCallForFacilities("Initial");
+                    this.FC_onPressClear(); // Clear the filter bar
+                } else {
+                    await this.FC_onSearch(); // Filter function for trainee
+                }
             } catch (err) {
                 sap.ui.core.BusyIndicator.hide();
                 sap.m.MessageToast.show(err.message || err.responseText);
@@ -48,25 +51,68 @@ sap.ui.define([
             }
         },
 
+        FC_onSearch: async function() {
+            var aFilterItems = this.byId("FO_id_FilterbarEmployee").getFilterGroupItems();
+            var params = {};
+            aFilterItems.forEach(function(oItem) {
+                var oControl = oItem.getControl();
+                if (oControl && oControl.getValue) {
+                    var sKey = oItem.getName();
+                    var sValue = oControl.getValue();
+                    if (sValue) params[sKey] = sValue;
+                }
+            });
+            await this.readCallForFacilities(params).then(() => {}).catch((error) => {
+                MessageToast.show(error.message || error.responseText);
+            }).finally(() => {
+                sap.ui.core.BusyIndicator.hide();
+            });
+        },
+
+        readCallForFacilities: async function(filter) {
+            sap.ui.core.BusyIndicator.show(0);
+            await this.ajaxReadWithJQuery("HM_ExtraFacilities", filter).then((oData) => {
+                let responseData = [];
+                if (Array.isArray(oData.data)) {
+                    responseData = oData.data;
+                } else if (oData.data && Array.isArray(oData.data.data)) {
+                    responseData = oData.data.data;
+                } else {
+                    responseData = [oData.data]; // fallback single object
+                }
+
+                var oFCIAerData = responseData;
+                this.getOwnerComponent().setModel(new sap.ui.model.json.JSONModel(oFCIAerData), "Facilities");
+               
+                if (filter === "Initial") {  // For Initial load only
+                    var facilitiesData = [...new Map(oFCIAerData.filter(item => item.FacilityName) // Unique FacilityName
+                        .map(item => [item.FacilityName.trim(), item])).values()];
+                    this.getView().setModel( new sap.ui.model.json.JSONModel(facilitiesData),
+                        "facilitiesDataModelInitial");
+                }
+
+                var branchData = [...new Map(oFCIAerData.filter(item => item.BranchCode)  // BranchCode unique list
+                    .map(item => [item.BranchCode.trim(), item])).values()];
+                this.getView().setModel(new sap.ui.model.json.JSONModel(branchData),
+                    "branchDataModelInitial");
+            }).catch((error) => {
+                sap.m.MessageToast.show(error.message || error.responseText);
+            }).finally(() => {
+                sap.ui.core.BusyIndicator.hide();
+            });
+        },
+
         _loadBranchCode: async function() {
             sap.ui.core.BusyIndicator.show(0);
             try {
-                const oView = this.getView();
-
                 const oResponse = await this.ajaxReadWithJQuery("HM_Branch", {});
-
-                const aBranches = Array.isArray(oResponse?.data) ?
-                    oResponse.data :
-                    (oResponse?.data ? [oResponse.data] : []);
-
+                const aBranches = Array.isArray(oResponse?.data) ? oResponse.data : (oResponse?.data ? [oResponse.data] : []);
                 const oBranchModel = new sap.ui.model.json.JSONModel(aBranches);
-                oView.setModel(oBranchModel, "BranchModel");
+                this.getView().setModel(oBranchModel, "BranchModel");
             } catch (err) {
                 sap.ui.core.BusyIndicator.hide();
                 sap.m.MessageToast.show(err.message || err.responseText);
-            } finally {
-                sap.ui.core.BusyIndicator.hide();
-            }
+            } 
         },
 
         FD_RoomDetails: function(oEvent) {
@@ -176,6 +222,7 @@ sap.ui.define([
                 sap.m.MessageBox.error("Please upload at least one image.");
                 return;
             }
+
             if (attachments.length > 3) {
                 sap.m.MessageBox.error("You can upload a maximum of 3 images only.");
                 return;
@@ -213,18 +260,12 @@ sap.ui.define([
 
             sap.ui.core.BusyIndicator.show(0);
             try {
-                await this.ajaxCreateWithJQuery("HM_ExtraFacilities", {
-                    data: oData
-                });
+                await this.ajaxCreateWithJQuery("HM_ExtraFacilities", {data: oData});
                 sap.m.MessageToast.show("Facility added successfully!");
-                oView.getModel("UploaderData").setData({
-                    attachments: []
-                });
-                oView.getModel("tokenModel").setData({
-                    tokens: []
-                });
-                await this.Onsearch();
+                oView.getModel("UploaderData").setData({ attachments: [] });
+                oView.getModel("tokenModel").setData({ tokens: [] });
                 this.ARD_Dialog.close();
+                return this.readCallForFacilities("Initial");
             } catch (err) {
                 sap.ui.core.BusyIndicator.hide();
                 sap.m.MessageToast.show(err.message || err.responseText);
@@ -235,7 +276,7 @@ sap.ui.define([
 
         _resetFacilityValueStates: function() {
             var oView = this.getView();
-            var aFields = ["idRoomType123", "idFacilityName", "idFacilityName1", "FL_id_Currency", "idPerHourPrice", 
+            var aFields = ["idRoomType123", "idFacilityName", "idFacilityName1", "FL_id_Currency", "idPerHourPrice",
                 "idPerDayPrice", "idPerMonthPrice", "idPerYearPrice"
             ];
             aFields.forEach(function(sId) {
@@ -316,7 +357,7 @@ sap.ui.define([
             oUploaderData.setProperty("/attachments", aAttachments);
         },
 
-        onFacilityFileChange: function (oEvent) {
+        onFacilityFileChange: function(oEvent) {
             const oFiles = oEvent.getParameter("files");
             if (!oFiles || oFiles.length === 0) return;
 
@@ -338,12 +379,12 @@ sap.ui.define([
             const aSelectedFiles = Array.from(oFiles).slice(0, iAvailableSlots);
 
             aSelectedFiles.forEach((oFile) => {
-                  if (oFile.size > 2 * 1024 * 1024) {
-            sap.m.MessageToast.show(`"${oFile.name}" exceeds 2 MB size limit.`);
-            return;
-        }
+                if (oFile.size > 2 * 1024 * 1024) {
+                    sap.m.MessageToast.show(`"${oFile.name}" exceeds 2 MB size limit.`);
+                    return;
+                }
                 const bIsDuplicate = aAttachments.some(att =>
-                    att.filename === oFile.name   // filename duplicate
+                    att.filename === oFile.name // filename duplicate
                 );
 
                 if (bIsDuplicate) {
@@ -396,62 +437,6 @@ sap.ui.define([
             const sizes = ["Bytes", "KB", "MB", "GB"];
             let i = Math.floor(Math.log(bytes) / Math.log(1024));
             return (bytes / Math.pow(1024, i)).toFixed(1) + " " + sizes[i];
-        },
-
-        Onsearch: function() {
-            sap.ui.core.BusyIndicator.show(0);
-            this.ajaxReadWithJQuery("HM_ExtraFacilities", "").then((oData) => {
-                var oFCIAerData = Array.isArray(oData.data) ? oData.data : [oData.data];
-                var model = new sap.ui.model.json.JSONModel(oFCIAerData);
-                this.getView().setModel(model, "Facilities")
-                var model = new sap.ui.model.json.JSONModel(oFCIAerData);
-                this.getView().setModel(model, "Testing")
-                this._populateUniqueFilterValues(oFCIAerData);
-                sap.ui.core.BusyIndicator.hide();
-            })
-        },
-
-        _populateUniqueFilterValues: function(data) {
-            let uniqueValues = {
-                FN_id_FacilityName: new Set(),
-                FN_id_BranchCode: new Set()
-            };
-
-            data.forEach(item => {
-                uniqueValues.FN_id_FacilityName.add(item.FacilityName);
-                uniqueValues.FN_id_BranchCode.add(item.BranchCode);
-            });
-
-            let oView = this.getView();
-            ["FN_id_FacilityName", "FN_id_BranchCode"].forEach(field => {
-                let oComboBox = oView.byId(field);
-                oComboBox.destroyItems();
-                Array.from(uniqueValues[field]).sort().forEach(value => {
-                    oComboBox.addItem(new sap.ui.core.Item({
-                        key: value,
-                        text: value
-                    }));
-                });
-            });
-        },
-
-        FC_onSearch: function() {
-            var oView = this.getView();
-            var oTable = oView.byId("id_facilityTable");
-            var oBinding = oTable.getBinding("items");
-
-            var sCustomerName = oView.byId("FN_id_FacilityName").getSelectedKey() || oView.byId("FN_id_FacilityName").getValue();
-            var sCustomerID = oView.byId("FN_id_BranchCode").getSelectedKey() || oView.byId("FN_id_BranchCode").getValue();
-
-            var aFilters = [];
-            if (sCustomerName) {
-                aFilters.push(new sap.ui.model.Filter("FacilityName", sap.ui.model.FilterOperator.Contains, sCustomerName));
-            }
-            if (sCustomerID) {
-                aFilters.push(new sap.ui.model.Filter("BranchCode", sap.ui.model.FilterOperator.Contains, sCustomerID));
-            }
-            var oCombinedFilter = new sap.ui.model.Filter({filters: aFilters, and: true});
-            oBinding.filter(oCombinedFilter);
         },
 
         FC_onPressClear: function() {
@@ -512,8 +497,8 @@ sap.ui.define([
                                 });
 
                                 await Promise.all(aDeletePromises);
-                                sap.m.MessageToast.show("Selected facilities deleted successfully!");
-                                await that.Onsearch(); // refresh table
+                                sap.m.MessageToast.show("facilities deleted successfully!");
+                                return that.readCallForFacilities("Initial");
                             } catch (err) {
                                 sap.ui.core.BusyIndicator.hide();
                                 sap.m.MessageToast.show(err.message || err.responseText);
