@@ -93,7 +93,7 @@
         >
         
             	<MessageStrip
-				text="Login to prefill traveller details and get access to secret deals"
+				text="Login to prefill personal details and get access to secret deals"
 				showIcon="true"
 				showCloseButton="false"
 				>

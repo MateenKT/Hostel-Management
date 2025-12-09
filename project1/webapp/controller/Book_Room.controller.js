@@ -18,7 +18,10 @@ sap.ui.define([
     onInit: function () {
        this.getOwnerComponent().getRouter().getRoute("RouteBookRoom").attachMatched(this._onRouteMatched, this);
     },
+  
+  
     _onRouteMatched: function(){
+        var oView = this.getView()
       const oUserModel = sap.ui.getCore().getModel("LoginModel");
       if (oUserModel) {
         this._oLoggedInUser = oUserModel.getData();
@@ -29,6 +32,17 @@ sap.ui.define([
       if (!oHostelModel.getProperty("/SelectedMonths")) {
     oHostelModel.setProperty("/SelectedMonths", "1");
   }
+
+   oView.setModel(new JSONModel({
+                fullname: "",
+                Email: "",
+                Mobileno: "",
+                password: "",
+                comfirmpass: ""
+            }), "LoginMode");
+            oView.setModel(new JSONModel({
+                selectedSection: "profile"
+            }), "profileSectionModel");
   
       if (!oHostelModel) {
         // If not found, create a fallback model
@@ -167,17 +181,8 @@ oHostelModel.setProperty("/SelectedPerson", "1");
             // Add only your required properties (safe, isolated)
             vm.setProperty("/loginMode", "password");   // "password" or "otp"
             vm.setProperty("/showOTPField", false);     // show OTP input box only after Send OTP success
-             vm.setProperty("/authFlow", "signin");
             vm.setProperty("/isOtpEntered", false); 
-             oView.setModel(new JSONModel({
-                CustomerName: "",
-                MobileNo: "",
-                Gender: "",
-                DateOfBirth: "",
-                CustomerEmail: "",
-                RoomType: ""
-            }), "HostelModel");
-            oView.setModel(new JSONModel({ isEditMode: false }), "saveModel");
+            this.getView().setModel(new JSONModel({ isEditMode: false }), "saveModel");
 
              vm.setProperty("/canResendOTP", true);
             vm.setProperty("/otpTimer", 0);
@@ -368,7 +373,7 @@ _handleLoginAndAutofill: function () {
         sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInusername")?.setValue("").setValueState("None");
         sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signinPassword")?.setValue("").setValueState("None");
         sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signInuserid")?.setValue("").setValueState("None");
-        sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signupvisible")?.setVisible(false);
+        // sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signupvisible")?.setVisible(false);
 
         this._oLoginAlertDialog.open();
         return false; // Not logged in
@@ -1135,8 +1140,6 @@ _createDynamicPersonsUI: function () {
         f => f.FacilityName === facility.FacilityName
     );
   
-
-
     // If selected → REMOVE it
     if (existsIndex > -1) {
 
@@ -1230,45 +1233,46 @@ if (oModel) oModel.refresh(true);
 },
 _createFacilityActionSheet: function (facility, iPersonIndex, oCard) {
     const that = this;
-    const oModel = this.getView().getModel("HostelModel");
 
     if (this._oFacilityActionSheet) {
         this._oFacilityActionSheet.destroy();
     }
 
+    const aButtons = [];
+
+    function addButton(price, label) {
+        // Convert string to number
+        const num = Number(price);
+
+        // Show button ONLY IF:
+        // - price is not empty
+        // - price is not null
+        // - price is a valid number
+        // - price >= 0
+        if (price !== "" && price !== null && Number.isFinite(num) && num >= 0) {
+            aButtons.push(
+                new sap.m.Button({
+                    text: `${label} – ${num} ${facility.Currency}`,
+                    press: () => that._setFacilitySelectedPrice(facility, label, num, iPersonIndex, oCard)
+                })
+            );
+        }
+    }
+
+    addButton(facility.PricePerHour, "Per Hour");
+    addButton(facility.PricePerDay, "Per Day");
+    addButton(facility.PricePerMonth, "Per Month");
+    addButton(facility.PricePerYear, "Per Year");
+
     this._oFacilityActionSheet = new sap.m.ActionSheet({
         placement: sap.m.PlacementType.Top,
-        buttons: [
-            new sap.m.Button({
-                text: "Per Hour – " + facility.PricePerHour + " " + facility.Currency,
-                press: function () {
-                    that._setFacilitySelectedPrice(facility, "Per Hour", facility.PricePerHour, iPersonIndex, oCard);
-                }
-            }),
-            new sap.m.Button({
-                text: "Per Day – " + facility.PricePerDay + " " + facility.Currency,
-                press: function () {
-                    that._setFacilitySelectedPrice(facility, "Per Day", facility.PricePerDay, iPersonIndex, oCard);
-                }
-            }),
-            new sap.m.Button({
-                text: "Per Month – " + facility.PricePerMonth + " " + facility.Currency,
-                press: function () {
-                    that._setFacilitySelectedPrice(facility, "Per Month", facility.PricePerMonth, iPersonIndex, oCard);
-                }
-            }),
-            new sap.m.Button({
-                text: "Per Year – " + facility.PricePerYear + " " + facility.Currency,
-                press: function () {
-                    that._setFacilitySelectedPrice(facility, "Per Year", facility.PricePerYear, iPersonIndex, oCard);
-                }
-            })
-        ]
+        buttons: aButtons
     });
 
     this.getView().addDependent(this._oFacilityActionSheet);
     return this._oFacilityActionSheet;
 },
+
 
 _setFacilitySelectedPrice: function (facility, selectedType, selectedPrice, iPersonIndex, oCard) {
     const oModel = this.getView().getModel("HostelModel");
@@ -2768,7 +2772,6 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
                 }
             };
 
-
             console.log("SignUp Payload:", payload);
             sap.ui.core.BusyIndicator.show(0);
             try {
@@ -3328,7 +3331,11 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
     if (isPayOnCheckIn) {
         // No payment needed now
         oPaymentModel.setProperty("/PaymentType", "PayOnCheckIn");
-        oPaymentModel.setProperty("/Amount", oHostelModel.getProperty("/FinalTotalCost"));
+       oPaymentModel.setProperty(
+    "/Amount",
+    Number(oHostelModel.getProperty("/FinalTotalCost")).toFixed(2)
+);
+
         oPaymentModel.setProperty("/PaymentDate", "");
         return;
     }
@@ -3336,7 +3343,11 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
     // For UPI and CARD
     oPaymentModel.setProperty("/PaymentType", isUPI ? "UPI" : "CARD");
     oPaymentModel.setProperty("/PaymentDate", this.Formatter.formatDate(new Date()));
-    oPaymentModel.setProperty("/Amount", oHostelModel.getProperty("/FinalTotalCost"));
+   oPaymentModel.setProperty(
+    "/Amount",
+    Number(oHostelModel.getProperty("/FinalTotalCost")).toFixed(2)
+);
+
 },
 
 
@@ -3765,150 +3776,106 @@ this._navigateAfterBooking();
                         new sap.m.Button({
                             text: "Enter into Profile",
                             icon: "sap-icon://customer",
-                            class: "myUnifiedBtn",
                             press: this._onEnterProfile.bind(this)
                         }).addStyleClass("myUnifiedBtn"),
 
                         new sap.m.Button({
                             text: "Logout",
-                            class: "myUnifiedBtn",
                             icon: "sap-icon://log",
                             press: this._onLogout.bind(this)
                         }).addStyleClass("myUnifiedBtn")
                     ]
                 });
-
                 this.getView().addDependent(this._oProfileActionSheet);
             }
         },
-       onPressAvatar: async function (oEvent) {
+     onPressAvatar: async function (oEvent) {
             const oUser = this._oLoggedInUser || {};
             const fullUserData = this._oLoggedInUser || {};
-            console.log(" FULL HM_Login DATA:", fullUserData);
             try {
                 const sUserID = oUser.UserID || "";
                 if (!sUserID) {
                     sap.m.MessageToast.show("User not logged in.");
                     return;
                 }
-                const filter = {
-                    UserID: sUserID
-                };
+
                 // if (!this._isProfileRequested) {
                 //     this.createAvatarActionSheet();
                 //     this._oProfileActionSheet.openBy(oEvent.getSource());
                 //     return;
                 // }
                 this._isProfileRequested = false;
-                //  Fetch only the logged-in user's data
-                sap.ui.core.BusyIndicator.show(0);
-                const response = await this.ajaxReadWithJQuery("HM_Customer", filter);
-                // Handle correct structure
-                const aCustomers = response?.commentData || response?.Customers || response?.value || [];
 
-                if (!Array.isArray(aCustomers) || aCustomers.length === 0) {
-                    sap.m.MessageToast.show("No customer data found for this user.");
-                }
-
-                const aCustomerDetails = aCustomers.flatMap(response => ({
-                    city: response.City,
-                    country: response.Country,
-                    customerID: response.CustomerID,
-                    salutation: response.Salutation,
-                    customerName: response.CustomerName,
-                    mobileno: response.MobileNo,
-                    stdCode: response.STDCode,
-                    state: response.State,
-                    countryCode: response.CountryCode,
-                    customerEmail: response.CustomerEmail,
-                    DOB: response.DateOfBirth,
-                    gender: response.Gender,
-                    Address: response.PermanentAddress
-
-                }));
-                // Combine all bookings from all customers
-                const aAllBookings = aCustomers.flatMap(customer =>
-                    Array.isArray(customer.Bookings) ? customer.Bookings : []
-                );
-                const aAllFacilitis = aCustomers.flatMap(customer =>
-                    Array.isArray(customer.FaciltyItems) ? customer.FaciltyItems : []
-                );
-                let aBookingData = [];
-                const today = new Date();
-                today.setHours(0, 0, 0, 0); // avoid timezone issues
-
-                if (aAllBookings.length === 0) {
-                } else {
-                    aBookingData = aAllBookings.map(booking => {
-                        const oStart = booking.StartDate ? new Date(booking.StartDate) : null;
-                        if (oStart) {
-                            oStart.setHours(0, 0, 0, 0);
-                        }
-
-                        let bookingGroup = "Others";
-
-                        if (booking.Status === "Completed") {
-                            bookingGroup = "Completed";
-                        } else if (booking.Status === "New" || booking.Status === "Assigned") {
-                            if (oStart && oStart <= today) {
-                                bookingGroup = "Ongoing";
-                            } else {
-                                bookingGroup = "Upcoming";
-                            }
-                        }
-                        const customer = aCustomers.find(c => c.CustomerID === booking.CustomerID);
-                        const sSalutation = customer?.Salutation || "";
-                        const sFullName = customer?.CustomerName || "N/A";
-                        return {
-                            salutation: sSalutation,                // ✔ Add salutation
-                            customerName: `${sSalutation} ${sFullName}`.trim(),
-                            Startdate: oStart ? oStart.toLocaleDateString("en-GB") : "N/A",
-                            EndDate: booking.EndDate
-                                ? new Date(booking.EndDate).toLocaleDateString("en-GB") : "N/A",
-                            room: booking.BedType || "N/A",
-                            amount: booking.RentPrice || "N/A",
-                            status: booking.Status || "N/A",
-                            bookingGroup: bookingGroup,
-                            cutomerid: booking.CustomerID,
-                            branchCode: booking.BranchCode,
-                            currency: booking.Currency || "INR",
-                            noofperson: booking.NoOfPersons,
-                            grandTotal: booking.RentPrice,
-                            paymenytype: booking.PaymentType,
-                            RoomPrice: booking.RoomPrice,
-                             BookingID:booking.BookingID
-                        };
-                    });
-                }
-                const aFacilitiData = aAllFacilitis.map(faciliti => ({
-                    startdate: faciliti.StartDate ? new Date(faciliti.StartDate).toLocaleDateString("en-GB") : "N/A",
-                    bookingid: faciliti.BookingID,
-                    enddate: faciliti.EndDate,
-                    customerid: faciliti.CustomerID || "N/A",
-                    facilitiname: faciliti.FacilityName || "N/A",
-                    facilitiId: faciliti.FacilityID,
-                    facilitiPrice: faciliti.FacilitiPrice || "N/A",
-                    status: faciliti.PaidStatus || "N/A"
-                }));
-
-                //  Load fragment if not already loaded
                 if (!this._oProfileDialog) {
-                    if (this._isProfileDialogLoading) {
-                        console.log("Profile dialog load already in process, skipping duplicate call.");
-                        return;
-                    }
-                    this._isProfileDialogLoading = true;
-
-                    const oDialog = await sap.ui.core.Fragment.load({
+                    this._oProfileDialog = await sap.ui.core.Fragment.load({
                         name: "sap.ui.com.project1.fragment.ManageProfile",
                         controller: this
                     });
-                    this._oProfileDialog = oDialog;
-                    this.getView().addDependent(oDialog);
-                    this._isProfileDialogLoading = false;
+                    this.getView().addDependent(this._oProfileDialog);
                 }
+                const oTempModel = new sap.ui.model.json.JSONModel({
+                    bookings: [],
+                    Payments: [],
+                    isEditMode: false,
+                    selectedTab: "Booking History",
+                    isTableBusy: true
+                });
 
-                //  Create and bind the Profile Model
+                this._oProfileDialog.setModel(oTempModel, "profileData");
+                // oProfileModel.refresh(true); 
+                this._oProfileDialog.open();
+                setTimeout(() => {
+                    this.byId("id_dialog")?.addStyleClass("dialogBlur");
+                }, 200);
+
+                const filter = { UserID: sUserID }
+                const response = await this.ajaxReadWithJQuery("CustomerAndPayment", filter);
+             
+                const aBookings = response?.BookingData || [];
+                const aPayments = response?.PaymentData || [];
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const aBookingData = aBookings.map(booking => {
+                    const oStart = booking.StartDate ? new Date(booking.StartDate) : null;
+                    if (oStart) {
+                        oStart.setHours(0, 0, 0, 0);
+                    }
+
+                    let bookingGroup = "Others";
+
+                    if (booking.Status === "Completed") {
+                        bookingGroup = "Completed";
+                    } else if (booking.Status === "New" || booking.Status === "Assigned") {
+                        if (oStart && oStart <= today) {
+                            bookingGroup = "Ongoing";
+                        } else {
+                            bookingGroup = "Upcoming";
+                        }
+                    }
+                    // const oStart = booking.StartDate ? new Date(booking.StartDate) : null;
+                    return {
+                        customerName: oUser.Salutation + " " + oUser.UserName,
+                        room: booking.BedType || "",
+                        Startdate: new Date(booking.StartDate).toLocaleDateString("en-GB"),
+                        EndDate: booking.EndDate ? new Date(booking.EndDate).toLocaleDateString("en-GB") : "",
+                        amount: booking.RentPrice,
+                        status: booking.Status,
+                        customerID: booking.CustomerID,
+                        BookingID: booking.BookingID,
+                        bookingGroup: bookingGroup
+                    }
+
+                });
+                // Format PAYMENTS
+                const aPaymentData = aPayments.map(payment => ({
+                    InvNo: payment.InvNo,
+                    CustomerName: payment.CustomerName,
+                    TotalAmount: payment.TotalAmount,
+                    DueAmount: payment.DueAmount,
+                    currency: payment.Currency,
+                }));
+
                 const oProfileModel = new JSONModel({
                     ...fullUserData,
                     isEditMode: false,
@@ -3922,39 +3889,33 @@ this._navigateAfterBooking();
                     dob: this.Formatter.DateFormat(oUser.DateOfBirth) || "",
                     gender: oUser.Gender || "",
                     address: oUser.Address || "",
-                    state: oUser.State,
-                    country: oUser.Country,
-                    city: oUser.City,
+                    State: oUser.State,
+                    Country: oUser.Country,
+                    City: oUser.City,
                     stdCode: oUser.STDCode,
                     branchCode: oUser.BranchCode,
                     role: oUser.Role,
+
                     bookings: aBookingData,
-                    facility: aFacilitiData,
-                    aCustomers: aCustomerDetails
+                    Payments: aPaymentData,
+                    bookingCount: aBookingData.length,
+                    paymentCount: aPaymentData.length,
+                    selectedTab: "Booking History",
+                    aCustomers: aBookingData.map(booking => ({ customerID: booking.customerID || CustomerID, customerName: booking.customerName })),
+                    facility: [],
+                    
+                    isTableBusy: false
                 });
                 this._oProfileDialog.setModel(oProfileModel, "profileData");
                 oProfileModel.setProperty("/isEditMode", false);
-                //  Open the dialog
-                this._oProfileDialog.open();
+                oProfileModel.setProperty("/isTableBusy", false);
+                // this.byId("id_dialog").removeStyleClass("dialogBlur");
+
 
             } catch (err) {
                 console.error("Profile Load Error:", err);
 
-                // Always open fragment even when error (like no customer found)
-                if (!this._oProfileDialog) {
-                    if (this._isProfileDialogLoading) {
-                        console.log("Profile dialog load already in process, skipping duplicate call.");
-                        return;
-                    }
-                    this._isProfileDialogLoading = true;
-                    const oDialog = await sap.ui.core.Fragment.load({
-                        name: "sap.ui.com.project1.fragment.ManageProfile",
-                        controller: this
-                    });
-                    this._oProfileDialog = oDialog;
-                    this.getView().addDependent(oDialog);
-                    this._isProfileDialogLoading = false;
-                }
+              
 
                 const oProfileModel = new sap.ui.model.json.JSONModel({
                     ...fullUserData,
@@ -3967,12 +3928,14 @@ this._navigateAfterBooking();
                     gender: oUser.Gender || "",
                     address: oUser.Address || "",
                     bookings: [],
-                    facility: [],
                     aCustomers: []
                 });
                 this._oProfileDialog.setModel(oProfileModel, "profileData");
                 oProfileModel.setProperty("/isEditMode", false);
+                oProfileModel.refresh(true);
                 this._oProfileDialog.open();
+              
+
             } finally {
                 sap.ui.core.BusyIndicator.hide();
             }
@@ -4360,7 +4323,7 @@ this._navigateAfterBooking();
             var aCustomers = oProfileModel.getProperty("/aCustomers");
             var aFacilities = oProfileModel.getProperty("/facility");
 
-            var sCustomerID = oBookingData.cutomerid || oBookingData.CustomerID || "";
+            var sCustomerID = oBookingData.customerID || oBookingData.CustomerID || "";
 
             if (!sCustomerID) {
                 sap.m.MessageToast.show("Customer ID not found for this booking.");
@@ -4743,6 +4706,11 @@ onSelectionChange: function (oEvent) {
     var oRouter = this.getOwnerComponent().getRouter()
       oRouter.navTo("RouteHostel")
  },
+   onTableSelect: async function (oEvent) {
+            const sKey = oEvent.getParameter("key");
+            const oModel = this._oProfileDialog.getModel("profileData");
+            oModel.setProperty("/selectedTab", sKey);
+        }
 
 
   });
