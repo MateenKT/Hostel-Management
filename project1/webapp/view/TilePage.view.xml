@@ -1,165 +1,79 @@
-<mvc:View
-    controllerName="sap.ui.com.project1.controller.TilePage"
-    xmlns:mvc="sap.ui.core.mvc"
-    displayBlock="true"
-    xmlns="sap.m"
-    xmlns:ux="sap.uxap"
-    xmlns:core="sap.ui.core"
-    xmlns:layout="sap.ui.layout"
-    xmlns:l="sap.ui.layout"
-    xmlns:f="sap.f"
-    xmlns:card="sap.f.cards"
->
-    <App>
-        <Page
-            id="idPageTile"
-            class="service-background"
-            showHeader="true"
-            enableScrolling="false"
-        >
-            <headerContent>
-                <Text
-                    text="{= 'Welcome ' + ${LoginModel>/EmployeeName} }"
-                    class="boldBlueText sapUiLargeMarginBegin"
-                />
-                <ToolbarSpacer />
-                <Button
-                    press="Tile_onLogPress"
-                    icon="sap-icon://log"
-                />
-            </headerContent>
-            <ux:ObjectPageLayout
-                upperCaseAnchorBar="false"
-                id="id_ObjectPageLayoutTile"
-            >
-                <ux:sections>
-                    <ux:ObjectPageSection
-                        id="id_Sectiontile"
-                        titleUppercase="false"
-                        title=""
-                        visible="{= ${TileAccessModel>/Home} === '1' ? true : false}"
-                    >
-                        <ux:subSections>
-                            <ux:ObjectPageSubSection titleUppercase="false">
-                                <ux:blocks>
-                                    <layout:HorizontalLayout
-                                        allowWrapping="true"
-                                        class="sapUiTinyMargin"
-                                    >
-                                        <GenericTile
-                                            visible="true"
-                                            class="sapUiMediumMargin"
-                                            header="Manage Rooms"
-                                            press="TileV_onpressInbox"
-                                        >
-                                            <TileContent unit="Assign Rooms">
-                                                <ImageContent
-                                                    src="sap-icon://building"
-                                                />
-                                            </TileContent>
-                                        </GenericTile>
-                                        <GenericTile
-                                            visible="true"
-                                            class="sapUiMediumMargin"
-                                            header="Manage Room Details"
-                                            press="TileV_onpressroomdetails"
-                                        >
-                                            <TileContent unit="Room Details">
-                                                <ImageContent
-                                                    src="sap-icon://detail-view"
-                                                />
-                                            </TileContent>
-                                        </GenericTile>
-                                        <GenericTile
-                                            visible="true"
-                                            class="sapUiMediumMargin"
-                                            header="Manage Bed Details"
-                                            press="TileV_onpressbeddetails"
-                                        >
-                                            <TileContent unit="Bed Details">
-                                                <ImageContent
-                                                    src="sap-icon://bed"
-                                                />
-                                            </TileContent>
-                                        </GenericTile>
-                                        <GenericTile
-                                            visible="true"
-                                            class="sapUiMediumMargin"
-                                            header="Manage Extra Facilities"
-                                            press="TileV_onpressextrafacilities"
-                                        >
-                                            <TileContent
-                                                unit="Extra facilities"
-                                            >
-                                                <ImageContent
-                                                    src="sap-icon://activities"
-                                                />
-                                            </TileContent>
-                                        </GenericTile>
-                                             <!-- <GenericTile
+<mvc:View controllerName="sap.ui.com.project1.controller.TilePage"
+	xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+	xmlns="sap.m"
+	xmlns:layout="sap.ui.layout">
+	<Page id="idPageTile" class="service-background">
+		<headerContent>
+			<Text text="{= 'Welcome ' + ${LoginModel>/EmployeeName} }" class="boldBlueText sapUiLargeMarginBegin"/>
+			<ToolbarSpacer/>
+			<Button press="Tile_onLogPress" icon="sap-icon://log"/>
+		</headerContent>
+		<layout:VerticalLayout>
+			<FlexBox wrap="Wrap" alignItems="Center" justifyContent="Center" class="tileContainer">
+            
+				<GenericTile visible="true" class="sapUiMediumMargin" header="Manage Rooms" press="TileV_onpressInbox">
+					<TileContent unit="Assign Rooms">
+						<ImageContent src="sap-icon://building"/>
+					</TileContent>
+				</GenericTile>
+
+				<GenericTile visible="true" class="sapUiMediumMargin" header="Manage Room Details" press="TileV_onpressroomdetails">
+					<TileContent unit="Room Details">
+						<ImageContent src="sap-icon://detail-view"/>
+					</TileContent>
+				</GenericTile>
+
+				<GenericTile visible="true" class="sapUiMediumMargin" header="Manage Bed Details" press="TileV_onpressbeddetails">
+					<TileContent unit="Bed Details">
+						<ImageContent src="sap-icon://bed"/>
+					</TileContent>
+				</GenericTile>
+
+				<GenericTile visible="true" class="sapUiMediumMargin" header="Manage Extra Facilities" press="TileV_onpressextrafacilities">
+					<TileContent unit="Extra facilities">
+						<ImageContent src="sap-icon://activities"/>
+					</TileContent>
+				</GenericTile>
+
+				<!-- <GenericTile
                                             visible="true"
                                             class="sapUiMediumMargin"
                                             header="Maintain Data"
                                             press="TileV_onpressmaintaindata"
-                                        >
-                                           <TileContent unit="Maintain Data">
-                                                <ImageContent
+                                        ><TileContent unit="Maintain Data"><ImageContent
                                                     src="sap-icon://cancel-maintenance"
-                                                />
-                                            </TileContent>
-                                        </GenericTile>	 -->
-                                        
-                                    <GenericTile
-                                            visible="true"
-                                            class="sapUiMediumMargin"
-                                            header="Manage Branch Details"
-                                            press="TileV_onpressBranchdata"
-                                        >
-                                           <TileContent unit="Branch Details">
-                                                <ImageContent
-                                                    src="sap-icon://building"
-                                                />
-                                            </TileContent>
-                                        </GenericTile>	
+                                                /></TileContent></GenericTile>	 -->
 
-                                         <GenericTile
-                                            visible="true"
-                                            class="sapUiMediumMargin"
-                                            header="Maintain Hostel Features"
-                                            press="TileV_onpresshostelfeatures"
-                                        >
-                                           <TileContent unit="Hostel Features">
-                                                <ImageContent
-                                                    src="sap-icon://home-share"
-                                                />
-                                            </TileContent>
-                                        </GenericTile>	
+				<GenericTile visible="true" class="sapUiMediumMargin" header="Manage Branch Details"
+                press="TileV_onpressBranchdata">
+					<TileContent unit="Branch Details">
+						<ImageContent src="sap-icon://building"/>
+					</TileContent>
+				</GenericTile>
 
-                                         <GenericTile
-                                            visible="true"
-                                            class="sapUiMediumMargin"
-                                            header="Manage Invoice"
-                                            press="TileV_onpressManageInvoice"
-                                        >
-                                            <TileContent unit="Invoice Details">
-                                                <ImageContent
-                                                    src="sap-icon://expense-report"
-                                                />
-                                            </TileContent>
-                                        </GenericTile>
-                                        <GenericTile visible="true" class="sapUiMediumMargin" header="Manage Coupon" press="TileV_onpressCouponDetails">
-	                                        <TileContent unit="Coupon Details">
-		                                        <ImageContent src="sap-icon://tags" />
-	                                        </TileContent>
-                                        </GenericTile>  
+				<GenericTile visible="true" class="sapUiMediumMargin" header="Maintain Hostel Features" press="TileV_onpresshostelfeatures" >
+					<TileContent unit="Hostel Features">
+						<ImageContent src="sap-icon://home-share"/>
+					</TileContent>
+				</GenericTile>
 
-                                    </layout:HorizontalLayout>
-                                </ux:blocks>
-                            </ux:ObjectPageSubSection>
-                        </ux:subSections>
-                    </ux:ObjectPageSection>
-                </ux:sections>
-            </ux:ObjectPageLayout>
-        </Page>
-    </App>
+				<GenericTile visible="true" class="sapUiMediumMargin" header="Manage Invoice" press="TileV_onpressManageInvoice">
+					<TileContent unit="Invoice Details">
+						<ImageContent src="sap-icon://expense-report"/>
+					</TileContent>
+				</GenericTile>
+                
+				<GenericTile visible="true" class="sapUiMediumMargin" header="Manage Coupon" press="TileV_onpressCouponDetails">
+					<TileContent unit="Coupon Details">
+						<ImageContent src="sap-icon://tags" />
+					</TileContent>
+				</GenericTile>
+			</FlexBox>
+		</layout:VerticalLayout>
+		<footer>
+			<Bar>
+				<contentRight></contentRight>
+			</Bar>
+		</footer>
+	</Page>
 </mvc:View>

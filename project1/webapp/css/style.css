@@ -2057,3 +2057,15 @@ span.sapMBtnInner.sapMBtnEmphasized {
     outline: none;
     text-decoration: none !important;
 }
+
+.tileContainer {
+  justify-content: flex-start;
+}
+
+/* Center Tiles on Small Screens (Mobile) */
+@media screen and (max-width: 768px) {
+  .tileContainer {
+    justify-content: center !important;
+    /* Center align on mobile */
+  }
+}
