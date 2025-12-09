@@ -2069,3 +2069,18 @@ span.sapMBtnInner.sapMBtnEmphasized {
     /* Center align on mobile */
   }
 }
+
+.login-background, .service-background {
+  /* background-image: url('../image/hostel.jpg'); */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Apply different background styles for mobile devices */
+@media (max-width: 768px) {
+  .login-background, .service-background {
+    background-size: auto; /* Adjust to fit smaller screens */
+    background-position: top; /* Adjust positioning */
+  }
+}
