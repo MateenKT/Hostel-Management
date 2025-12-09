@@ -191,6 +191,8 @@ sap.ui.define([
             });
         },
 
+
+
         onSelectPricePlan: function (oEvent) {
             const oTile = oEvent.getSource();
             const sType = oTile.data("type"); // "daily", "monthly", or "yearly"
@@ -386,7 +388,53 @@ sap.ui.define([
             });
         },
 
-        _LoadFacilities: function (sBranchCode) {
+        // _LoadFacilities: function (sBranchCode) {
+        //     const oView = this.getView();
+        //     if (!this._oRoomDetailFragment) return; // Safety check
+
+        //     if (!sBranchCode) return;
+
+        //     const oFacilityModel = this._oRoomDetailFragment.getModel("FacilityModel");
+        //     if (!oFacilityModel) return; // Model might not be set yet
+
+        //     oFacilityModel.setProperty("/loading", true);
+        //     this.ajaxReadWithJQuery("HM_Facilities", {
+        //         BranchCode: sBranchCode
+        //     })
+        //         .then((Response) => {
+        //             console.log("Facility Response:", Response);
+        //             const aFacilities = (Response && Response.data) ? Response.data : [];
+
+        //             const convert = (base64, type) => {
+        //                 if (!base64) {
+        //                     return sap.ui.require.toUrl("sap/ui/com/project1/image/no-image.png");
+        //                 }
+        //                 return `data:${type || "image/jpeg"};base64,${base64}`;
+        //             };
+
+        //             const formatted = aFacilities.map(f => ({
+        //                 FacilityID: f.ID,
+        //                 FacilityName: f.FacilityName,
+        //                 Image: convert(f.Photo1, f.Photo1Type),
+        //                 Price: f.Price,
+        //                 Price: f.PerHourPrice, // Correctly map the price from API response
+        //                 UnitText: f.UnitText,
+        //                 Currency: f.Currency
+        //             }));
+
+        //             oFacilityModel.setProperty("/Facilities", formatted);
+        //             oFacilityModel.setProperty("/loading", false);
+
+        //             oFacilityModel.refresh(true);
+        //         })
+        //         .catch(err => {
+        //             console.error("Failed to load facilities:", err);
+        //             oFacilityModel.setProperty("/loading", false);
+        //         });
+        // },
+
+
+               _LoadFacilities: function (sBranchCode) {
             const oView = this.getView();
             if (!this._oRoomDetailFragment) return; // Safety check
 
@@ -410,15 +458,42 @@ sap.ui.define([
                         return `data:${type || "image/jpeg"};base64,${base64}`;
                     };
 
-                    const formatted = aFacilities.map(f => ({
-                        FacilityID: f.ID,
-                        FacilityName: f.FacilityName,
-                        Image: convert(f.Photo1, f.Photo1Type),
-                        Price: f.Price,
-                        Price: f.PerHourPrice, // Correctly map the price from API response
-                        UnitText: f.UnitText,
-                        Currency: f.Currency
-                    }));
+const formatted = aFacilities
+    .map(f => {
+        let price = 0;
+        let unit = "";
+
+        if (parseFloat(f.PerHourPrice) > 0) {
+            price = f.PerHourPrice;
+            unit = "Per Hour";
+        }
+        else if (parseFloat(f.PerDayPrice) > 0) {
+            price = f.PerDayPrice;
+            unit = "Per Day";
+        }
+        else if (parseFloat(f.PerMonthPrice) > 0) {
+            price = f.PerMonthPrice;
+            unit = "Per Month";
+        }
+        else if (parseFloat(f.PerYearPrice) > 0) {
+            price = f.PerYearPrice;
+            unit = "Per Year";
+        }
+        else {
+            return null; // ❌ NO prices at all → drop facility
+        }
+
+        return {
+            FacilityID: f.ID,
+            FacilityName: f.FacilityName,
+            Image: convert(f.Photo1, f.Photo1Type),
+            Price: price,
+            UnitText: unit,
+            Currency: f.Currency
+        };
+    })
+    .filter(Boolean);   // removes null entries (facilities with all prices = 0)
+
 
                     oFacilityModel.setProperty("/Facilities", formatted);
                     oFacilityModel.setProperty("/loading", false);
@@ -430,7 +505,6 @@ sap.ui.define([
                     oFacilityModel.setProperty("/loading", false);
                 });
         },
-
         viewDetails: function (oEvent) {
             try {
                 const oView = this.getView();
@@ -865,6 +939,7 @@ sap.ui.define([
                 oDOBpicker.setMinDate(oMinDate);
             }
             this._resetOtpState();
+            this._addPasswordGenerateIcon();
         },
 
         onEmailliveChange: function (oEvent) {
@@ -882,6 +957,77 @@ sap.ui.define([
         SM_onChnageSetAndConfirm: function (oEvent) {
             utils._LCvalidatePassword(oEvent);
         },
+
+
+
+SM_onGeneratePassword: function () {
+
+    var oPwdInput = sap.ui.getCore().byId("signUpPassword");
+
+    if (!oPwdInput) {
+        console.error("❌ signUpPassword input not found");
+        return;
+    }
+
+    var pwd = utils._LCgenerateStrongPassword();
+
+    oPwdInput.setValue(pwd);
+
+
+
+    // Run same validation logic
+    utils._LCvalidatePassword(oPwdInput);
+},
+
+_addPasswordGenerateIcon: function () {
+
+    const oInput = sap.ui.getCore().byId("signUpPassword");
+    if (!oInput || oInput._hasCopyIcon) return;
+
+    oInput.addEndIcon({
+        src: "sap-icon://copy",
+        tooltip: "Copy password to clipboard",
+        press: this.SM_onCopyPassword.bind(this)
+    });
+
+    oInput._hasCopyIcon = true;   // prevent duplicates
+},
+SM_onCopyPassword: function () {
+
+    const oPwdInput = sap.ui.getCore().byId("signUpPassword");
+    if (!oPwdInput) return;
+
+    const pwd = oPwdInput.getValue();
+
+    if (!pwd) {
+        sap.m.MessageToast.show("No password to copy");
+        return;
+    }
+
+    navigator.clipboard.writeText(pwd)
+        .then(() => {
+            sap.m.MessageToast.show("Password copied to clipboard");
+        })
+        .catch(() => {
+
+            // Fallback for older browsers
+            try {
+                const oTemp = document.createElement("textarea");
+                oTemp.value = pwd;
+                document.body.appendChild(oTemp);
+                oTemp.select();
+                document.execCommand("copy");
+                document.body.removeChild(oTemp);
+
+                sap.m.MessageToast.show("Password copied to clipboard");
+
+            } catch (err) {
+                sap.m.MessageToast.show("Copy failed");
+            }
+        });
+},
+
+
 
         onSignUp: async function () {
 

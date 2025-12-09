@@ -382,31 +382,193 @@ sap.ui.define([], function() {
         //         return true;
         //     }
         // },
-        _LCvalidatePassword: function (oEventOrInput) {
-            // Detect whether event or direct Input control was passed
-            var oField = (oEventOrInput.getSource)
-                ? oEventOrInput.getSource()      // liveChange event
-                : oEventOrInput;                // direct control
 
-            if (!oField || !oField.getValue) return false;
 
-            var oValue = oField.getValue().trim();
+_LCgenerateStrongPassword: function () {
 
-            // Strong password rule
-            var regex = /^(?=.*[A-Z])(?=.*[!@#$%^&*+\-])[A-Za-z\d!+\-@#$%^&*()_=]{6,}$/;
+    var charsUpper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    var charsLower = "abcdefghijklmnopqrstuvwxyz";
+    var charsDigits = "0123456789";
+    var charsSpecial = "!@#$%^&*()_-+=";
 
-            if (!regex.test(oValue)) {
-                oField.setValueState("Error");
-                oField.setValueStateText("Password must contain uppercase and special character, min 6 chars");
-                return false;
-            } else {
-                oField.setValueState("None");
-                return true;
-            }
-        },
+    function pick(set) {
+        return set[Math.floor(Math.random() * set.length)];
+    }
+
+    var pwdArr = [];
+
+    // ensure rule compliance
+    pwdArr.push(pick(charsUpper));
+    pwdArr.push(pick(charsLower));
+    pwdArr.push(pick(charsDigits));
+    pwdArr.push(pick(charsDigits));
+    pwdArr.push(pick(charsSpecial));
+    pwdArr.push(pick(charsSpecial));
+
+    var all = charsUpper + charsLower + charsDigits + charsSpecial;
+
+    // fill remaining length randomly
+    while (pwdArr.length < 12) {
+        pwdArr.push(pick(all));
+    }
+
+    // shuffle
+    pwdArr.sort(() => Math.random() - 0.5);
+
+    return pwdArr.join("");
+},
+
+
+_LCvalidatePassword: function (oEventOrInput) {
+
+    var oField =
+        typeof oEventOrInput.getSource === "function"
+            ? oEventOrInput.getSource()
+            : oEventOrInput;
+
+    if (!oField) return false;
+
+    var pwd = (oField.getValue() || "").trim();
+
+    var strength = this._getPasswordStrength(pwd);
+
+    var oText = sap.ui.getCore().byId("passwordStrengthText");
+
+var map = {
+    poor:   { cls: "pwdMinFail", txt: "Strength: Poor" },
+    weak:   { cls: "pwdWeak",    txt: "Strength: Weak" },
+    medium: { cls: "pwdMedium",  txt: "Strength: Medium" },
+    strong: { cls: "pwdStrong",  txt: "Strength: Strong" }
+};
+
+    if (oText) {
+        oText.setText(map[strength].txt);
+        oText.removeStyleClass("pwdMinFail pwdWeak pwdMedium pwdStrong");
+        oText.addStyleClass(map[strength].cls);
+    }
+
+    // oField.setValueState(
+    //     strength === "poor"  ? "Error"   :
+    //     strength === "weak"  ? "Warning" :
+    //     strength === "medium"? "None"    :
+    //                            "Success"
+    // );
+
+oField.setValueState(
+    strength === "poor" ? "Error" :
+    strength === "strong" ? "Success" :
+    "None"
+);
+
+    // allow only Weak or better to pass form validation
+    return strength !== "poor";
+},
+// _getPasswordStrength: function (pwd) {
+
+//     if (!pwd) return "poor";
+
+//     var length = pwd.length;
+//     var upper   = /[A-Z]/.test(pwd);
+//     var lower   = /[a-z]/.test(pwd);
+//     var digits  = pwd.match(/\d/g) || [];
+//     var special = pwd.match(/[!@#$%^&*()_\-+=]/g) || [];
+
+//     var commonPatterns = /(1234|abcd|password|qwerty|1111)/i.test(pwd);
+//     var repeated = /(.)\1\1/.test(pwd); // aaa, 111, !!!
+
+//     // POOR (minimum legacy rule)
+//     if (
+//         length >= 6 &&
+//         upper &&
+//         lower &&
+//         digits.length >= 1 &&
+//         special.length >= 1
+//     ) {
+
+//         // WEAK
+//         if (length >= 8 && !commonPatterns) {
+
+//             // MEDIUM
+//             if (length >= 10 && digits.length >= 2 && !repeated) {
+
+//                 // STRONG
+//                 if (length >= 12 && special.length >= 2) {
+//                     return "strong";
+//                 }
+
+//                 return "medium";
+//             }
+
+//             return "weak";
+//         }
+//     }
+
+//     return "poor";
+// },
+
+
+        // _LCvalidatePassword: function (oEventOrInput) {
+        //     // Detect whether event or direct Input control was passed
+        //     var oField = (oEventOrInput.getSource)
+        //         ? oEventOrInput.getSource()      // liveChange event
+        //         : oEventOrInput;                // direct control
+
+        //     if (!oField || !oField.getValue) return false;
+
+        //     var oValue = oField.getValue().trim();
+
+        //     // Strong password rule
+        //     var regex = /^(?=.*[A-Z])(?=.*[!@#$%^&*+\-])[A-Za-z\d!+\-@#$%^&*()_=]{6,}$/;
+
+        //     if (!regex.test(oValue)) {
+        //         oField.setValueState("Error");
+        //         oField.setValueStateText("Password must contain uppercase and special character, min 6 chars");
+        //         return false;
+        //     } else {
+        //         oField.setValueState("None");
+        //         return true;
+        //     }
+        // },
 
 
         // LUT Number Validation
+        
+        
+        _getPasswordStrength: function(pwd) {
+
+    if (!pwd) return "poor";
+
+    var length  = pwd.length;
+    var upper   = /[A-Z]/.test(pwd);
+    var lower   = /[a-z]/.test(pwd);
+    var digits  = pwd.match(/\d/g) || [];
+    var special = pwd.match(/[!@#$%^&*()_\-+=]/g) || [];
+
+    var commonPatterns = /(1234|abcd|password|qwerty|1111)/i.test(pwd);
+    var repeated = /(.)\1\1/.test(pwd);
+
+    // Minimum validity check
+    if (upper && lower && digits.length >= 1 && special.length >= 1) {
+
+        if (length >= 12 && digits.length >= 2 && special.length >= 2 && !repeated && !commonPatterns) {
+            return "strong";
+        }
+
+        if (length >= 10 && digits.length >= 2 && !repeated) {
+            return "medium";
+        }
+
+        if (length >= 6) {
+            return "weak";       // ✅ Aaa@12 lives here
+        }
+    }
+
+    return "poor";
+},
+
+        
+        
+        
         _LCvalidateLutNumber: function(oEvent, type) {
             var oField = type === "ID" ? oEvent : oEvent.getSource();
             if (!oField) return false;
