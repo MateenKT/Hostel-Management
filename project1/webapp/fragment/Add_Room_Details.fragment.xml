@@ -101,7 +101,8 @@
                     id="idExtrabed"
                     value="{RoomModel>/ExtraBed}"
                     placeholder="Enter No Of ExtraBed"
-                    type="Number"
+                    liveChange="onPriceInputLiveChange"
+                     maxLength="2"
                 />
 
                 <Label

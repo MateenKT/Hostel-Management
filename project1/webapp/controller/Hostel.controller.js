@@ -2285,7 +2285,7 @@ sap.ui.define([
                         const bookedCount = customerData.filter(cust =>
                             cust.BranchCode?.toLowerCase() === rm.BranchCode?.toLowerCase() &&
                             cust.BedType?.trim().toLowerCase() === rm.BedTypeName?.trim().toLowerCase() && 
-                             (cust.Status === "New" || cust.Status === "Assigned")
+                             cust.Status === "Assigned"
                         ).length;
                         totalBooked = bookedCount;
                     });

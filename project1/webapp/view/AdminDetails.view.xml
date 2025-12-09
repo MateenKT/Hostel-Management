@@ -25,10 +25,7 @@
                         width="100%">
 						<!-- LEFT SIDE DETAILS -->
 						<FlexBox
-                            wrap="Wrap"
-                            justifyContent="Start"
-                            alignItems="Start"
-                            class="sapUiSmallMarginEnd">
+                           direction="Row" >
 							<VBox class="sapUiSmallMarginEnd">
 								<Text text="Status" class="sapUiSmallMarginBottom" />
 								<ObjectStatus text="{CustomerData>/Status}"
@@ -47,9 +44,7 @@
 						</FlexBox>
 						<!-- RIGHT SIDE BUTTONS -->
 						<FlexBox
-                            wrap="Wrap"
-                            justifyContent="End"
-                            alignItems="End"
+                           class="rightButtons" wrap="NoWrap" justifyContent="End" alignItems="End"
                         >
 							<Button text="Edit" id="idedit" class="sapUiSmallMarginBegin myUnifiedBtn"
                             press="onEditBooking"

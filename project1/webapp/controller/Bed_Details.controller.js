@@ -353,7 +353,7 @@ sap.ui.define([
 
                     const response = Array.isArray(oData.data) ? oData.data : [oData.data];
 
-                    if (!this._originalBedData || flag === "true") {
+                    if (!this._originalBedData || flag === "true" || flag === undefined) {
                         this._originalBedData = response;
                     }
 
