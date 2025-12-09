@@ -572,7 +572,10 @@ sap.ui.define([
                         return;
                     }
                 }
-
+                     if(Payload.YearPrice ===0 &&  Payload.MonthPrice===0 && Payload.YearPrice===0){
+                         sap.m.MessageToast.show("Please fill at least one price");
+                           return;
+                     }
                 // Find selected BedType
                 // var oBedType = aBedTypes.find(function (bed) {
                 //     return bed.BranchCode === Payload.BranchCode &&
@@ -794,9 +797,17 @@ sap.ui.define([
         onRoomNoInputLiveChange: function (oEvent) {
             utils._LCvalidateMandatoryField(oEvent.getSource(), "ID");
         },
-        onPriceInputLiveChange: function (oEvent) {
-            utils._LCvalidateAmount(oEvent.getSource(), "ID");
-        },
+      
+        onPriceInputLiveChange: function(oEvent) {
+    const oInput = oEvent.getSource();
+    let sValue = oInput.getValue();
+
+    // Remove any non-digit characters
+    sValue = sValue.replace(/[^0-9]/g, "");
+
+    oInput.setValue(sValue);
+},
+
         onACtypeChange: function (oEvent) {
             utils._LCstrictValidationComboBox(oEvent.getSource(), "ID");
         },

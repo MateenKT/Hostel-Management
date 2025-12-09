@@ -112,6 +112,8 @@
                             value="{RoomModel>/Price}"
                             placeholder="Enter Price"
                             maxLength="7"
+                            liveChange="onPriceInputLiveChange"
+
                             valueStateText="Please enter a valid amount"
                         />
                 <!-- <HBox
@@ -154,6 +156,8 @@
                             value="{RoomModel>/MonthPrice}"
                             placeholder="Enter Month Price"
                             maxLength="7"
+                            liveChange="onPriceInputLiveChange"
+
                             valueStateText="Please enter a valid amount"
                         />
                           <Label
@@ -164,6 +168,8 @@
                             value="{RoomModel>/YearPrice}"  
                             placeholder="Enter Year Price"
                             maxLength="7"
+                            liveChange="onPriceInputLiveChange"
+
                             valueStateText="Please enter a valid amount"
                         />
                 <Label text="Currency" required="true"/>

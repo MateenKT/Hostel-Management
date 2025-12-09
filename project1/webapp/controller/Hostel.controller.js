@@ -171,29 +171,6 @@ sap.ui.define([
                 sap.m.MessageToast.show("Failed to load room data.");
             }
         },
-
-       _loadBranchCode: async function () {
-    try {
-        const oView = this.getView();
-        const oResponse = await this.ajaxReadWithJQuery("HM_Branch", {});
-        const aBranches = Array.isArray(oResponse?.data) ? oResponse.data : (oResponse?.data ? [oResponse.data] : []);
-
-        // ***** Filter Unique Cities *****
-        const aUniqueCities = aBranches.filter((obj, index, self) =>
-            index === self.findIndex(o => o.City === obj.City)
-        );
-
-        const oBranchModel = new sap.ui.model.json.JSONModel(aUniqueCities);
-        oView.setModel(oBranchModel, "sBRModel");
-
-        this._populateUniqueFilterValues(aUniqueCities);
-
-    } catch (err) {
-        console.error("Error while loading branch data:", err);
-    }
-}
-,
-
         _populateUniqueFilterValues: function (data) {
             let uniqueValues = { id_Branch: new Set(), };
 
@@ -666,12 +643,10 @@ sap.ui.define([
                 await this.onReadcallforRoom();
                 await this.CustomerDetails();
 
-                const oBRModel = this.getView().getModel("sBRModel");
+               const oBRModel = this.getView().getModel("sBRModel");
                 const oModelData = oBRModel.getData();
-                const uniqueCities = [...new Set(oModelData.map(item => item.City))];
-                const uniqueCityObjects = uniqueCities.map(city => ({ City: city }));
-                oBRModel.setData(uniqueCityObjects);
-                oBRModel.refresh();
+                this._populateUniqueFilterValues(oModelData)
+              
                 const aFiltered = oModelData.filter(item => item.City === this.City);
 
                 if (aFiltered.length === 0) {
@@ -2310,12 +2285,11 @@ sap.ui.define([
                         const bookedCount = customerData.filter(cust =>
                             cust.BranchCode?.toLowerCase() === rm.BranchCode?.toLowerCase() &&
                             cust.BedType?.trim().toLowerCase() === rm.BedTypeName?.trim().toLowerCase() && 
-                              (cust.Status==="Assigned" ||  cust.Status==="New") && 
-                              cust.Status!=="Completed" && cust.Status!=="Cancelled" ||
-                              cust.RoomNo?.toLowerCase() === rm.RoomNo?.toLowerCase() 
+                             (cust.Status === "New" || cust.Status === "Assigned")
                         ).length;
-                        totalBooked += bookedCount;
+                        totalBooked = bookedCount;
                     });
+
 
                     const isFull = totalBooked >= totalCapacity && totalCapacity > 0;
                     const isVisible = !isFull && price.trim() !== "";
