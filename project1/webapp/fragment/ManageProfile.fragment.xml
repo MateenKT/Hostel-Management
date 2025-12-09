@@ -334,7 +334,7 @@
                     path: 'profileData>/bookings',
                     sorter: [
                         { path: 'bookingGroup', descending: false, group: true },
-                        { path: 'StartDate', descending: true }
+                        { path: 'BookingDate', descending: true }
                     ]
                 }"
         >
