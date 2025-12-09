@@ -168,7 +168,7 @@ sap.ui.define([
                         IndexNo: index + 1,
                         StartDate: item.StartDate ? this.Formatter.DateFormat(item.StartDate) : "",
                         EndDate: item.EndDate ? this.Formatter.DateFormat(item.EndDate) : "",
-                        editable :false
+                        // editable :false
                     }));
 
                     oView.setModel(new JSONModel({
@@ -390,7 +390,7 @@ sap.ui.define([
                         StartDate: this.Formatter.DateFormat(bookingDetails.StartDate),
                         EndDate: this.Formatter.DateFormat(bookingDetails.EndDate),
                         Currency: bookingDetails.Currency,
-                        editable: false
+                        // editable: false
                     });
 
                     facilityArray.forEach((item, index) => {
@@ -406,7 +406,7 @@ sap.ui.define([
                             StartDate: this.Formatter.DateFormat(item.StartDate),
                             EndDate: this.Formatter.DateFormat(item.EndDate),
                             Currency: item.Currency,
-                            editable: false
+                            // editable: false
                         });
                     });
 
@@ -456,7 +456,7 @@ sap.ui.define([
                     Currency: currency,
                     Discount: "0.00",
                     Total: "",
-                    editable: true
+                    // editable: true
                 };
                 if (this.Update) {
                     newItem.flag = "create";
