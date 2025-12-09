@@ -2419,9 +2419,10 @@ sap.ui.define([
                         totalCapacity += rm.NoofPerson || 0;
                         const bookedCount = customerData.filter(cust =>
                             cust.BranchCode?.toLowerCase() === rm.BranchCode?.toLowerCase() &&
-                            cust.RoomNo?.toLowerCase() === rm.RoomNo?.toLowerCase() &&
-                            cust.BedType?.trim().toLowerCase() === rm.BedTypeName?.trim().toLowerCase() &&
-                            cust.Status === "Assigned"
+                            cust.BedType?.trim().toLowerCase() === rm.BedTypeName?.trim().toLowerCase() && 
+                              (cust.Status==="Assigned" ||  cust.Status==="New") && 
+                              cust.Status!=="Completed" && cust.Status!=="Cancelled" ||
+                              cust.RoomNo?.toLowerCase() === rm.RoomNo?.toLowerCase() 
                         ).length;
                         totalBooked += bookedCount;
                     });

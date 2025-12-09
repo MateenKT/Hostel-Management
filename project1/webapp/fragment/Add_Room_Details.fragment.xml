@@ -106,14 +106,12 @@
 
                 <Label
                     text="Daily Price"
-                    required="true"
                 />
                   <Input
                             id="idPrice"
                             value="{RoomModel>/Price}"
                             placeholder="Enter Price"
                             maxLength="7"
-                            liveChange="onPriceInputLiveChange"
                             valueStateText="Please enter a valid amount"
                         />
                 <!-- <HBox
@@ -150,26 +148,22 @@
                 </HBox> -->
                   <Label
                     text="Monthly Price"
-                    required="true"
                 />
                   <Input
                             id="id_MonthlyPrice"
                             value="{RoomModel>/MonthPrice}"
                             placeholder="Enter Month Price"
                             maxLength="7"
-                            liveChange="onPriceInputLiveChange"
                             valueStateText="Please enter a valid amount"
                         />
                           <Label
                     text="Yearly Price"
-                    required="true"
                 />
                   <Input
                             id="id_YearlyPrice"
                             value="{RoomModel>/YearPrice}"  
                             placeholder="Enter Year Price"
                             maxLength="7"
-                            liveChange="onPriceInputLiveChange"
                             valueStateText="Please enter a valid amount"
                         />
                 <Label text="Currency" required="true"/>
