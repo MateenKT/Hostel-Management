@@ -1425,16 +1425,24 @@ sap.ui.define([
                         oStart.setHours(0, 0, 0, 0);
                     }
 
-                    let bookingGroup = "Others";
+                    const startDate = booking.StartDate ? new Date(booking.StartDate) : null;
+                    const endDate = booking.EndDate ? new Date(booking.EndDate) : null;
+                    if (startDate) startDate.setHours(0, 0, 0, 0);
+                    if (endDate) endDate.setHours(0, 0, 0, 0);
 
-                    if (booking.Status === "Completed") {
+                    let bookingGroup = "Others";
+                    if (booking.Status === "Cancelled") {
+                        bookingGroup = "Cancelled";
+                    } else if (booking.Status === "Completed") {
                         bookingGroup = "Completed";
                     } else if (booking.Status === "New" || booking.Status === "Assigned") {
-                        if (oStart && oStart <= today) {
+                        // Ongoing = Today is between StartDate & EndDate
+                        if (startDate && endDate && startDate <= today && endDate >= today) {
                             bookingGroup = "Ongoing";
-                        } else {
+                        // Upcoming = Future StartDate
+                        } else if (startDate && startDate > today) {
                             bookingGroup = "Upcoming";
-                        }
+                        } 
                     }
                     // const oStart = booking.StartDate ? new Date(booking.StartDate) : null;
                     return {
@@ -1442,6 +1450,7 @@ sap.ui.define([
                         room: booking.BedType || "",
                         Startdate: new Date(booking.StartDate).toLocaleDateString("en-GB"),
                         EndDate: booking.EndDate ? new Date(booking.EndDate).toLocaleDateString("en-GB") : "",
+                        BookingDate: booking.BookingDate ? new Date(booking.BookingDate).toLocaleDateString("en-GB") : "",
                         amount: booking.RentPrice,
                         status: booking.Status,
                         customerID: booking.CustomerID,
@@ -2108,6 +2117,10 @@ sap.ui.define([
             this.getOwnerComponent().getRouter().navTo("RouteAdminDetails", {
                 sPath: encodeURIComponent(sCustomerID)
             });
+        },
+
+        onPressManageInvoice: function (oEvent) {
+          this.getOwnerComponent().getRouter().navTo("RouteManageInvoiceDetails", { sPath: encodeURIComponent(oEvent.getSource().getBindingContext("profileData").getObject().InvNo), dash:"ManageInvoice" });
         },
 
         //  Separated calculation function

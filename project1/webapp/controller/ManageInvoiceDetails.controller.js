@@ -250,9 +250,18 @@ sap.ui.define([
                 });
             },
 
-            onNavBack: function() {
-                var oRouter = this.getOwnerComponent().getRouter();
-                oRouter.navTo("RouteManageInvoice");
+            onNavBack: function () {
+                const oLoginModel = this.getView().getModel("LoginModel");
+                const sRole = oLoginModel?.getProperty("/Role") || "";
+                const sEmpID = oLoginModel?.getProperty("/EmployeeID") || "";
+                if (sRole === "Customer") {
+                    this._sLoggedUserID = sEmpID;
+                    const oUIModel = this.getOwnerComponent().getModel("UIModel");
+                    oUIModel.setProperty("/isLoggedIn", true);
+                    this.getOwnerComponent().getRouter().navTo("RouteHostel");
+                } else {
+                    this.getOwnerComponent().getRouter().navTo("RouteManageInvoice");
+                }
             },
 
             onHome: function() {

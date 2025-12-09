@@ -245,12 +245,18 @@
 		<m:footer>
 			<m:Bar>
 				<m:contentRight>
-					<m:Button visible="{visiablityPlay>/createVisi}" text="{i18n>submit}" press="CID_onPressSubmit" class="sendMail myUnifiedBtn" />
-					<m:Button text="{i18n>companyInvoiceSendEmail}" class="myUnifiedBtn" press="CID_onPressSendEmail" visible="{visiablityPlay>/payByDate}" />
-					<m:Button visible="{visiablityPlay>/Edit}" text="{= ${visiablityPlay>/editable} === true?'Save':'Edit'}" press="CID_onPressEdit" class="sendMail myUnifiedBtn"  />
-					<m:Button text="{i18n>sendInvoiceText}" press="CID_onPressSendMultipalEmail" visible="{visiablityPlay>/MultiEmail}" class="myUnifiedBtn" />
-					<m:Button text="{i18n>GeneratePDF}" press="CID_onPressGeneratePdf" visible="{visiablityPlay>/merge}" class="myUnifiedBtn"/>
-				</m:contentRight>
+						<m:Button visible="{= ${visiablityPlay>/createVisi} &amp;&amp; ${LoginModel>/Role} === 'Admin'}"
+								text="{i18n>submit}" press="CID_onPressSubmit" class="sendMail myUnifiedBtn"/>
+						<m:Button visible="{= ${visiablityPlay>/payByDate} &amp;&amp; ${LoginModel>/Role} === 'Admin'}"
+								text="{i18n>companyInvoiceSendEmail}" press="CID_onPressSendEmail" class="myUnifiedBtn"/>
+						<m:Button visible="{= ${visiablityPlay>/Edit} &amp;&amp; ${LoginModel>/Role} === 'Admin'}"
+								text="{= ${visiablityPlay>/editable} === true ? 'Save' : 'Edit'}"
+								press="CID_onPressEdit" class="sendMail myUnifiedBtn"/>
+						<m:Button visible="{= ${visiablityPlay>/MultiEmail} &amp;&amp; ${LoginModel>/Role} === 'Admin'}"
+								text="{i18n>sendInvoiceText}" press="CID_onPressSendMultipalEmail" class="myUnifiedBtn"/>
+						<m:Button visible="{visiablityPlay>/merge}"
+								text="{i18n>GeneratePDF}" press="CID_onPressGeneratePdf" class="myUnifiedBtn"/>
+				</m:contentRight>	
 			</m:Bar>
 		</m:footer>
 	</m:Page>

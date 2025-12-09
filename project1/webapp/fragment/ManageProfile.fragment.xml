@@ -343,7 +343,7 @@
                     <Text text="Customer Name" />
                 </Column>
                 <Column demandPopin="true">
-                    <Text text="Start Date" />
+                    <Text text="Booking Date" />
                 </Column>
                 <Column demandPopin="true">
                     <Text text="Room" />
@@ -372,7 +372,7 @@
                             title="{profileData>customerName}"
                             text="{profileData>BookingID}"
                         />
-                        <Text text="{profileData>StartDate}" />
+                        <Text text="{profileData>BookingDate}" />
                         <Text text="{profileData>room}" />
                         <Text
                             text="{ parts: [ 'profileData>amount', 'profileData>currency' ], formatter: '.Formatter.formatCurrency' }"
@@ -410,7 +410,7 @@
             </columns>
 
             <items>
-                <ColumnListItem>
+                <ColumnListItem type="Navigation" press="onPressManageInvoice">
                     <cells>
                         <Text text="{profileData>InvNo}" />
                         <Text text="{profileData>CustomerName}" />
