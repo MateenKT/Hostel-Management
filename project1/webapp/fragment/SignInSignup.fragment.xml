@@ -159,15 +159,43 @@
 						</HBox>
 						<Label text="Address" required="true"/>
 						<TextArea id="signUpAddress" rows="3" maxLength="500" value="{LoginMode>/Address}" liveChange="onAddressChange" placeholder="Address" />
-						<HBox width="100%">
-							<Label text="Account Security" design="Bold" class="sapUiSmallMarginTop"/>
-						</HBox>
-						<!-- <Title text="Account Security" /> -->
-						<Label text="Create Password" required="true" />
-						<Input id="signUpPassword" placeholder="Enter Password" value="{LoginMode>/password}" valueState="{LoginViewModel>/frgNewPasswordValueState}" type="Password" liveChange="SM_onChnageSetAndConfirm" showValueHelp="true" valueStateText="Password must contain 1 uppercase, 1 lowercase, 1 number &amp; 1 special character" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility" maxLength="50" />
-						<Label text="Confirm Password" required="true" />
-						<Input id="signUpConfirmPassword" placeholder="Enter Confirm Password" value="{LoginMode>/comfirmpass}" type="Password" change="FSM_onConfirm" liveChange="FSM_onConfirm" showValueHelp="true" valueStateText="Enter Confirm Password" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility" maxLength="50"/>
-					</f:SimpleForm>
+<HBox width="100%">
+	<Label text="Account Security" design="Bold" class="sapUiSmallMarginTop"/>
+</HBox>
+<!-- <Title text="Account Security" /> -->
+<MessageStrip id="passwordHelpStrip" type="Information" showIcon="false"  text="Password must be 6+ characters: upper/lowercase letters, a number, and a special character" />
+
+
+
+
+
+<Label text="Create Password" required="true" />
+
+<HBox width="100%">
+	<Input showValueStateMessage="false" id="signUpPassword" width="100%" placeholder="Enter Password" value="{LoginMode>/password}" type="Password" liveChange="SM_onChnageSetAndConfirm" showValueHelp="true" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility">
+		<layoutData>
+			<FlexItemData growFactor="1"/>
+		</layoutData>
+	</Input>
+</HBox>
+
+<HBox width="100%" justifyContent="SpaceBetween">
+<Text id="passwordStrengthText" class="pwdMinFail" />
+	<Button text="Generate password" type="Transparent" icon="sap-icon://refresh" press="SM_onGeneratePassword" />
+</HBox>
+
+
+
+
+
+
+
+
+
+
+<Label text="Confirm Password" required="true" />
+<Input id="signUpConfirmPassword" placeholder="Enter Confirm Password" value="{LoginMode>/comfirmpass}" type="Password" change="FSM_onConfirm" liveChange="FSM_onConfirm" showValueHelp="true" valueStateText="Enter Confirm Password" valueHelpIconSrc="sap-icon://show" valueHelpRequest="SM_onTogglePasswordVisibility" maxLength="50"/>				
+	</f:SimpleForm>
 					<HBox justifyContent="End" class="sapUiSmallMargin">
 						<Button text="Sign Up" class="myUnifiedBtn sapUiSmallMarginEnd" width="120px" press="onSignUp"/>
 					</HBox>
