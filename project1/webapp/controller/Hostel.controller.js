@@ -172,19 +172,27 @@ sap.ui.define([
             }
         },
 
-        _loadBranchCode: async function () {
-            try {
-                const oView = this.getView();
-                const oResponse = await this.ajaxReadWithJQuery("HM_Branch", {});
-                const aBranches = Array.isArray(oResponse?.data) ? oResponse.data : (oResponse?.data ? [oResponse.data] : []);
+       _loadBranchCode: async function () {
+    try {
+        const oView = this.getView();
+        const oResponse = await this.ajaxReadWithJQuery("HM_Branch", {});
+        const aBranches = Array.isArray(oResponse?.data) ? oResponse.data : (oResponse?.data ? [oResponse.data] : []);
 
-                const oBranchModel = new sap.ui.model.json.JSONModel(aBranches);
-                oView.setModel(oBranchModel, "sBRModel");
-                this._populateUniqueFilterValues(aBranches);
-            } catch (err) {
-                console.error("Error while loading branch data:", err);
-            }
-        },
+        // ***** Filter Unique Cities *****
+        const aUniqueCities = aBranches.filter((obj, index, self) =>
+            index === self.findIndex(o => o.City === obj.City)
+        );
+
+        const oBranchModel = new sap.ui.model.json.JSONModel(aUniqueCities);
+        oView.setModel(oBranchModel, "sBRModel");
+
+        this._populateUniqueFilterValues(aUniqueCities);
+
+    } catch (err) {
+        console.error("Error while loading branch data:", err);
+    }
+}
+,
 
         _populateUniqueFilterValues: function (data) {
             let uniqueValues = { id_Branch: new Set(), };
@@ -658,9 +666,12 @@ sap.ui.define([
                 await this.onReadcallforRoom();
                 await this.CustomerDetails();
 
-
                 const oBRModel = this.getView().getModel("sBRModel");
                 const oModelData = oBRModel.getData();
+                const uniqueCities = [...new Set(oModelData.map(item => item.City))];
+                const uniqueCityObjects = uniqueCities.map(city => ({ City: city }));
+                oBRModel.setData(uniqueCityObjects);
+                oBRModel.refresh();
                 const aFiltered = oModelData.filter(item => item.City === this.City);
 
                 if (aFiltered.length === 0) {

@@ -19,93 +19,67 @@
                     />
 					<!-- Responsive Booking Status and Buttons -->
 					<!-- Left Side Info -->
-				<FlexBox
-    wrap="Wrap"
-    justifyContent="SpaceBetween"
-    width="100%"
->
+					<FlexBox
+                        wrap="Wrap"
+                        justifyContent="SpaceBetween"
+                        width="100%">
+						<!-- LEFT SIDE DETAILS -->
+						<FlexBox
+                            wrap="Wrap"
+                            justifyContent="Start"
+                            alignItems="Start"
+                            class="sapUiSmallMarginEnd">
+							<VBox class="sapUiSmallMarginEnd">
+								<Text text="Status" class="sapUiSmallMarginBottom" />
+								<ObjectStatus text="{CustomerData>/Status}"
+                                    state="{path:'CustomerData>/Status', formatter:'.Formatter.formatObjectStatus'}"/>
+							</VBox>
 
-    <!-- LEFT SIDE DETAILS -->
-    <FlexBox
-        wrap="Wrap"
-        justifyContent="Start"
-        alignItems="Start"
-        class="sapUiSmallMarginEnd"
-    >
-        <VBox class="sapUiSmallMarginEnd">
-            <Text text="Status" class="sapUiSmallMarginBottom" />
-            <ObjectStatus
-                text="{CustomerData>/Status}"
-                state="{path:'CustomerData>/Status', formatter:'.Formatter.formatObjectStatus'}"
-            />
-        </VBox>
+							<VBox class="sapUiSmallMarginEnd">
+								<Text text="Booking Date" class="sapUiSmallMarginBottom" />
+                                    <ObjectStatus text="{path: 'CustomerData>/BookingDate', formatter: '.Formatter.formatDate'}"/>
+							</VBox>
 
-        <VBox visible="{= ${CustomerData>/RoomNo} ? true : false }">
-            <Text text="Room No" class="sapUiSmallMarginBottom" />
-            <Text text="{CustomerData>/RoomNo}" />
-        </VBox>
-    </FlexBox>
+							<VBox visible="{= ${CustomerData>/RoomNo} ? true : false }">
+								<Text text="Room No" class="sapUiSmallMarginBottom" />
+								<Text text="{CustomerData>/RoomNo}" />
+							</VBox>
+						</FlexBox>
+						<!-- RIGHT SIDE BUTTONS -->
+						<FlexBox
+                            wrap="Wrap"
+                            justifyContent="End"
+                            alignItems="End"
+                        >
+							<Button text="Edit" id="idedit" class="sapUiSmallMarginBegin myUnifiedBtn"
+                            press="onEditBooking"
+                                visible="{=
+                                    (
+                                        ${CustomerData>/Status} === 'New' ||
+                                        (${CustomerData>/Status} === 'Assigned' &amp;&amp; ${LoginModel>/Role} === 'Admin')
+                                    )
+                                    &amp;&amp; !${VisibleModel>/visible}
+                                }"
+                            />
+							<Button id="idcancel" text="Cancel Booking" press="onPressCancelBooking"
+                            visible="{= ${CustomerData>/Status} === 'New' &amp;&amp; !${VisibleModel>/visible} }"
+                                class="sapUiSmallMarginBegin myUnifiedBtn"/>
 
-    <!-- RIGHT SIDE BUTTONS -->
-    <FlexBox
-        wrap="Wrap"
-        justifyContent="End"
-        alignItems="End"
-    >
-        <Button
-            text="Edit"
-            id="idedit"
-            class="sapUiSmallMarginBegin myUnifiedBtn"
-            press="onEditBooking"
-            visible="{=
-                (
-                    ${CustomerData>/Status} === 'New' ||
-                    (${CustomerData>/Status} === 'Assigned' &amp;&amp; ${LoginModel>/Role} === 'Admin')
-                )
-                &amp;&amp; !${VisibleModel>/visible}
-            }"
-        />
+							<Button text="CheckOut" id="idCheckout" class="sapUiSmallMarginBegin myUnifiedBtn"
+                                press="onChekout"
+                                visible="{= ${CustomerData>/Status} === 'Assigned' 
+                                    &amp;&amp; !${VisibleModel>/visible}
+                                    &amp;&amp; ${LoginModel>/Role} === 'Admin' }"
+                            />
 
-        <Button
-            id="idcancel"
-            text="Cancel Booking"
-            press="onPressCancelBooking"
-            visible="{= ${CustomerData>/Status} === 'New' &amp;&amp; !${VisibleModel>/visible} }"
-            class="sapUiSmallMarginBegin myUnifiedBtn"
-        />
+							<Button text="Save" id="idsave" press="onSaveBooking" visible="{VisibleModel>/visible}"
+                             class="sapUiSmallMarginBegin myUnifiedBtn"/>
 
-        <Button
-            text="CheckOut"
-            id="idCheckout"
-            class="sapUiSmallMarginBegin myUnifiedBtn"
-            press="onChekout"
-            visible="{= ${CustomerData>/Status} === 'Assigned' 
-                   &amp;&amp; !${VisibleModel>/visible}
-                   &amp;&amp; ${LoginModel>/Role} === 'Admin' }"
-        />
-
-        <Button
-            text="Save"
-            id="idsave"
-            press="onSaveBooking"
-            visible="{VisibleModel>/visible}"
-            class="sapUiSmallMarginBegin myUnifiedBtn"
-        />
-
-        <Button
-            id="idcancelbtn"
-            text="Cancel"
-            press="onCancelBooking"
-            visible="{VisibleModel>/visible}"
-            class="sapUiSmallMarginBegin myUnifiedBtn"
-        />
-    </FlexBox>
-
-</FlexBox>
-
-                
+							<Button id="idcancelbtn" text="Cancel" press="onCancelBooking" visible="{VisibleModel>/visible}"
+                            class="sapUiSmallMarginBegin myUnifiedBtn" />
+						</FlexBox>
+					</FlexBox>
 				</VBox>
-                 
 			</content>
 			<VBox class="sapUiMediumMarginBottom">
 				<Panel
@@ -135,17 +109,13 @@
 						<f:content>
 							<!-- Booking Details -->
 							<!-- Room Type -->
-							<Label
-                                text="Desired Room Type"
-                                required="{= ${VisibleModel>/visible} ? true : false }"
-                            />
+							<Label text="Desired Room Type" required="{= ${VisibleModel>/visible} ? true : false }"/>
 							<ComboBox
                                 id="Ad_id_RoomType"
                                 items="{Availablebeds>/}"
                                 showClearIcon="true"
                                 visible="{VisibleModel>/visible}"
                                 selectedKey="{Bookingmodel>/BedTypeName}"
-
                                 selectionChange="onRoomBedChange"
                                 valueStateText="Select Room Type"
                                 width="40%"
@@ -156,37 +126,18 @@
                                 />
 							</ComboBox>
 
-                            	<Label
-                                text="Desired Room Type"
-                                required="{= ${VisibleModel>/visible} ? true : false }"
-                            />
-							<Text
-                                id="Ad_id_RoomType3"
-                                text="{CustomerData>/BedType}"
-                                visible="{= !${VisibleModel>/visible} }"
-                            />
+							<Label text="Desired Room Type" required="{= ${VisibleModel>/visible} ? true : false }" />
+							<Text id="Ad_id_RoomType3" text="{CustomerData>/BedType}" visible="{= !${VisibleModel>/visible} }"/>
+
 							<!-- Price -->
-							<Label
-                                text="Price"
-                                required="{= ${VisibleModel>/visible} ? true : false }"
-                            />
-							<Text
-                                id="Ad_id_idPrice4"
-                                text="{=${CustomerData>/OrginalRentPrice} +' ' + ${CustomerData>/Currency}}"
-                            />
+							<Label text="Price" required="{= ${VisibleModel>/visible} ? true : false }"/>
+							<Text id="Ad_id_idPrice4" text="{=${CustomerData>/OrginalRentPrice} +' ' + ${CustomerData>/Currency}}"/>
+
 							<!-- Payment -->
-							<Label
-                                text="Payment Method"
-                                required="{= ${VisibleModel>/visible} ? true : false }"
-                            />
-							<Text
-                                text="{CustomerData>/PaymentType}"
-                                visible="{= !${VisibleModel>/visible} }"
-                            />
-                            <Label
-                                text="Payment Method"
-                                required="{= ${VisibleModel>/visible} ? true : false }"
-                            />
+							<Label text="Payment Method" required="{= ${VisibleModel>/visible} ? true : false }"/>
+							<Text text="{CustomerData>/PaymentType}" visible="{= !${VisibleModel>/visible} }" />
+
+							<Label text="Payment Method" required="{= ${VisibleModel>/visible} ? true : false }"/>
 							<ComboBox
                                 id="idPaymentMethod1"
                                 showClearIcon="true"
@@ -197,38 +148,21 @@
                                 visible="{VisibleModel>/visible}"
                                 valueStateText="Select Payment Type"
                                 change="onChange"
-                                
                             >
-								<core:ListItem
-                                    key="daily"
-                                    text="Per Day"
-                                />
-								<core:ListItem
-                                    key="monthly"
-                                    text="Per Month"
-                                />
-								<core:ListItem
-                                    key="yearly"
-                                    text="Per Year"
-                                />
+								<core:ListItem key="daily" text="Per Day"/>
+								<core:ListItem key="monthly" text="Per Month"/>
+								<core:ListItem key="yearly" text="Per Year"/>
 							</ComboBox>
 							<!-- Persons -->
 							<!-- <Label text="No of Persons" required="true" /><Text text="{CustomerData>/Person}" /> -->
 							<!-- Dates -->
 							<!-- <core:Title text="" /> -->
+
 							<!-- Start Date -->
-							<Label
-                                text="Start Date"
-                                required="{= ${VisibleModel>/visible} ? true : false }"
-                            />
-							<Text
-                                text="{CustomerData>/StartDate}"
-                                visible="{= !${VisibleModel>/visible} }"
-                            />
-                            <Label
-                                text="Start Date"
-                                required="{= ${VisibleModel>/visible} ? true : false }"
-                            />
+							<Label text="Start Date" required="{= ${VisibleModel>/visible} ? true : false }"/>
+							<Text text="{CustomerData>/StartDate}" visible="{= !${VisibleModel>/visible} }"/>
+
+							<Label text="Start Date" required="{= ${VisibleModel>/visible} ? true : false }"/>
 							<DatePicker
                                 id="Ad_id_editStartDate"
                                 visible="{VisibleModel>/visible}"
@@ -238,64 +172,27 @@
                                 change="onBookingEditDateChange"
                                 valueStateText="Select Star Date"
                                 width="40%"
+                            />
 
-                            />
 							<!-- Month/Year Select -->
-							<Label
-                                text="How many Month/Year"
-                                visible="{= ${Bookingmodel>/UnitText} !== 'daily' }"
-                            />
+							<Label text="How many Month/Year" visible="{= ${Bookingmodel>/UnitText} !== 'daily' }" />
 							<Select
                                 id="idMonthYearSelect"
                                 width="40%"
                                 visible="{= ${Bookingmodel>/UnitText} !== 'daily'}"
                                 selectedKey="{Bookingmodel>/DurationUnit}"
-                                change=".onBookMonthYearChange"
-                            >
-								<core:Item
-                                    key="1"
-                                    text="1"
-                                />
-								<core:Item
-                                    key="2"
-                                    text="2"
-                                />
-								<core:Item
-                                    key="3"
-                                    text="3"
-                                />
-								<core:Item
-                                    key="4"
-                                    text="4"
-                                />
-								<core:Item
-                                    key="5"
-                                    text="5"
-                                />
-								<core:Item
-                                    key="6"
-                                    text="6"
-                                />
-								<core:Item
-                                    key="7"
-                                    text="7"
-                                />
-								<core:Item
-                                    key="8"
-                                    text="8"
-                                />
-								<core:Item
-                                    key="9"
-                                    text="9"
-                                />
-								<core:Item
-                                    key="10"
-                                    text="10"
-                                />
-								<core:Item
-                                    key="11"
-                                    text="11"
-                                />
+                                change=".onBookMonthYearChange">
+								<core:Item key="1" text="1"/>
+								<core:Item key="2" text="2"/>
+								<core:Item key="3" text="3"/>
+                                <core:Item key="4" text="4"/>
+								<core:Item key="5" text="5"/>
+								<core:Item key="6" text="6"/>
+                                <core:Item key="7" text="7"/>
+								<core:Item key="8" text="8"/>
+								<core:Item key="9" text="9"/>
+                                <core:Item key="10" text="10"/>
+								<core:Item key="11" text="11"/>
 							</Select>
 							<!-- End Date -->
 							<Label
@@ -306,7 +203,7 @@
                                 text="{CustomerData>/EndDate}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                            <Label
+							<Label
                                 text="End Date"
                                 required="{= ${VisibleModel>/visible} ? true : false }"
                             />
@@ -369,7 +266,7 @@
                                 text="{= ${CustomerData>/Salutation} + ' ' + ${CustomerData>/CustomerName} }"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                            	<Label
+							<Label
                                 required="{= ${VisibleModel>/visible} ? true : false }"
                                 text="Full Name"
                             />
@@ -403,7 +300,7 @@
                                 text="{CustomerData>/DateOfBirth}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                            <Label
+							<Label
                                 required="{= ${VisibleModel>/visible} ? true : false }"
                                 text="Date of Birth"
                             />
@@ -425,7 +322,7 @@
                                 text="{CustomerData>/Gender}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                            	<Label
+							<Label
                                 required="{= ${VisibleModel>/visible} ? true : false }"
                                 text="Gender"
                             />
@@ -458,7 +355,7 @@
                                 text="{CustomerData>/CustomerEmail}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                            <Label
+							<Label
                                 required="{= ${VisibleModel>/visible} ? true : false }"
                                 text="Email"
                             />
@@ -480,7 +377,7 @@
                                 text="{CustomerData>/Country}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                            	<Label
+							<Label
                                 required="{= ${VisibleModel>/visible} ? true : false }"
                                 text="Country"
                             />
@@ -510,7 +407,7 @@
                                 text="{CustomerData>/State}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                            	<Label
+							<Label
                                 required="{= ${VisibleModel>/visible} ? true : false }"
                                 text="State"
                             />
@@ -538,7 +435,7 @@
                                 text="{CustomerData>/City}"
                                 visible="{= !${VisibleModel>/visible} }"
                             />
-                            		<Label
+							<Label
                                 required="{= ${VisibleModel>/visible} ? true : false }"
                                 text="City"
                             />
@@ -549,9 +446,9 @@
                                 valueStateText="Select City"
                                 placeholder="Enter City"
                                 items="{
-        path:'CityModel>/',
-        length:1000
-    }"
+                                        path:'CityModel>/',
+                                        length:1000
+                                    }"
                                 selectedKey="{Bookingmodel>/City}"
                                 showSecondaryValues="true"
                                 visible="{VisibleModel>/visible}"
@@ -571,7 +468,7 @@
                                 visible="{= !${VisibleModel>/visible} }"
                             />
 							<!-- <Text text="{CustomerData>/MobileNo}" visible="{= !${VisibleModel>/visible} }" /> -->
-                            	<Label
+							<Label
                                 required="{= ${VisibleModel>/visible} ? true : false }"
                                 text="Mobile Number"
                             />
@@ -652,15 +549,13 @@
                                    growing="true"
                                  growingScrollToLoad="true"
                             >
-							<headerToolbar>
+								<headerToolbar>
 									<Toolbar>
 										<Title
                                             text="Document Details ({=${CustomerData>/Documents}.length})"
                                         />
 										<ToolbarSpacer />
-									
-
-                                        <Button
+										<Button
                                     text="Upload Documents"
                                     press="onUploadDocumentFile"
                                     class="myUnifiedBtn"
@@ -777,12 +672,12 @@
 									<Text text="{CustomerData>FacilityName}" />
 									<Text
                                         text="{
-        parts: [
-            { path: 'CustomerData>Price' },
-            { path: 'CustomerData>Currency' }
-        ],
-        formatter: '.Formatter.formatCurrency'
-    }"
+                                                parts: [
+                                                    { path: 'CustomerData>Price' },
+                                                    { path: 'CustomerData>Currency' }
+                                                ],
+                                                formatter: '.Formatter.formatCurrency'
+                                            }"
                                     />
 									<Text
                                         text="{path:'CustomerData>StartDate'}"
@@ -810,13 +705,9 @@
 							</ColumnListItem>
 						</items>
 					</Table>
-                   
 					<FlexBox class="custom-flexbox sapUiContentPadding" direction="Column">
-                  
 						<VBox class="custom-vbox" width="100%" alignItems="End">
-                        <!-- Coupon Code Row -->
-
-
+							<!-- Coupon Code Row -->
 							<!-- Total Facility Cost -->
 							<HBox justifyContent="SpaceBetween">
 								<Label text="Total Facility Cost:"
@@ -846,20 +737,18 @@
                         }"
                     textAlign="End"/>
 							</HBox>
-                               <HBox  width="100%" justifyContent="End" alignItems="Center" class="sapUiSmallMarginBottom"
+							<HBox  width="100%" justifyContent="End" alignItems="Center" class="sapUiSmallMarginBottom"
                                                                visible="{VisibleModel>/visible}"
 
                                >
-
-    <!-- Coupon Label -->
-    <Label 
+								<!-- Coupon Label -->
+								<Label 
         text="Coupon Code:"
         class="totalColumnBold1 sapUiTinyMarginEnd"
         width="120px"
     />
-
-    <!-- Coupon Input -->
- <Input 
+								<!-- Coupon Input -->
+								<Input 
     id="couponInput"
     value="{Bookingmodel>/CouponCode}"
     placeholder="Enter coupon"
@@ -870,10 +759,8 @@
     valueHelpRequest="oncancelCoupon"
       liveChange="onCouponLiveChange"
 />
-
-
-    <!-- Apply Now Button -->
-    <Button
+								<!-- Apply Now Button -->
+								<Button
     id="idApplyNowButton"
         text="Apply Now"
         type="Emphasized"
@@ -882,11 +769,8 @@
 
         visible="{= !${VisibleModel>/IsCouponApplied} }"
     />
- 
-    
-
-</HBox>
-	<HBox justifyContent="SpaceBetween">
+							</HBox>
+							<HBox justifyContent="SpaceBetween">
 								<Label text="Discount:"
                      class="totalColumnBold1 sapUiTinyMarginBottom rightAlignLabel"/>
 								<Text class="amountText totalColumnBold1"
@@ -899,7 +783,6 @@
                         }"
                     textAlign="End"/>
 							</HBox>
-
 							<!-- Sub Total -->
 							<HBox justifyContent="SpaceBetween">
 								<Label text="Sub Total:"
