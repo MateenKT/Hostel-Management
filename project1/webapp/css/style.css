@@ -1241,7 +1241,8 @@
   }
   .bookNowTile * {
     font-size: 15px !important;
-    line-height: 16px !important;
+    line-height: 30px !important;
+    padding: 10px 0 0 0 ! important;
   }
   .sapMGTHdrTxt {
     margin-top: -3px !important;
@@ -1976,9 +1977,9 @@ span.sapMBtnInner.sapMBtnEmphasized {
     text-align: center !important;
 }
   
-#roomDetailID.sapMDialog.sapMDialogStretched {
+/* #roomDetailID.sapMDialog.sapMDialogStretched {
     width: 100% !important;
-}
+} */
 
 .dialogBlur .sapMDialogSection .sapMDialogScrollCont{
   filter: blur(10px);
@@ -2058,6 +2059,11 @@ span.sapMBtnInner.sapMBtnEmphasized {
     text-decoration: none !important;
 }
 
+
+.pwdMinFail { color: #b00020; font-weight: 450; }
+.pwdWeak    { color: orangered; font-weight: 500; }
+.pwdMedium  { color: orange;    font-weight: 500; }
+.pwdStrong  { color: green;     font-weight: 500; }
 .tileContainer {
   justify-content: flex-start;
 }
