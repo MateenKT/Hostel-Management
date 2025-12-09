@@ -27,26 +27,23 @@
 
 				<Label text="Bed Type" required="true"/>
 				<Input id="BD_idBedType" value="{BedModel>/Name}" placeholder="Enter Bed Type" valueStateText="Enter Bed Type"
-                    maxLength="50" liveChange="onLivehange"/>
+                maxLength="50" liveChange="onLivehange"/>
 
 				<Label text="Room Type" required="true"/>
 				<ComboBox id="BD_id_Roomtype"  selectedKey="{BedModel>/ACType}"  change="onbranchChange"
-                    placeholder="Select Room Type" valueStateText="Select Room Type" >
+                placeholder="Select Room Type" valueStateText="Select Room Type" >
 				            <core:ListItem key="AC" text="AC"/>
 				            <core:ListItem key="Non-Ac" text="Non-Ac"/>
 				</ComboBox>
 
-				<Label text="No Of Person" required="true"/>
-				<Input id="BD_id_Person" value="{BedModel>/NoOfPerson}" placeholder="Enter No Of Person" valueStateText="Enter No Of Person"
-                    liveChange="onNoOfPersonInputLiveChange" maxLength="2"/>
+				<Label text="No of Person" required="true"/>
+				<Input id="BD_id_Person" value="{BedModel>/NoOfPerson}" placeholder="Enter No of Person" valueStateText="Enter No Of Person" liveChange="onNoOfPersonInputLiveChange" maxLength="2"/>
 
-				<Label text="No Of Rooms" required="true"/>
-				<Input id="BD_id_MaxBeds" value="{BedModel>/MaxBeds}" placeholder="Enter No Of Rooms" valueStateText="Enter No Of Rooms"
-                    maxLength="3" liveChange="onNoOfPersonInputLiveChange"/>
+				<Label text="No of Rooms" required="true"/>
+				<Input id="BD_id_MaxBeds" value="{BedModel>/MaxBeds}" placeholder="Enter No of Rooms" valueStateText="Enter No Of Rooms"  maxLength="3" liveChange="onNoOfPersonInputLiveChange"/>
 
 				<Label text="Description" required="true"/>
-				<TextArea id="BD_id_Description" value="{BedModel>/Description}" maxLength="150"
-                    placeholder="Enter Description" valueStateText="Enter Description" liveChange="onLivehange"/>
+				<TextArea id="BD_id_Description" value="{BedModel>/Description}" maxLength="150" placeholder="Enter Description" valueStateText="Enter Description" liveChange="onLivehange"/>
 
 				<Label text=""/>
 				<VBox width="100%">

@@ -40,8 +40,7 @@ sap.ui.define([
             } catch (err) {
                 sap.ui.core.BusyIndicator.hide();
                 sap.m.MessageToast.show(err.message || err.responseText);
-            } finally {
-            }
+            } finally {}
         },
 
         _loadBranchCode: async function() {
@@ -58,8 +57,7 @@ sap.ui.define([
             } catch (err) {
                 sap.ui.core.BusyIndicator.hide();
                 sap.m.MessageToast.show(err.message || err.responseText);
-            } finally {
-            }
+            } finally {}
         },
 
         Onsearch: function() {
@@ -109,8 +107,8 @@ sap.ui.define([
                     that.getView().setModel(oDisplayModel, "DisplayImagesModel");
                 })
                 .catch(function(err) {
-                  sap.ui.core.BusyIndicator.hide();
-                  sap.m.MessageToast.show(err.message || err.responseText);
+                    sap.ui.core.BusyIndicator.hide();
+                    sap.m.MessageToast.show(err.message || err.responseText);
                 })
                 .finally(function() {
                     // always hide busy indicator
@@ -259,7 +257,7 @@ sap.ui.define([
                     ...oData
                 };
                 delete payloadWithoutID.ID;
-                 sap.ui.core.BusyIndicator.show(0);
+                sap.ui.core.BusyIndicator.show(0);
                 if (Payload.ID) {
                     await this.ajaxUpdateWithJQuery("HM_BedType", {
                         data: payloadWithoutID,
@@ -321,17 +319,17 @@ sap.ui.define([
         onFileSelected: function(oEvent) {
             const oFile = oEvent.getParameter("files")[0];
             if (!oFile) return;
-             const MAX_SIZE = 2 * 1024 * 1024; // 2MB
-                if (oFile.size > MAX_SIZE) {
-                    sap.m.MessageToast.show(
-                        "File size must be less than 2 MB.\nSelected file size: " +
-                        (oFile.size / 1024 / 1024).toFixed(2) + " MB"
-                    );
+            const MAX_SIZE = 2 * 1024 * 1024; // 2MB
+            if (oFile.size > MAX_SIZE) {
+                sap.m.MessageToast.show(
+                    "File size must be less than 2 MB.\nSelected file size: " +
+                    (oFile.size / 1024 / 1024).toFixed(2) + " MB"
+                );
 
-                    // reset uploader field
-                    oEvent.getSource().clear();
-                    return;
-                }
+                // reset uploader field
+                oEvent.getSource().clear();
+                return;
+            }
 
             const oReader = new FileReader();
             oReader.onload = (oLoadEvent) => {

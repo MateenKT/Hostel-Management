@@ -252,16 +252,16 @@ sap.ui.define([
 
             aSelectedFiles.forEach((oFile) => {
                 const MAX_SIZE = 2 * 1024 * 1024; // 2MB
-                    if (oFile.size > MAX_SIZE) {
-                        sap.m.MessageToast.show(
-                            "File size must be less than 2 MB.\nSelected file size: " +
-                            (oFile.size / 1024 / 1024).toFixed(2) + " MB"
-                        );
-                
-                        //  Reset the FileUploader input
-                        oEvent.getSource().clear();
-                        return;
-                    }
+                if (oFile.size > MAX_SIZE) {
+                    sap.m.MessageToast.show(
+                        "File size must be less than 2 MB.\nSelected file size: " +
+                        (oFile.size / 1024 / 1024).toFixed(2) + " MB"
+                    );
+
+                    //  Reset the FileUploader input
+                    oEvent.getSource().clear();
+                    return;
+                }
                 const bIsDuplicate = aAttachments.some(att =>
                     att.filename === oFile.name // filename duplicate
                 );
@@ -331,58 +331,56 @@ sap.ui.define([
             oRouter.navTo("RouteHostel");
         },
 
-       Onsearch: function (flag) {
-    var oView = this.getView();
-    var oTable = oView.byId("id_BedTable");
-    var oBinding = oTable.getBinding("items");
+        Onsearch: function(flag) {
+            var oView = this.getView();
+            var oTable = oView.byId("id_BedTable");
+            var oBinding = oTable.getBinding("items");
 
-    var sCustomerName = oView.byId("PO_id_CustomerName").getSelectedKey() 
-                     || oView.byId("PO_id_CustomerName").getValue();
-    var sCustomerID = oView.byId("PO_id_CompanyName").getSelectedKey() 
-                    || oView.byId("PO_id_CompanyName").getValue();
+            var sCustomerName = oView.byId("PO_id_CustomerName").getSelectedKey() ||
+                oView.byId("PO_id_CustomerName").getValue();
+            var sCustomerID = oView.byId("PO_id_CompanyName").getSelectedKey() ||
+                oView.byId("PO_id_CompanyName").getValue();
 
-    var filters = {};
+            var filters = {};
 
-    if (sCustomerName) filters.Name = sCustomerName;
-    if (sCustomerID) filters.ACType = sCustomerID;
+            if (sCustomerName) filters.Name = sCustomerName;
+            if (sCustomerID) filters.ACType = sCustomerID;
 
-    sap.ui.core.BusyIndicator.show(0);
+            sap.ui.core.BusyIndicator.show(0);
 
-    return this.ajaxReadWithJQuery("HM_BedType", filters)
-        .then((oData) => {
+            return this.ajaxReadWithJQuery("HM_BedType", filters)
+                .then((oData) => {
 
-            const response = Array.isArray(oData.data) ? oData.data : [oData.data];
+                    const response = Array.isArray(oData.data) ? oData.data : [oData.data];
 
-            if (!this._originalBedData || flag==="true") {
-                this._originalBedData = response;  
-            }
+                    if (!this._originalBedData || flag === "true") {
+                        this._originalBedData = response;
+                    }
 
-         
-            if (Object.keys(filters).length === 0) {
-                const model = new sap.ui.model.json.JSONModel(this._originalBedData);
-                this.getView().setModel(model, "BedDetails");
 
-                this._populateUniqueFilterValues(this._originalBedData);
-                return;
-            }
+                    if (Object.keys(filters).length === 0) {
+                        const model = new sap.ui.model.json.JSONModel(this._originalBedData);
+                        this.getView().setModel(model, "BedDetails");
 
-          
-            const filteredData = response[0].data;
+                        this._populateUniqueFilterValues(this._originalBedData);
+                        return;
+                    }
 
-            const model = new sap.ui.model.json.JSONModel(filteredData);
-            this.getView().setModel(model, "BedDetails");
+                    const filteredData = response[0].data;
 
-            this._populateUniqueFilterValues(this._originalBedData);
-        })
-        .catch((err) => {
-            console.error("Error in search", err);
-            sap.m.MessageBox.error("Failed to load bed details.");
-        })
-        .finally(() => {
-            sap.ui.core.BusyIndicator.hide();
-        });
-}
-,
+                    const model = new sap.ui.model.json.JSONModel(filteredData);
+                    this.getView().setModel(model, "BedDetails");
+
+                    this._populateUniqueFilterValues(this._originalBedData);
+                })
+                .catch((err) => {
+                    console.error("Error in search", err);
+                    sap.m.MessageBox.error("Failed to load bed details.");
+                })
+                .finally(() => {
+                    sap.ui.core.BusyIndicator.hide();
+                });
+        },
 
         _populateUniqueFilterValues: function(data) {
             let uniqueValues = {
@@ -427,7 +425,10 @@ sap.ui.define([
                 aFilters.push(new sap.ui.model.Filter("BranchCode", sap.ui.model.FilterOperator.Contains, sCustomerID));
             }
 
-            var oCombinedFilter = new sap.ui.model.Filter({filters: aFilters,and: true});
+            var oCombinedFilter = new sap.ui.model.Filter({
+                filters: aFilters,
+                and: true
+            });
             oBinding.filter(oCombinedFilter);
         },
 
@@ -451,7 +452,7 @@ sap.ui.define([
                 sPath: BEdID
             })
         },
-        
+
         HM_DeleteDetails: function() {
             var table = this.byId("id_BedTable");
             var aSelectedItems = table.getSelectedItems();
