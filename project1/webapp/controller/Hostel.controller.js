@@ -3772,12 +3772,31 @@ sap.ui.define([
                 }
             }
             oBinding.filter(aFilters);
+            this._updateRowCount();
         },
 
         onTableSelect: async function (oEvent) {
             const sKey = oEvent.getParameter("key");
             const oModel = this._oProfileDialog.getModel("profileData");
             oModel.setProperty("/selectedTab", sKey);
-        }
+        },
+
+        onTableUpdateFinished: function () {
+            this._updateRowCount();
+        },
+
+        _updateRowCount: function () {
+            const oProfileModel = this._oProfileDialog.getModel("profileData");
+            const sSelectedTab = oProfileModel.getProperty("/selectedTab");
+            const oTable = sSelectedTab === "Payment" ? this.byId("Id_PaymentTable") : this.byId("Id_ProfileaTable");
+            const oBinding = oTable.getBinding("items");
+            const length = oBinding ? oBinding.getLength():0;
+
+            if (sSelectedTab === "Payment") {
+                oProfileModel.setProperty("/paymentCount", length);
+            } else {
+                oProfileModel.setProperty("/bookingCount", length);
+            }
+            }
     });
 });
