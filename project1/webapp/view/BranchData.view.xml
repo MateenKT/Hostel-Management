@@ -148,6 +148,9 @@
                     >
                         <Text text="Penalty" />
                     </Column>
+                    <Column  demandPopin="true">
+						<Text text="Image" />
+					</Column>
                 </columns>
                 <items>
                     <ColumnListItem>
@@ -161,6 +164,7 @@
                             <Text text="{mainModel>State}" />
                             <Text text="{mainModel>City}" />
                             <Text text="{mainModel>Penalty}" />
+							<Button text="View" press="HF_viewroom"></Button>
                         </cells>
                     </ColumnListItem>
                 </items>

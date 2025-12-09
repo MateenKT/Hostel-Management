@@ -34,7 +34,16 @@ sap.ui.define([
                     isEdit: false
                 });
                 this.getView().setModel(oeditable, "editableModel");
+                 this.getView().setModel(new sap.ui.model.json.JSONModel({
+                    Photo1: "",
+                    Photo1Type: "",
+                    Photo1Name: ""
+                }), "UploadModel");
 
+                // Token model
+                this.getView().setModel(new sap.ui.model.json.JSONModel({
+                    tokens: []
+                }), "tokenModel");
                 await this.onClearAndSearch("MD_id_Filterbar");
                 await this.Onsearch();
             } catch (err) {
@@ -187,6 +196,15 @@ sap.ui.define([
                 this.oDialog = sap.ui.xmlfragment(oView.getId(), "sap.ui.com.project1.fragment.BranchData", this);
                 oView.addDependent(this.oDialog);
             }
+            oView.getModel("UploadModel").setData({
+                Photo1: "",
+                Photo1Type: "",
+                Photo1Name: ""
+            });
+
+            oView.getModel("tokenModel").setData({
+                tokens: []
+            });
             const oBranch = sap.ui.getCore().byId(oView.createId("BD_idBranch"));
             const oName = sap.ui.getCore().byId(oView.createId("BD_idBName"));
             const oAddress = sap.ui.getCore().byId(oView.createId("BD_idAddress"));
@@ -255,6 +273,7 @@ sap.ui.define([
 
         MD_onSaveButtonPress: async function () {
             var oView = this.getView();
+            const oUpload = oView.getModel("UploadModel").getData();
             var oFacilitiesModel = oView.getModel("MDmodel");
             var Payload = oFacilitiesModel.getData();
             var isMandatoryValid = (
@@ -270,6 +289,10 @@ sap.ui.define([
             if (!isMandatoryValid) {
                 sap.m.MessageToast.show(this.i18nModel.getText("mandetoryFields"));
                 return;
+            }
+
+            if (!oUpload.Photo1Name) {
+                return sap.m.MessageToast.show("Please upload at least one image.");
             }
 
             let phone = sap.ui.getCore().byId(oView.createId("BD_idPhone")).getValue();
@@ -314,7 +337,10 @@ sap.ui.define([
                 Country: Payload.country,
                 State: Payload.state,
                 City: Payload.baseLocation,
-                Penalty: Payload.Penalty
+                Penalty: Payload.Penalty,
+                Photo1: oUpload.Photo1,
+                Photo1Type: oUpload.Photo1Type,
+                Photo1Name: oUpload.Photo1Name
             };
             sap.ui.core.BusyIndicator.show(0);
             try {
@@ -534,7 +560,21 @@ sap.ui.define([
                 c.stateName === oData.state && c.countryCode === oData.countryCode
             );
             this.getView().setModel(new sap.ui.model.json.JSONModel(aFilteredCities), "FilteredCityModel");
+             this.getView().getModel("UploadModel").setData({
+                Photo1: oData.Photo1 || "",
+                Photo1Type: oData.Photo1Type || "",
+                Photo1Name: oData.Photo1Name || ""
+            });
 
+            // Add existing file to tokens
+            const aTokens = oData.Photo1Name ? [{
+                key: oData.Photo1Name,
+                text: oData.Photo1Name
+            }] : [];
+
+            this.getView().getModel("tokenModel").setData({
+                tokens: aTokens
+            });
             if (!this.oDialog) {
                 this.oDialog = sap.ui.xmlfragment(oView.getId(), "sap.ui.com.project1.fragment.BranchData", this);
                 oView.addDependent(this.oDialog);
@@ -683,6 +723,86 @@ sap.ui.define([
                     return sText.includes(sTerm) || sAdditional.includes(sTerm);
                 });
             }
+        },
+
+        onFacilityFileChange: function(oEvent) {
+            const oFile = oEvent.getParameter("files")[0];
+            if (!oFile) return;
+            const oReader = new FileReader();
+            oReader.onload = (e) => {
+                const base64 = e.target.result.split(",")[1];
+
+                this.getView().getModel("UploadModel").setData({
+                    Photo1: base64,
+                    Photo1Type: oFile.type,
+                    Photo1Name: oFile.name
+                });
+
+                this.getView().getModel("tokenModel").setData({
+                    tokens: [{
+                        key: oFile.name,
+                        text: oFile.name
+                    }]
+                });
+            };
+            oReader.readAsDataURL(oFile);
+        },
+
+         onTokenDelete: function(oEvent) {
+            this.getView().getModel("UploadModel").setData({
+                Photo1: "",
+                Photo1Type: "",
+                Photo1Name: ""
+            });
+            this.getView().getModel("tokenModel").setData({
+                tokens: []
+            });
+        },
+
+         HF_viewroom: function(oEvent) {
+            var oContext = oEvent.getSource().getBindingContext("mainModel");
+            var oData = oContext.getObject();
+
+            if (!oData.Photo1 || !oData.Photo1.length) {
+               sap.m.MessageToast.show("No document found for this room!");
+                return;
+            }
+
+            var sBase64 = oData.Photo1.replace(/\s/g, "");
+
+            if (sBase64 && !sBase64.startsWith("data:image")) {
+                sBase64 = "data:image/jpeg;base64," + sBase64;
+            }
+
+            var oImage = new sap.m.Image({
+                src: sBase64,
+                densityAware: false,
+                decorative: false,
+                width: "100%",
+                height: "100%",
+                style: "object-fit: cover; display:block; margin:0; padding:0;"
+            });
+
+            var oDialog = new sap.m.Dialog({
+                title: "Room Photo",
+                contentWidth: "50%",
+                contentHeight: "60%",
+                horizontalScrolling: false,
+                verticalScrolling: false,
+                content: [oImage],
+                endButton: new sap.m.Button({
+                    text: "Close",
+                    press: function() {
+                        oDialog.close();
+                    }
+                }),
+                afterClose: function() {
+                    oDialog.destroy();
+                }
+            });
+
+            oDialog.addStyleClass("ImageDialogNoPadding");
+            oDialog.open();
         }
     })
 });

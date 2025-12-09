@@ -126,7 +126,7 @@
                         additionalText="{CityModel>branchCode}"
                     />
 				</ComboBox>
-				<Label text="Mobile Number" />
+				<Label text="Mobile Number" required="true"/>
 				<HBox
                     width="100%"
                     justifyContent="Start"
@@ -162,6 +162,54 @@
                     liveChange="onPenaltyInputLiveChange"
                     valueStateText="Enter Penalty"
                 />
+                <Label
+                    text="Add Image"
+                    required="true"
+                />
+                <VBox
+                    alignItems="Start"
+                    width="100%"
+                    renderType="Bare"
+                >
+                    <HBox width="25%">
+                        <u:FileUploader
+                            id="BD_id_FileUploader"
+                            fileSizeExceed="onFileSizeExceeds"
+                            maximumFileSize="5MB"
+                            typeMissmatch="onFileTypeMissmatch"
+                            fileType="jpg,jpeg,png"
+                            change="onFacilityFileChange"
+                            buttonOnly="true"
+                            sameFilenameAllowed="true"
+                            iconFirst="true"
+                            buttonText="Upload Images"
+                            multiple="true"
+                            uploadOnChange="false"
+                            tooltip="Only JPG, PNG, or PDF files under 5MB allowed"
+                        />
+                    </HBox>
+                    <!-- Tokenizer -->
+                    <HBox width="75%">
+                        <ScrollContainer
+                            height="60px"
+                            width="100%"
+                            horizontal="false"
+                            vertical="true"
+                        >
+                            <Tokenizer
+                                id="BD_id_TokenList"
+                                width="100%"
+                                tokenDelete="onTokenDelete"
+                                tokens="{tokenModel>/tokens}"
+                            >
+                                <Token
+                                    key="{tokenModel>key}"
+                                    text="{tokenModel>text}"
+                                />
+                            </Tokenizer>
+                        </ScrollContainer>
+                    </HBox>
+                </VBox>
 			</f:content>
 		</f:SimpleForm>
 		<footer>
