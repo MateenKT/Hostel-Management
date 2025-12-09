@@ -11,7 +11,7 @@
 		<layout:VerticalLayout>
 			<FlexBox wrap="Wrap" alignItems="Center" justifyContent="Center" class="tileContainer">
             
-				<GenericTile visible="true" class="sapUiMediumMargin" header="Manage Rooms" press="TileV_onpressInbox">
+				<GenericTile visible="true" class="sapUiMediumMargin" header="Manage Customer Details" press="TileV_onpressInbox">
 					<TileContent unit="Assign Rooms">
 						<ImageContent src="sap-icon://building"/>
 					</TileContent>
@@ -57,13 +57,13 @@
 					</TileContent>
 				</GenericTile>
 
-				<GenericTile visible="true" class="sapUiMediumMargin" header="Manage Invoice" press="TileV_onpressManageInvoice">
+				<GenericTile visible="true" class="sapUiMediumMargin" header="Manage Invoice Details" press="TileV_onpressManageInvoice">
 					<TileContent unit="Invoice Details">
 						<ImageContent src="sap-icon://expense-report"/>
 					</TileContent>
 				</GenericTile>
                 
-				<GenericTile visible="true" class="sapUiMediumMargin" header="Manage Coupon" press="TileV_onpressCouponDetails">
+				<GenericTile visible="true" class="sapUiMediumMargin" header="Manage Coupon Details" press="TileV_onpressCouponDetails">
 					<TileContent unit="Coupon Details">
 						<ImageContent src="sap-icon://tags" />
 					</TileContent>

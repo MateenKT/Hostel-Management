@@ -127,7 +127,7 @@ sap.ui.define([], function() {
             oInput.setValue(value);
 
             // 3️⃣ Validation
-            if (value === "" || parseFloat(value) <= 0) {
+            if (value === "" || parseFloat(value) < 0) {
                 oInput.setValueState("Error");
                 return false;
             }
