@@ -1462,20 +1462,21 @@ sap.ui.define([
                         Startdate: new Date(booking.StartDate).toLocaleDateString("en-GB"),
                         EndDate: booking.EndDate ? new Date(booking.EndDate).toLocaleDateString("en-GB") : "",
                         BookingDate: booking.BookingDate ? new Date(booking.BookingDate).toLocaleDateString("en-GB") : "",
-                        amount: booking.RentPrice,
+                        amount: booking.RentPrice?.toString() || "",
                         status: booking.Status,
+                        currency: booking.Currency,
                         customerID: booking.CustomerID,
-                        BookingID: booking.BookingID,
+                        BookingID: booking.BookingID?.toString() || "",
                         bookingGroup: bookingGroup
                     }
 
                 });
                 // Format PAYMENTS
                 const aPaymentData = aPayments.map(payment => ({
-                    InvNo: payment.InvNo,
+                    InvNo: payment.InvNo?.toString() || "",
                     CustomerName: payment.CustomerName,
-                    TotalAmount: payment.TotalAmount,
-                    DueAmount: payment.DueAmount,
+                    TotalAmount: payment.TotalAmount?.toString() || "",
+                    DueAmount: payment.DueAmount?.toString() || "",
                     currency: payment.Currency,
                 }));
 
@@ -1506,12 +1507,6 @@ sap.ui.define([
                     selectedTab: "Booking History",
                     aCustomers: aBookingData.map(booking => ({ customerID: booking.customerID || CustomerID, customerName: booking.customerName })),
                     facility: [],
-                    // Payments: aPaymentData,
-                    // paymentCount: aPaymentData.length,
-                    // selectedTab: "Booking History",
-                    // bookings: aBookingData,
-                    // facility: aFacilitiData,
-                    // aCustomers: aCustomerDetails,
                     isTableBusy: false
                 });
                 this._oProfileDialog.setModel(oProfileModel, "profileData");
@@ -1519,113 +1514,8 @@ sap.ui.define([
                 oProfileModel.setProperty("/isTableBusy", false);
                 this.byId("id_dialog").removeStyleClass("dialogBlur");
 
-                // const response = await this.ajaxReadWithJQuery("HM_Customer", filter);
-                // const aCustomers = response?.commentData || response?.Customers || response?.value || [];
-
-                // if (!Array.isArray(aCustomers) || aCustomers.length === 0) {
-                //     sap.m.MessageToast.show("No customer data found for this user.");
-                // }
-
-                // const aCustomerDetails = aCustomers.flatMap(response => ({
-                //     city: response.City,
-                //     country: response.Country,
-                //     customerID: response.CustomerID,
-                //     salutation: response.Salutation,
-                //     customerName: response.CustomerName,
-                //     mobileno: response.MobileNo,
-                //     stdCode: response.STDCode,
-                //     state: response.State,
-                //     countryCode: response.CountryCode,
-                //     customerEmail: response.CustomerEmail,
-                //     DOB: response.DateOfBirth,
-                //     gender: response.Gender,
-                //     Address: response.PermanentAddress
-
-                // }));
-                // const aAllBookings = aCustomers.flatMap(customer =>
-                //     Array.isArray(customer.Bookings) ? customer.Bookings : []
-                // );
-                // const aAllFacilitis = aCustomers.flatMap(customer =>
-                //     Array.isArray(customer.FaciltyItems) ? customer.FaciltyItems : []
-                // );
-                // let aBookingData = [];
-                // const customer = aCustomers.find(c => c.CustomerID === booking.CustomerID);
-                // const sSalutation = customer?.Salutation || "";
-                // const sFullName = customer?.CustomerName || "N/A";
-                //         return {
-                //             salutation: sSalutation,
-                //             customerName: `${sSalutation} ${sFullName}`.trim(),
-                //             Startdate: oStart ? oStart.toLocaleDateString("en-GB") : "N/A",
-                //             EndDate: booking.EndDate ? new Date(booking.EndDate).toLocaleDateString("en-GB") : "N/A",
-                //             room: booking.BedType || "N/A",
-                //             amount: booking.RentPrice || "N/A",
-                //             status: booking.Status || "N/A",
-                //             bookingGroup: bookingGroup,
-                //             cutomerid: booking.CustomerID,
-                //             branchCode: booking.BranchCode,
-                //             currency: booking.Currency || "INR",
-                //             noofperson: booking.NoOfPersons,
-                //             grandTotal: booking.RentPrice,
-                //             paymenytype: booking.PaymentType,
-                //             RoomPrice: booking.RoomPrice,
-                //             BookingID: booking.BookingID
-                //         };
-                //     });
-                // }
-                // const aFacilitiData = aAllFacilitis.map(faciliti => ({
-                //     startdate: faciliti.StartDate ? new Date(faciliti.StartDate).toLocaleDateString("en-GB") : "N/A",
-                //     bookingid: faciliti.BookingID,
-                //     enddate: faciliti.EndDate,
-                //     customerid: faciliti.CustomerID || "N/A",
-                //     facilitiname: faciliti.FacilityName || "N/A",
-                //     facilitiId: faciliti.FacilityID,
-                //     facilitiPrice: faciliti.FacilitiPrice || "N/A",
-                //     status: faciliti.PaidStatus || "N/A"
-                // }));
-
-                // //  Load fragment if not already loaded
-                // if (!this._oProfileDialog) {
-                //     if (this._isProfileDialogLoading) {
-                //         console.log("Profile dialog load already in process, skipping duplicate call.");
-                //         return;
-                //     }
-                //     this._isProfileDialogLoading = true;
-
-                //     const oDialog = await sap.ui.core.Fragment.load({
-                //         id: this.getView().getId(),
-                //         name: "sap.ui.com.project1.fragment.ManageProfile",
-                //         controller: this
-                //     });
-                //     this._oProfileDialog = oDialog;
-                //     this.getView().addDependent(oDialog);
-                //     this._isProfileDialogLoading = false;
-                // }
-
-                //  Create and bind the Profile Model
-
-
-                //  Open the dialog
-                // this._oProfileDialog.open();
-
             } catch (err) {
                 console.error("Profile Load Error:", err);
-
-                // Always open fragment even when error (like no customer found)
-                // if (!this._oProfileDialog) {
-                //     if (this._isProfileDialogLoading) {
-                //         console.log("Profile dialog load already in process, skipping duplicate call.");
-                //         return;
-                //     }
-                // this._isProfileDialogLoading = true;
-                // const oDialog = await sap.ui.core.Fragment.load({
-                //     id: this.getView().getId(),
-                //     name: "sap.ui.com.project1.fragment.ManageProfile",
-                //     controller: this
-                // });
-                // this._oProfileDialog = oDialog;
-                // this.getView().addDependent(oDialog);
-                // this._isProfileDialogLoading = false;
-                // }
 
                 const oProfileModel = new sap.ui.model.json.JSONModel({
                     ...fullUserData,
@@ -3865,26 +3755,47 @@ sap.ui.define([
             vm.setProperty("/canResendOTP", false);
         },
 
-        onGlobalSearch: function (oEvent) {
-            const sQuery = oEvent.getParameter("newValue");
-            const oTable = this.byId("Id_ProfileaTable");
+          onGlobalSearch: function (oEvent) {
+            const sQuery = oEvent.getParameter("newValue")?.toLowerCase() || "";
+
+            const oProfileModel = this._oProfileDialog.getModel("profileData");
+            const sSelectedTab = oProfileModel.getProperty("/selectedTab");
+
+            // Decide Table
+            const oTable = sSelectedTab === "Payment" ? this.byId("Id_PaymentTable") : this.byId("Id_ProfileaTable");
             const oBinding = oTable.getBinding("items");
 
+            // Apply filters for booking or payment table
             let aFilters = [];
-
             if (sQuery) {
-                aFilters = [
-                    new sap.ui.model.Filter({
-                        filters: [
-                            new sap.ui.model.Filter("customerName", sap.ui.model.FilterOperator.Contains, sQuery),
-                            new sap.ui.model.Filter("Startdate", sap.ui.model.FilterOperator.Contains, sQuery),
-                            new sap.ui.model.Filter("room", sap.ui.model.FilterOperator.Contains, sQuery),
-                            new sap.ui.model.Filter("BookingID", sap.ui.model.FilterOperator.Contains, sQuery.toString()),
-                            new sap.ui.model.Filter("status", sap.ui.model.FilterOperator.Contains, sQuery)
-                        ],
-                        and: false
-                    })
-                ];
+                if (sSelectedTab === "Payment") {
+                    aFilters = [
+                        new sap.ui.model.Filter({
+                            filters: [
+                                new sap.ui.model.Filter("InvNo", sap.ui.model.FilterOperator.Contains, sQuery.toString()),
+                                new sap.ui.model.Filter("CustomerName", sap.ui.model.FilterOperator.Contains, sQuery.toString()),
+                                new sap.ui.model.Filter("TotalAmount", sap.ui.model.FilterOperator.Contains, sQuery.toString()),
+                                new sap.ui.model.Filter("DueAmount", sap.ui.model.FilterOperator.Contains, sQuery.toString())
+                            ],
+                            and: false
+                        })
+                    ];
+                } else {
+                    aFilters = [
+                        new sap.ui.model.Filter({
+                            filters: [
+                                new sap.ui.model.Filter("customerName", sap.ui.model.FilterOperator.Contains, sQuery.toString()),
+                                new sap.ui.model.Filter("BookingID", sap.ui.model.FilterOperator.Contains, sQuery.toString()),
+                                new sap.ui.model.Filter("BookingDate", sap.ui.model.FilterOperator.Contains, sQuery.toString()),
+                                new sap.ui.model.Filter("room", sap.ui.model.FilterOperator.Contains, sQuery.toString()),
+                                new sap.ui.model.Filter("status", sap.ui.model.FilterOperator.Contains, sQuery.toString()),
+                                new sap.ui.model.Filter("amount", sap.ui.model.FilterOperator.Contains, sQuery.toString()),
+                                new sap.ui.model.Filter("currency", sap.ui.model.FilterOperator.Contains, sQuery.toString())
+                            ],
+                            and: false
+                        })
+                    ];
+                }
             }
             oBinding.filter(aFilters);
         },
