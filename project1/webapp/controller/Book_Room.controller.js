@@ -522,7 +522,7 @@ _createDynamicPersonsUI: function () {
               sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signInusername").setValue("").setValueState("None");
 				                                     sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signinPassword").setValue("").setValueState("None");
 				                                     sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signInuserid").setValue("").setValueState("None");
-													   sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signupvisible").setVisible(false)
+													//    sap.ui.core.Fragment.byId(that.createId("LoginAlertDialog"), "signupvisible").setVisible(false)
             oEvent.getSource().setSelected(false);
             return;
         }
@@ -1249,7 +1249,7 @@ _createFacilityActionSheet: function (facility, iPersonIndex, oCard) {
         // - price is not null
         // - price is a valid number
         // - price >= 0
-        if (price !== "" && price !== null && Number.isFinite(num) && num >= 0) {
+        if (price !== "" && price !== null && Number.isFinite(num) && num > 0) {
             aButtons.push(
                 new sap.m.Button({
                     text: `${label} – ${num} ${facility.Currency}`,
@@ -2705,16 +2705,18 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
             oInput.setType(isPassword ? "Text" : "Password");
             oInput.setValueHelpIconSrc(isPassword ? "sap-icon://hide" : "sap-icon://show");
         },
-        SM_onChnageSetAndConfirm: function (oEvent) {
-            utils._LCvalidatePassword(oEvent);
-        },
+        // SM_onChnageSetAndConfirm: function (oEvent) {
+        //     utils._LCvalidatePassword(oEvent);
+        // },
 		onUserlivechange: function (oEvent) {
 			utils._LCvalidateMandatoryField(oEvent);
 		},
         //onsignup
          onSignUp: async function () {
 
-            const C = sap.ui.getCore().byId.bind(sap.ui.getCore());
+            const fragId = this.createId("LoginAlertDialog");
+            const C = (id) => sap.ui.core.Fragment.byId(fragId, id);
+
             const oModel = this.getView().getModel("LoginMode");
             const data = oModel.getData();
 
@@ -2865,6 +2867,72 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
             }
 
         },
+        _resetAuthDialog: function () {
+            const oModel = this.getView().getModel("LoginMode");
+
+            // Reset LoginMode data (your existing block)
+            oModel.setData({
+                Salutation: "",
+                fullname: "",
+                Email: "",
+                STDCode: "",
+                Mobileno: "",
+                password: "",
+                comfirmpass: "",
+                UserID: "",
+                Gender: "",
+                Country: "",
+                State: "",
+                City: "",
+                Address: "",
+                DateOfBirth: ""
+            });
+            //  Reset UI controls
+            //  Reset Sign-Up controls
+            [
+                "signUpSalutation", "signUpName", "signUpEmail", "signUpPassword",
+                "signUpConfirmPassword", "signUpDOB", "signUpGender", "signUpCountry",
+                "signUpState", "signUpCity", "signUpSTD", "signUpPhone", "signUpAddress"
+            ].forEach(id => {
+                const ctrl = $C(id);
+                if (ctrl) {
+                    ctrl.setValueState("None");
+                    if (ctrl.setValue) ctrl.setValue("");
+                    if (ctrl.setSelectedKey) ctrl.setSelectedKey("");
+                }
+            });
+
+            //  Reset Sign-In controls
+            ["signInuserid", "signInusername", "signinPassword"].forEach(id => {
+                const ctrl = $C(id);
+                if (ctrl) {
+                    ctrl.setValueState("None");
+                    if (ctrl.setValue) ctrl.setValue("");
+                }
+            });
+
+
+            // Re-enable STD & Gender
+            const STD = $C("signUpSTD");
+            const GEN = $C("signUpGender");
+            if (STD) STD.setEnabled(true);
+            if (GEN) GEN.setEnabled(true);
+
+            // Reset account type
+            const oVM = this.getView().getModel("LoginViewModel");
+            oVM.setProperty("/selectedAccountType", "personal");
+            oVM.setProperty("/authFlow", "signin");
+            this._resetOtpState();
+
+            // Clear all fields including forgot/otp/reset
+            this._clearAllAuthFields();
+
+            // Remove blur effect from the background
+            this.getView().removeStyleClass("blur-background");
+
+            // Ensure only Sign In panel is visible when dialog opens next time
+
+        },
           onChangeState: function (oEvent) {
 
             const oState = oEvent.getSource();
@@ -2884,7 +2952,7 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
             oModel.setProperty("/State", sStateText);
 
             // reset city whenever state changes
-            const oCity = sap.ui.getCore().byId("signUpCity");
+            const oCity = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpCity");
             oModel.setProperty("/City", "");
             oCity.setValue("").setSelectedKey("");
 
@@ -2893,7 +2961,7 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
             ]);
 
             // release cities only if country is valid
-            const oCountry = sap.ui.getCore().byId("signUpCountry");
+            const oCountry = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpCountry");
             const sCountryCode =
                 oCountry.getSelectedItem()?.getAdditionalText()?.trim();
 
@@ -2912,8 +2980,8 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
             // sanitize manual typing
             oCity.setValue(oCity.getValue().replace(/[^a-zA-Z\s]/g, ""));
 
-            const oCountry = sap.ui.getCore().byId("signUpCountry");
-            const oState = sap.ui.getCore().byId("signUpState");
+            const oCountry = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpCountry");
+            const oState = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpState");
 
             const hasCountry = !!oCountry.getSelectedItem();
             const hasState = !!oState.getSelectedItem() || !!oState.getValue();
@@ -2942,6 +3010,32 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
 
             oModel.setProperty("/City", sCityText);
         },
+          FSM_onConfirm: function (oEvent) {
+
+            const oInput = oEvent?.getSource();
+            if (!oInput) return false;
+
+            const confirm = (oInput.getValue() || "").trim();
+            const pass =sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpPassword").getValue().trim();
+
+            // Required
+            if (!confirm) {
+                oInput.setValueState("Error");
+                oInput.setValueStateText("Confirm Password is required");
+                return false;     
+            }
+
+            // Compare
+            if (pass !== confirm) {
+                oInput.setValueState("Error");
+                oInput.setValueStateText("Passwords do not match");
+                return false;    
+            }
+
+            // Success
+            oInput.setValueState("None");
+            return true;          
+        },
 
 
 
@@ -2949,7 +3043,7 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
 
             const oSalutation = oEvent.getSource();
             const sKey = oSalutation.getSelectedKey();
-            const oGender = sap.ui.getCore().byId("signUpGender");
+            const oGender = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpGender");
 
             // Reset gender
             oGender.setSelectedKey("");
@@ -3020,8 +3114,8 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
             // Sanitize manual typing
             oCity.setValue(oCity.getValue().replace(/[^a-zA-Z\s]/g, ""));
 
-            const oCountry = sap.ui.getCore().byId("signUpCountry");
-            const oState = sap.ui.getCore().byId("signUpState");
+            const oCountry = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpCountry");
+            const oState = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpState");
 
             const hasCountry = !!oCountry.getSelectedItem();
             const hasState = !!oState.getSelectedItem();
@@ -3060,7 +3154,7 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
             let val = oInput.getValue().replace(/\D/g, "");
             oInput.setValue(val);
 
-            const stdRaw = sap.ui.getCore().byId("signUpSTD").getValue() || "";
+            const stdRaw = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpSTD").getValue() || "";
             const std = stdRaw.replace(/\s+/g, "").startsWith("+")
                 ? stdRaw.replace(/\s+/g, "")
                 : "+" + stdRaw.replace(/\s+/g, "");
@@ -3095,8 +3189,8 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
 
 
         onSTDChange: function () {
-            const oSTD = sap.ui.getCore().byId("signUpSTD");
-            const oMobile = sap.ui.getCore().byId("signUpPhone");
+            const oSTD = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpSTD");
+            const oMobile = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpPhone");
 
             const std = oSTD.getValue();
 
@@ -3111,7 +3205,7 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
         },
 
         onAddressChange: function () {
-            utils._LCvalidateAddress(sap.ui.getCore().byId("signUpAddress"));
+            utils._LCvalidateAddress(sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpAddress"));
         },
              onChangeCountry: function (oEvent) {
 
@@ -3122,9 +3216,9 @@ if (!oMatchedUser || !oMatchedUser.UserID) {
 
             const oModel = this.getView().getModel("LoginMode");
 
-            const oState = sap.ui.getCore().byId("signUpState");
-            const oCity = sap.ui.getCore().byId("signUpCity");
-            const oSTD = sap.ui.getCore().byId("signUpSTD");
+            const oState = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpState");
+            const oCity = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpCity");
+            const oSTD = sap.ui.core.Fragment.byId(this.createId("LoginAlertDialog"), "signUpSTD");
 
             // Model reset
             ["State", "City", "Mobileno", "STDCode"].forEach(p =>
