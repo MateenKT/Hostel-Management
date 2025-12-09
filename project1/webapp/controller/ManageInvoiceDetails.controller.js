@@ -1495,6 +1495,7 @@ sap.ui.define([
 
             CID_onPressGeneratePdf: async function() {
                 try {
+                    sap.ui.core.BusyIndicator.show(0);
                     const { jsPDF } = window.jspdf;
                     const oView = this.getView();
                     const oModel = oView.getModel("SelectedCustomerModel").getData();
@@ -1505,10 +1506,10 @@ sap.ui.define([
                     var allDueAmount = paymentModel ? (paymentModel.getProperty("/AllDueAmount") || 0) : 0;
                     var AllReceivedAmount = paymentModel ? (paymentModel.getProperty("/AllReceivedAmount") || 0) : 0;
 
-                    let filter = {
-                        BranchID: oModel.BranchCode
-                    }
+                    // fetch company details
+                    let filter = { BranchID: oModel.BranchCode };
                     const oCompanyDetailsModel = await this.ajaxReadWithJQuery("HM_Branch", filter);
+                    const companyImage = oCompanyDetailsModel.data[0].Photo1;
 
                     let totalInWords = await this.convertNumberToWords(oModel.TotalAmount, data.Currency);
                     const showSAC = oModel.GSTNO !== undefined && oModel.GSTNO !== "";
@@ -1523,87 +1524,65 @@ sap.ui.define([
                     const pageWidth = doc.internal.pageSize.getWidth();
                     const pageHeight = doc.internal.pageSize.getHeight();
                     const usableWidth = pageWidth - 2 * margin;
-                    const headerMargin = 25.4;
-                    let currentY = headerMargin;
+                    let currentY = 0;
 
-                    // ===== HEADER =====
-                    doc.setFontSize(16);
-                    doc.setFont("times", "bold");
-                    let headerLabel = (oModel.GSTNO === undefined || oModel.GSTNO === "") ? "INVOICE" : "TAX-INVOICE";
-                    doc.text(headerLabel, pageWidth - 18, currentY, {
-                        align: "right"
-                    });
+                    // Header
+                    let headerMargin = 25.4;
+                    doc.setFontSize(14).setFont("times", "bold");
+                    doc.text("TAX - INVOICE", pageWidth - 18, headerMargin, { align: "right" });
 
-                    currentY += 10;
+                   if (companyImage && companyImage.trim() !== "") {
+                        const imgData = "data:image/png;base64," + companyImage;
+                        doc.addImage(imgData, "PNG", margin, 15, 40, 40);
+                    }
 
-                    // ===== INVOICE DETAILS TABLE RIGHT SIDE =====
-                    const detailsStartY = currentY;
+                    // Invoice Details
+                    const detailsStartY = 35;
                     const rowHeight = 6.5;
                     const columnWidths = [30, 30];
-                    doc.setFontSize(12);
-                    doc.setFont("times", "normal");
-                    const rightAlignX = pageWidth - 13.5 - columnWidths[0] - columnWidths[1];
+                    const rightAlignX = pageWidth - 18 - columnWidths[0] - columnWidths[1];
 
-                    const detailsTable = [{
-                            label: 'Invoice No. :',
-                            value: oModel.InvNo
-                        },
-                        {
-                            label: 'Date :',
-                            value: typeof(oModel.InvoiceDate) === 'string' ? oModel.InvoiceDate : Formatter.formatDate(oModel.InvoiceDate)
-                        },
-                        {
-                            label: 'Room No :',
-                            value: oModel.RoomNo
-                        },
+                    doc.setFontSize(12).setFont("times", "bold");
+
+                    const detailsTable = [
+                        { label: 'Invoice No. :', value: oModel.InvNo },
+                        { label: 'Date :', value: typeof oModel.InvoiceDate === "string" ? oModel.InvoiceDate : Formatter.formatDate(oModel.InvoiceDate) },
+                        { label: 'Room No :', value: oModel.RoomNo }
                     ];
 
+                    currentY = detailsStartY;
                     detailsTable.forEach(row => {
-                        doc.setFont("times", "bold");
                         doc.text(row.label, rightAlignX + columnWidths[0] - doc.getTextWidth(row.label), currentY + 5);
-                        doc.setFont("times", "normal");
-                        doc.text(row.value, rightAlignX + columnWidths[0] + 2, currentY + 5);
+                        doc.text(String(row.value), rightAlignX + columnWidths[0] + 5, currentY + 5);
                         currentY += rowHeight;
                     });
 
-                    // ===== INVOICE TO BLOCK =====
-                    currentY = detailsStartY + 15;
-                    doc.setFont("times", "bold");
-                    doc.text("Invoice To:", margin, currentY);
+                    currentY += 15;
+                    doc.setFont("times", "bold").setFontSize(11);
+                    doc.text("To,", margin, currentY);
 
                     currentY += 5;
-                    doc.setFont("times", "normal");
-                    doc.setFontSize(12);
+                    doc.setFont("times", "normal").setFontSize(12);
 
+                    // Customer details
                     if (oModel.CustomerName) {
                         doc.text(`Name : ${oModel.CustomerName}`, margin, currentY);
                         currentY += 5;
                     }
 
-                    if (oModel.PermanentAddress && oModel.PermanentAddress.trim() !== "") {
+                    if (oModel.PermanentAddress) {
                         const ConsultantAddressLines = doc.splitTextToSize(oModel.PermanentAddress, usableWidth / 2 - 10);
                         doc.text(ConsultantAddressLines, margin, currentY);
                         currentY += ConsultantAddressLines.length * 5;
                     }
 
-                    if (oModel.MobileNo) {
-                        doc.text(`Mobile No : ${oModel.MobileNo}`, margin, currentY);
-                        currentY += 5;
-                    }
-
-                    if (oModel.CustomerEmail) {
-                        doc.text(`Email : ${oModel.CustomerEmail}`, margin, currentY);
-                        currentY += 5;
-                    }
-
-                    if (oModel.GST !== undefined && oModel.GST !== "") {
-                        doc.text(`GSTIN : ${oModel.GST}`, margin, currentY);
-                        currentY += 5;
-                    }
+                    if (oModel.MobileNo) { doc.text(`Mobile No : ${oModel.MobileNo}`, margin, currentY); currentY += 5; }
+                    if (oModel.CustomerEmail) { doc.text(`Email : ${oModel.CustomerEmail}`, margin, currentY); currentY += 5; }
+                    if (oModel.GST) { doc.text(`GSTIN : ${oModel.GST}`, margin, currentY); currentY += 5; }
 
                     currentY += 5;
 
-                    // ===== TABLE BODY PREPARATION =====
+                    // ===== TABLE BODY =====
                     const body = oCompanyItemModel.filter(item => item).map((item, index) => {
                         const row = [
                             index + 1,
@@ -1613,17 +1592,14 @@ sap.ui.define([
                             item.UnitText,
                             Formatter.fromatNumber(item.Total) || "0.00"
                         ];
-                        if (showSAC) row.splice(2, 0, item.SAC); // Insert SAC column when GST available
+                        if (showSAC) row.splice(2, 0, item.SAC);
                         return row;
                     });
 
-                    const head = showSAC ? [
-                        ['Sl.No.', 'Particulars', 'SAC', 'Start Date', 'End Date', 'UnitText', 'Total']
-                    ] : [
-                        ['Sl.No.', 'Particulars', 'Start Date', 'End Date', 'UnitText', 'Total']
-                    ];
+                    const head = showSAC
+                        ? [['Sl.No.', 'Particulars', 'SAC', 'Start Date', 'End Date', 'UnitText', 'Total']]
+                        : [['Sl.No.', 'Particulars', 'Start Date', 'End Date', 'UnitText', 'Total']];
 
-                    // ===== AUTO TABLE =====
                     doc.autoTable({
                         startY: currentY,
                         head: head,
@@ -1657,7 +1633,7 @@ sap.ui.define([
                         currentY = 20;
                     }
 
-                    // ===== SUMMARY TABLE =====
+                     // ===== SUMMARY TABLE =====
                     const summaryBody = [];
 
                     if (parseFloat(oModel.SubTotalNotGST) > 0) {
@@ -1776,8 +1752,7 @@ sap.ui.define([
                         this.addFooter(doc, oCompanyDetailsModel, pageWidth, pageHeight, i, totalPages);
                     }
 
-                    // ===== SAVE FILE =====
-                     doc.save(`${oModel.CustomerName}-${oModel.InvNo}-Invoice.pdf`);
+                   doc.save(`${oModel.CustomerName}-${oModel.InvNo}-Invoice.pdf`);
                 } catch (error) {
                     sap.ui.core.BusyIndicator.hide();
                     MessageToast.show(error.message || error.responseText);

@@ -42,5 +42,9 @@
     {
         "ID": 11,
         "FacilityName": "Locker Facilities"
+    },
+    {
+        "ID": 12,
+        "FacilityName": "Others"
     }
 ]
